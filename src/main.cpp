@@ -11,8 +11,8 @@ int main(int argc, char *argv[]) {
     std::cout << std::unitbuf;
     std::cerr << std::unitbuf;
 
-    // You can use print statements as follows for debugging, they'll be visible when running tests.
-    std::cerr << "Logs from your program will appear here!" << std::endl;
+    // // You can use print statements as follows for debugging, they'll be visible when running tests.
+    // std::cerr << "Logs from your program will appear here!" << std::endl;
 
     if (argc < 3) {
         std::cerr << "Usage: ./your_program tokenize <filename>" << std::endl;
@@ -26,11 +26,11 @@ int main(int argc, char *argv[]) {
         
         // Uncomment this block to pass the first stage
         // 
-        // if (!file_contents.empty()) {
-        //     std::cerr << "Scanner not implemented" << std::endl;
-        //     return 1;
-        // }
-        // std::cout << "EOF  null" << std::endl; // Placeholder, remove this line when implementing the scanner
+        if (!file_contents.empty()) {
+            std::cerr << "Scanner not implemented" << std::endl;
+            return 1;
+        }
+        std::cout << "EOF  null" << std::endl; // Placeholder, remove this line when implementing the scanner
         
     } else {
         std::cerr << "Unknown command: " << command << std::endl;
