@@ -54,6 +54,7 @@ int main(int argc, char *argv[]) {
     auto load_result = lexer.load(path);
     if (!load_result.ok()) {
       println("EOF  null");
+      return EXIT_SUCCESS;
     }
     auto lex_result = lexer.lex();
     if (!lex_result.ok()) {
