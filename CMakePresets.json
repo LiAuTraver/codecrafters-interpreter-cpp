@@ -1,0 +1,285 @@
+{
+  "version": 3,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 10,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "Environments",
+      "hidden": true,
+      "generator": "Ninja",
+			"binaryDir": "${sourceDir}/build/${presetName}",
+      "cacheVariables": {
+        "CMAKE_CXX_EXTENSIONS": "OFF",
+        "CMAKE_CXX_STANDARD": "23",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+				"CMAKE_WARN_DEPRECATED":false,
+				"CMAKE_SUPPRESS_DEVELOPER_WARNINGS": "TRUE",
+				"CMAKE_BUILD_TYPE": "Debug",
+				"CMAKE_CXX_FLAGS": "-D_DEBUG -DDEBUG -D__DEBUG__"
+      }
+    },
+    {
+      "name": "Windows",
+      "hidden": true,
+      "inherits": [
+        "Environments"
+      ],
+      "cacheVariables": {
+        "CMAKE_SYSTEM_NAME": "Windows"
+      }
+    },
+    {
+      "name": "Linux",
+      "hidden": true,
+      "inherits": [
+        "Environments"
+      ],
+      "cacheVariables": {
+        "CMAKE_SYSTEM_NAME": "Linux"
+      }
+    },
+    {
+      "name": "Qt6",
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_AUTOMOC": "ON",
+        "CMAKE_AUTORCC": "ON",
+        "CMAKE_AUTOUIC": "ON",
+        "QT_VERSION_MAJOR": "6"
+      }
+    },
+    {
+      "name": "vcpkg",
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_TOOLCHAIN_FILE": {
+          "value": "M:/vcpkg/scripts/buildsystems/vcpkg.cmake",
+          "type": "FILEPATH"
+        }
+      }
+    },
+    {
+      "name": "GNU",
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_CXX_COMPILER": "g++",
+        "CMAKE_C_COMPILER": "gcc",
+        "CMAKE_CXX_FLAGS": "-std=c++2a"
+      }
+    },
+    {
+      "name": "LLVM",
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_CXX_COMPILER": "clang++",
+        "CMAKE_C_COMPILER": "clang",
+        "CMAKE_CXX_FLAGS": "-std=c++latest"
+      }
+    },
+		{
+      "name": "LLVM-MSVC-Compat-Mode",
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_CXX_COMPILER": "clang-cl",
+        "CMAKE_C_COMPILER": "clang-cl",
+        "CMAKE_CXX_FLAGS": "-clang:-std=c++latest"
+      }
+    },
+    {
+      "name": "MSVC",
+      "hidden": true,
+      "inherits": [
+        "Windows"
+      ],
+      "cacheVariables": {
+        "CMAKE_CXX_COMPILER": "cl",
+        "CMAKE_C_COMPILER": "cl",
+        "CMAKE_CXX_FLAGS": "/std:c++latest"
+      }
+    },
+    {
+      "name": "Windows-MSVC-Debug",
+      "hidden": false,
+      "generator": "Ninja",
+      "inherits": [
+        "MSVC",
+        "Windows",
+        "vcpkg"
+      ],
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "Windows-MSVC-Release",
+      "hidden": false,
+      "inherits": [
+        "MSVC",
+        "Windows",
+        "vcpkg"
+      ],
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    },
+    {
+      "name": "Windows-LLVM-Debug",
+      "hidden": false,
+      "inherits": [
+        "LLVM",
+        "Windows",
+        "vcpkg"
+      ],
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "Windows-LLVM-Release",
+      "hidden": false,
+      "inherits": [
+        "LLVM",
+        "Windows",
+        "vcpkg"
+      ],
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    },
+		{
+			"name": "Windows-LLVM-MSVC-Compat-Mode-Debug",
+			"hidden": false,
+			"inherits": [
+				"LLVM-MSVC-Compat-Mode",
+				"Windows",
+				"vcpkg"
+			],
+			"cacheVariables": {
+				"CMAKE_BUILD_TYPE": "Debug"
+			}
+		},
+		{
+			"name": "Windows-LLVM-MSVC-Compat-Mode-Release",
+			"hidden": false,
+			"inherits": [
+				"LLVM-MSVC-Compat-Mode",
+				"Windows",
+				"vcpkg"
+			],
+			"cacheVariables": {
+				"CMAKE_BUILD_TYPE": "Release"
+			}
+		},
+    {
+      "name": "Windows-GNU-Debug",
+      "hidden": false,
+      "inherits": [
+        "GNU",
+        "Windows",
+        "vcpkg"
+      ],
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "Windows-GNU-Release",
+      "hidden": false,
+      "inherits": [
+        "GNU",
+        "Windows",
+        "vcpkg"
+      ],
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    },
+    {
+      "name": "Qt6-Windows-MSVC-Debug",
+      "hidden": false,
+      "inherits": [
+        "MSVC",
+        "Qt6",
+        "Windows",
+        "vcpkg"
+      ],
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_PREFIX_PATH": "C:/Qt/6.8.0/msvc2019_64/lib/cmake/Qt6"
+      }
+    },
+    {
+      "name": "Qt6-Windows-MSVC-Release",
+      "hidden": false,
+      "inherits": [
+        "MSVC",
+        "Qt6",
+        "Windows",
+        "vcpkg"
+      ],
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_PREFIX_PATH": "C:/Qt/6.8.0/msvc2019_64/lib/cmake/Qt6"
+      }
+    },
+    {
+      "name": "Qt6-Windows-LLVM-Debug",
+      "hidden": false,
+      "inherits": [
+        "LLVM",
+        "Qt6",
+        "Windows",
+        "vcpkg"
+      ],
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_PREFIX_PATH": "C:/Qt/6.8.0/llvm-mingw_64/lib/cmake/Qt6"
+      }
+    },
+    {
+      "name": "Qt6-Windows-LLVM-Release",
+      "hidden": false,
+      "inherits": [
+        "LLVM",
+        "Qt6",
+        "Windows",
+        "vcpkg"
+      ],
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_PREFIX_PATH": "C:/Qt/6.8.0/llvm-mingw_64/lib/cmake/Qt6"
+      }
+    },
+    {
+      "name": "Qt6-Windows-GNU-Debug",
+      "hidden": false,
+      "inherits": [
+        "GNU",
+        "Qt6",
+        "Windows",
+        "vcpkg"
+      ],
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_PREFIX_PATH": "C:/Qt/6.8.0/mingw_64/lib/cmake/Qt6"
+      }
+    },
+    {
+      "name": "Qt6-Windows-GNU-Release",
+      "hidden": false,
+      "inherits": [
+        "GNU",
+        "Qt6",
+        "Windows",
+        "vcpkg"
+      ],
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_PREFIX_PATH": "C:/Qt/6.8.0/mingw_64/lib/cmake/Qt6"
+      }
+    }
+  ]
+}

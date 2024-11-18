@@ -1,0 +1,12 @@
+Diagnostics:
+  UnusedIncludes: None
+  # Suppress:
+    # - dangling-gsl
+InlayHints:
+  BlockEnd: true
+Hover:
+  ShowAKA: true
+CompileFlags:
+  Add:
+    - /std:c++latest
+    - -IM:\vcpkg\installed\x64-windows\include
