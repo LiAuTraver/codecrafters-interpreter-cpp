@@ -54,6 +54,7 @@ dkms.conf
 build
 build-*
 vcpkg_installed
+.vs
 
 .cache
 compile_commands.json
