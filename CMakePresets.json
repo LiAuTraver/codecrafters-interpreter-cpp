@@ -10,15 +10,15 @@
       "name": "Environments",
       "hidden": true,
       "generator": "Ninja",
-			"binaryDir": "${sourceDir}/build/${presetName}",
+      "binaryDir": "${sourceDir}/build/${presetName}",
       "cacheVariables": {
         "CMAKE_CXX_EXTENSIONS": "OFF",
         "CMAKE_CXX_STANDARD": "23",
         "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
-				"CMAKE_WARN_DEPRECATED":false,
-				"CMAKE_SUPPRESS_DEVELOPER_WARNINGS": "TRUE",
-				"CMAKE_BUILD_TYPE": "Debug",
-				"CMAKE_CXX_FLAGS": "-D_DEBUG -DDEBUG -D__DEBUG__"
+        "CMAKE_WARN_DEPRECATED": false,
+        "CMAKE_SUPPRESS_DEVELOPER_WARNINGS": "TRUE",
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_CXX_FLAGS": "-D_DEBUG -DDEBUG -D__DEBUG__"
       }
     },
     {
@@ -52,11 +52,21 @@
       }
     },
     {
-      "name": "vcpkg",
+      "name": "vcpkg-Windows",
       "hidden": true,
       "cacheVariables": {
         "CMAKE_TOOLCHAIN_FILE": {
           "value": "M:/vcpkg/scripts/buildsystems/vcpkg.cmake",
+          "type": "FILEPATH"
+        }
+      }
+    },
+    {
+      "name": "vcpkg-Linux",
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_TOOLCHAIN_FILE": {
+          "value": "/home/ancillarycat/realhome/build_systems/vcpkg/scripts/buildsystems/vcpkg.cmake",
           "type": "FILEPATH"
         }
       }
@@ -79,7 +89,7 @@
         "CMAKE_CXX_FLAGS": "-std=c++latest"
       }
     },
-		{
+    {
       "name": "LLVM-MSVC-Compat-Mode",
       "hidden": true,
       "cacheVariables": {
@@ -107,7 +117,7 @@
       "inherits": [
         "MSVC",
         "Windows",
-        "vcpkg"
+        "vcpkg-Windows"
       ],
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug"
@@ -119,7 +129,7 @@
       "inherits": [
         "MSVC",
         "Windows",
-        "vcpkg"
+        "vcpkg-Windows"
       ],
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release"
@@ -131,7 +141,7 @@
       "inherits": [
         "LLVM",
         "Windows",
-        "vcpkg"
+        "vcpkg-Windows"
       ],
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug"
@@ -143,43 +153,43 @@
       "inherits": [
         "LLVM",
         "Windows",
-        "vcpkg"
+        "vcpkg-Windows"
       ],
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release"
       }
     },
-		{
-			"name": "Windows-LLVM-MSVC-Compat-Mode-Debug",
-			"hidden": false,
-			"inherits": [
-				"LLVM-MSVC-Compat-Mode",
-				"Windows",
-				"vcpkg"
-			],
-			"cacheVariables": {
-				"CMAKE_BUILD_TYPE": "Debug"
-			}
-		},
-		{
-			"name": "Windows-LLVM-MSVC-Compat-Mode-Release",
-			"hidden": false,
-			"inherits": [
-				"LLVM-MSVC-Compat-Mode",
-				"Windows",
-				"vcpkg"
-			],
-			"cacheVariables": {
-				"CMAKE_BUILD_TYPE": "Release"
-			}
-		},
+    {
+      "name": "Windows-LLVM-MSVC-Compat-Mode-Debug",
+      "hidden": false,
+      "inherits": [
+        "LLVM-MSVC-Compat-Mode",
+        "Windows",
+        "vcpkg-Windows"
+      ],
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "Windows-LLVM-MSVC-Compat-Mode-Release",
+      "hidden": false,
+      "inherits": [
+        "LLVM-MSVC-Compat-Mode",
+        "Windows",
+        "vcpkg-Windows"
+      ],
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    },
     {
       "name": "Windows-GNU-Debug",
       "hidden": false,
       "inherits": [
         "GNU",
         "Windows",
-        "vcpkg"
+        "vcpkg-Windows"
       ],
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug"
@@ -191,7 +201,55 @@
       "inherits": [
         "GNU",
         "Windows",
-        "vcpkg"
+        "vcpkg-Windows"
+      ],
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    },
+    {
+      "name": "Linux-GNU-Debug",
+      "hidden": false,
+      "inherits": [
+        "GNU",
+        "Linux",
+        "vcpkg-Linux"
+      ],
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "Linux-GNU-Release",
+      "hidden": false,
+      "inherits": [
+        "GNU",
+        "Linux",
+        "vcpkg-Linux"
+      ],
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    },
+    {
+      "name": "Linux-LLVM-Debug",
+        "hidden": false,
+        "inherits": [
+          "LLVM",
+          "Linux",
+          "vcpkg-Linux"
+        ],
+        "cacheVariables": {
+          "CMAKE_BUILD_TYPE": "Debug"
+        }
+    },
+    {
+      "name": "Linux-LLVM-Release",
+      "hidden": false,
+      "inherits": [
+        "LLVM",
+        "Linux",
+        "vcpkg-Linux"
       ],
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release"
@@ -204,7 +262,7 @@
         "MSVC",
         "Qt6",
         "Windows",
-        "vcpkg"
+        "vcpkg-Windows"
       ],
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
@@ -218,7 +276,7 @@
         "MSVC",
         "Qt6",
         "Windows",
-        "vcpkg"
+        "vcpkg-Windows"
       ],
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release",
@@ -232,7 +290,7 @@
         "LLVM",
         "Qt6",
         "Windows",
-        "vcpkg"
+        "vcpkg-Windows"
       ],
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
@@ -246,7 +304,7 @@
         "LLVM",
         "Qt6",
         "Windows",
-        "vcpkg"
+        "vcpkg-Windows"
       ],
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release",
@@ -260,7 +318,7 @@
         "GNU",
         "Qt6",
         "Windows",
-        "vcpkg"
+        "vcpkg-Windows"
       ],
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
@@ -274,11 +332,39 @@
         "GNU",
         "Qt6",
         "Windows",
-        "vcpkg"
+        "vcpkg-Windows"
       ],
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release",
         "CMAKE_PREFIX_PATH": "C:/Qt/6.8.0/mingw_64/lib/cmake/Qt6"
+      }
+    },
+    {
+      "name": "Qt6-Linux-GNU-Debug",
+      "hidden": false,
+      "inherits": [
+        "GNU",
+        "Qt6",
+        "Linux",
+        "vcpkg-Linux"
+      ],
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_PREFIX_PATH": "/home/ancillarycat/Qt/6.8.0/gcc_64/lib/cmake/Qt6"
+      }
+    },
+    {
+      "name": "Qt6-Linux-GNU-Release",
+      "hidden": false,
+      "inherits": [
+        "GNU",
+        "Qt6",
+        "Linux",
+        "vcpkg-Linux"
+      ],
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_PREFIX_PATH": "/home/ancillarycat/Qt/6.8.0/gcc_64/lib/cmake/Qt6"
       }
     }
   ]

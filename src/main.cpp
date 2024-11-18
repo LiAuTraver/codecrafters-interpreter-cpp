@@ -11,6 +11,9 @@
 #include <string_view>
 #include "config.hpp"
 #include "lexer.hpp"
+#if __has_include(<spdlog/spdlog.h>)
+#include <spdlog/spdlog.h>
+#endif
 /// @note use fmt::print, fmt::println when compiling with clang-cl.exe will
 /// cause some wired error: Critical error detected c0000374
 /// A breakpoint instruction (__debugbreak() statement or a similar call) was
@@ -57,9 +60,8 @@ int main(int argc, char *argv[]) {
       println("Error: {}", lex_result.message().data());
     }
     auto tokens = lexer.get_tokens();
-    std::ranges::for_each(tokens, [](const auto &token) {
-      println("{}", token.to_string());
-    });
+    std::ranges::for_each(
+        tokens, [](const auto &token) { println("{}", token.to_string()); });
     return EXIT_SUCCESS;
   }
 

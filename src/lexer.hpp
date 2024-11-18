@@ -220,7 +220,7 @@ inline void lexer::next_token() {
   // 			 ^ cursor position
   contract_assert(cursor < contents.size());
   auto c = get();
-  dbg(info, "c: {}", c);
+  dbg(debug, "c: {}", c);
 
   switch (c) {
   case '(':
@@ -301,7 +301,7 @@ inline bool lexer::is_at_end(size_t offset) const {
 }
 inline void lexer::add_token(token_type_t type, std::any literal) {
   string_view_t lexeme = string_view_t(contents.data() + head, cursor - head);
-  dbg(info, "lexeme: {}", lexeme);
+  dbg(debug, "lexeme: {}", lexeme);
   token_t token{type, lexeme, literal, line};
   tokens.push_back(token);
         lexeme_views.push_back(lexeme);
@@ -322,7 +322,7 @@ inline lexer::string_view_t lexer::lex_string() {
   // 						     ^ cursor position
   get(); // consume the closing quote.
   auto value = string_view_t(contents.data() + head + 1, cursor - head - 2);
-  dbg(info, "string value: {}", value);
+  dbg(debug, "string value: {}", value);
   return value;
 }
 inline std::any lexer::lex_number(bool is_negative) {
@@ -365,7 +365,7 @@ inline lexer::string_view_t lexer::lex_identifier() {
   // 123_abc
   //       ^ cursor position
   auto value = string_view_t(contents.data() + head, cursor - head);
-  dbg(info, "identifier: {}", value);
+  dbg(debug, "identifier: {}", value);
   return value;
 }
 } // namespace net::ancillarycat::loxograph

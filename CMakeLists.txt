@@ -14,8 +14,12 @@ endif ()
 if (NOT DEFINED CMAKE_C_COMPILER)
     set(CMAKE_C_COMPILER "gcc")
 endif ()
-
-
+if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+    # for code crafters' test
+    set(CMAKE_CXX_COMPILER "g++")
+    set(CMAKE_MAKE_PROGRAM "make")
+    set(CMAKE_C_COMPILER "gcc")
+endif ()
 option(AC_CPP_DEBUG "set the environment variable AC_CPP_DEBUG to enable debug mode" OFF)
 
 file(GLOB_RECURSE SOURCE_FILES src/*.cpp src/*.hpp)

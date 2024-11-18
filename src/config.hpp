@@ -19,7 +19,10 @@
 #else
 #define LOXOGRAPH_DEBUG_LOGGING(_level_, _msg_, ...)
 #endif
-
+#ifdef __RESHARPER__
+/// @note resharper can't get through this @code __PRETTY_FUNCTION__ @endcode
+#define __PRETTY_FUNCTION__ __FUNCSIG__
+#endif
 #ifdef __clang__
 #define LOXOGRAPH_FORCEINLINE [[clang::always_inline]]
 #define LOXOGRAPH_DEBUG_BREAK __builtin_debugtrap();
