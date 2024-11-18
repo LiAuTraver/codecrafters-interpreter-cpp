@@ -14,13 +14,13 @@ set -e # Exit early if any commands fail
 # - Edit .codecrafters/compile.sh to change how your program compiles remotely
 (
   cd "$(dirname "$0")" # Ensure compile steps are run within the repository directory
-  cmake -B build-2 -S .
+  cmake -B build/linux -S .
 #   -DCMAKE_TOOLCHAIN_FILE=${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake
-  cmake --build ./build-2
+  cmake --build ./build/linux
 )
 
 # Copied from .codecrafters/run.sh
 #
 # - Edit this to change how your program runs locally
 # - Edit .codecrafters/run.sh to change how your program runs remotely
-exec $(dirname $0)/build-2/interpreter "$@"
+exec $(dirname $0)/build/linux/interpreter "$@"

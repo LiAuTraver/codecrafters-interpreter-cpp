@@ -44,7 +44,7 @@ public:
 
 private:
   Code my_code;
-  std::string_view my_message;
+  std::string my_message;
   std::source_location my_location;
 };
 

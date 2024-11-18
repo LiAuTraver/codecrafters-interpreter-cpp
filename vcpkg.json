@@ -1,5 +1,11 @@
 {
   "name": "loxograph",
   "version": "1.0.0",
-  "dependencies": []
+  "dependencies": [
+    "benchmark",
+    "fmt",
+    "gtest",
+    "spdlog",
+    "magic-enum"
+  ]
 }
