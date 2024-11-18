@@ -53,7 +53,7 @@ int main(int argc, char *argv[]) {
     net::ancillarycat::loxograph::lexer lexer;
     auto load_result = lexer.load(path);
     if (!load_result.ok()) {
-      println("Error: {}", load_result.message().data());
+      println("EOF  null");
     }
     auto lex_result = lexer.lex();
     if (!lex_result.ok()) {
