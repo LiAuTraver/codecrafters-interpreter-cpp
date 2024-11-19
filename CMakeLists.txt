@@ -24,9 +24,15 @@ if(DEFINED ENV{AC_CPP_DEBUG})
   endif()
 endif()
 
-add_library(driver SHARED
-    ${DRIVER_SOURCE_FILES}
-)
+if(AC_CPP_DEBUG)
+  add_library(driver STATIC
+      ${DRIVER_SOURCE_FILES}
+  )
+else()
+  add_library(driver SHARED
+      ${DRIVER_SOURCE_FILES}
+  )
+endif()
 
 add_executable(interpreter
     interpreter.cpp

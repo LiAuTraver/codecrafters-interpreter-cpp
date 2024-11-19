@@ -41,7 +41,7 @@ int main(int argc, char **argv, char **envp) {
     path = argv[1];
     command = "tokenize";
   } else if (argc != 3) {
-    path = R"(Z:\loxograph\templates\empty.lox)";
+    path = R"(Z:\loxograph\templates\simple4.lox)";
     command = "tokenize";
   }
 #endif
@@ -52,6 +52,6 @@ int main(int argc, char **argv, char **envp) {
   std::ostringstream oss;
   const auto result =
       net::ancillarycat::loxograph::loxo_main(path, command, oss);
-  print("{}", oss.str());
+//  print("{}", oss.str());
   return result;
 }
