@@ -34,7 +34,7 @@ public:
 public:
   string_t to_string(const string_view_t lexeme_sv = "stray lexeme"sv,
                      const uint_least32_t line = 0) const {
-    // contract_assert(line && (bool)"Line number must not be zero");
+    // contract_assert(current_line && (bool)"Line number must not be zero");
     auto msg = string_t{};
     switch (type) {
     case kMonostate:
@@ -48,7 +48,7 @@ public:
       msg = "Unterminated string";
       break;
     }
-    auto str = format("[line {}] Error: {}: {}", line, msg, lexeme_sv.data());
+    auto str = format("[current_line {}] Error: {}: {}", line, msg, lexeme_sv.data());
     dbg(error, "{}", str);
     return str;
   }

@@ -4,6 +4,8 @@
 #include <iosfwd>
 #include <string>
 #include <string_view>
+
+#include "config.hpp"
 #if (defined(__clang__) && defined(_MSC_VER)) || (!__has_include(<fmt/core.h>))
 #include <format>
 #include <print>
@@ -52,9 +54,9 @@ using ::net::ancillarycat::utils::StringType;
 using ::net::ancillarycat::utils::StringViewType;
 using namespace std::string_view_literals;
 using namespace std::string_literals;
-static constexpr auto tolerable_chars = "_@`"sv;
+static constexpr auto tolerable_chars = "_`"sv;
 /// @note intolarable in codecrafter test
-static constexpr auto conditional_tolerable_chars = "$#"sv;
+static constexpr auto conditional_tolerable_chars = "@$#"sv;
 static constexpr auto whitespace_chars = " \t\r"sv;
 static constexpr auto newline_chars = "\n\v\f"sv;
 /// @note use fmt::print, fmt::println when compiling with clang-cl.exe will
@@ -70,4 +72,5 @@ using ::fmt::format;
 using ::fmt::print;
 using ::fmt::println;
 #endif
+LOXOGRAPH_INITIALIZATION
 } // namespace net::ancillarycat::loxograph

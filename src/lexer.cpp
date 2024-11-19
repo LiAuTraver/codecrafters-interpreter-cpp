@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <any>
 #include <array>
 #include <cctype>
@@ -19,8 +20,8 @@
 #include <variant>
 #include <vector>
 
-#include "config.hpp"
 #include "Token.hpp"
+#include "config.hpp"
 #include "lex_error.hpp"
 #include "lexer.hpp"
 
@@ -99,7 +100,6 @@ void lexer::add_identifier() {
     return;
   }
   add_token(TokenType::kIdentifier, value);
-  return;
 }
 void lexer::add_number() {
   auto value = lex_number(false);
@@ -108,7 +108,6 @@ void lexer::add_number() {
     return;
   }
   add_token(TokenType::kNumber, value);
-  return;
 }
 void lexer::add_string() {
   auto value = lex_string();
@@ -165,7 +164,7 @@ void lexer::next_token() {
     if (whitespace_chars.find(c) != string_view_type::npos)
       return;
     if (newline_chars.find(c) != string_view_type::npos) {
-      line++;
+      current_line++;
       return;
     }
     if (c == '"') {
@@ -179,7 +178,7 @@ void lexer::next_token() {
     if (std::isalpha(c, std::locale()) or c == '_') {
       return add_identifier();
     }
-		add_lex_error(lex_error::kUnexpectedCharacter);
+    add_lex_error(lex_error::kUnexpectedCharacter);
     dbg(error, "unexpected character: {}", c);
   }
 }
@@ -206,20 +205,21 @@ bool lexer::is_at_end(size_t offset) const {
 void lexer::add_token(token_type_t type, std::any literal) {
   auto lexeme = string_view_type(contents.data() + head, cursor - head);
   dbg(trace, "lexeme: {}", lexeme);
-  token_t token{type, lexeme, literal, line};
+  token_t token{type, lexeme, std::move(literal), current_line};
   tokens.push_back(token);
   lexeme_views.push_back(lexeme);
 }
 void lexer::add_lex_error(const lex_error::type_t type) {
   dbg(error, "Lexical error: {}", contents.substr(head, cursor - head));
-  return add_token(TokenType::kLexError,std::make_any<error_t>(type));
+  error_count++;
+  return add_token(TokenType::kLexError, std::make_any<error_t>(type));
 }
 lexer::string_view_type lexer::lex_string() {
   while (peek() != '"' && !is_at_end()) {
     if (peek() == '\n') {
-      line++; // multiline string, of course we dont want act like C/C++ which
-              // will result in a compile error if the string is not closed at
-              // the same line.
+      current_line++; // multiline string, of course we dont want act like C/C++
+                      // which will result in a compile error if the string is
+                      // not closed at the same current_line.
     }
     get();
   }
@@ -263,6 +263,8 @@ std::any lexer::lex_number(boolean_type is_negative) {
   return to_number<double>(value);
 }
 auto lexer::get_tokens() -> lexer::tokens_t { return tokens; }
+lexer::boolean_type lexer::ok() const noexcept { return !error_count; }
+uint_least32_t lexer::error() const noexcept { return error_count; }
 lexer::string_view_type lexer::lex_identifier() {
   while (std::isalnum(peek(), std::locale()) ||
          tolerable_chars.find(peek()) != string_view_type::npos) {

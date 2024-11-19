@@ -18,30 +18,34 @@
 #if __has_include(<spdlog/spdlog.h>)
 #include <spdlog/spdlog.h>
 #endif
+#if __has_include(<fmt/core.h>)
+#include <fmt/core.h>
+#endif
+#if __has_include(<sal.h>)
+#include <sal.h>
+#else
+#define _In_
+#define _Inout_
+#endif
 #ifdef _WIN32
 #include <io.h>
-
 #define isatty _isatty
 #define fileno _fileno
 #else
 #include <unistd.h>
 #endif
 namespace net::ancillarycat::loxograph {
-LOXOGRAPH_INITIALIZATION
 inline void inspect(std::ostringstream &oss, const Status &load_result) {
   if (load_result.code() == Status::kNotFoundError)
     return dbg(error, "{}", load_result.message().data());
 }
-// template std::string loxo_main(const std::filesystem::path &,
-//                                const std::string_view);
-template <typename PathType = std::filesystem::path,
-          typename StringType = std::string,
-          typename StringViewType = std::string_view,
-          typename InputStreamType = std::ifstream,
-          typename OutputStringStreamType = std::ostringstream>
-StringType loxo_main(const PathType &path, const StringViewType command) {
-
-  OutputStringStreamType oss;
+// clang-format off
+nodiscard_msg(loxo_main)
+int loxo_main(_In_ const std::filesystem::path &path,
+              _In_ const std::string_view command,
+              _Inout_ std::ostringstream &oss)
+// clang-format on
+{
   if (command == "tokenize") {
     net::ancillarycat::loxograph::lexer lexer;
     Status load_result;
@@ -60,32 +64,33 @@ StringType loxo_main(const PathType &path, const StringViewType command) {
 #endif
     if (!load_result.ok()) {
       inspect(oss, load_result);
-      return oss.str();
+      return 65;
     }
     auto lex_result = lexer.lex();
     if (!lex_result.ok()) {
       dbg(warn, "{}", lex_result.message().data());
-      return oss.str();
+      return 65;
     }
-    auto tokens = lexer.get_tokens();
-    // std::ranges::for_each(tokens, [&](const auto &token) {
-    //   oss << token.to_string() << std::endl;
-    // });
-		// first print error(lex_error) if any, then print tokens.
-		for (const auto &token : tokens) {
-			if (token.type.type == TokenType::kLexError) {
-				oss << token.to_string() << std::endl;
-			}
-		}
-		for (const auto &token : tokens) {
-			if (token.type.type != TokenType::kLexError) {
-				oss << token.to_string() << std::endl;
-			}
-		}
-    return oss.str();
+    const auto tokens = lexer.get_tokens();
+    std::ranges::for_each(tokens, [&oss](const auto &token) {
+      if (token.type.type == TokenType::kLexError) {
+        oss << token.to_string() << std::endl;
+      }
+    });
+    std::ranges::for_each(tokens, [&oss](const auto &token) {
+      if (token.type.type != TokenType::kLexError) {
+        oss << token.to_string() << std::endl;
+      }
+    });
+    if (!lexer.ok()) {
+      dbg(error, "lexing process completed with {} error(s).", lexer.error());
+      return 65;
+    }
+    dbg(trace, "lexing process completed successfully with no errors.");
+    return 0;
   }
 
   dbg(error, "Unknown command: {}", command);
-  return oss.str();
+  return 65;
 }
 } // namespace net::ancillarycat::loxograph

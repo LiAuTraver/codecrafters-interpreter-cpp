@@ -25,9 +25,9 @@
 #include "Token.hpp"
 #include "config.hpp"
 #include "file_reader.hpp"
+#include "lex_error.hpp"
 #include "loxo_fwd.hpp"
 #include "status.hpp"
-#include "lex_error.hpp"
 
 /// @namespace net::ancillarycat::loxograph
 namespace net::ancillarycat::loxograph {
@@ -81,6 +81,8 @@ public:
   /// @return OkStatus() if successful, NotFoundError() otherwise
   status_t lex();
   auto get_tokens() -> tokens_t;
+  boolean_type ok() const noexcept;
+  uint_least32_t error() const noexcept;
 
 private:
   void add_identifier();
@@ -141,8 +143,10 @@ private:
   /// @brief lexme views(non-owning)
   lexeme_views_t lexeme_views;
   /// @brief current source line number
-  uint_least32_t line = 1;
+  uint_least32_t current_line = 1;
   /// @brief tokens
   tokens_t tokens;
+  /// @brief errors
+  uint_least32_t error_count = 0;
 };
 } // namespace net::ancillarycat::loxograph
