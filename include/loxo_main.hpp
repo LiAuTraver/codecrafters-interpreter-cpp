@@ -19,8 +19,9 @@
 #include <spdlog/spdlog.h>
 #endif
 #ifdef _WIN32
-#include <io.h>
 #include <corecrt_io.h>
+#include <io.h>
+
 #define isatty _isatty
 #define fileno _fileno
 #else
@@ -44,19 +45,23 @@ StringType loxo_main(const PathType &path, const StringViewType command) {
   OutputStringStreamType oss;
   if (command == "tokenize") {
     net::ancillarycat::loxograph::lexer lexer;
-		Status load_result;
+    Status load_result;
+#ifdef LOXOGRAPH_DEBUG_ENABLED
     if (!isatty(fileno(stdin))) {
-			dbg(info, "loxograph: reading from stdin...");
-			load_result = lexer.load(std::cin);
+      dbg(info, "loxograph: reading from stdin...");
+      load_result = lexer.load(std::cin);
     } else {
-			dbg(info, "loxograph: reading from file...");
-			dbg(info, "file path: {}", path.string());
+#endif
+      dbg(info, "loxograph: reading from file...");
+      dbg(info, "file path: {}", path.string());
       load_result = lexer.load(path);
+#ifdef LOXOGRAPH_DEBUG_ENABLED
     }
-      if (!load_result.ok()) {
-        inspect(oss, load_result);
-        return oss.str();
-      }
+#endif
+    if (!load_result.ok()) {
+      inspect(oss, load_result);
+      return oss.str();
+    }
     auto lex_result = lexer.lex();
     if (!lex_result.ok()) {
       dbg(warn, "{}", lex_result.message().data());
