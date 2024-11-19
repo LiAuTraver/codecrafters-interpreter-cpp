@@ -48,7 +48,7 @@ public:
       msg = "Unterminated string";
       break;
     }
-    auto str = format("[current_line {}] Error: {}: {}", line, msg, lexeme_sv.data());
+    auto str = format("[line {}] Error: {}: {}", line, msg, lexeme_sv.data());
     dbg(error, "{}", str);
     return str;
   }

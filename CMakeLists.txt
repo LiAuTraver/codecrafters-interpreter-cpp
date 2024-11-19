@@ -4,7 +4,7 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux" AND EXISTS ENV{AC_CPP_DEBUG})
-  if($ENV{AC_CPP_DEBUG} STREQUAL "ON")
+  if($ENV{AC_CPP_DEBUG} STREQUAL "")
     # for codecrafters' test
     set(CMAKE_CXX_COMPILER "g++")
     set(CMAKE_MAKE_PROGRAM "make")
@@ -32,6 +32,6 @@ target_link_libraries(interpreter PUBLIC
     driver
 )
 
-if(DEFINED ENV{AC_CPP_DEBUG})
+if(DEFINED ENV{AC_CPP_DEBUG} AND ${CMAKE_BUILD_TYPE} STREQUAL "Debug")
   include(cmake/debug_mode.cmake)
 endif()
