@@ -1,4 +1,5 @@
 #pragma once
+
 #include <algorithm>
 #include <any>
 #include <array>
@@ -22,12 +23,13 @@
 #include <utility>
 #include <variant>
 #include <vector>
-#include "Token.hpp"
+
 #include "config.hpp"
 #include "file_reader.hpp"
 #include "lex_error.hpp"
 #include "loxo_fwd.hpp"
 #include "status.hpp"
+#include "Token.hpp"
 
 /// @namespace net::ancillarycat::loxograph
 namespace net::ancillarycat::loxograph {
@@ -66,16 +68,11 @@ public:
 public:
 public:
   /// @brief load the contents of the file
-  /// @param filepath the path to the file
   /// @return OkStatus() if successful, NotFoundError() otherwise
   status_t load(const path_type &);
-  /// @brief load the contents of the file
-  /// @param content the contents of the file
-  /// @return OkStatus() if successful, AlreadyExistsError() otherwise
+  /// @copydoc load(const path_type &)
   status_t load(string_type &&);
-  /// @brief load the contents of the file
-  /// @param content the contents of the file
-  /// @return OkStatus() if successful, AlreadyExistsError() otherwise
+  /// @copydoc load(const path_type &)
   status_t load(const std::istream &);
   /// @brief lex the contents of the file
   /// @return OkStatus() if successful, NotFoundError() otherwise
@@ -90,9 +87,9 @@ private:
   void add_string();
   void add_comment();
   void next_token();
-  bool is_at_end(size_t = 0) const;
   void add_token(token_type_t, std::any = std::any());
   void add_lex_error(lex_error::type_t = lex_error::kMonostate);
+  bool is_at_end(size_t = 0) const;
   auto lex_string() -> lexer::status_t::Code;
   auto lex_identifier() -> string_view_type;
   auto lex_number(boolean_type) -> std::any;
@@ -139,13 +136,13 @@ private:
   /// @brief current cursor position
   size_type cursor = 0;
   /// @brief the contents of the file
-  const string_type contents;
+  const string_type contents = string_type();
   /// @brief lexme views(non-owning)
-  lexeme_views_t lexeme_views;
+  lexeme_views_t lexeme_views = lexeme_views_t();
   /// @brief current source line number
   uint_least32_t current_line = 1;
   /// @brief tokens
-  tokens_t tokens;
+  tokens_t tokens = tokens_t();
   /// @brief errors
   uint_least32_t error_count = 0;
 };

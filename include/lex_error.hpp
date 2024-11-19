@@ -1,7 +1,6 @@
 #pragma once
 #include <string>
 #include <string_view>
-#include <format>
 #include <cstdint>
 
 #include "config.hpp"
@@ -26,7 +25,7 @@ public:
   inline lex_error(lex_error &&that) = default;
   inline lex_error &operator=(const lex_error &) = default;
   inline lex_error &operator=(lex_error &&that) = default;
-  inline lex_error(type_t type) : type(type) {}
+  inline explicit lex_error(type_t type) : type(type) {}
 
 public:
   type_t type = kMonostate;
@@ -42,21 +41,15 @@ public:
       msg = "Internal error";
       break;
     case kUnexpectedCharacter:
-      msg = format("Unexpected character: {}", lexeme_sv.data());
+      msg = utils::format("Unexpected character: {}", lexeme_sv.data());
       break;
     case kUnterminatedString:
       msg = "Unterminated string.";
       break;
     }
-    auto str = format("[line {}] Error: {}", line, msg);
+    auto str = utils::format("[line {}] Error: {}", line, msg);
     dbg(error, "{}", str);
     return str;
   }
 };
 } // namespace net::ancillarycat::loxograph
-// template <>
-// struct fmt::formatter<net::ancillarycat::loxograph::lex_error> : fmt::formatter<net::ancillarycat::loxograph::lex_error::string_t>{
-//   auto format(net::ancillarycat::loxograph::lex_error lex_error, format_context &ctx) const -> decltype(ctx.out())const  {
-//     return fmt::format_to(ctx.out(), "{}", lex_error.to_string());
-//   }
-// };

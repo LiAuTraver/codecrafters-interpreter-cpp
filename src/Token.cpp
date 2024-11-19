@@ -1,41 +1,65 @@
-#include "Token.hpp"
 #include <any>
 #include <concepts>
 #include <cstdint>
 #include <format>
-#include <lex_error.hpp>
 #include <optional>
-#include <source_location>
 #include <string>
 #include <string_view>
 #include <typeinfo>
 #include <unordered_map>
 #include <variant>
+
 #include "config.hpp"
+#include "lex_error.hpp"
+#include "loxo_fwd.hpp"
+#include "Token.hpp"
+
 namespace net::ancillarycat::loxograph {
+// clang-format off
+/*!
+ * @brief cast the literal to the specified type and also log the value in debug mode.
+ * @note clang-cl.exe does not fully support `try` and `catch` blocks but
+ * `any_cast` will throw an exception if the cast fails. For more information,
+ * @htmlonly
+ * <a href="https://learn.microsoft.com/en-us/cpp/cpp/try-except-statement?view=msvc-170">try-except-statement</a>
+ * <a href="https://clang.llvm.org/docs/MSVCCompatibility.html">Asynchronous Exceptions</a>
+ * <a href="https://stackoverflow.com/questions/7049502/c-try-and-try-catch-finally">try-catch-finally</a>
+ * @endhtmlonly
+ */
+// clang-format on
 template <typename Ty>
 inline auto Token::cast_literal() const
     -> std::optional<decltype(std::any_cast<Ty>(literal))>
   requires std::default_initializable<Ty> &&
            std::formattable<Ty, string_t::value_type>
 {
-  try {
-    dbg(info, "literal type: {}, value: {}", literal.type().name(),
-        std::any_cast<Ty>(literal));
-    return std::any_cast<Ty>(literal);
-  } catch (std::bad_any_cast &e) {
-    dbg(error, "bad any cast: {}", e.what());
-    return std::nullopt;
+#if 0
+   _TRY_BEGIN
+      dbg(info, "literal type: {}, value: {}", literal.type().name(),
+          std::any_cast<Ty>(literal));
+      return std::any_cast<Ty>(literal);
+   _CATCH  (std::bad_any_cast &e)
+      dbg(error, "bad any cast: {}", e.what());
+      return std::nullopt;
+   _CATCH_END
+#endif
+  auto *ptr = std::any_cast<Ty>(&literal);
+  if (ptr) {
+    dbg(info, "literal type: {}, value: {}", typeid(Ty).name(), *ptr);
+    return *ptr;
   }
+  dbg(error, "bad any cast: {}", LOXOGRAPH_STACKTRACE);
+  return std::nullopt;
 }
 template <typename Ty>
-inline auto Token::cast_literal() const
+inline auto net::ancillarycat::loxograph::Token::cast_literal() const
     -> std::optional<decltype(std::any_cast<Ty>(literal))>
   requires std::default_initializable<Ty> &&
            (!std::formattable<Ty, string_t::value_type>) && requires(Ty t) {
              { t.to_string() } -> std::convertible_to<string_t>;
            }
 {
+#if 0
   try {
     dbg(info, "literal type: {}, value: {}", literal.type().name(),
         std::any_cast<Ty>(literal).to_string());
@@ -44,6 +68,15 @@ inline auto Token::cast_literal() const
     dbg(error, "bad any cast: {}", e.what());
     return std::nullopt;
   }
+#endif
+  auto *ptr = std::any_cast<Ty>(&literal);
+  if (ptr) {
+    dbg(info, "literal type: {}, value: {}", typeid(Ty).name(),
+        ptr->to_string());
+    return *ptr;
+  }
+  dbg(error, "bad any cast: {}", LOXOGRAPH_STACKTRACE);
+  return std::nullopt;
 }
 template <typename Ty>
   requires std::is_arithmetic_v<std::remove_cvref_t<Ty>>
@@ -179,16 +212,16 @@ Token::string_t Token::to_string() const {
     type_sv = "NUMBER"sv;
     lexeme_sv = lexeme;
     {
+      /// @note num_value's lifetime is the same as the literal
       auto num_value = cast_literal<long double>().value_or(
           std::numeric_limits<long double>::
               signaling_NaN()); // format *can* format NaN to "nan"
       if (is_integer(num_value))
         // 42 -> 42.0
-        return format("{} {} {:.1f}", type_sv, lexeme_sv, num_value);
-        // literal_sv = string_t{format("{:.1f}", num_value)};
+        return utils::format("{} {} {:.1f}", type_sv, lexeme_sv, num_value);
       else
         // leave as is
-        return format("{} {} {}", type_sv, lexeme_sv, num_value);
+        return utils::format("{} {} {}", type_sv, lexeme_sv, num_value);
     }
     break;
   case kAnd:
@@ -284,7 +317,8 @@ Token::string_t Token::to_string() const {
   default:
     break;
   }
-  /// @not DON'T use `.data()` since it's not null-terminated and will the string will last till the end
-  return format("{} {} {}", type_sv, lexeme_sv, literal_sv);
+  /// @note DON'T use `.data()` since it's not null-terminated and will the
+  /// string will last till the end
+  return utils::format("{} {} {}", type_sv, lexeme_sv, literal_sv);
 }
 } // namespace net::ancillarycat::loxograph

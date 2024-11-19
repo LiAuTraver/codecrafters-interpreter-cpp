@@ -94,8 +94,8 @@
       "name": "LLVM-MSVC-Compat-Mode",
       "hidden": true,
       "cacheVariables": {
-        "CMAKE_CXX_COMPILER": "clang-cl",
-        "CMAKE_C_COMPILER": "clang-cl",
+        "CMAKE_CXX_COMPILER": "clang-cl.exe",
+        "CMAKE_C_COMPILER": "clang-cl.exe",
         "CMAKE_CXX_FLAGS": "-clang:-std=c++latest"
       }
     },
@@ -106,9 +106,9 @@
         "Windows"
       ],
       "cacheVariables": {
-        "CMAKE_CXX_COMPILER": "cl",
-        "CMAKE_C_COMPILER": "cl",
-        "CMAKE_CXX_FLAGS": "/std:c++latest"
+        "CMAKE_CXX_COMPILER": "cl.exe",
+        "CMAKE_C_COMPILER": "cl.exe",
+        "CMAKE_CXX_FLAGS": "/std:c++latest  /Zc:preprocessor"
       }
     },
     {

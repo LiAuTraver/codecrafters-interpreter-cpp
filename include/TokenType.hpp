@@ -59,7 +59,7 @@ public:
 
     // lex error,
     kLexError,
-
+    // end of file
     kEndOfFile,
   };
 

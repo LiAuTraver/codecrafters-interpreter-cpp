@@ -1,9 +1,9 @@
-#include "status.hpp"
 #include <format>
-#include <source_location>
 #include <string>
 #include <string_view>
+
 #include "config.hpp"
+#include "status.hpp"
 namespace net::ancillarycat::utils {
 using namespace std::string_view_literals;
 Status::Status(Code code, std::string_view message,
@@ -21,14 +21,27 @@ Status::Status(const Status &that) {
   my_message = that.my_message;
   my_location = that.my_location;
 }
+Status &Status::operator=(const Status &that) {
+  my_code = that.my_code;
+  my_message = that.my_message;
+  my_location = that.my_location;
+  return *this;
+}
+Status &Status::operator=(Status &&that) noexcept {
+  my_code = that.my_code;
+  my_message = std::move(that.my_message);
+  my_location = that.my_location;
+  that.my_code = kMovedFrom;
+  that.my_message = "This status has been moved from.";
+  that.my_location = std::source_location::current();
+  return *this;
+}
 bool Status::ok() const { return my_code == kOkStatus; }
 Status::Code Status::code() const { return my_code; }
 std::string_view Status::message() const { return my_message; }
 std::source_location Status::location() const { return my_location; }
-std::string Status::stacktrace() const {
-  return LOXOGRAPH_STACKTRACE;
-}
-constexpr bool Status::ignore_error() const {
+std::string Status::stacktrace() const { return LOXOGRAPH_STACKTRACE; }
+constexpr bool Status::ignore_error() const /*noexcept*/ {
   contract_assert(ok());
   return true;
 }
@@ -47,7 +60,7 @@ Status AlreadyExistsError(std::string_view message,
   return Status(Status::kAlreadyExistsError, message, location);
 }
 Status FileNotFoundError(std::string_view message,
-                     const std::source_location &location) {
+                         const std::source_location &location) {
   return Status(Status::kNotFoundError, message, location);
 }
 Status UnknownError(std::string_view message,

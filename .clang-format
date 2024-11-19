@@ -21,6 +21,7 @@ IncludeCategories:
     Priority: 6
 
 IncludeIsMainRegex: "(_test)?$"
+SortIncludes: CaseInsensitive
 IndentWidth: 2
 TabWidth: 2
 UseTab: Never

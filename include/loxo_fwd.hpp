@@ -16,6 +16,9 @@
 #include <fmt/ostream.h>
 #endif
 namespace net::ancillarycat::utils {
+/// @brief A class that represents the status of a function call. it's designed
+/// to be as identical as possible to the `absl::Status` class, for
+/// `absl::Status` seems to fail to compile with clang++ on Windows.
 class Status;
 /// @brief a simple file reader that reads the contents of a file
 /// @tparam PathType the path type
@@ -37,6 +40,19 @@ using StatusType = Status;
 using InputStreamType = std::ifstream;
 using OutputStringStreamType = std::ostringstream;
 using PathType = std::filesystem::path;
+/// @note use fmt::print, fmt::println when compiling with clang-cl.exe will
+/// cause some wired error: Critical error detected c0000374
+/// A breakpoint instruction (__debugbreak() statement or a similar call) was
+/// executed, which related to heap corruption. The program will terminate.
+#if (defined(__clang__) && defined(_MSC_VER)) || (!__has_include(<fmt/core.h>))
+using ::std::format;
+using ::std::print;
+using ::std::println;
+#else
+using ::fmt::format;
+using ::fmt::print;
+using ::fmt::println;
+#endif
 } // namespace net::ancillarycat::utils
 namespace net::ancillarycat::loxograph {
 class lex_error;
@@ -59,17 +75,4 @@ static constexpr auto tolerable_chars = "_`"sv;
 static constexpr auto conditional_tolerable_chars = "@$#"sv;
 static constexpr auto whitespace_chars = " \t\r"sv;
 static constexpr auto newline_chars = "\n\v\f"sv;
-/// @note use fmt::print, fmt::println when compiling with clang-cl.exe will
-/// cause some wired error: Critical error detected c0000374
-/// A breakpoint instruction (__debugbreak() statement or a similar call) was
-/// executed, which related to heap corruption. The program will terminate.
-#if (defined(__clang__) && defined(_MSC_VER)) || (!__has_include(<fmt/core.h>))
-using ::std::format;
-using ::std::print;
-using ::std::println;
-#else
-using ::fmt::format;
-using ::fmt::print;
-using ::fmt::println;
-#endif
 } // namespace net::ancillarycat::loxograph

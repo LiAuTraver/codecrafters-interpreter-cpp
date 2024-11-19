@@ -10,11 +10,13 @@
 #include <string>
 #include <string_view>
 #include <vector>
-#include "Token.hpp"
+
 #include "config.hpp"
 #include "lexer.hpp"
 #include "loxo_fwd.hpp"
 #include "status.hpp"
+#include "Token.hpp"
+
 #if __has_include(<spdlog/spdlog.h>)
 #include <spdlog/spdlog.h>
 #endif
@@ -75,13 +77,13 @@ int loxo_main(_In_ const std::filesystem::path &path,
     std::ranges::for_each(tokens, [&oss](const auto &token) {
       if (token.type.type == TokenType::kLexError) {
         oss << token.to_string() << std::endl;
-        println(stderr, "{}", token.to_string());
+        utils::println(stderr, "{}", token.to_string());
       }
     });
     std::ranges::for_each(tokens, [&oss](const auto &token) {
       if (token.type.type != TokenType::kLexError) {
         oss << token.to_string() << std::endl;
-        println(stdout, "{}", token.to_string());
+        utils::println(stdout, "{}", token.to_string());
       }
     });
     if (!lexer.ok()) {

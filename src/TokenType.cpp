@@ -1,12 +1,13 @@
-#include <string>
-#include <string_view>
 #if __has_include(<spdlog/spdlog.h>)
 #include <spdlog/spdlog.h>
 #endif
+
 #include <string>
 #include <string_view>
-#include "TokenType.hpp"
+
 #include "config.hpp"
+#include "loxo_fwd.hpp"
+#include "TokenType.hpp"
 namespace net::ancillarycat::loxograph {
 TokenType::string_view_t TokenType::to_string_view() const noexcept {
   using namespace std::string_view_literals;

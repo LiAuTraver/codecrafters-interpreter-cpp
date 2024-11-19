@@ -20,10 +20,10 @@
 #include <variant>
 #include <vector>
 
-#include "Token.hpp"
 #include "config.hpp"
 #include "lex_error.hpp"
 #include "lexer.hpp"
+#include "Token.hpp"
 
 /// @namespace net::ancillarycat::loxograph
 namespace net::ancillarycat::loxograph {
@@ -84,8 +84,6 @@ lexer::status_t lexer::load(const std::istream &ss) {
 }
 
 lexer::status_t lexer::lex() {
-  // if (contents.empty())
-  //   return utils::FileNotFoundError("No content to lex");
   while (not is_at_end()) {
     head = cursor;
     next_token();
