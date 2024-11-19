@@ -184,11 +184,11 @@ Token::string_t Token::to_string() const {
               signaling_NaN()); // format *can* format NaN to "nan"
       if (is_integer(num_value))
         // 42 -> 42.0
-        return format("{} {} {:.1f}", type_sv.data(), lexeme_sv.data(), num_value);
+        return format("{} {} {:.1f}", type_sv, lexeme_sv, num_value);
         // literal_sv = string_t{format("{:.1f}", num_value)};
       else
         // leave as is
-        return format("{} {} {}", type_sv.data(), lexeme_sv.data(), num_value);
+        return format("{} {} {}", type_sv, lexeme_sv, num_value);
     }
     break;
   case kAnd:
@@ -284,6 +284,7 @@ Token::string_t Token::to_string() const {
   default:
     break;
   }
-  return format("{} {} {}", type_sv.data(), lexeme_sv.data(), literal_sv.data());
+  /// @not DON'T use `.data()` since it's not null-terminated and will the string will last till the end
+  return format("{} {} {}", type_sv, lexeme_sv, literal_sv);
 }
 } // namespace net::ancillarycat::loxograph
