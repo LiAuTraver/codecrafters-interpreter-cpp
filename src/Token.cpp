@@ -62,12 +62,24 @@ Token::string_t Token::to_string() const {
 		literal_sv = "null"sv;
     break;
   case kComma:
+		type_sv = "COMMA"sv;
+		lexeme_sv = ","sv;
+		literal_sv = "null"sv;
     break;
   case kDot:
+		type_sv = "DOT"sv;
+		lexeme_sv = "."sv;
+		literal_sv = "null"sv;
     break;
   case kMinus:
+		type_sv = "MINUS"sv;
+		lexeme_sv = "-"sv;
+		literal_sv = "null"sv;
     break;
   case kPlus:
+		type_sv = "PLUS"sv;
+		lexeme_sv = "+"sv;
+		literal_sv = "null"sv;
     break;
   case kSemicolon:
     type_sv = "SEMICOLON"sv;
@@ -75,12 +87,24 @@ Token::string_t Token::to_string() const {
     literal_sv = "null"sv;
     break;
   case kSlash:
+		type_sv = "SLASH"sv;
+		lexeme_sv = "/"sv;
+		literal_sv = "null"sv;
     break;
   case kStar:
+		type_sv = "STAR"sv;
+		lexeme_sv = "*"sv;
+		literal_sv = "null"sv;
     break;
   case kBang:
+		type_sv = "BANG"sv;
+		lexeme_sv = "!"sv;
+		literal_sv = "null"sv;
     break;
   case kBangEqual:
+		type_sv = "BANG_EQUAL"sv;
+		lexeme_sv = "!="sv;
+		literal_sv = "null"sv;
     break;
   case kEqual:
     type_sv = "EQUAL"sv;
@@ -88,14 +112,29 @@ Token::string_t Token::to_string() const {
     literal_sv = "null"sv;
     break;
   case kEqualEqual:
+		type_sv = "EQUAL_EQUAL"sv;
+		lexeme_sv = "=="sv;
+		literal_sv = "null"sv;
     break;
   case kGreater:
+		type_sv = "GREATER"sv;
+		lexeme_sv = ">"sv;
+		literal_sv = "null"sv;
     break;
   case kGreaterEqual:
+		type_sv = "GREATER_EQUAL"sv;
+		lexeme_sv = ">="sv;
+		literal_sv = "null"sv;
     break;
   case kLess:
+		type_sv = "LESS"sv;
+		lexeme_sv = "<"sv;
+		literal_sv = "null"sv;
     break;
   case kLessEqual:
+		type_sv = "LESS_EQUAL"sv;
+		lexeme_sv = "<="sv;
+		literal_sv = "null"sv;
     break;
   case kIdentifier:
     type_sv = "IDENTIFIER"sv;
