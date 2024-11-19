@@ -52,8 +52,14 @@ Token::string_t Token::to_string() const {
     literal_sv = "null"sv;
     break;
   case kLeftBrace:
+		type_sv = "LEFT_BRACE"sv;
+		lexeme_sv = "{"sv;
+		literal_sv = "null"sv;
     break;
   case kRightBrace:
+		type_sv = "RIGHT_BRACE"sv;
+		lexeme_sv = "}"sv;
+		literal_sv = "null"sv;
     break;
   case kComma:
     break;
