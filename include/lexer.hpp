@@ -93,7 +93,7 @@ private:
   bool is_at_end(size_t = 0) const;
   void add_token(token_type_t, std::any = std::any());
   void add_lex_error(lex_error::type_t = lex_error::kMonostate);
-  auto lex_string() -> string_view_type;
+  auto lex_string() -> lexer::status_t::Code;
   auto lex_identifier() -> string_view_type;
   auto lex_number(boolean_type) -> std::any;
 

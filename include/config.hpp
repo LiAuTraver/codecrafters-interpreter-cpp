@@ -19,7 +19,7 @@
 #define LOXOGRAPH_DEBUG_LOGGING(_level_, _msg_, ...)                           \
   ::spdlog::_level_(_msg_, ##__VA_ARGS__);
 #define LOXOGRAPH_DEBUG_LOGGING_SETUP(_level_, _msg_, ...)                     \
-  ::spdlog::set_level(spdlog::level::debug);                                   \
+  ::spdlog::set_level(spdlog::level::_level_);                                 \
   ::spdlog::set_pattern("[%^%l%$] %v");                                        \
   LOXOGRAPH_DEBUG_LOGGING(_level_, _msg_)
 #else
@@ -75,7 +75,7 @@
                    "           Constraints not satisfied:\n"                   \
                    "           Expect `{4}` equals to `{5}`,\n"                \
                    "             but actually `{4}` appears to be {6},\n"      \
-                   "             and `{5}` appears to be {7}."                 \
+                   "             and `{5}` appears to be {7}.\n"               \
                    "Stacktrace:\n{8}",                                         \
                    LOXOGRAPH_FILENAME, LOXOGRAPH_FUNCTION_NAME,                \
                    LOXOGRAPH_LINE, LOXOGRAPH_COLUMN, #x, #y, x, y,             \
@@ -164,13 +164,13 @@
 #define LOXOGRAPH_NOEXCEPT noexcept
 #endif
 #include <iostream>
-#define LOXOGRAPH_INITIALIZATION                                               \
+#define LOXOGRAPH_INITIALIZATION(_log_level_)                                  \
   [[maybe_unused]] static inline const auto LOXOGRAPH_INITIALIZATION =         \
       []() -> int {                                                            \
     std::cout << std::unitbuf;                                                 \
     std::cerr << std::unitbuf;                                                 \
     LOXOGRAPH_DEBUG_LOGGING(info, "spdlog framework initialized.");           \
-    LOXOGRAPH_DEBUG_LOGGING_SETUP(debug, "Debug mode enabled.");               \
+    LOXOGRAPH_DEBUG_LOGGING_SETUP(_log_level_, "Debug mode enabled.");         \
     return 0;                                                                  \
   }();
 

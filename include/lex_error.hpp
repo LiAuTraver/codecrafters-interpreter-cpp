@@ -32,7 +32,7 @@ public:
   type_t type = kMonostate;
 
 public:
-  string_t to_string(const string_view_t lexeme_sv = "stray lexeme"sv,
+  string_t to_string(const string_view_t lexeme_sv = "<uninitialized>"sv,
                      const uint_least32_t line = 0) const {
     // contract_assert(current_line && (bool)"Line number must not be zero");
     auto msg = string_t{};
@@ -42,13 +42,13 @@ public:
       msg = "Internal error";
       break;
     case kUnexpectedCharacter:
-      msg = "Unexpected character";
+      msg = format("Unexpected character: {}", lexeme_sv.data());
       break;
     case kUnterminatedString:
-      msg = "Unterminated string";
+      msg = "Unterminated string.";
       break;
     }
-    auto str = format("[line {}] Error: {}: {}", line, msg, lexeme_sv.data());
+    auto str = format("[line {}] Error: {}", line, msg);
     dbg(error, "{}", str);
     return str;
   }

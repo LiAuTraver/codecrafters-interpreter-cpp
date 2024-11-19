@@ -110,7 +110,15 @@ void lexer::add_number() {
   add_token(TokenType::kNumber, value);
 }
 void lexer::add_string() {
-  auto value = lex_string();
+  // hard to do...
+  auto status = lex_string();
+  auto value = string_view_type(contents.data() + head + 1, cursor - head - 2);
+  if (status != Status::kOkStatus) {
+    dbg(error, "Unterminated string.");
+    add_lex_error(lex_error::kUnterminatedString);
+    return;
+  }
+  dbg(trace, "string value: {}", value);
   add_token(TokenType::kString, value);
 }
 void lexer::add_comment() {
@@ -214,7 +222,7 @@ void lexer::add_lex_error(const lex_error::type_t type) {
   error_count++;
   return add_token(TokenType::kLexError, std::make_any<error_t>(type));
 }
-lexer::string_view_type lexer::lex_string() {
+lexer::status_t::Code lexer::lex_string() {
   while (peek() != '"' && !is_at_end()) {
     if (peek() == '\n') {
       current_line++; // multiline string, of course we dont want act like C/C++
@@ -223,15 +231,16 @@ lexer::string_view_type lexer::lex_string() {
     }
     get();
   }
-  if (is_at_end()) {
+  // peek() == '"' || is_at_end()
+  if (is_at_end() && peek() != '"') {
     dbg(error, "Unterminated string.");
+    return status_t::kError;
   }
   // "i am a string..."
-  // 						     ^ cursor position
-  get(); // consume the closing quote.
-  auto value = string_view_type(contents.data() + head + 1, cursor - head - 2);
-  dbg(trace, "string value: {}", value);
-  return value;
+  // 						      ^ cursor position
+  else
+    get(); // consume the closing quote.
+  return status_t::kOkStatus;
 }
 std::any lexer::lex_number(boolean_type is_negative) {
   while (std::isdigit(peek(), std::locale())) {

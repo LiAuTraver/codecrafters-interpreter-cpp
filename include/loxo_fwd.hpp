@@ -72,5 +72,4 @@ using ::fmt::format;
 using ::fmt::print;
 using ::fmt::println;
 #endif
-LOXOGRAPH_INITIALIZATION
 } // namespace net::ancillarycat::loxograph

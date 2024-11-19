@@ -21,6 +21,7 @@
 #include "loxo_fwd.hpp"
 // clang-format off
 namespace net::ancillarycat::loxograph {
+LOXOGRAPH_INITIALIZATION(trace)
 nodiscard_msg(loxo_main) extern
 int loxo_main(_In_ const std::filesystem::path &,
               _In_ const std::string_view,
@@ -41,7 +42,7 @@ int main(int argc, char **argv, char **envp) {
     path = argv[1];
     command = "tokenize";
   } else if (argc != 3) {
-    path = R"(Z:\loxograph\templates\simple4.lox)";
+    path = R"(Z:\loxograph\templates\dynamic.lox)";
     command = "tokenize";
   }
 #endif
@@ -52,6 +53,6 @@ int main(int argc, char **argv, char **envp) {
   std::ostringstream oss;
   const auto result =
       net::ancillarycat::loxograph::loxo_main(path, command, oss);
-//  print("{}", oss.str());
+  //  print("{}", oss.str());
   return result;
 }
