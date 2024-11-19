@@ -3,7 +3,7 @@ project(loxograph VERSION 1.0.0 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux" AND EXISTS ENV{AC_CPP_DEBUG})
+if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux" AND DEFINED ENV{AC_CPP_DEBUG})
   if($ENV{AC_CPP_DEBUG} STREQUAL "")
     # for codecrafters' test
     set(CMAKE_CXX_COMPILER "g++")
@@ -18,6 +18,11 @@ include_directories(include)
 option(AC_CPP_DEBUG "set the environment variable AC_CPP_DEBUG to enable debug mode" OFF)
 option(USE_BOOST_CONTRACT "set the environment variable LOXOGRAPH_USE_BOOST_CONTRACT to enable boost contract; only works when AC_CPP_DEBUG is enabled"
     OFF)
+if(DEFINED ENV{AC_CPP_DEBUG})
+  if($ENV{AC_CPP_DEBUG} STREQUAL "ON")
+    set(AC_CPP_DEBUG ON)
+  endif()
+endif()
 
 add_library(driver SHARED
     ${DRIVER_SOURCE_FILES}
@@ -32,6 +37,6 @@ target_link_libraries(interpreter PUBLIC
     driver
 )
 
-if(DEFINED ENV{AC_CPP_DEBUG} AND ${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+if(AC_CPP_DEBUG)
   include(cmake/debug_mode.cmake)
 endif()
