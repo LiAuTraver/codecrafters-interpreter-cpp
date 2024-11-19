@@ -4,20 +4,26 @@
 #if defined(AC_CPP_DEBUG)
 #define LOXOGRAPH_DEBUG_ENABLED
 #endif
-
+#if __has_include(<stacktrace>) && defined(LOXOGRAPH_DEBUG_ENABLED)
+#include <format>
+#include <stacktrace>
+#define LOXOGRAPH_STACKTRACE ::std::format("\n{}", std::stacktrace::current())
+#else
+#define LOXOGRAPH_STACKTRACE ("<no further information>")
+#endif
 #ifdef LOXOGRAPH_DEBUG_ENABLED
 #define LOXOGRAPH_NODISCARD_MSG(_name_)                                        \
   [[nodiscard("discarding a return value of `" #_name_                         \
               "` is strongly discouraged")]]
 #include <spdlog/spdlog.h>
 #define LOXOGRAPH_DEBUG_LOGGING(_level_, _msg_, ...)                           \
-  spdlog::_level_(_msg_, __VA_ARGS__);
+  ::spdlog::_level_(_msg_, __VA_ARGS__);
 #define LOXOGRAPH_DEBUG_LOGGING_SETUP(_level_, _msg_, ...)                     \
-  spdlog::set_level(spdlog::level::debug);                                     \
-  spdlog::set_pattern("[%^%l%$] %v");                                          \
+  ::spdlog::set_level(spdlog::level::debug);                                   \
+  ::spdlog::set_pattern("[%^%l%$] %v");                                        \
   LOXOGRAPH_DEBUG_LOGGING(_level_, _msg_)
 #else
-#define LOXOGRAPH_DEBUG_LOGGING(_level_, _msg_, ...)
+#define LOXOGRAPH_DEBUG_LOGGING(...)
 #endif
 #ifdef __RESHARPER__
 /// @note resharper can't get through this @code __PRETTY_FUNCTION__ @endcode
@@ -52,13 +58,6 @@
 #define LOXOGRAPH_FUNCTION_NAME LOXOGRAPH_DEBUG_FUNCTION_NAME
 #define LOXOGRAPH_LINE (std::source_location::current().line())
 #define LOXOGRAPH_COLUMN (std::source_location::current().column())
-#endif
-#if __has_include(<stacktrace>)
-#include <format>
-#include <stacktrace>
-#define LOXOGRAPH_STACKTRACE std::format("\n{}", std::stacktrace::current())
-#else
-#define LOXOGRAPH_STACKTRACE ("<no further information>")
 #endif
 #define LOXOGRAPH_RUNTIME_DEBUG_RAISE LOXOGRAPH_DEBUG_BREAK
 #define LOXOGRAPH_PRINT_ERROR_MSG_IMPL_SINGLE(x)                               \
@@ -170,6 +169,7 @@
       []() -> int {                                                            \
     std::cout << std::unitbuf;                                                 \
     std::cerr << std::unitbuf;                                                 \
+    LOXOGRAPH_DEBUG_LOGGING(info, "spdlog framework initialized.");           \
     LOXOGRAPH_DEBUG_LOGGING_SETUP(debug, "Debug mode enabled.");               \
     return 0;                                                                  \
   }();
@@ -184,7 +184,6 @@
 ///       LOXOGRAPH_DEBUG_LOGGING(__VA_ARGS__) @endcode
 #define dbg(_level_, _msg_, ...)                                               \
   LOXOGRAPH_DEBUG_LOGGING(_level_, _msg_, __VA_ARGS__)
-#define streq(...) LOXOGRAPH_TO_STRING(__VA_ARGS__)
 #define nodiscard_msg(...) LOXOGRAPH_NODISCARD_MSG(__VA_ARGS__)
 #define NOEXCEPT_IF(...) LOXOGRAPH_NOEXCEPT_IF(__VA_ARGS__)
 #define NOEXCEPT LOXOGRAPH_NOEXCEPT

@@ -1,12 +1,12 @@
 #include "spdlog/spdlog.h"
 #include <gtest/gtest.h>
 #include <spdlog/spdlog.h>
+#include <magic_enum.hpp>
 #include <stacktrace>
-#include "../src/token.hpp"
-#include "../src/status.hpp"
+#include "Token.hpp"
+#include "status.hpp"
 #include "fmt/core.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
-#include <magic_enum.hpp>
 
 TEST(spdlog, playground) {
   spdlog::info("Welcome to spdlog!");
