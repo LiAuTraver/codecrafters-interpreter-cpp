@@ -212,7 +212,7 @@ Token::string_t Token::to_string() const {
     literal_sv = "null"sv;
     break;
   case kFun:
-    type_sv = "fun"sv;
+    type_sv = "FUN"sv;
     lexeme_sv = "fun"sv;
     literal_sv = "null"sv; // currently no literal for fun // @todo
     break;
