@@ -55,6 +55,9 @@ Token::string_t Token::to_string() const {
   using enum TokenType::type_t;
   auto type_sv = ""sv;
   auto lexeme_sv = ""sv;
+  /// @note cannot use `string_view_t`, or the string_view will be destroyed.
+  ///       eg: `42.0` -> `▯2.0`
+  ///                      ^ actually a `\0`, but cannot be displayed.
   auto literal_str = ""s;
   if (!literal.has_value())
     literal_str = "null"s;
@@ -188,38 +191,83 @@ Token::string_t Token::to_string() const {
     }
     break;
   case kAnd:
+    type_sv = "AND"sv;
+    lexeme_sv = "and"sv;
+    literal_str = "null"s;
     break;
   case kClass:
+    type_sv = "CLASS"sv;
+    lexeme_sv = "class"sv;
+    literal_str = "null"s;
     break;
   case kElse:
+    type_sv = "ELSE"sv;
+    lexeme_sv = "else"sv;
+    literal_str = "null"s;
     break;
   case kFalse:
+    type_sv = "FALSE"sv;
+    lexeme_sv = "false"sv;
+    literal_str = "null"s;
     break;
   case kFun:
+    type_sv = "fun"sv;
+    lexeme_sv = "fun"sv;
+    literal_str = "null"s; // currently no literal for fun // @todo
     break;
   case kFor:
+    type_sv = "FOR"sv;
+    lexeme_sv = "for"sv;
+    literal_str = "null"s;
     break;
   case kIf:
+    type_sv = "IF"sv;
+    lexeme_sv = "if"sv;
+    literal_str = "null"s;
     break;
   case kNil:
+    type_sv = "NIL"sv;
+    lexeme_sv = "nil"sv;
+    literal_str = "null"s;
     break;
   case kOr:
+    type_sv = "OR"sv;
+    lexeme_sv = "or"sv;
+    literal_str = "null"s;
     break;
   case kPrint:
+    type_sv = "PRINT"sv;
+    lexeme_sv = "print"sv;
+    literal_str = "null"s;
     break;
   case kReturn:
+    type_sv = "RETURN"sv;
+    lexeme_sv = "return"sv;
+    literal_str = "null"s;
     break;
   case kSuper:
+    type_sv = "SUPER"sv;
+    lexeme_sv = "super"sv;
+    literal_str = "null"s;
     break;
   case kThis:
+    type_sv = "THIS"sv;
+    lexeme_sv = "this"sv;
+    literal_str = "null"s;
     break;
   case kTrue:
+    type_sv = "TRUE"sv;
+    lexeme_sv = "true"sv;
+    literal_str = "null"s;
     break;
   case kVar:
     type_sv = "VAR"sv;
     lexeme_sv = "var"sv;
     literal_str = "null"s;
   case kWhile:
+    type_sv = "WHILE"sv;
+    lexeme_sv = "while"sv;
+    literal_str = "null"s;
     break;
   case kEndOfFile:
     type_sv = "EOF"sv;
