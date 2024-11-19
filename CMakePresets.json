@@ -12,8 +12,9 @@
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/build/${presetName}",
       "cacheVariables": {
-        "CMAKE_CXX_EXTENSIONS": "OFF",
+        "CMAKE_CXX_EXTENSIONS": "ON",
         "CMAKE_CXX_STANDARD": "23",
+        "CMAKE_MAKE_PROGRAM": "ninja",
         "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
         "CMAKE_WARN_DEPRECATED": false,
         "CMAKE_SUPPRESS_DEVELOPER_WARNINGS": "TRUE",
@@ -233,15 +234,15 @@
     },
     {
       "name": "Linux-LLVM-Debug",
-        "hidden": false,
-        "inherits": [
-          "LLVM",
-          "Linux",
-          "vcpkg-Linux"
-        ],
-        "cacheVariables": {
-          "CMAKE_BUILD_TYPE": "Debug"
-        }
+      "hidden": false,
+      "inherits": [
+        "LLVM",
+        "Linux",
+        "vcpkg-Linux"
+      ],
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
     },
     {
       "name": "Linux-LLVM-Release",

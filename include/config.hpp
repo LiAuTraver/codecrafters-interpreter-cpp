@@ -17,7 +17,7 @@
               "` is strongly discouraged")]]
 #include <spdlog/spdlog.h>
 #define LOXOGRAPH_DEBUG_LOGGING(_level_, _msg_, ...)                           \
-  ::spdlog::_level_(_msg_, __VA_ARGS__);
+  ::spdlog::_level_(_msg_, ##__VA_ARGS__);
 #define LOXOGRAPH_DEBUG_LOGGING_SETUP(_level_, _msg_, ...)                     \
   ::spdlog::set_level(spdlog::level::debug);                                   \
   ::spdlog::set_pattern("[%^%l%$] %v");                                        \
@@ -178,12 +178,16 @@
 #define contract_assert(...) LOXOGRAPH_RUNTIME_ASSERT(__VA_ARGS__)
 #define precondition(...) LOXOGRAPH_PRECONDITION(__VA_ARGS__)
 #define postcondition(...) LOXOGRAPH_POSTCONDITION(__VA_ARGS__)
+#if defined(_MSC_VER) && !defined(__clang__)
 /// @note MSVC can't get through this:
 ///        error C2563: mismatch in formal parameter list
 ///       thus can't just simply write @code #define dbg(...)
 ///       LOXOGRAPH_DEBUG_LOGGING(__VA_ARGS__) @endcode
 #define dbg(_level_, _msg_, ...)                                               \
   LOXOGRAPH_DEBUG_LOGGING(_level_, _msg_, __VA_ARGS__)
+#else
+#define dbg(...) LOXOGRAPH_DEBUG_LOGGING(__VA_ARGS__)
+#endif
 #define nodiscard_msg(...) LOXOGRAPH_NODISCARD_MSG(__VA_ARGS__)
 #define NOEXCEPT_IF(...) LOXOGRAPH_NOEXCEPT_IF(__VA_ARGS__)
 #define NOEXCEPT LOXOGRAPH_NOEXCEPT

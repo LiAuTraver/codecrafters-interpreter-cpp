@@ -27,6 +27,7 @@
 #include "file_reader.hpp"
 #include "loxo_fwd.hpp"
 #include "status.hpp"
+#include "lex_error.hpp"
 
 /// @namespace net::ancillarycat::loxograph
 namespace net::ancillarycat::loxograph {
@@ -48,6 +49,8 @@ public:
   using lexeme_views_t = std::vector<string_view_type>;
   using file_reader_t = file_reader</*dafault template arguments*/>;
   using char_t = typename string_type::value_type;
+  using error_t = lex_error;
+  using errors_t = std::vector<error_t>;
 
 public:
   inline explicit constexpr lexer() = default;
@@ -61,6 +64,7 @@ public:
   inline constexpr ~lexer() = default;
 
 public:
+public:
   /// @brief load the contents of the file
   /// @param filepath the path to the file
   /// @return OkStatus() if successful, NotFoundError() otherwise
@@ -69,10 +73,10 @@ public:
   /// @param content the contents of the file
   /// @return OkStatus() if successful, AlreadyExistsError() otherwise
   status_t load(string_type &&);
-	/// @brief load the contents of the file
+  /// @brief load the contents of the file
   /// @param content the contents of the file
   /// @return OkStatus() if successful, AlreadyExistsError() otherwise
-  status_t load(const std::istream&);
+  status_t load(const std::istream &);
   /// @brief lex the contents of the file
   /// @return OkStatus() if successful, NotFoundError() otherwise
   status_t lex();
@@ -86,6 +90,7 @@ private:
   void next_token();
   bool is_at_end(size_t = 0) const;
   void add_token(token_type_t, std::any = std::any());
+  void add_lex_error(lex_error::type_t = lex_error::kMonostate);
   auto lex_string() -> string_view_type;
   auto lex_identifier() -> string_view_type;
   auto lex_number(boolean_type) -> std::any;
@@ -133,11 +138,11 @@ private:
   size_type cursor = 0;
   /// @brief the contents of the file
   const string_type contents;
-  /// @brief tokens
-  tokens_t tokens;
   /// @brief lexme views(non-owning)
   lexeme_views_t lexeme_views;
   /// @brief current source line number
   uint_least32_t line = 1;
+  /// @brief tokens
+  tokens_t tokens;
 };
 } // namespace net::ancillarycat::loxograph

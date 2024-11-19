@@ -12,6 +12,7 @@ add_executable(benchmark
 )
 
 target_link_libraries(benchmark PUBLIC
+		driver
 		fmt::fmt
 		spdlog::spdlog
 		benchmark::benchmark

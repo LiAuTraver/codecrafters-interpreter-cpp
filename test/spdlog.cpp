@@ -3,15 +3,12 @@
 #include <spdlog/spdlog.h>
 #include <magic_enum.hpp>
 #include <stacktrace>
-#include "Token.hpp"
-#include "status.hpp"
 #include "fmt/core.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
 
 TEST(spdlog, playground) {
   spdlog::info("Welcome to spdlog!");
   spdlog::error("Some error message with arg: {}", 1);
-  dbg(error, "Some error message with arg: {}", 2);
   spdlog::warn("Easy padding in numbers like {:08d}", 12);
   spdlog::critical(
       "Support for int: {0:d};  hex: {0:x};  oct: {0:o}; bin: {0:b}", 42);
@@ -30,7 +27,4 @@ TEST(spdlog, playground) {
   // remove (depending on SPDLOG_ACTIVE_LEVEL) the call on the release code.
   SPDLOG_TRACE("Some trace message with param {}", 42);
   SPDLOG_DEBUG("Some debug message");
-
-  net::ancillarycat::loxograph::Token token;
-  dbg(info, "token: {}", token);
 }

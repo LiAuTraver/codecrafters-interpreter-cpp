@@ -91,6 +91,8 @@ TokenType::string_view_t TokenType::to_string_view() const noexcept {
     return "WHILE"sv;
   case kEndOfFile:
     return "EOF"sv;
+  case kLexError:
+    return "LEX_ERROR"sv;
   default:
     dbg(error, "Unknown token type: {}", (uint16_t)type);
     return "UNKNOWN"sv;

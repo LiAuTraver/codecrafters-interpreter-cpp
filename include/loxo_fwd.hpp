@@ -37,6 +37,7 @@ using OutputStringStreamType = std::ostringstream;
 using PathType = std::filesystem::path;
 } // namespace net::ancillarycat::utils
 namespace net::ancillarycat::loxograph {
+class lex_error;
 class lexer;
 class Token;
 class TokenType;
@@ -50,7 +51,10 @@ using ::net::ancillarycat::utils::StatusType;
 using ::net::ancillarycat::utils::StringType;
 using ::net::ancillarycat::utils::StringViewType;
 using namespace std::string_view_literals;
-static constexpr auto tolerable_chars = "_$@`"sv;
+using namespace std::string_literals;
+static constexpr auto tolerable_chars = "_@`"sv;
+/// @note intolarable in codecrafter test
+static constexpr auto conditional_tolerable_chars = "$#"sv;
 static constexpr auto whitespace_chars = " \t\r"sv;
 static constexpr auto newline_chars = "\n\v\f"sv;
 /// @note use fmt::print, fmt::println when compiling with clang-cl.exe will

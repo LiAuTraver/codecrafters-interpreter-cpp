@@ -19,8 +19,9 @@
 #include <variant>
 #include <vector>
 
-#include "Token.hpp"
 #include "config.hpp"
+#include "Token.hpp"
+#include "lex_error.hpp"
 #include "lexer.hpp"
 
 /// @namespace net::ancillarycat::loxograph
@@ -70,15 +71,15 @@ lexer::status_t lexer::load(string_type &&content) {
   lexeme_views.clear();
   return utils::OkStatus();
 }
-lexer::status_t lexer::load(const std::istream & ss) {
-	if (not contents.empty())
-		return utils::AlreadyExistsError("Content already loaded");
-	std::ostringstream oss;
-	oss << ss.rdbuf();
-	const_cast<string_type &>(contents) = oss.str();
-	tokens.clear();
-	lexeme_views.clear();
-	return utils::OkStatus();
+lexer::status_t lexer::load(const std::istream &ss) {
+  if (not contents.empty())
+    return utils::AlreadyExistsError("Content already loaded");
+  std::ostringstream oss;
+  oss << ss.rdbuf();
+  const_cast<string_type &>(contents) = oss.str();
+  tokens.clear();
+  lexeme_views.clear();
+  return utils::OkStatus();
 }
 
 lexer::status_t lexer::lex() {
@@ -122,7 +123,7 @@ void lexer::next_token() {
   // 			 ^ cursor position
   contract_assert(cursor < contents.size());
   auto c = get();
-  dbg(debug, "c: {}", c);
+  dbg(trace, "c: {}", c);
 
   switch (c) {
   case '(':
@@ -178,7 +179,8 @@ void lexer::next_token() {
     if (std::isalpha(c, std::locale()) or c == '_') {
       return add_identifier();
     }
-    return dbg(error, "unexpected character: {}", c);
+		add_lex_error(lex_error::kUnexpectedCharacter);
+    dbg(error, "unexpected character: {}", c);
   }
 }
 lexer::char_t lexer::peek(size_t offset) {
@@ -202,12 +204,15 @@ bool lexer::is_at_end(size_t offset) const {
   return cursor + offset >= contents.size();
 }
 void lexer::add_token(token_type_t type, std::any literal) {
-  string_view_type lexeme =
-      string_view_type(contents.data() + head, cursor - head);
-  dbg(debug, "lexeme: {}", lexeme);
+  auto lexeme = string_view_type(contents.data() + head, cursor - head);
+  dbg(trace, "lexeme: {}", lexeme);
   token_t token{type, lexeme, literal, line};
   tokens.push_back(token);
   lexeme_views.push_back(lexeme);
+}
+void lexer::add_lex_error(const lex_error::type_t type) {
+  dbg(error, "Lexical error: {}", contents.substr(head, cursor - head));
+  return add_token(TokenType::kLexError,std::make_any<error_t>(type));
 }
 lexer::string_view_type lexer::lex_string() {
   while (peek() != '"' && !is_at_end()) {
@@ -225,7 +230,7 @@ lexer::string_view_type lexer::lex_string() {
   // 						     ^ cursor position
   get(); // consume the closing quote.
   auto value = string_view_type(contents.data() + head + 1, cursor - head - 2);
-  dbg(debug, "string value: {}", value);
+  dbg(trace, "string value: {}", value);
   return value;
 }
 std::any lexer::lex_number(boolean_type is_negative) {
@@ -266,7 +271,7 @@ lexer::string_view_type lexer::lex_identifier() {
   // 123_abc
   //       ^ cursor position
   auto value = string_view_type(contents.data() + head, cursor - head);
-  dbg(debug, "identifier: {}", value);
+  dbg(trace, "identifier: {}", value);
   return value;
 }
 } // namespace net::ancillarycat::loxograph

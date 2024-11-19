@@ -7,31 +7,40 @@ find_package(spdlog CONFIG REQUIRED)
 find_package(gtest CONFIG REQUIRED)
 find_package(magic_enum CONFIG REQUIRED)
 include_directories(${CMAKE_SOURCE_DIR}/src)
-enable_testing()
+
+include(GoogleTest)
+# enable_testing()
 
 add_executable(spdlog_test
-		spdlog.cpp
-		${INTERPRETER_SOURCE_FILES}
+	spdlog.cpp
 )
 target_link_libraries(spdlog_test PRIVATE
-		spdlog::spdlog
-		fmt::fmt
-		GTest::gtest
-		GTest::gtest_main
-		magic_enum::magic_enum
+	spdlog::spdlog
+	fmt::fmt
+	GTest::gtest
+	GTest::gtest_main
+	magic_enum::magic_enum
+	driver
 )
+
+# gtest_discover_tests(spdlog_test)
+# or:
+add_test(
+	NAME spdlog_test
+	COMMAND spdlog_test
+)
+
 add_executable(scan_test
-		scan.cpp
-		${INTERPRETER_SOURCE_FILES}
+	scan.cpp
+	${INTERPRETER_SOURCE_FILES}
 )
 
 target_link_libraries(scan_test PRIVATE
-		spdlog::spdlog
-		fmt::fmt
-		GTest::gtest
-		GTest::gtest_main
-		magic_enum::magic_enum
+	spdlog::spdlog
+	fmt::fmt
+	GTest::gtest
+	GTest::gtest_main
+	magic_enum::magic_enum
+	driver
 )
-
-add_test(NAME scan_test COMMAND scan_test)
-add_test(NAME spdlog_test COMMAND spdlog_test)
+gtest_discover_tests(scan_test)

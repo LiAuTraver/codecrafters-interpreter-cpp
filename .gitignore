@@ -57,5 +57,4 @@ vcpkg_installed
 .vs
 
 .cache
-compile_commands.json
 *.lox

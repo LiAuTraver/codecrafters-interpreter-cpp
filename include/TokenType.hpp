@@ -57,6 +57,9 @@ public:
     kVar,
     kWhile,
 
+    // lex error,
+    kLexError,
+
     kEndOfFile,
   };
 

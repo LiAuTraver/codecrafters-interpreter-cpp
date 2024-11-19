@@ -6,14 +6,13 @@
 #include <unordered_map>
 #include <utility>
 #include <variant>
+#include "TokenType.hpp"
 #include "config.hpp"
 #include "loxo_fwd.hpp"
-#include "TokenType.hpp"
 #if __has_include(<spdlog/spdlog.h>)
 #include <spdlog/spdlog.h>
 #endif
 namespace net::ancillarycat::loxograph {
-using namespace std::string_view_literals;
 static const auto keywords = std::unordered_map<StringViewType, TokenType>{
     {"and"sv, {TokenType::kAnd}},       {"class"sv, {TokenType::kClass}},
     {"else"sv, {TokenType::kElse}},     {"false"sv, {TokenType::kFalse}},
@@ -29,6 +28,7 @@ public:
   using string_t = StringType;
   using string_view_t = StringViewType;
   using token_type = TokenType;
+  using error_t = lex_error;
 
 public:
   inline Token() : type(TokenType::kMonostate) {}
@@ -49,10 +49,9 @@ public:
   nodiscard_msg(string_t) string_t to_string() const;
 
 public:
-public:
-  token_type type;
+  token_type type = TokenType::kMonostate;
   string_t lexeme;
-  std::any literal;
+  std::any literal = std::any();
   uint_least32_t line;
 
 private:
@@ -61,5 +60,12 @@ private:
       -> std::optional<decltype(std::any_cast<Ty>(literal))>
     requires std::default_initializable<Ty> &&
              std::formattable<Ty, string_t::value_type>;
+  template <typename Ty>
+  inline auto cast_literal() const
+      -> std::optional<decltype(std::any_cast<Ty>(literal))>
+    requires std::default_initializable<Ty> &&
+                 (!std::formattable<Ty, string_t::value_type>) && requires(Ty t) {
+                   { t.to_string() } -> std::convertible_to<string_t>;
+                 };
 };
 } // namespace net::ancillarycat::loxograph

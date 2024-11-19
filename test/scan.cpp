@@ -31,11 +31,26 @@ TEST(scan, simple1) {
                     "EOF  null\n");
 }
 
-TEST(scan, simple2){
-	const auto filepath = path(R"(Z:/loxograph/templates/simple2.lox)");
-	auto result = loxo_main(filepath, command);
-	EXPECT_EQ(result, "LEFT_PAREN ( null\n"
-										"LEFT_PAREN ( null\n"
-										"RIGHT_PAREN ) null\n"
-										"EOF  null\n");
+TEST(scan, simple2) {
+  const auto filepath = path(R"(Z:/loxograph/templates/simple2.lox)");
+  auto result = loxo_main(filepath, command);
+  EXPECT_EQ(result, "LEFT_PAREN ( null\n"
+                    "LEFT_PAREN ( null\n"
+                    "RIGHT_PAREN ) null\n"
+                    "EOF  null\n");
+}
+
+TEST(scan, simple3) {
+  const auto filepath = path(R"(Z:/loxograph/templates/simple3.lox)");
+  auto result = loxo_main(filepath, command);
+  EXPECT_EQ(result, "LEFT_PAREN ( null\n"
+                    "LEFT_BRACE { null\n"
+                    "STAR * null\n"
+                    "DOT . null\n"
+                    "COMMA , null\n"
+                    "PLUS + null\n"
+                    "STAR * null\n"
+                    "RIGHT_BRACE } null\n"
+                    "RIGHT_PAREN ) null\n"
+                    "EOF  null\n");
 }

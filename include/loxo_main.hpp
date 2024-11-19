@@ -19,7 +19,6 @@
 #include <spdlog/spdlog.h>
 #endif
 #ifdef _WIN32
-#include <corecrt_io.h>
 #include <io.h>
 
 #define isatty _isatty
@@ -47,7 +46,8 @@ StringType loxo_main(const PathType &path, const StringViewType command) {
     net::ancillarycat::loxograph::lexer lexer;
     Status load_result;
 #ifdef LOXOGRAPH_DEBUG_ENABLED
-    if (!isatty(fileno(stdin))) {
+    dbg(info, "use `--stdin` to read from stdin.");
+    if (!isatty(fileno(stdin)) && command == "--stdin") {
       dbg(info, "loxograph: reading from stdin...");
       load_result = lexer.load(std::cin);
     } else {
@@ -68,9 +68,20 @@ StringType loxo_main(const PathType &path, const StringViewType command) {
       return oss.str();
     }
     auto tokens = lexer.get_tokens();
-    std::ranges::for_each(tokens, [&](const auto &token) {
-      oss << token.to_string() << std::endl;
-    });
+    // std::ranges::for_each(tokens, [&](const auto &token) {
+    //   oss << token.to_string() << std::endl;
+    // });
+		// first print error(lex_error) if any, then print tokens.
+		for (const auto &token : tokens) {
+			if (token.type.type == TokenType::kLexError) {
+				oss << token.to_string() << std::endl;
+			}
+		}
+		for (const auto &token : tokens) {
+			if (token.type.type != TokenType::kLexError) {
+				oss << token.to_string() << std::endl;
+			}
+		}
     return oss.str();
   }
 
