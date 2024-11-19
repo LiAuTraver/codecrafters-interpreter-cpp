@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <any>
 #include <array>
 #include <cctype>
@@ -19,8 +20,8 @@
 #include <variant>
 #include <vector>
 
-#include "config.hpp"
 #include "Token.hpp"
+#include "config.hpp"
 #include "lex_error.hpp"
 #include "lexer.hpp"
 
@@ -99,7 +100,6 @@ void lexer::add_identifier() {
     return;
   }
   add_token(TokenType::kIdentifier, value);
-  return;
 }
 void lexer::add_number() {
   auto value = lex_number(false);
@@ -108,10 +108,17 @@ void lexer::add_number() {
     return;
   }
   add_token(TokenType::kNumber, value);
-  return;
 }
 void lexer::add_string() {
-  auto value = lex_string();
+  // hard to do...
+  auto status = lex_string();
+  auto value = string_view_type(contents.data() + head + 1, cursor - head - 2);
+  if (status != Status::kOkStatus) {
+    dbg(error, "Unterminated string.");
+    add_lex_error(lex_error::kUnterminatedString);
+    return;
+  }
+  dbg(trace, "string value: {}", value);
   add_token(TokenType::kString, value);
 }
 void lexer::add_comment() {
@@ -165,7 +172,7 @@ void lexer::next_token() {
     if (whitespace_chars.find(c) != string_view_type::npos)
       return;
     if (newline_chars.find(c) != string_view_type::npos) {
-      line++;
+      current_line++;
       return;
     }
     if (c == '"') {
@@ -179,7 +186,7 @@ void lexer::next_token() {
     if (std::isalpha(c, std::locale()) or c == '_') {
       return add_identifier();
     }
-		add_lex_error(lex_error::kUnexpectedCharacter);
+    add_lex_error(lex_error::kUnexpectedCharacter);
     dbg(error, "unexpected character: {}", c);
   }
 }
@@ -206,32 +213,34 @@ bool lexer::is_at_end(size_t offset) const {
 void lexer::add_token(token_type_t type, std::any literal) {
   auto lexeme = string_view_type(contents.data() + head, cursor - head);
   dbg(trace, "lexeme: {}", lexeme);
-  token_t token{type, lexeme, literal, line};
+  token_t token{type, lexeme, std::move(literal), current_line};
   tokens.push_back(token);
   lexeme_views.push_back(lexeme);
 }
 void lexer::add_lex_error(const lex_error::type_t type) {
   dbg(error, "Lexical error: {}", contents.substr(head, cursor - head));
-  return add_token(TokenType::kLexError,std::make_any<error_t>(type));
+  error_count++;
+  return add_token(TokenType::kLexError, std::make_any<error_t>(type));
 }
-lexer::string_view_type lexer::lex_string() {
+lexer::status_t::Code lexer::lex_string() {
   while (peek() != '"' && !is_at_end()) {
     if (peek() == '\n') {
-      line++; // multiline string, of course we dont want act like C/C++ which
-              // will result in a compile error if the string is not closed at
-              // the same line.
+      current_line++; // multiline string, of course we dont want act like C/C++
+                      // which will result in a compile error if the string is
+                      // not closed at the same current_line.
     }
     get();
   }
-  if (is_at_end()) {
+  // peek() == '"' || is_at_end()
+  if (is_at_end() && peek() != '"') {
     dbg(error, "Unterminated string.");
+    return status_t::kError;
   }
   // "i am a string..."
-  // 						     ^ cursor position
-  get(); // consume the closing quote.
-  auto value = string_view_type(contents.data() + head + 1, cursor - head - 2);
-  dbg(trace, "string value: {}", value);
-  return value;
+  // 						      ^ cursor position
+  else
+    get(); // consume the closing quote.
+  return status_t::kOkStatus;
 }
 std::any lexer::lex_number(boolean_type is_negative) {
   while (std::isdigit(peek(), std::locale())) {
@@ -251,18 +260,22 @@ std::any lexer::lex_number(boolean_type is_negative) {
   // 789_
   //    ^ cursor position
   auto value = contents.substr(head, cursor - head);
-  if (is_negative && !is_floating_point) {
-    return to_number<long long int>(value);
-  }
-  if (!is_negative && !is_floating_point) {
-    return to_number<unsigned long long int>(value);
-  }
-  if (is_negative && is_floating_point) {
-    return to_number<long double>(value);
-  }
-  return to_number<double>(value);
+ /// @note codecrafter's test view all of it as double
+ return to_number<long double>(value);
+  // if (is_negative && !is_floating_point) {
+  //   return to_number<long long int>(value);
+  // }
+  // if (!is_negative && !is_floating_point) {
+  //   return to_number<unsigned long long int>(value);
+  // }
+  // if (is_negative && is_floating_point) {
+  //   return to_number<long double>(value);
+  // }
+  // return to_number<double>(value);
 }
 auto lexer::get_tokens() -> lexer::tokens_t { return tokens; }
+lexer::boolean_type lexer::ok() const noexcept { return !error_count; }
+uint_least32_t lexer::error() const noexcept { return error_count; }
 lexer::string_view_type lexer::lex_identifier() {
   while (std::isalnum(peek(), std::locale()) ||
          tolerable_chars.find(peek()) != string_view_type::npos) {

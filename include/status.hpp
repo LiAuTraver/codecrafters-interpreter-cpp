@@ -12,13 +12,14 @@
 namespace net::ancillarycat::utils {
 class nodiscard_msg(Status) Status {
 public:
-  enum nodiscard_msg(Code) Code {
+  enum nodiscard_msg(Code) Code : uint8_t {
     kOkStatus = 0,
-    kAlreadyExistsError = 1,
-    kNotFoundError = 2,
-    kUnknownError = 3,
+    kError = 1,
+    kAlreadyExistsError = 2,
+    kNotFoundError = 3,
     kMovedFrom = 4,
     kPermissionDeniedError = 5,
+    kUnknownError = std::numeric_limits<uint8_t>::max()
   };
   nodiscard_msg(Status) Status()
       : my_code(kOkStatus), my_message("<default initialized>"),

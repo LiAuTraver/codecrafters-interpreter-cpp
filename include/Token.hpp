@@ -1,6 +1,9 @@
 #pragma once
+#include <algorithm>
 #include <any>
+#include <cmath>
 #include <cstdint>
+#include <numeric>
 #include <string>
 #include <string_view>
 #include <unordered_map>
@@ -64,8 +67,11 @@ private:
   inline auto cast_literal() const
       -> std::optional<decltype(std::any_cast<Ty>(literal))>
     requires std::default_initializable<Ty> &&
-                 (!std::formattable<Ty, string_t::value_type>) && requires(Ty t) {
-                   { t.to_string() } -> std::convertible_to<string_t>;
-                 };
+             (!std::formattable<Ty, string_t::value_type>) && requires(Ty t) {
+               { t.to_string() } -> std::convertible_to<string_t>;
+             };
+  template <typename Ty>
+    requires std::is_arithmetic_v<std::remove_cvref_t<Ty>>
+  bool is_integer(Ty &&value) const noexcept;
 };
 } // namespace net::ancillarycat::loxograph

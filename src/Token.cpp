@@ -32,10 +32,9 @@ template <typename Ty>
 inline auto Token::cast_literal() const
     -> std::optional<decltype(std::any_cast<Ty>(literal))>
   requires std::default_initializable<Ty> &&
-               (!std::formattable<Ty, string_t::value_type>) &&
-               requires(Ty t) {
-                 { t.to_string() } -> std::convertible_to<string_t>;
-               }
+           (!std::formattable<Ty, string_t::value_type>) && requires(Ty t) {
+             { t.to_string() } -> std::convertible_to<string_t>;
+           }
 {
   try {
     dbg(info, "literal type: {}, value: {}", literal.type().name(),
@@ -46,11 +45,19 @@ inline auto Token::cast_literal() const
     return std::nullopt;
   }
 }
+template <typename Ty>
+  requires std::is_arithmetic_v<std::remove_cvref_t<Ty>>
+bool Token::is_integer(Ty &&value) const noexcept {
+  return std::trunc(value) == value;
+}
 Token::string_t Token::to_string() const {
   using namespace std::string_literals;
   using enum TokenType::type_t;
   auto type_sv = ""sv;
   auto lexeme_sv = ""sv;
+  /// @note cannot use `string_view_t`, or the string_view will be destroyed.
+  ///       eg: `42.0` -> `▯2.0`
+  ///                      ^ actually a `\0`, but cannot be displayed.
   auto literal_sv = ""sv;
   if (!literal.has_value())
     literal_sv = "null"sv;
@@ -169,40 +176,100 @@ Token::string_t Token::to_string() const {
     contract_assert(lexeme_sv.substr(1, lexeme_sv.size() - 2), literal_sv);
     break;
   case kNumber:
+    type_sv = "NUMBER"sv;
+    lexeme_sv = lexeme;
+    {
+      auto num_value = cast_literal<long double>().value_or(
+          std::numeric_limits<long double>::
+              signaling_NaN()); // format *can* format NaN to "nan"
+      if (is_integer(num_value))
+        // 42 -> 42.0
+        return format("{} {} {:.1f}", type_sv, lexeme_sv, num_value);
+        // literal_sv = string_t{format("{:.1f}", num_value)};
+      else
+        // leave as is
+        return format("{} {} {}", type_sv, lexeme_sv, num_value);
+    }
     break;
   case kAnd:
+    type_sv = "AND"sv;
+    lexeme_sv = "and"sv;
+    literal_sv = "null"sv;
     break;
   case kClass:
+    type_sv = "CLASS"sv;
+    lexeme_sv = "class"sv;
+    literal_sv = "null"sv;
     break;
   case kElse:
+    type_sv = "ELSE"sv;
+    lexeme_sv = "else"sv;
+    literal_sv = "null"sv;
     break;
   case kFalse:
+    type_sv = "FALSE"sv;
+    lexeme_sv = "false"sv;
+    literal_sv = "null"sv;
     break;
   case kFun:
+    type_sv = "FUN"sv;
+    lexeme_sv = "fun"sv;
+    literal_sv = "null"sv; // currently no literal for fun // @todo
     break;
   case kFor:
+    type_sv = "FOR"sv;
+    lexeme_sv = "for"sv;
+    literal_sv = "null"sv;
     break;
   case kIf:
+    type_sv = "IF"sv;
+    lexeme_sv = "if"sv;
+    literal_sv = "null"sv;
     break;
   case kNil:
+    type_sv = "NIL"sv;
+    lexeme_sv = "nil"sv;
+    literal_sv = "null"sv;
     break;
   case kOr:
+    type_sv = "OR"sv;
+    lexeme_sv = "or"sv;
+    literal_sv = "null"sv;
     break;
   case kPrint:
+    type_sv = "PRINT"sv;
+    lexeme_sv = "print"sv;
+    literal_sv = "null"sv;
     break;
   case kReturn:
+    type_sv = "RETURN"sv;
+    lexeme_sv = "return"sv;
+    literal_sv = "null"sv;
     break;
   case kSuper:
+    type_sv = "SUPER"sv;
+    lexeme_sv = "super"sv;
+    literal_sv = "null"sv;
     break;
   case kThis:
+    type_sv = "THIS"sv;
+    lexeme_sv = "this"sv;
+    literal_sv = "null"sv;
     break;
   case kTrue:
+    type_sv = "TRUE"sv;
+    lexeme_sv = "true"sv;
+    literal_sv = "null"sv;
     break;
   case kVar:
     type_sv = "VAR"sv;
     lexeme_sv = "var"sv;
     literal_sv = "null"sv;
+    break;
   case kWhile:
+    type_sv = "WHILE"sv;
+    lexeme_sv = "while"sv;
+    literal_sv = "null"sv;
     break;
   case kEndOfFile:
     type_sv = "EOF"sv;
@@ -211,11 +278,13 @@ Token::string_t Token::to_string() const {
     break;
   case kLexError:
     /// @note message is different from the other cases.
-    return cast_literal<error_t>().value_or(lex_error{}).to_string(lexeme, line);
+    return cast_literal<error_t>()
+        .value_or(lex_error{})
+        .to_string(lexeme, line);
   default:
     break;
   }
-  return string_t{type_sv} + " " + string_t{lexeme_sv} + " " +
-         string_t{literal_sv};
+  /// @not DON'T use `.data()` since it's not null-terminated and will the string will last till the end
+  return format("{} {} {}", type_sv, lexeme_sv, literal_sv);
 }
 } // namespace net::ancillarycat::loxograph

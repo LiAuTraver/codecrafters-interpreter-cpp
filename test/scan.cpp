@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 #include <filesystem>
 #include <string_view>
-#include "loxo_main.hpp"
+#include "../src/loxograph_driver.cpp"
 
 using namespace net::ancillarycat::loxograph;
 using namespace std::string_view_literals;
