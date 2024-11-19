@@ -260,16 +260,18 @@ std::any lexer::lex_number(boolean_type is_negative) {
   // 789_
   //    ^ cursor position
   auto value = contents.substr(head, cursor - head);
-  if (is_negative && !is_floating_point) {
-    return to_number<long long int>(value);
-  }
-  if (!is_negative && !is_floating_point) {
-    return to_number<unsigned long long int>(value);
-  }
-  if (is_negative && is_floating_point) {
-    return to_number<long double>(value);
-  }
-  return to_number<double>(value);
+ /// @note codecrafter's test view all of it as double
+ return to_number<long double>(value);
+  // if (is_negative && !is_floating_point) {
+  //   return to_number<long long int>(value);
+  // }
+  // if (!is_negative && !is_floating_point) {
+  //   return to_number<unsigned long long int>(value);
+  // }
+  // if (is_negative && is_floating_point) {
+  //   return to_number<long double>(value);
+  // }
+  // return to_number<double>(value);
 }
 auto lexer::get_tokens() -> lexer::tokens_t { return tokens; }
 lexer::boolean_type lexer::ok() const noexcept { return !error_count; }
