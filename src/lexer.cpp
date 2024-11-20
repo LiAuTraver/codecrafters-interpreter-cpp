@@ -1,24 +1,4 @@
-#include <algorithm>
-#include <any>
-#include <array>
-#include <cctype>
-#include <charconv>
-#include <concepts>
-#include <cstddef>
-#include <cstdint>
-#include <expected>
-#include <filesystem>
-#include <fstream>
-#include <iostream>
-#include <locale>
-#include <optional>
-#include <sstream>
-#include <string>
-#include <string_view>
-#include <unordered_map>
-#include <utility>
-#include <variant>
-#include <vector>
+#include "std.hh"
 
 #include "config.hpp"
 #include "lex_error.hpp"
@@ -30,7 +10,7 @@ namespace net::ancillarycat::loxograph {
 template <typename Predicate>
 bool lexer::advance_if(Predicate &&predicate)
   requires std::invocable<Predicate, char_t> &&
-           std::convertible_to<Predicate, boolean_type>
+           std::convertible_to<Predicate, bool>
 {
   if (is_at_end() || !predicate(contents[cursor]))
     return false;
@@ -111,9 +91,9 @@ void lexer::add_string() {
   // hard to do...
   auto status = lex_string();
   auto value = string_view_type(contents.data() + head + 1, cursor - head - 2);
-  if (status != Status::kOkStatus) {
+  if (status != utils::Status::kOkStatus) {
     dbg(error, "Unterminated string.");
-    add_lex_error(lex_error::kUnterminatedString);
+    add_lex_error(error_t::kUnterminatedString);
     return;
   }
   dbg(trace, "string value: {}", value);
@@ -184,7 +164,7 @@ void lexer::next_token() {
     if (std::isalpha(c, std::locale()) or c == '_') {
       return add_identifier();
     }
-    add_lex_error(lex_error::kUnexpectedCharacter);
+    add_lex_error(error_t::kUnexpectedCharacter);
     dbg(error, "unexpected character: {}", c);
   }
 }
@@ -211,11 +191,10 @@ bool lexer::is_at_end(size_t offset) const {
 void lexer::add_token(token_type_t type, std::any literal) {
   auto lexeme = string_view_type(contents.data() + head, cursor - head);
   dbg(trace, "lexeme: {}", lexeme);
-  token_t token{type, lexeme, std::move(literal), current_line};
-  tokens.push_back(token);
-  lexeme_views.push_back(lexeme);
+  tokens.emplace_back(type, lexeme, std::move(literal), current_line);
+  lexeme_views.emplace_back(lexeme);
 }
-void lexer::add_lex_error(const lex_error::type_t type) {
+void lexer::add_lex_error(const error_code_t type) {
   dbg(error, "Lexical error: {}", contents.substr(head, cursor - head));
   error_count++;
   return add_token(TokenType::kLexError, std::make_any<error_t>(type));
@@ -240,7 +219,7 @@ lexer::status_t::Code lexer::lex_string() {
     get(); // consume the closing quote.
   return status_t::kOkStatus;
 }
-std::any lexer::lex_number(boolean_type is_negative) {
+std::any lexer::lex_number(const bool is_negative) {
   while (std::isdigit(peek(), std::locale())) {
     get();
   }
@@ -272,7 +251,7 @@ std::any lexer::lex_number(boolean_type is_negative) {
   // return to_number<double>(value);
 }
 auto lexer::get_tokens() -> lexer::tokens_t { return tokens; }
-lexer::boolean_type lexer::ok() const noexcept { return !error_count; }
+bool lexer::ok() const noexcept { return !error_count; }
 uint_least32_t lexer::error() const noexcept { return error_count; }
 lexer::string_view_type lexer::lex_identifier() {
   while (std::isalnum(peek(), std::locale()) ||

@@ -1,27 +1,5 @@
 #pragma once
 
-#include <algorithm>
-#include <any>
-#include <array>
-#include <cctype>
-#include <concepts>
-#include <cstddef>
-#include <cstdint>
-#include <expected>
-#include <filesystem>
-#include <fstream>
-#include <iostream>
-#include <istream>
-#include <limits>
-#include <locale>
-#include <optional>
-#include <sstream>
-#include <stacktrace>
-#include <string>
-#include <string_view>
-#include <unordered_map>
-#include <utility>
-#include <variant>
 #include <vector>
 
 #include "config.hpp"
@@ -33,37 +11,32 @@
 
 /// @namespace net::ancillarycat::loxograph
 namespace net::ancillarycat::loxograph {
-// template <typename StringType = std::string,
-//           typename StringViewType = std::string_view,
-//           typename PathType = std::filesystem::path,
-//           typename BooleanType = bool, typename StatusType = Status>
 class lexer {
 public:
-  using size_type = typename StringType::size_type;
-  using string_type = StringType;
-  using string_view_type = StringViewType;
-  using path_type = PathType;
-  using boolean_type = BooleanType;
-  using status_t = StatusType;
+  using size_type = typename utils::string::size_type;
+  using string_type = utils::string;
+  using string_view_type = utils::string_view;
+  using path_type = utils::path;
+  using status_t = utils::Status;
   using token_t = Token;
   using token_type_t = token_t::token_type;
   using tokens_t = std::vector<token_t>;
   using lexeme_views_t = std::vector<string_view_type>;
-  using file_reader_t = file_reader</*dafault template arguments*/>;
+  using file_reader_t = utils::file_reader;
   using char_t = typename string_type::value_type;
   using error_t = lex_error;
-  using errors_t = std::vector<error_t>;
+  using error_code_t = typename error_t::type_t;
 
 public:
-  inline explicit constexpr lexer() = default;
+  explicit lexer() = default;
 
-  inline constexpr lexer(const lexer &other) = delete;
-  inline constexpr lexer(lexer &&other) = delete;
+  lexer(const lexer &other) = delete;
+  lexer(lexer &&other) = delete;
 
-  inline constexpr lexer &operator=(const lexer &other) = delete;
-  inline constexpr lexer &operator=(lexer &&other) = delete;
+  lexer &operator=(const lexer &other) = delete;
+  lexer &operator=(lexer &&other) = delete;
 
-  inline constexpr ~lexer() = default;
+  ~lexer() = default;
 
 public:
 public:
@@ -78,7 +51,7 @@ public:
   /// @return OkStatus() if successful, NotFoundError() otherwise
   status_t lex();
   auto get_tokens() -> tokens_t;
-  boolean_type ok() const noexcept;
+  bool ok() const noexcept;
   uint_least32_t error() const noexcept;
 
 private:
@@ -88,11 +61,11 @@ private:
   void add_comment();
   void next_token();
   void add_token(token_type_t, std::any = std::any());
-  void add_lex_error(lex_error::type_t = lex_error::kMonostate);
+  void add_lex_error(lex_error::type_t= error_t::kMonostate);
   bool is_at_end(size_t = 0) const;
   auto lex_string() -> lexer::status_t::Code;
   auto lex_identifier() -> string_view_type;
-  auto lex_number(boolean_type) -> std::any;
+  auto lex_number(bool) -> std::any;
 
 private:
   /// @brief lookaheads; we have only consumed the character before the cursor
@@ -114,7 +87,7 @@ private:
   template <typename Predicate>
   bool advance_if(Predicate &&predicate)
     requires std::invocable<Predicate, char_t> &&
-             std::convertible_to<Predicate, boolean_type>;
+             std::convertible_to<Predicate, bool>;
 
 public:
   nodiscard_msg(token_views_t) const tokens_t &get_tokens() const {

@@ -1,13 +1,4 @@
-#include <any>
-#include <concepts>
-#include <cstdint>
-#include <format>
-#include <optional>
-#include <string>
-#include <string_view>
-#include <typeinfo>
-#include <unordered_map>
-#include <variant>
+#include "std.hh"
 
 #include "config.hpp"
 #include "lex_error.hpp"
@@ -17,78 +8,41 @@
 namespace net::ancillarycat::loxograph {
 // clang-format off
 /*!
- * @brief cast the literal to the specified type and also log the value in debug mode.
- * @note clang-cl.exe does not fully support `try` and `catch` blocks but
- * `any_cast` will throw an exception if the cast fails. For more information,
- * @htmlonly
- * <a href="https://learn.microsoft.com/en-us/cpp/cpp/try-except-statement?view=msvc-170">try-except-statement</a>
- * <a href="https://clang.llvm.org/docs/MSVCCompatibility.html">Asynchronous Exceptions</a>
- * <a href="https://stackoverflow.com/questions/7049502/c-try-and-try-catch-finally">try-catch-finally</a>
- * @endhtmlonly
+   @brief cast the literal to the specified type and also log the value in debug mode.
+   @note clang-cl.exe does not fully support `try` and `catch` blocks but
+   `any_cast` will throw an exception if the cast fails. For more information, see
+   @htmlonly
+   https://learn.microsoft.com/en-us/cpp/cpp/try-except-statement try-except-statement
+   https://clang.llvm.org/docs/MSVCCompatibility.html Asynchronous Exceptions
+   https://stackoverflow.com/questions/7049502/c-try-and-try-catch-finally try-catch-finally
+   @endhtmlonly
  */
 // clang-format on
 template <typename Ty>
-inline auto Token::cast_literal() const
-    -> std::optional<decltype(std::any_cast<Ty>(literal))>
-  requires std::default_initializable<Ty> &&
-           std::formattable<Ty, string_t::value_type>
+inline auto Token::cast_literal() const -> decltype(auto)
+  requires std::default_initializable<Ty>
 {
-#if 0
-   _TRY_BEGIN
-      dbg(info, "literal type: {}, value: {}", literal.type().name(),
-          std::any_cast<Ty>(literal));
-      return std::any_cast<Ty>(literal);
-   _CATCH  (std::bad_any_cast &e)
-      dbg(error, "bad any cast: {}", e.what());
-      return std::nullopt;
-   _CATCH_END
-#endif
-  auto *ptr = std::any_cast<Ty>(&literal);
+  const auto ptr = std::any_cast<Ty>(&literal);
   if (ptr) {
     dbg(info, "literal type: {}, value: {}", typeid(Ty).name(), *ptr);
-    return *ptr;
+  } else {
+    dbg(error, "bad any cast: {}", LOXOGRAPH_STACKTRACE);
+    contract_assert(0);
   }
-  dbg(error, "bad any cast: {}", LOXOGRAPH_STACKTRACE);
-  return std::nullopt;
-}
-template <typename Ty>
-inline auto net::ancillarycat::loxograph::Token::cast_literal() const
-    -> std::optional<decltype(std::any_cast<Ty>(literal))>
-  requires std::default_initializable<Ty> &&
-           (!std::formattable<Ty, string_t::value_type>) && requires(Ty t) {
-             { t.to_string() } -> std::convertible_to<string_t>;
-           }
-{
-#if 0
-  try {
-    dbg(info, "literal type: {}, value: {}", literal.type().name(),
-        std::any_cast<Ty>(literal).to_string());
-    return std::any_cast<Ty>(literal);
-  } catch (std::bad_any_cast &e) {
-    dbg(error, "bad any cast: {}", e.what());
-    return std::nullopt;
-  }
-#endif
-  auto *ptr = std::any_cast<Ty>(&literal);
-  if (ptr) {
-    dbg(info, "literal type: {}, value: {}", typeid(Ty).name(),
-        ptr->to_string());
-    return *ptr;
-  }
-  dbg(error, "bad any cast: {}", LOXOGRAPH_STACKTRACE);
-  return std::nullopt;
+  return ptr;
 }
 template <typename Ty>
   requires std::is_arithmetic_v<std::remove_cvref_t<Ty>>
 bool Token::is_integer(Ty &&value) const noexcept {
   return std::trunc(value) == value;
 }
-Token::string_t Token::to_string() const {
+Token::string_type Token::to_string() const {
   using namespace std::string_literals;
   using enum TokenType::type_t;
   auto type_sv = ""sv;
   auto lexeme_sv = ""sv;
-  /// @note cannot use `string_view_t`, or the string_view will be destroyed.
+  // const void *ptr = nullptr;
+  /// @note cannot use `string_view_type`, or the string_view will be destroyed.
   ///       eg: `42.0` -> `▯2.0`
   ///                      ^ actually a `\0`, but cannot be displayed.
   auto literal_sv = ""sv;
@@ -204,25 +158,27 @@ Token::string_t Token::to_string() const {
     type_sv = "STRING"sv;
     lexeme_sv = lexeme;
     contract_assert(lexeme_sv.front() == '"' && lexeme_sv.back() == '"');
-    literal_sv =
-        cast_literal<string_view_t>().value_or("<failed to access data>");
+    // ptr = cast_literal<string_view_type>();
+    // literal_sv =
+    if (auto ptr = cast_literal<string_view_type>())
+      literal_sv = *ptr;
+    else
+      literal_sv = "<failed to access data>"sv;
     contract_assert(lexeme_sv.substr(1, lexeme_sv.size() - 2), literal_sv);
     break;
   case kNumber:
     type_sv = "NUMBER"sv;
     lexeme_sv = lexeme;
-    {
-      /// @note num_value's lifetime is the same as the literal
-      auto num_value = cast_literal<long double>().value_or(
-          std::numeric_limits<long double>::
-              signaling_NaN()); // format *can* format NaN to "nan"
-      if (is_integer(num_value))
-        // 42 -> 42.0
-        return utils::format("{} {} {:.1f}", type_sv, lexeme_sv, num_value);
-      else
-        // leave as is
-        return utils::format("{} {} {}", type_sv, lexeme_sv, num_value);
-    }
+    if (auto ptr = cast_literal<long double>()) {
+      // 42 -> 42.0
+      if (is_integer(*ptr)) {
+        return utils::format("{} {} {:.1f}", type_sv, lexeme_sv, *ptr);
+      }
+      //  leave as is
+      return utils::format("{} {} {}", type_sv, lexeme_sv, *ptr);
+    } else
+      return utils::format("{} {} {}", type_sv, lexeme_sv,
+                           "<failed to access data>");
     break;
   case kAnd:
     type_sv = "AND"sv;
@@ -247,7 +203,7 @@ Token::string_t Token::to_string() const {
   case kFun:
     type_sv = "FUN"sv;
     lexeme_sv = "fun"sv;
-    literal_sv = "null"sv; // currently no literal for fun // @todo
+    literal_sv = "null"sv;
     break;
   case kFor:
     type_sv = "FOR"sv;
@@ -310,10 +266,15 @@ Token::string_t Token::to_string() const {
     literal_sv = "null"sv;
     break;
   case kLexError:
-    /// @note message is different from the other cases.
-    return cast_literal<error_t>()
-        .value_or(lex_error{})
-        .to_string(lexeme, line);
+    // /// @note message is different from the other cases.
+    // return cast_literal<error_t>()
+    //     .value_or(lex_error{})
+    //     .to_string(lexeme, line);
+    if (auto ptr = cast_literal<error_t>())
+      return ptr->to_string(lexeme, line);
+    else
+      return utils::format("[line {}] Error: {}", line,
+                           "<failed to access data>");
   default:
     break;
   }
@@ -321,4 +282,15 @@ Token::string_t Token::to_string() const {
   /// string will last till the end
   return utils::format("{} {} {}", type_sv, lexeme_sv, literal_sv);
 }
+auto format_as(const Token &token) -> Token::string_type {
+  return token.to_string();
+}
 } // namespace net::ancillarycat::loxograph
+auto std::formatter<net::ancillarycat::loxograph::Token, char>::format(
+    net::ancillarycat::loxograph::Token t, std::format_context &ctx) const
+    -> decltype(ctx.out()) {
+  // clang-format off
+  return std::formatter<net::ancillarycat::loxograph::Token::string_type>
+            ::format(t.to_string(),ctx);
+  // clang-format on
+}

@@ -1,7 +1,3 @@
-#if __has_include(<spdlog/spdlog.h>)
-#include <spdlog/spdlog.h>
-#endif
-
 #include <string>
 #include <string_view>
 
@@ -10,8 +6,14 @@
 #include "TokenType.hpp"
 namespace net::ancillarycat::loxograph {
 TokenType::string_view_t TokenType::to_string_view() const noexcept {
-  using namespace std::string_view_literals;
-  switch (type) {
+  return string_view_t{format_as(*this)};
+}
+TokenType::string_t TokenType::to_string() const noexcept {
+  return string_t{format_as(*this)};
+}
+auto format_as(TokenType t) noexcept -> TokenType::string_view_t {
+  using enum TokenType::type_t;
+  switch (t.type) {
   case kMonostate:
     return "MONOSTATE"sv;
   case kLeftParen:
@@ -95,11 +97,15 @@ TokenType::string_view_t TokenType::to_string_view() const noexcept {
   case kLexError:
     return "LEX_ERROR"sv;
   default:
-    dbg(error, "Unknown token type: {}", (uint16_t)type);
+    dbg(error, "Unknown token type: {}", (uint16_t)t.type);
     return "UNKNOWN"sv;
   }
 }
-TokenType::string_t TokenType::to_string() const noexcept {
-  return string_t{to_string_view()};
-}
 } // namespace net::ancillarycat::loxograph
+auto std::formatter<net::ancillarycat::loxograph::TokenType, char>::format(
+    net::ancillarycat::loxograph::TokenType t,
+    std::format_context &ctx) const -> decltype(ctx.out()) {
+  return ::std::
+      formatter<net::ancillarycat::loxograph::TokenType::string_view_t>::format(
+          t.to_string_view(), ctx);
+}

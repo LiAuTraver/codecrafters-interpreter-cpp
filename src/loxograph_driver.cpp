@@ -1,22 +1,3 @@
-#include <cstdlib>
-#include <cstring>
-#include <filesystem>
-#include <fstream>
-#include <iostream>
-#include <ostream>
-#include <print>
-#include <sstream>
-#include <stacktrace>
-#include <string>
-#include <string_view>
-#include <vector>
-
-#include "config.hpp"
-#include "lexer.hpp"
-#include "loxo_fwd.hpp"
-#include "status.hpp"
-#include "Token.hpp"
-
 #if __has_include(<spdlog/spdlog.h>)
 #include <spdlog/spdlog.h>
 #endif
@@ -36,9 +17,16 @@
 #else
 #include <unistd.h>
 #endif
+
+#include <ranges>
+
+#include "config.hpp"
+#include "lexer.hpp"
+#include "status.hpp"
+
 namespace net::ancillarycat::loxograph {
-inline void inspect(std::ostringstream &oss, const Status &load_result) {
-  if (load_result.code() == Status::kNotFoundError)
+inline void inspect(std::ostringstream &oss, const utils::Status &load_result) {
+  if (load_result.code() == utils::Status::kNotFoundError)
     return dbg(error, "{}", load_result.message().data());
 }
 // clang-format off
@@ -50,7 +38,7 @@ int loxo_main(_In_ const std::filesystem::path &path,
 {
   if (command == "tokenize") {
     net::ancillarycat::loxograph::lexer lexer;
-    Status load_result;
+    utils::Status load_result;
 #ifdef LOXOGRAPH_DEBUG_ENABLED
     dbg(info, "use `--stdin` to read from stdin.");
     if (!isatty(fileno(stdin)) && command == "--stdin") {

@@ -1,10 +1,13 @@
-#include <stdio.h>
 #include <cstdio>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <ostream>
+#include <source_location>
 #include <sstream>
+#include <string>
+#include <string_view>
+#include <vector>
 #if __has_include(<spdlog/spdlog.h>)
 #include <spdlog/spdlog.h>
 #endif
@@ -21,7 +24,7 @@
 #include "loxo_fwd.hpp"
 // clang-format off
 namespace net::ancillarycat::loxograph {
-LOXOGRAPH_INITIALIZATION(trace)
+LOXOGRAPH_INITIALIZATION(trace);
 nodiscard_msg(loxo_main) extern
 int loxo_main(_In_ const std::filesystem::path &,
               _In_ const std::string_view,

@@ -11,6 +11,13 @@
 /// `fmt`, `spdlog`, and potentially `gtest` and `Google Benchmark`.
 /// release mode carries no dependencies and only requires C++20.
 #define LOXOGRAPH_DEBUG_ENABLED
+/// @note use fmt::print, fmt::println when compiling with clang-cl.exe will
+/// cause some wired error: Critical error detected c0000374
+/// A breakpoint instruction (__debugbreak() statement or a similar call) was
+/// executed, which related to heap corruption. The program will terminate.
+#if defined(__clang__) && defined(_MSC_VER)
+#define LOXOGRAPH_USE_FMT_FORMAT
+#endif
 #endif
 /// @note GNU on Windows seems failed to perform linking for `stacktrace` and
 /// `spdlog`.
@@ -83,13 +90,10 @@ struct ::fmt::formatter<::std::stacktrace> : ::fmt::formatter<::std::string> {
   case 0:                                                                      \
   default:
 /// @note like `stacktrace`, `source_location` is not fully supported sometimes.
-#if __has_include(<source_location>)
-#include <source_location>
 #define LOXOGRAPH_FILENAME (::std::source_location::current().file_name())
 #define LOXOGRAPH_FUNCTION_NAME LOXOGRAPH_DEBUG_FUNCTION_NAME
 #define LOXOGRAPH_LINE (::std::source_location::current().line())
 #define LOXOGRAPH_COLUMN (::std::source_location::current().column())
-#endif
 #define LOXOGRAPH_RUNTIME_DEBUG_RAISE LOXOGRAPH_DEBUG_BREAK
 #define LOXOGRAPH_PRINT_ERROR_MSG_IMPL_SINGLE(x)                               \
   spdlog::critical("in file {0}, line {2} column {3},\n"                       \
