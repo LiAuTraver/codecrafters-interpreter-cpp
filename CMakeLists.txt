@@ -28,25 +28,23 @@ if(DEFINED ENV{AC_CPP_DEBUG})
 endif()
 
 if(AC_CPP_DEBUG OR LOXOGRAPH_BUILD_SHARED)
-  add_library(std STATIC
-      include/std.hh
-  )
-  set_target_properties(std PROPERTIES LINKER_LANGUAGE CXX)
   add_library(driver STATIC
       ${DRIVER_SOURCE_FILES}
   )
   set_target_properties(driver PROPERTIES LINKER_LANGUAGE CXX)
-  target_link_libraries(driver PUBLIC std)
 else()
-  add_library(std SHARED
-      include/std.hh
-  )
-  set_target_properties(std PROPERTIES LINKER_LANGUAGE CXX)
   add_library(driver SHARED
       ${DRIVER_SOURCE_FILES}
   )
   set_target_properties(driver PROPERTIES LINKER_LANGUAGE CXX)
 endif()
+
+target_precompile_headers(driver PUBLIC
+    include/std.hh
+)
+target_compile_options(driver PRIVATE
+    $<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>>: -Wno-deprecated>
+)
 
 add_executable(interpreter
     interpreter.cpp
@@ -55,7 +53,6 @@ add_executable(interpreter
 
 target_link_libraries(interpreter PUBLIC
     driver
-    std
 )
 
 if(AC_CPP_DEBUG)

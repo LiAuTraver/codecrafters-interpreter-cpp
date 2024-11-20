@@ -287,7 +287,7 @@ auto format_as(const Token &token) -> Token::string_type {
 }
 } // namespace net::ancillarycat::loxograph
 auto std::formatter<net::ancillarycat::loxograph::Token, char>::format(
-    net::ancillarycat::loxograph::Token t, std::format_context &ctx) const
+    const net::ancillarycat::loxograph::Token &t, std::format_context &ctx) const
     -> decltype(ctx.out()) {
   // clang-format off
   return std::formatter<net::ancillarycat::loxograph::Token::string_type>
