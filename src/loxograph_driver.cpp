@@ -19,6 +19,7 @@
 #endif
 
 #include <ranges>
+#include <algorithm>
 
 #include "config.hpp"
 #include "lexer.hpp"
