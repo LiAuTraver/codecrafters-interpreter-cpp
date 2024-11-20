@@ -7,7 +7,7 @@
 #include "loxo_fwd.hpp"
 
 namespace net::ancillarycat::loxograph {
-class lex_error {
+class LIBLOXOGRAPH_EXPORT lex_error {
 public:
   enum type_t : uint8_t {
     kMonostate = 0,

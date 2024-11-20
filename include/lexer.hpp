@@ -11,7 +11,7 @@
 
 /// @namespace net::ancillarycat::loxograph
 namespace net::ancillarycat::loxograph {
-class lexer {
+class LIBLOXOGRAPH_EXPORT lexer {
 public:
   using size_type = typename utils::string::size_type;
   using string_type = utils::string;

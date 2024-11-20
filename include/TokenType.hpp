@@ -5,7 +5,7 @@
 #include "loxo_fwd.hpp"
 
 namespace net::ancillarycat::loxograph {
-class TokenType {
+class LIBLOXOGRAPH_EXPORT TokenType {
 public:
   enum type_t : uint16_t;
   using string_t = utils::string;

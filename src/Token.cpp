@@ -267,15 +267,15 @@ Token::string_type Token::to_string() const {
     break;
   case kLexError:
     // /// @note message is different from the other cases.
-    // return cast_literal<error_t>()
-    //     .value_or(lex_error{})
-    //     .to_string(lexeme, line);
     if (auto ptr = cast_literal<error_t>())
       return ptr->to_string(lexeme, line);
     else
       return utils::format("[line {}] Error: {}", line,
                            "<failed to access data>");
   default:
+    dbg(critical, "unreachable code reached: {}", LOXOGRAPH_STACKTRACE);
+		contract_assert(false);
+		std::unreachable();
     break;
   }
   /// @note DON'T use `.data()` since it's not null-terminated and will the
@@ -287,8 +287,8 @@ auto format_as(const Token &token) -> Token::string_type {
 }
 } // namespace net::ancillarycat::loxograph
 auto std::formatter<net::ancillarycat::loxograph::Token, char>::format(
-    const net::ancillarycat::loxograph::Token &t, std::format_context &ctx) const
-    -> decltype(ctx.out()) {
+    const net::ancillarycat::loxograph::Token &t,
+    std::format_context &ctx) const -> decltype(ctx.out()) {
   // clang-format off
   return std::formatter<net::ancillarycat::loxograph::Token::string_type>
             ::format(t.to_string(),ctx);

@@ -11,14 +11,14 @@ if($ENV{AC_CPP_DEBUG} STREQUAL "ON")
 	add_subdirectory(test)
 	add_subdirectory(example)
 	add_subdirectory(benchmark)
-	target_compile_options(interpreter PRIVATE
-		$<$<CXX_COMPILER_ID:MSVC>:/EHsc /D_DEBUG /DDEBUG /D__DEBUG__ /DAC_CPP_DEBUG>
-		$<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>>: -D_DEBUG -DDEBUG -D__DEBUG__ -DAC_CPP_DEBUG>
-	)
-	target_compile_options(driver PRIVATE
-		$<$<CXX_COMPILER_ID:MSVC>:/EHsc /D_DEBUG /DDEBUG /D__DEBUG__ /DAC_CPP_DEBUG>
-		$<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>>: -D_DEBUG -DDEBUG -D__DEBUG__ -DAC_CPP_DEBUG>
-	)
+	 target_compile_options(interpreter PUBLIC
+	 	$<$<CXX_COMPILER_ID:MSVC>:/EHsc /D_DEBUG /DDEBUG /D__DEBUG__ /DAC_CPP_DEBUG>
+	 	$<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>>: -D_DEBUG -DDEBUG -D__DEBUG__ -DAC_CPP_DEBUG>
+	 )
+	 target_compile_options(driver PUBLIC
+	 	$<$<CXX_COMPILER_ID:MSVC>:/EHsc /D_DEBUG /DDEBUG /D__DEBUG__ /DAC_CPP_DEBUG>
+	 	$<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>>: -D_DEBUG -DDEBUG -D__DEBUG__ -DAC_CPP_DEBUG>
+	 )
 	target_link_libraries(driver PUBLIC
 		fmt::fmt
 		spdlog::spdlog

@@ -22,17 +22,37 @@
 #endif
 #include "config.hpp"
 #include "loxo_fwd.hpp"
+#include <cstddef>
+#include <iostream>
+
 // clang-format off
 namespace net::ancillarycat::loxograph {
 LOXOGRAPH_INITIALIZATION(trace);
 nodiscard_msg(loxo_main) extern
 int loxo_main(_In_ const std::filesystem::path &,
-              _In_ const std::string_view,
+              _In_ std::string_view,
               _Inout_ std::ostringstream &);
+// clang-format on
+
+// mimic the from llvm clang-driver's ToolContext
+struct ToolContext {
+  const utils::string_view executable_name = "loxograph"sv;
+  utils::string_view executable_path;
+  utils::string_view sysroot;
+  utils::string_view triple;
+  static ToolContext inspectArgs(){
+		// todo: implement this
+		return ToolContext();        
+	}
+};
 } // namespace net::ancillarycat::loxograph
 // clang-format on
 int main(int argc, char **argv, char **envp) {
   contract_assert(argc);
+
+  auto tool_context = net::ancillarycat::loxograph::ToolContext::inspectArgs();
+
+  // inspect_args(argc, argv, envp);
   std::filesystem::path path;
   std::string command;
 #ifndef LOXOGRAPH_DEBUG_ENABLED
@@ -54,8 +74,5 @@ int main(int argc, char **argv, char **envp) {
     command = argv[1];
   }
   std::ostringstream oss;
-  const auto result =
-      net::ancillarycat::loxograph::loxo_main(path, command, oss);
-  //  print("{}", oss.str());
-  return result;
+  return net::ancillarycat::loxograph::loxo_main(path, command, oss);
 }

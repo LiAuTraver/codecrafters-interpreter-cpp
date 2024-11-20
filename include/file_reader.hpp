@@ -14,7 +14,9 @@ public:
   using ostringstream_t = ostringstream;
 
 public:
-  inline explicit constexpr file_reader(path_t path_) NOEXCEPT
+  inline explicit
+  // constexpr // clang 18.1 failed
+   file_reader(path_t path_) NOEXCEPT
       : filePath(std::move(path_)) {}
   inline constexpr ~file_reader() NOEXCEPT = default;
 

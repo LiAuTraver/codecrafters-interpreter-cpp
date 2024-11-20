@@ -6,7 +6,7 @@
 #include "TokenType.hpp"
 
 namespace net::ancillarycat::loxograph {
-class Token {
+class LIBLOXOGRAPH_EXPORT Token {
 public:
   using string_type = TokenType::string_t;
   using string_view_type = TokenType::string_view_t;

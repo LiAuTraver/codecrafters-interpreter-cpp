@@ -19,7 +19,8 @@
         "CMAKE_WARN_DEPRECATED": false,
         "CMAKE_SUPPRESS_DEVELOPER_WARNINGS": "TRUE",
         "CMAKE_BUILD_TYPE": "Debug",
-        "CMAKE_CXX_FLAGS": "-D_DEBUG -DDEBUG -D__DEBUG__"
+        "CMAKE_CXX_FLAGS": "-D_DEBUG -DDEBUG -D__DEBUG__",
+        "BUILD_SHARED_LIBS": "ON"
       }
     },
     {
@@ -94,8 +95,8 @@
       "name": "LLVM-MSVC-Compat-Mode",
       "hidden": true,
       "cacheVariables": {
-        "CMAKE_CXX_COMPILER": "clang-cl.exe",
-        "CMAKE_C_COMPILER": "clang-cl.exe",
+        "CMAKE_CXX_COMPILER": "clang-cl",
+        "CMAKE_C_COMPILER": "clang-cl",
         "CMAKE_CXX_FLAGS": "-clang:-std=c++latest"
       }
     },
@@ -106,10 +107,14 @@
         "Windows"
       ],
       "cacheVariables": {
-        "CMAKE_CXX_COMPILER": "cl.exe",
-        "CMAKE_C_COMPILER": "cl.exe",
+        "CMAKE_CXX_COMPILER": "cl",
+        "CMAKE_C_COMPILER": "cl",
         "CMAKE_CXX_FLAGS": "/std:c++latest  /Zc:preprocessor"
-      }
+      },
+			"environment": {
+				"CC": "cl",
+				"CXX": "cl"
+			}	
     },
     {
       "name": "Windows-MSVC-Debug",

@@ -1,6 +1,17 @@
 #pragma once
 #include "internal/variadic.h"
-
+#ifdef LIBLOXOGRAPH_SHARED
+#ifdef _WIN32
+#define LIBLOXOGRAPH_EXPORT __declspec(dllexport)
+#define LIBLOXOGRAPH_IMPORT __declspec(dllimport)
+#else
+#define LIBLOXOGRAPH_EXPORT __attribute__((visibility("default")))
+#define LIBLOXOGRAPH_IMPORT
+#endif
+#else
+#define LIBLOXOGRAPH_EXPORT
+#define LIBLOXOGRAPH_IMPORT
+#endif
 #if defined(AC_CPP_DEBUG)
 /// @def LOXOGRAPH_DEBUG_ENABLED
 /// @note only defined in debug mode; never define it when submitting the code
@@ -15,13 +26,14 @@
 /// cause some wired error: Critical error detected c0000374
 /// A breakpoint instruction (__debugbreak() statement or a similar call) was
 /// executed, which related to heap corruption. The program will terminate.
-#if defined(__clang__) && defined(_MSC_VER)
+/// @attention now it's ok again, why? maybe I called vcvarsall.bat?
+// #if !(defined(__clang__) && defined(_MSC_VER))
 #define LOXOGRAPH_USE_FMT_FORMAT
-#endif
+// #endif
 #endif
 /// @note GNU on Windows seems failed to perform linking for `stacktrace` and
 /// `spdlog`.
-#if __has_include(<stacktrace>) && defined(LOXOGRAPH_DEBUG_ENABLED)
+#if __has_include(<stacktrace>) && defined(LOXOGRAPH_DEBUG_ENABLED) && defined(_WIN32)
 #include <stacktrace>
 #if __has_include(<fmt/format.h>)
 #include <format>
@@ -200,16 +212,22 @@ struct ::fmt::formatter<::std::stacktrace> : ::fmt::formatter<::std::string> {
 #include <cstddef>
 #include <iostream>
 /// @def LOXOGRAPH_INITIALIZATION(_log_level_) initializes the spdlog framework
-/// @note only call it once in the whole project; never call it twice.
+/// @note only call it once in the whole exec; never call it twice.
+// clang-format off
 #define LOXOGRAPH_INITIALIZATION(_log_level_)                                  \
-  [[maybe_unused]] static inline const auto LOXOGRAPH_INITIALIZATION =         \
-      [](void) static constexpr -> ::std::nullptr_t {                         \
+  [[maybe_unused]] LIBLOXOGRAPH_EXPORT                                         \
+  /* static, <- msvc can't get through this.*/                                 \
+      inline const auto LOXOGRAPH_INITIALIZATION =                             \
+          [](void)                                                             \
+  /* static constexpr , <- msvc can't get through this.*/                      \
+          -> ::std::nullptr_t {                                                \
     ::std::cout << ::std::unitbuf;                                             \
     ::std::cerr << ::std::unitbuf;                                             \
     LOXOGRAPH_DEBUG_LOGGING(info, "spdlog framework initialized.");            \
     LOXOGRAPH_DEBUG_LOGGING_SETUP(_log_level_, "Debug mode enabled.");         \
     return nullptr;                                                            \
   }();
+// clang-format on
 
 /// @note export macros for convenience
 #if (!defined(_MSVC_TRADITIONAL) || _MSVC_TRADITIONAL) && !defined(__clang__)

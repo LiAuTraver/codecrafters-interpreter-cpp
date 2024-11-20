@@ -5,7 +5,7 @@
 #include "loxo_fwd.hpp"
 
 namespace net::ancillarycat::utils {
-class nodiscard_msg(Status) Status {
+class LIBLOXOGRAPH_EXPORT nodiscard_msg(Status) Status {
 public:
   enum nodiscard_msg(Code) Code : uint8_t {
     kOkStatus = 0,
@@ -45,6 +45,7 @@ private:
 
 nodiscard_msg(Status) Status
     OkStatus(const std::source_location & = std::source_location::current());
+
 nodiscard_msg(Status) Status
     AlreadyExistsError(string_view, const std::source_location & =
                                         std::source_location::current());
