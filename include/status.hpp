@@ -5,7 +5,7 @@
 #include "loxo_fwd.hpp"
 
 namespace net::ancillarycat::utils {
-class LIBLOXOGRAPH_EXPORT nodiscard_msg(Status) Status {
+class LOXOGRAPH_API nodiscard_msg(Status) Status {
 public:
   enum nodiscard_msg(Code) Code : uint8_t {
     kOkStatus = 0,

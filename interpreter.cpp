@@ -7,6 +7,8 @@
 #include <sstream>
 #include <string>
 #include <string_view>
+#include <unordered_map>
+#include <unordered_set>
 #include <vector>
 #if __has_include(<spdlog/spdlog.h>)
 #include <spdlog/spdlog.h>
@@ -20,59 +22,55 @@
 #define _In_
 #define _Inout_
 #endif
-#include "config.hpp"
-#include "loxo_fwd.hpp"
 #include <cstddef>
 #include <iostream>
+#include "config.hpp"
+#include "loxo_fwd.hpp"
+#include "tools/execution_context.hpp"
 
 // clang-format off
 namespace net::ancillarycat::loxograph {
 LOXOGRAPH_INITIALIZATION(trace);
 nodiscard_msg(loxo_main) extern
-int loxo_main(_In_ const std::filesystem::path &,
-              _In_ std::string_view,
-              _Inout_ std::ostringstream &);
+int loxo_main(_In_ int ,
+              _In_ char**,
+              _Inout_ ExecutionContext &);
 // clang-format on
 
-// mimic the from llvm clang-driver's ToolContext
-struct ToolContext {
-  const utils::string_view executable_name = "loxograph"sv;
-  utils::string_view executable_path;
-  utils::string_view sysroot;
-  utils::string_view triple;
-  static ToolContext inspectArgs(){
-		// todo: implement this
-		return ToolContext();        
-	}
-};
 } // namespace net::ancillarycat::loxograph
+void alterToolContext(
+    net::ancillarycat::loxograph::ExecutionContext &execution_context) {
+  static auto debugInputFilePath =
+      net::ancillarycat::utils::path{"Z:/loxograph/examples/dynamic.lox"};
+  if (execution_context.commands.empty())
+    execution_context.commands.emplace_back("tokenize");
+  if (execution_context.input_files.empty()) {
+    if (exists(debugInputFilePath))
+      execution_context.input_files.emplace_back(debugInputFilePath);
+    else {
+      dbg(critical, "file not found: {}", debugInputFilePath);
+      LOXOGRAPH_DEBUG_BREAK
+    }
+  }
+}
 // clang-format on
 int main(int argc, char **argv, char **envp) {
-  contract_assert(argc);
 
-  auto tool_context = net::ancillarycat::loxograph::ToolContext::inspectArgs();
+  auto &tool_context =
+      net::ancillarycat::loxograph::ExecutionContext::inspectArgs(argc, argv,
+                                                                  envp);
 
-  // inspect_args(argc, argv, envp);
-  std::filesystem::path path;
-  std::string command;
-#ifndef LOXOGRAPH_DEBUG_ENABLED
-  if (argc != 3) {
-    fprintf(stderr, "Usage: ./your_program tokenize <filename>");
-    return EXIT_FAILURE;
-  }
-#else
-  if (argc == 2) {
-    path = argv[1];
-    command = "tokenize";
-  } else if (argc != 3) {
-    path = R"(Z:\loxograph\templates\dynamic.lox)";
-    command = "tokenize";
-  }
+#ifdef LOXOGRAPH_DEBUG_ENABLED
+  alterToolContext(tool_context);
 #endif
-  else {
-    path = argv[2];
-    command = argv[1];
-  }
-  std::ostringstream oss;
-  return net::ancillarycat::loxograph::loxo_main(path, command, oss);
+
+  dbg(info, "Executable name: {}", tool_context.executable_name);
+  dbg(info, "Executable path: {}", tool_context.executable_path);
+  dbg(info, "Command: {}",
+      tool_context.commands.empty() ? "<no command provided>"
+                                    : tool_context.commands.front());
+  dbg(info, "Execution directory: {}", tool_context.execution_dir);
+  dbg(info, "Temp directory: {}", tool_context.tempdir);
+
+  return net::ancillarycat::loxograph::loxo_main(argc, argv, tool_context);
 }

@@ -51,3 +51,8 @@ StatementAttributeLikeMacros:
 StatementMacros:
   - Q_UNUSED
   - QT_REQUIRE_VERSION
+InsertNewlineAtEOF: true
+InsertTrailingCommas: Wrapped
+IndentPPDirectives: AfterHash
+BinPackArguments: false
+BinPackParameters: false

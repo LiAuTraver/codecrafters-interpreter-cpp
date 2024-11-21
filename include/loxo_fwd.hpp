@@ -1,20 +1,11 @@
 #pragma once
 
-#include <filesystem>
-#include <iosfwd>
-#include <string>
-#include <string_view>
-
 #include "config.hpp"
+
 #ifndef LOXOGRAPH_USE_FMT_FORMAT
-#include <format>
-#include <print>
-#else
-#include <fmt/core.h>
-#include <fmt/format.h>
-#include <fmt/os.h>
-#include <fmt/ostream.h>
+#include <fmt.hh>
 #endif
+#include <std.hh>
 namespace net::ancillarycat::utils {
 /// @brief A class that represents the status of a function call. it's designed
 /// to be as identical as possible to the `absl::Status` class, for

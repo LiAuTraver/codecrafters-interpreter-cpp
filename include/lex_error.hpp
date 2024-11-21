@@ -7,7 +7,7 @@
 #include "loxo_fwd.hpp"
 
 namespace net::ancillarycat::loxograph {
-class LIBLOXOGRAPH_EXPORT lex_error {
+class LOXOGRAPH_API lex_error {
 public:
   enum type_t : uint8_t {
     kMonostate = 0,
@@ -31,8 +31,8 @@ public:
   type_t type = kMonostate;
 
 public:
-  string_t to_string(const string_view_t lexeme_sv = ""sv,
-                     const uint_least32_t line = 0) const;
+  string_t to_string(string_view_t lexeme_sv = ""sv,
+                     uint_least32_t line = 0) const;
 };
 inline lex_error::string_t
 lex_error::to_string(const string_view_t lexeme_sv,

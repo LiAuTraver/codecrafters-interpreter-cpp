@@ -57,9 +57,9 @@
 #include <deque>
 #include <exception>
 #include <execution>
-#if _HAS_CXX23
+#if __cplusplus >= 202203L
 #include <expected>
-#endif // _HAS_CXX23
+#endif // __cplusplus >= 202203L
 #include <filesystem>
 #include <format>
 #include <forward_list>
@@ -78,9 +78,12 @@
 #include <list>
 #include <locale>
 #include <map>
-#if _HAS_CXX23
+#if __cplusplus >= 202203L
+#if __has_include(<mdspan>)
 #include <mdspan>
-#endif // _HAS_CXX23
+/// @note ^^^^^^ GNU still doesn't support this header
+#endif // __has_include(<mdspan>)
+#endif // __cplusplus >= 202203L
 #include <memory>
 #include <memory_resource>
 #include <mutex>
@@ -89,9 +92,9 @@
 #include <numeric>
 #include <optional>
 #include <ostream>
-#if _HAS_CXX23
+#if __cplusplus >= 202203L
 #include <print>
-#endif // _HAS_CXX23
+#endif // __cplusplus >= 202203L
 #include <queue>
 #include <random>
 #include <ranges>
@@ -103,18 +106,18 @@
 #include <shared_mutex>
 #include <source_location>
 #include <span>
-#if _HAS_CXX23
+#if __cplusplus >= 202203L
 #include <spanstream>
-#endif // _HAS_CXX23
+#endif // __cplusplus >= 202203L
 #include <sstream>
 #include <stack>
-#if _HAS_CXX23
+#if __cplusplus >= 202203L
 #include <stacktrace>
-#endif // _HAS_CXX23
+#endif // __cplusplus >= 202203L
 #include <stdexcept>
-#if _HAS_CXX23
+#if __cplusplus >= 202203L
 #include <stdfloat>
-#endif // _HAS_CXX23
+#endif // __cplusplus >= 202203L
 #include <stop_token>
 #include <streambuf>
 #include <string>

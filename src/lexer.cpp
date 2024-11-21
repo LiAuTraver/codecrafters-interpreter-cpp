@@ -39,9 +39,6 @@ lexer::status_t lexer::load(const path_type &filepath) {
                                     filepath.string());
   file_reader_t reader(filepath);
   const_cast<string_type &>(contents) = reader.get_contents();
-  // if (contents.empty())
-  //   return utils::PermissionDeniedError("Unable to read file: "
-  //   +filepath.string());
   return utils::OkStatus();
 }
 lexer::status_t lexer::load(string_type &&content) {

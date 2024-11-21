@@ -1,34 +1,34 @@
-#include <gtest/gtest.h>
-#include <filesystem>
-#include <string_view>
-#include "../src/loxograph_driver.cpp"
+#include "test_env.hpp"
 
-using namespace net::ancillarycat::loxograph;
-using namespace std::string_view_literals;
-using std::filesystem::path;
-const auto command = "tokenize"sv;
+LOXOGRAPH_INITIALIZATION(trace);
 
-auto get_result(auto &filepath, auto &command) {
+const auto command = "tokenize";
+
+auto get_result(auto &filepath) {
   std::ostringstream oss;
-  loxo_main(filepath, command, oss);
+  ExecutionContext ec;
+  ec.commands.push_back(command);
+  ec.input_files.push_back(filepath);
+  ec.output_stream.set_rdbuf(oss.rdbuf());
+  auto _ = loxo_main(3, nullptr, ec);
   return oss.str();
 }
 
 TEST(scan, invalid_path) {
   const auto filepath = path(R"(ABCDEF)");
-  auto result = get_result(filepath, command);
+  auto result = get_result(filepath);
   EXPECT_EQ(result, "");
 }
 
 TEST(scan, empty_file) {
-  const auto filepath = path(R"(Z:/loxograph/templates/empty.lox)");
-  auto result = get_result(filepath, command);
+  const auto filepath = path(R"(Z:/loxograph/examples/empty.lox)");
+  auto result = get_result(filepath);
   EXPECT_EQ(result, "EOF  null\n");
 }
 
 TEST(scan, simple1) {
-  const auto filepath = path(R"(Z:/loxograph/templates/simple1.lox)");
-  auto result = get_result(filepath, command);
+  const auto filepath = path(R"(Z:/loxograph/examples/simple1.lox)");
+  auto result = get_result(filepath);
   EXPECT_EQ(result, "VAR var null\n"
                     "IDENTIFIER language null\n"
                     "EQUAL = null\n"
@@ -38,8 +38,8 @@ TEST(scan, simple1) {
 }
 
 TEST(scan, simple2) {
-  const auto filepath = path(R"(Z:/loxograph/templates/simple2.lox)");
-  auto result = get_result(filepath, command);
+  const auto filepath = path(R"(Z:/loxograph/examples/simple2.lox)");
+  auto result = get_result(filepath);
   EXPECT_EQ(result, "LEFT_PAREN ( null\n"
                     "LEFT_PAREN ( null\n"
                     "RIGHT_PAREN ) null\n"
@@ -47,8 +47,8 @@ TEST(scan, simple2) {
 }
 
 TEST(scan, simple3) {
-  const auto filepath = path(R"(Z:/loxograph/templates/simple3.lox)");
-  auto result = get_result(filepath, command);
+  const auto filepath = path(R"(Z:/loxograph/examples/simple3.lox)");
+  auto result = get_result(filepath);
   EXPECT_EQ(result, "LEFT_PAREN ( null\n"
                     "LEFT_BRACE { null\n"
                     "STAR * null\n"

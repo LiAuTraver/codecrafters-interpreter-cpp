@@ -16,9 +16,9 @@ public:
 public:
   inline explicit
   // constexpr // clang 18.1 failed
-   file_reader(path_t path_) NOEXCEPT
+   file_reader(path_t path_)
       : filePath(std::move(path_)) {}
-  inline constexpr ~file_reader() NOEXCEPT = default;
+  inline constexpr ~file_reader()  = default;
 
 public:
   nodiscard_msg(path_t) inline string_t get_contents() const {
@@ -30,7 +30,7 @@ public:
     buffer << file.rdbuf();
     return buffer.str();
   }
-  nodiscard_msg(path_t) inline path_t filepath() const NOEXCEPT { return filePath; }
+  nodiscard_msg(path_t) inline path_t filepath() const  { return filePath; }
 
 private:
   const path_t filePath;
