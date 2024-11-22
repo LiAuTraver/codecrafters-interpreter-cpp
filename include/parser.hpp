@@ -77,8 +77,9 @@ public:
     // default to add a group as the root node
     if (!expr_head)
       return std::make_shared<Grouping>(std::make_shared<Literal>(Token{TokenType::kNil, "nil"sv, 0.0l}));
-    auto group = std::make_shared<Grouping>(expr_head);
-    return group;
+    // auto group = std::make_shared<Grouping>(expr_head);
+    // return group;
+		return expr_head;
   }
 
 private:
