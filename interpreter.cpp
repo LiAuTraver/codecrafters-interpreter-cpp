@@ -68,6 +68,7 @@ int main(int argc, char **argv, char **envp) {
                     ? "<no command provided>"
                     : loxograph::ExecutionContext::command_sv(
                           tool_context.commands.front()));
+            dbg(info, "Input files: {}", tool_context.input_files);
             dbg(info, "Execution directory: {}", tool_context.execution_dir);
             dbg(info, "Temp directory: {}", tool_context.tempdir));
 

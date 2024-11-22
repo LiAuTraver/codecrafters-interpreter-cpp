@@ -1,22 +1,35 @@
 #pragma once
+#include <cstdint>
 #include <filesystem>
+#include <limits>
+#include <ostream>
 #include <string>
 #include <string_view>
 #include <unordered_set>
 #include "config.hpp"
 
 namespace net::ancillarycat::loxograph {
+class lexer;
 /// mimic the from llvm clang-driver's ToolContext
 struct ExecutionContext {
-  enum commands_t : uint8_t { parse, lex, compile, run, test, help, version };
+  enum commands_t : uint8_t {
+    help = 0,
+    lex = 1,
+    parse = 2,
+    compile = 4,
+    run = 8,
+    test = 16,
+    version,
+    unknown = std::numeric_limits<uint8_t>::max(),
+  };
   std::filesystem::path executable_name;
   std::string_view executable_path;
   std::vector<commands_t> commands;
   std::filesystem::path execution_dir;
   std::filesystem::path tempdir;
   std::ostringstream output_stream;
-  // std::filesystem::string_view triple;
   std::vector<std::filesystem::path> input_files;
+  loxograph::lexer* lexer = nullptr;
   // std::vector<std::filesystem::path> output_files;
   static constexpr auto $null = std::string_view{};
   void addCommands(char **&argv) {
@@ -39,13 +52,17 @@ struct ExecutionContext {
     } else
       dbg(critical, "Unknown command: {}", *(argv + 1));
   }
+  std::string result_string() const { return output_stream.str(); }
   static ExecutionContext &
   inspectArgs(const int argc, char **&argv, char **&envp) {
     static auto ctx = ExecutionContext{};
     ctx.executable_path = argv[0];
     auto path_ = std::filesystem::path(ctx.executable_path);
     ctx.executable_name = path_.filename();
-    ctx.output_stream.set_rdbuf(std::cout.rdbuf());
+    //! @note according to standard, `set_rdbuf` shall be protected;
+    //! for some reason, MSVC's STL makes it public.
+    //! did not compile with libstdc++.
+    // ctx.output_stream.set_rdbuf(std::cout.rdbuf());
     ctx.execution_dir = std::filesystem::current_path();
     ctx.tempdir = std::filesystem::temp_directory_path();
     if (argc > 1) {
@@ -58,7 +75,7 @@ struct ExecutionContext {
     if (argc > 3) {
       dbg(error, "currently only one file is supported.");
     }
-    for (auto i = 2ull; (argv + i); ++i) {
+    for (auto i = 2ull; *(argv + i); ++i) {
       ctx.input_files.emplace_back(*(argv + i));
     }
     return ctx;

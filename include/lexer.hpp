@@ -26,31 +26,26 @@ public:
   using char_t = typename string_type::value_type;
   using error_t = lex_error;
   using error_code_t = typename error_t::type_t;
+  using enum token_type_t::type_t;
 
 public:
-  explicit lexer() = default;
-
+  lexer() = default;
   lexer(const lexer &other) = delete;
-  lexer(lexer &&other) = delete;
-
+  lexer(lexer &&other) noexcept;
   lexer &operator=(const lexer &other) = delete;
-  lexer &operator=(lexer &&other) = delete;
-
+  lexer &operator=(lexer &&other) noexcept;
   ~lexer() = default;
 
 public:
-public:
   /// @brief load the contents of the file
   /// @return OkStatus() if successful, NotFoundError() otherwise
-  status_t load(const path_type &);
-  /// @copydoc load(const path_type &)
-  status_t load(string_type &&);
+  status_t load(const path_type &) const;
   /// @copydoc load(const path_type &)
   status_t load(const std::istream &);
   /// @brief lex the contents of the file
   /// @return OkStatus() if successful, NotFoundError() otherwise
   status_t lex();
-  auto get_tokens() -> tokens_t;
+  auto get_tokens() -> tokens_t &;
   bool ok() const noexcept;
   uint_least32_t error() const noexcept;
 
@@ -61,7 +56,7 @@ private:
   void add_comment();
   void next_token();
   void add_token(token_type_t, std::any = std::any());
-  void add_lex_error(lex_error::type_t= error_t::kMonostate);
+  void add_lex_error(lex_error::type_t = error_t::kMonostate);
   bool is_at_end(size_t = 0) const;
   auto lex_string() -> lexer::status_t::Code;
   auto lex_identifier() -> string_view_type;
@@ -69,7 +64,7 @@ private:
 
 private:
   /// @brief lookaheads; we have only consumed the character before the cursor
-  char_t peek(size_t offset = 0);
+  char_t peek(size_t offset = 0) const;
   /// @brief get current character and advance the cursor
   /// @note does not check if @code cursor + offset >= contents.size() @endcode
   const char_t &get(size_t offset = 1);

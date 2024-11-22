@@ -1,6 +1,7 @@
 #include <print>
-#include "expr.hpp"
+#include "Expr.hpp"
 #include "test_env.hpp"
+#include "parser.hpp"
 
 
 TEST(AST, dummy) {
@@ -10,7 +11,7 @@ TEST(AST, dummy) {
   auto binary =
       std::make_shared<Binary>(Token{TokenType::kPlus, "+"sv, '+'}, lit2, lit3);
   auto grouping = std::make_shared<Grouping>(binary);
-  auto astPrinter = ASTPrinter(std::cout);
+  auto astPrinter = ASTPrinter{};
   grouping->accept(astPrinter);
   std::println("{}", astPrinter.to_string());
 }

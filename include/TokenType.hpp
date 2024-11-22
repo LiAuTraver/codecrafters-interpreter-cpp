@@ -32,7 +32,7 @@ public:
 
 public:
   /// @note no-explicit
-  TokenType(enum type_t type = kMonostate) : type(type) {}
+  TokenType(enum type_t type = kMonostate) : type(type) {} // NOLINT(google-explicit-constructor)
 
 public:
   string_view_t to_string_view() const noexcept;

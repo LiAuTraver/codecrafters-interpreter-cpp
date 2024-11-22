@@ -7,6 +7,7 @@
 #include "Token.hpp"
 
 namespace net::ancillarycat::loxograph {
+/// @interface ExprVisitor
 class ExprVisitor {
 public:
   virtual ~ExprVisitor() = default;
@@ -28,7 +29,7 @@ private:
   virtual void visit_impl(const Binary &expr) = 0;
   virtual void visit_impl(const Grouping &expr) = 0;
 };
-
+/// @interface Expr
 class Expr {
   using ostream_t = std::ostream;
   using ostringstream_t = std::ostringstream;
@@ -51,11 +52,12 @@ private:
     return os << expr.to_string();
   }
 };
-
+/// @implements Expr
 class Literal : public Expr {
 
 public:
-  Literal(Token literal) : literal(std::move(literal)) {} // NOLINT
+  Literal(Token literal) // NOLINT(google-explicit-constructor)
+      : literal(std::move(literal)) {}
 
 private:
   virtual void accept_impl(ExprVisitor &visitor) override {
@@ -143,8 +145,7 @@ public:
   using ostringstream_t = std::ostringstream;
 
 public:
-  ASTPrinter() = delete;
-  explicit ASTPrinter(ostream_t &os) { oss.set_rdbuf(os.rdbuf()); }
+  ASTPrinter() = default;
   virtual ~ASTPrinter() override = default;
 
 public:
@@ -173,6 +174,7 @@ private:
 };
 } // namespace net::ancillarycat::loxograph
 
+#ifdef LOXOGRAPH_USE_FMT_FORMAT
 template <> struct fmt::formatter<net::ancillarycat::loxograph::Expr> {
   constexpr auto parse(format_parse_context &ctx) { return ctx.begin(); }
   template <typename FormatContext>
@@ -181,7 +183,6 @@ template <> struct fmt::formatter<net::ancillarycat::loxograph::Expr> {
     return format_to(ctx.out(), "{}", expr.to_string());
   }
 };
-
 template <> struct fmt::formatter<net::ancillarycat::loxograph::ExprVisitor> {
   constexpr auto parse(format_parse_context &ctx) { return ctx.begin(); }
   template <typename FormatContext>
@@ -190,3 +191,4 @@ template <> struct fmt::formatter<net::ancillarycat::loxograph::ExprVisitor> {
     return format_to(ctx.out(), "{}", "ExprVisitor");
   }
 };
+#endif

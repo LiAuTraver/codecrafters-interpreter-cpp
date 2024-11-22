@@ -2,7 +2,7 @@
 
 #include "config.hpp"
 
-#ifndef LOXOGRAPH_USE_FMT_FORMAT
+#ifdef LOXOGRAPH_USE_FMT_FORMAT
 #  include <fmt.hh>
 #endif
 #include <std.hh>
@@ -48,7 +48,8 @@ class Grouping;
 class ExprVisitor;
 class DummyVisitor;
 
-class Parser;
+class parser;
+class parse_error;
 
 using utils::operator""s;
 using utils::operator""sv;

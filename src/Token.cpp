@@ -44,7 +44,7 @@ template <typename Ty>
 bool Token::is_integer(Ty &&value) const noexcept {
   return std::trunc(value) == value;
 }
-Token::string_type Token::number_to_string(FormatPolicy policy) const {
+Token::string_type Token::number_to_string(const FormatPolicy policy) const {
   if (auto ptr = cast_literal<long double>()) {
     // 42 -> 42.0
     if (is_integer(*ptr)) {

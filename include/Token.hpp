@@ -44,7 +44,7 @@ public:
       to_string(FormatPolicy policy = kDefault) const;
 
 public:
-  token_type type = TokenType::kMonostate;
+  token_type type{TokenType::kMonostate};
   string_type lexeme = string_type();
   dbg_only(mutable) std::any literal = std::any();
   uint_least32_t line = std::numeric_limits<

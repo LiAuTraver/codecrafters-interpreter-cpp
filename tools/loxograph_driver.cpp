@@ -1,3 +1,4 @@
+#include <print>
 #if __has_include(<spdlog/spdlog.h>)
 #  include <spdlog/spdlog.h>
 #endif
@@ -9,6 +10,7 @@
 #else
 #  define _In_
 #  define _Inout_
+#  define _In_opt_
 #endif
 #ifdef _WIN32
 #  include <io.h>
@@ -24,30 +26,34 @@
 #include "config.hpp"
 #include "execution_context.hpp"
 #include "lexer.hpp"
+#include "parser.hpp"
 #include "status.hpp"
 
 namespace net::ancillarycat::loxograph {
-int show_msg() {
-  fmt::print(stderr, "currently only one file is supported.\n");
-  return 65;
+utils::Status show_msg() {
+  dbg(critical, "please provide a command.");
+  contract_assert(false);
+  return utils::Status::kEmptyInput;
 }
-int onFileOperationFailed(const utils::Status &load_result) {
+utils::Status onFileOperationFailed(const utils::Status &load_result) {
   dbg(error, "{}", load_result.message().data());
-  return 65;
+  return utils::Status::kPermissionDeniedError;
 }
-int onLexOperationFailed(const utils::Status &lex_result) {
+utils::Status onLexOperationFailed(const utils::Status &lex_result) {
   dbg(warn, "{}", lex_result.message().data());
-  return 65;
+  return utils::Status::kError;
 }
-int onLexOperationExit(const lexer &lexer) {
+utils::Status onLexOperationExit(const lexer &lexer) {
   dbg(error, "lexing process completed with {} error(s).", lexer.error());
-  return 65;
+  return utils::Status::kError;
 }
-int onCommandNotFound(const ExecutionContext &ctx) {
-  dbg(error, "Unknown command: {}", ExecutionContext::command_sv(ctx.commands.front()));
-  return 65;
+utils::Status onCommandNotFound(const ExecutionContext &ctx) {
+  dbg(error,
+      "Unknown command: {}",
+      ExecutionContext::command_sv(ctx.commands.front()));
+  return utils::Status::kCommandNotFound;
 }
-void writeLexResults(ExecutionContext &ctx, const lexer::tokens_t& tokens) {
+void writeLexResults(ExecutionContext &ctx, const lexer::tokens_t &tokens) {
   std::ranges::for_each(tokens, [&ctx](const auto &token) {
     if (token.type.type == TokenType::kLexError) {
       ctx.output_stream << token.to_string() << std::endl;
@@ -59,12 +65,12 @@ void writeLexResults(ExecutionContext &ctx, const lexer::tokens_t& tokens) {
     }
   });
 }
-int tokenize(ExecutionContext &ctx) {
+utils::StatusOr<lexer> tokenize(ExecutionContext &ctx) {
   if (ctx.input_files.size() != 1) {
     return show_msg();
   }
   lexer lexer;
-  if (const utils::Status load_result = lexer.load(*ctx.input_files.begin());
+  if (const utils::Status load_result = lexer.load(*ctx.input_files.cbegin());
       !load_result.ok()) {
     return onFileOperationFailed(load_result);
   }
@@ -72,20 +78,21 @@ int tokenize(ExecutionContext &ctx) {
     return onLexOperationFailed(lex_result);
   }
   const auto tokens = lexer.get_tokens();
-  if (ctx.commands.front() == ExecutionContext::lex)
-    writeLexResults(ctx, tokens);
   if (!lexer.ok()) {
     return onLexOperationExit(lexer);
   }
-  dbg(trace, "lexing process completed successfully with no errors.");
-  return 0;
+  dbg(info, "lexing process completed successfully with no errors.");
+  return {std::move(lexer)};
 }
-int parse(ExecutionContext &ctx) {
-  // TODO(implement parser);
-	// parser parser;
-	// ...
+utils::StatusOr<parser> parse(ExecutionContext &ctx) {
   dbg(info, "Parsing...");
-  return 0;
+  parser parser;
+  parser.set_tokens(ctx.lexer->get_tokens()); //! take ownership
+  auto res = parser.parse();
+  if (res.ok()) {
+    return {std::move(parser)};
+  }
+  return res;
 }
 // clang-format off
 nodiscard_msg(loxo_main)
@@ -95,19 +102,50 @@ int loxo_main(_In_ const int argc,
 // clang-format on
 {
   if (!argv) {
-    // nothing now
+    dbg(info, "Debug mode enabled.");
   }
   if (argc == 0) {
-    return show_msg();
+    dbg(critical, "No arguments provided.");
+    return 1;
+  }
+  if (ctx.commands.empty()) {
+    std::println(stderr, "No command provided.");
+    return 1;
+  }
+  if (ctx.input_files.empty()) {
+    std::println(stderr, "No input files provided.");
+    return 1;
+  }
+  lexer lexer;
+  if (ctx.commands.front() == ExecutionContext::lex ||
+      ctx.commands.front() == ExecutionContext::parse) {
+    if (auto lex_res = tokenize(ctx)) {
+      lexer = std::move(*lex_res);
+    } else {
+      dbg(error, "Lexing failed: {}", lex_res.message());
+      return 65;
+    }
   }
   if (ctx.commands.front() == ExecutionContext::lex) {
-    return tokenize(ctx);
+    auto tokens = lexer.get_tokens();
+    writeLexResults(ctx, tokens);
+    return 0;
   }
+  ctx.lexer = &lexer;
   if (ctx.commands.front() == ExecutionContext::parse) {
-    // todo: implement parser
-    tokenize(ctx);
-    return parse(ctx);
+    if (auto parse_res = parse(ctx)) {
+      parser parser = std::move(*parse_res);
+      auto expr = parser.get_expr();
+      ASTPrinter astPrinter;
+      // ASTPrinter astPrinter(std::cout);
+      expr->accept(astPrinter);
+      // std::cout << ctx.output_stream.str() << std::endl;
+      std::cout << astPrinter.to_string() << std::endl;
+    } else {
+      dbg(error, "Parsing failed: {}", parse_res.message());
+      return 65;
+    }
   }
-  return onCommandNotFound(ctx);
+  return onCommandNotFound(ctx).code();
 }
 } // namespace net::ancillarycat::loxograph

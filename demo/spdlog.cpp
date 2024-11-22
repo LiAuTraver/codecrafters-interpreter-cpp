@@ -71,7 +71,7 @@ int main(int, char *[]) {
   // e.g. if some error happened:
   spdlog::dump_backtrace(); // log them now!
 
-  try {
+  // try {
     stdout_logger_example();
     basic_example();
     rotating_example();
@@ -103,14 +103,14 @@ int main(int, char *[]) {
     // Release all spdlog resources, and drop all loggers in the registry.
     // This is optional (only mandatory if using windows + async log).
     spdlog::shutdown();
-  }
+  // }
 
   // Exceptions will only be thrown upon failed logger or sink construction (not
   // during logging).
-  catch (const spdlog::spdlog_ex &ex) {
-    std::printf("Log initialization failed: %s\n", ex.what());
-    return 1;
-  }
+  // catch (const spdlog::spdlog_ex &ex) {
+  //   std::printf("Log initialization failed: %s\n", ex.what());
+  //   return 1;
+  // }
 }
 
 #include "spdlog/sinks/stdout_color_sinks.h"
