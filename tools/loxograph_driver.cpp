@@ -53,7 +53,7 @@ utils::Status onCommandNotFound(const ExecutionContext &ctx) {
       ExecutionContext::command_sv(ctx.commands.front()));
   return utils::Status::kCommandNotFound;
 }
-void writeLexResults(ExecutionContext &ctx, const lexer::tokens_t &tokens) {
+void writeLexResultsToContextStream(ExecutionContext &ctx, const lexer::tokens_t &tokens) {
   std::ranges::for_each(tokens, [&ctx](const auto &token) {
     if (token.type.type == TokenType::kLexError) {
       ctx.output_stream << token.to_string() << std::endl;
@@ -116,21 +116,20 @@ int loxo_main(_In_ const int argc,
     std::println(stderr, "No input files provided.");
     return 1;
   }
-  lexer lexer;
+  // lexer lexer;
+  // utils::Status status;
+  utils::StatusOr<lexer> maybe_lexer;
   if (ctx.commands.front() == ExecutionContext::lex ||
       ctx.commands.front() == ExecutionContext::parse) {
-    if (auto lex_res = tokenize(ctx)) {
-      lexer = std::move(*lex_res);
-    } else {
-      dbg(error, "Lexing failed: {}", lex_res.message());
-      return 65;
-    }
+    maybe_lexer = tokenize(ctx);
   }
   if (ctx.commands.front() == ExecutionContext::lex) {
-    auto tokens = lexer.get_tokens();
-    writeLexResults(ctx, tokens);
-    return 0;
+    auto tokens = (*maybe_lexer).get_tokens();
+    writeLexResultsToContextStream(ctx, tokens);
+    std::cout << ctx.output_stream.str() << std::endl;
+    return maybe_lexer.ok() ? 0 : 65;
   }
+  auto lexer = std::move(*maybe_lexer);
   ctx.lexer = &lexer;
   if (ctx.commands.front() == ExecutionContext::parse) {
     if (auto parse_res = parse(ctx)) {
@@ -141,6 +140,7 @@ int loxo_main(_In_ const int argc,
       expr->accept(astPrinter);
       // std::cout << ctx.output_stream.str() << std::endl;
       std::cout << astPrinter.to_string() << std::endl;
+      return 0;
     } else {
       dbg(error, "Parsing failed: {}", parse_res.message());
       return 65;
