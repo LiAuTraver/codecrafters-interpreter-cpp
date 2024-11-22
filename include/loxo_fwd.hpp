@@ -3,7 +3,7 @@
 #include "config.hpp"
 
 #ifndef LOXOGRAPH_USE_FMT_FORMAT
-#include <fmt.hh>
+#  include <fmt.hh>
 #endif
 #include <std.hh>
 namespace net::ancillarycat::utils {
@@ -15,13 +15,13 @@ class Status;
 /// @note the file reader is not thread-safe, and will consume a lot of memory
 /// if the file is too big. @todo here.
 class file_reader;
-using string = std::string;
-using string_view = std::string_view;
-using path = std::filesystem::path;
-using ifstream = std::ifstream;
-using ostringstream = std::ostringstream;
-using namespace std::string_view_literals;
-using namespace std::string_literals;
+using string = ::std::string;
+using string_view = ::std::string_view;
+using path = ::std::filesystem::path;
+using ifstream = ::std::ifstream;
+using ostringstream = ::std::ostringstream;
+using namespace ::std::string_view_literals;
+using namespace ::std::string_literals;
 #ifndef LOXOGRAPH_USE_FMT_FORMAT
 using ::std::format;
 using ::std::print;
@@ -33,10 +33,23 @@ using ::fmt::println;
 #endif
 } // namespace net::ancillarycat::utils
 namespace net::ancillarycat::loxograph {
-class lex_error;
 class lexer;
+class lex_error;
+
 class Token;
 class TokenType;
+
+class Expr;
+class Literal;
+class Unary;
+class Binary;
+class Grouping;
+
+class ExprVisitor;
+class DummyVisitor;
+
+class Parser;
+
 using utils::operator""s;
 using utils::operator""sv;
 static constexpr auto tolerable_chars = "_`"sv;

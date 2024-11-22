@@ -1,13 +1,9 @@
 #include "test_env.hpp"
 
-LOXOGRAPH_INITIALIZATION(trace);
-
-const auto command = "tokenize";
-
-auto get_result(auto &filepath) {
+auto get_result(const auto &filepath) {
   std::ostringstream oss;
   ExecutionContext ec;
-  ec.commands.push_back(command);
+  ec.commands.push_back(ExecutionContext::lex);
   ec.input_files.push_back(filepath);
   ec.output_stream.set_rdbuf(oss.rdbuf());
   auto _ = loxo_main(3, nullptr, ec);

@@ -8,6 +8,13 @@
 namespace net::ancillarycat::loxograph {
 class LOXOGRAPH_API Token {
 public:
+  enum FormatPolicy : uint8_t;
+  enum FormatPolicy : uint8_t {
+    kDefault = 0,
+    kTokenOnly = 1,
+  };
+
+public:
   using string_type = TokenType::string_t;
   using string_view_type = TokenType::string_view_t;
   using token_type = TokenType;
@@ -16,26 +23,30 @@ public:
 public:
   Token() : type(TokenType::kMonostate) {}
   explicit Token(
-      token_type type, string_type lexeme = std::string{},
+      token_type type,
+      string_type lexeme = std::string{},
       std::any literal = std::any{},
       uint_least32_t line = std::numeric_limits<
           std::underlying_type_t<enum token_type::type_t>>::signaling_NaN())
       : type(type), lexeme(std::move(lexeme)), literal(std::move(literal)),
         line(line) {}
   explicit Token(
-      token_type type, string_view_type lexeme = std::string_view{},
+      token_type type,
+      string_view_type lexeme = std::string_view{},
       std::any literal = std::any{},
       uint_least32_t line = std::numeric_limits<
           std::underlying_type_t<enum token_type::type_t>>::signaling_NaN())
       : type(type), lexeme(lexeme), literal(std::move(literal)), line(line) {}
 
 public:
-  nodiscard_msg(string_t) string_type to_string() const;
+  string_type number_to_string(FormatPolicy policy) const;
+  nodiscard_msg(string_t) string_type
+      to_string(FormatPolicy policy = kDefault) const;
 
 public:
   token_type type = TokenType::kMonostate;
   string_type lexeme = string_type();
-  std::any literal = std::any();
+  dbg_only(mutable) std::any literal = std::any();
   uint_least32_t line = std::numeric_limits<
       std::underlying_type_t<enum token_type::type_t>>::signaling_NaN();
   friend auto format_as(const Token &) -> Token::string_type;
@@ -53,8 +64,12 @@ private:
 } // namespace net::ancillarycat::loxograph
 
 template <>
-struct std::formatter<net::ancillarycat::loxograph::Token>
-    : std::formatter<net::ancillarycat::loxograph::Token::string_type> {
-  auto format(const net::ancillarycat::loxograph::Token &,
-              std::format_context &ctx) const -> decltype(ctx.out());
+struct std::formatter<net::ancillarycat::loxograph::Token> {
+  constexpr auto parse(std::format_parse_context &ctx) { return ctx.begin(); }
+    template <typename FormatContext>
+    auto format(const net::ancillarycat::loxograph::Token &token,
+                FormatContext &ctx) {
+      return format_to(ctx.out(), "{}", token.to_string());
+    }
 };
+

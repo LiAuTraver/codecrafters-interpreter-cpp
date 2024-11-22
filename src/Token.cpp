@@ -11,11 +11,9 @@ namespace net::ancillarycat::loxograph {
    @brief cast the literal to the specified type and also log the value in debug mode.
    @note clang-cl.exe does not fully support `try` and `catch` blocks but
    `any_cast` will throw an exception if the cast fails. For more information, see
-   @htmlonly
-   https://learn.microsoft.com/en-us/cpp/cpp/try-except-statement try-except-statement
-   https://clang.llvm.org/docs/MSVCCompatibility.html Asynchronous Exceptions
-   https://stackoverflow.com/questions/7049502/c-try-and-try-catch-finally try-catch-finally
-   @endhtmlonly
+   <a href="https://clang.llvm.org/docs/MSVCCompatibility.html#asynchronous-exceptions">Asynchronous Exceptions</a>,
+   <a href="https://stackoverflow.com/questions/7049502/c-try-and-try-catch-finally">try-catch-finally</a>,
+   and <a href="https://learn.microsoft.com/en-us/cpp/cpp/try-except-statement">try-except-statement</a>.
  */
 // clang-format on
 template <typename Ty>
@@ -26,8 +24,18 @@ inline auto Token::cast_literal() const -> decltype(auto)
   if (ptr) {
     dbg(info, "literal type: {}, value: {}", typeid(Ty).name(), *ptr);
   } else {
-    dbg(error, "bad any cast: {}", LOXOGRAPH_STACKTRACE);
-    contract_assert(0);
+    dbg_block({
+      dbg(error, "bad any cast: {}", LOXOGRAPH_STACKTRACE);
+      dbg(info,
+          "Expect type: {}, actual type: {}",
+          typeid(Ty).name(),
+          literal.type().name());
+      dbg(warn,
+          "\033[033mNote: this lexer treat all number as long double; meybe "
+          "you "
+          "accidentally passed an integer?\033[0m");
+      contract_assert(0);
+    });
   }
   return ptr;
 }
@@ -36,15 +44,48 @@ template <typename Ty>
 bool Token::is_integer(Ty &&value) const noexcept {
   return std::trunc(value) == value;
 }
-Token::string_type Token::to_string() const {
+Token::string_type Token::number_to_string(FormatPolicy policy) const {
+  if (auto ptr = cast_literal<long double>()) {
+    // 42 -> 42.0
+    if (is_integer(*ptr)) {
+      if (policy == kDefault)
+        return utils::format("NUMBER {} {:.1f}", lexeme, *ptr);
+      else if (policy == kTokenOnly)
+        return utils::format("{:.1f}", *ptr);
+      else {
+        dbg(critical, "unreachable code reached: {}", LOXOGRAPH_STACKTRACE);
+        contract_assert(false);
+        std::unreachable();
+      }
+    }
+    //  leave as is
+    if (policy == kDefault)
+      return utils::format("NUMBER {} {}", lexeme, *ptr);
+    else if (policy == kTokenOnly)
+      return utils::format("{}", *ptr);
+    else {
+      dbg(critical, "unreachable code reached: {}", LOXOGRAPH_STACKTRACE);
+      contract_assert(false);
+      std::unreachable();
+    }
+  } else {
+    dbg_block(literal = nullptr;);
+    if (policy == kDefault)
+      return utils::format("NUMBER {} {}", lexeme, "<failed to access data>");
+    else if (policy == kTokenOnly)
+      return utils::format("{}", "<failed to access data>");
+    else {
+      dbg(critical, "unreachable code reached: {}", LOXOGRAPH_STACKTRACE);
+      contract_assert(false);
+      std::unreachable();
+    }
+  }
+}
+Token::string_type Token::to_string(const FormatPolicy policy) const {
   using namespace std::string_literals;
   using enum TokenType::type_t;
   auto type_sv = ""sv;
   auto lexeme_sv = ""sv;
-  // const void *ptr = nullptr;
-  /// @note cannot use `string_view_type`, or the string_view will be destroyed.
-  ///       eg: `42.0` -> `▯2.0`
-  ///                      ^ actually a `\0`, but cannot be displayed.
   auto literal_sv = ""sv;
   if (!literal.has_value())
     literal_sv = "null"sv;
@@ -167,19 +208,7 @@ Token::string_type Token::to_string() const {
     contract_assert(lexeme_sv.substr(1, lexeme_sv.size() - 2), literal_sv);
     break;
   case kNumber:
-    type_sv = "NUMBER"sv;
-    lexeme_sv = lexeme;
-    if (auto ptr = cast_literal<long double>()) {
-      // 42 -> 42.0
-      if (is_integer(*ptr)) {
-        return utils::format("{} {} {:.1f}", type_sv, lexeme_sv, *ptr);
-      }
-      //  leave as is
-      return utils::format("{} {} {}", type_sv, lexeme_sv, *ptr);
-    } else
-      return utils::format("{} {} {}", type_sv, lexeme_sv,
-                           "<failed to access data>");
-    break;
+    return number_to_string(policy);
   case kAnd:
     type_sv = "AND"sv;
     lexeme_sv = "and"sv;
@@ -266,31 +295,36 @@ Token::string_type Token::to_string() const {
     literal_sv = "null"sv;
     break;
   case kLexError:
-    // /// @note message is different from the other cases.
-    if (auto ptr = cast_literal<error_t>())
-      return ptr->to_string(lexeme, line);
-    else
-      return utils::format("[line {}] Error: {}", line,
-                           "<failed to access data>");
+    if (policy == kDefault) {
+      // /// @note message is different from the other cases.
+      if (auto ptr = cast_literal<error_t>())
+        return ptr->to_string(lexeme, line);
+      else
+        return utils::format(
+            "[line {}] Error: {}", line, "<failed to access data>");
+    } else {
+      // do nothing
+      return ""s;
+    }
   default:
     dbg(critical, "unreachable code reached: {}", LOXOGRAPH_STACKTRACE);
-		contract_assert(false);
-		std::unreachable();
+    contract_assert(false);
     break;
   }
-  /// @note DON'T use `.data()` since it's not null-terminated and will the
-  /// string will last till the end
-  return utils::format("{} {} {}", type_sv, lexeme_sv, literal_sv);
+  if (policy == kDefault) {
+    /// @note DON'T use `.data()` since it's not null-terminated and will the
+    /// string will last till the end
+    return utils::format("{} {} {}", type_sv, lexeme_sv, literal_sv);
+  } else if (policy == kTokenOnly) {
+    // for ast print.
+    return utils::format("{}", lexeme_sv);
+  } else {
+    dbg(critical, "unreachable code reached: {}", LOXOGRAPH_STACKTRACE);
+    contract_assert(false);
+    std::unreachable();
+  }
 }
 auto format_as(const Token &token) -> Token::string_type {
   return token.to_string();
 }
 } // namespace net::ancillarycat::loxograph
-auto std::formatter<net::ancillarycat::loxograph::Token, char>::format(
-    const net::ancillarycat::loxograph::Token &t,
-    std::format_context &ctx) const -> decltype(ctx.out()) {
-  // clang-format off
-  return std::formatter<net::ancillarycat::loxograph::Token::string_type>
-            ::format(t.to_string(),ctx);
-  // clang-format on
-}

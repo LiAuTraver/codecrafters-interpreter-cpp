@@ -4,17 +4,19 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(fmt CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
-find_package(gtest CONFIG REQUIRED)
+find_package(GTest CONFIG REQUIRED)
 find_package(magic_enum CONFIG REQUIRED)
 include_directories(${CMAKE_SOURCE_DIR}/include)
 
+enable_testing()
+include(CTest)
 include(GoogleTest)
 if (${CMAKE_CXX_COMPILER} STREQUAL "MSVC")
     add_compile_options(/DGTEST_CREATE_SHARED_LIBRARY=1)
 else ()
     add_compile_options(-DGTEST_CREATE_SHARED_LIBRARY=1)
 endif ()
-# enable_testing()
+enable_testing()
 if (AC_CPP_DEBUG)
     macro(copy_dlls_for target)
         add_custom_command(TARGET ${target} POST_BUILD
@@ -36,19 +38,12 @@ target_link_libraries(spdlog_test PRIVATE
         magic_enum::magic_enum
         driver
 )
-
-# gtest_discover_tests(spdlog_test)
-# or:
-add_test(
-        NAME spdlog_test
-        COMMAND spdlog_test
-)
+gtest_discover_tests(spdlog_test)
 
 add_executable(scan_test
         scan.cpp
         ../tools/loxograph_driver.cpp
 )
-
 target_link_libraries(scan_test PRIVATE
         spdlog::spdlog
         fmt::fmt
@@ -59,3 +54,18 @@ target_link_libraries(scan_test PRIVATE
 )
 copy_dlls_for(scan_test)
 gtest_discover_tests(scan_test)
+
+add_executable(AST_test
+        AST.cpp
+        ../tools/loxograph_driver.cpp
+)
+target_link_libraries(AST_test PRIVATE
+        spdlog::spdlog
+        fmt::fmt
+        GTest::gtest
+        GTest::gtest_main
+        magic_enum::magic_enum
+        driver
+)
+copy_dlls_for(AST_test)
+gtest_discover_tests(AST_test)

@@ -85,6 +85,13 @@ struct ::fmt::formatter<::std::stacktrace> : ::fmt::formatter<::std::string> {
 #  include <spdlog/spdlog.h>
 #  define LOXOGRAPH_DEBUG_LOGGING(_level_, _msg_, ...)                         \
     ::spdlog::_level_(_msg_, ##__VA_ARGS__);
+#  define LOXOGRAPH_DEBUG_BLOCK(...)                                           \
+    const auto LOXOGRAPH_EXPAND_COUNTER(_loxograph_debug_block_at) = [&]()     \
+        -> std::nullptr_t {                                                    \
+          __VA_ARGS__                                                          \
+          return nullptr;                                                      \
+        }()
+#  define LOXOGRAPH_DEBUG_ONLY(...) __VA_ARGS__
 #  ifdef GTEST_API_
 // set the pattern with prefix `loxo` in yellow color.
 #    define LOXOGRAPH_DEBUG_LOGGING_SETUP(_level_, _msg_, ...)                 \
@@ -252,6 +259,8 @@ struct ::fmt::formatter<::std::stacktrace> : ::fmt::formatter<::std::string> {
 #  define LOXOGRAPH_POSTCONDITION(...)
 #  define LOXOGRAPH_NODISCARD_MSG(...)
 #  define LOXOGRAPH_DEBUG_LOGGING_SETUP(...)
+#  define LOXOGRAPH_DEBUG_BLOCK(...)
+#  define LOXOGRAPH_DEBUG_ONLY(...)
 #  define LOXOGRAPH_NOEXCEPT_IF(...) noexcept(__VA_ARGS__)
 #  define LOXOGRAPH_NOEXCEPT noexcept
 #endif
@@ -260,7 +269,7 @@ struct ::fmt::formatter<::std::stacktrace> : ::fmt::formatter<::std::string> {
 #define LOXOGRAPH_INITIALIZATION(_log_level_)                                  \
   [[maybe_unused]] /* LOXOGRAPH_API */                                         \
   static           /* <- msvc can't get through this.*/                        \
-      inline const auto LOXOGRAPH_INITIALIZATION =                             \
+      const auto LOXOGRAPH_INITIALIZATION =                                    \
           [](void) static constexpr /* <- msvc can't get through this.*/       \
       -> ::std::nullptr_t {                                                    \
     ::std::cout << ::std::unitbuf;                                             \
@@ -294,3 +303,12 @@ struct ::fmt::formatter<::std::stacktrace> : ::fmt::formatter<::std::string> {
 #  define dbg(...) LOXOGRAPH_DEBUG_LOGGING(__VA_ARGS__)
 #endif
 #define nodiscard_msg(...) LOXOGRAPH_NODISCARD_MSG(__VA_ARGS__)
+#define dbg_block(...) LOXOGRAPH_DEBUG_BLOCK(__VA_ARGS__)
+#define dbg_only(...) LOXOGRAPH_DEBUG_ONLY(__VA_ARGS__)
+// if exception was disabled, do nothing.
+#if defined(__cpp_exceptions) && __cpp_exceptions
+#define TODO(...) throw ::std::logic_error("TODO: " #__VA_ARGS__)
+#else
+#define TODO(...)                                                               \
+	LOXOGRAPH_DEBUG_LOGGING(critical, "TODO: " #__VA_ARGS__)
+#endif

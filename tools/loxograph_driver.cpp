@@ -1,21 +1,21 @@
 #if __has_include(<spdlog/spdlog.h>)
-#include <spdlog/spdlog.h>
+#  include <spdlog/spdlog.h>
 #endif
 #if __has_include(<fmt/core.h>)
-#include <fmt/core.h>
+#  include <fmt/core.h>
 #endif
 #if __has_include(<sal.h>)
-#include <sal.h>
+#  include <sal.h>
 #else
-#define _In_
-#define _Inout_
+#  define _In_
+#  define _Inout_
 #endif
 #ifdef _WIN32
-#include <io.h>
-#define isatty _isatty
-#define fileno _fileno
+#  include <io.h>
+#  define isatty _isatty
+#  define fileno _fileno
 #else
-#include <unistd.h>
+#  include <unistd.h>
 #endif
 
 #include <algorithm>
@@ -31,11 +31,11 @@ int show_msg() {
   fmt::print(stderr, "currently only one file is supported.\n");
   return 65;
 }
-int onFileOperationFailed(utils::Status &load_result) {
+int onFileOperationFailed(const utils::Status &load_result) {
   dbg(error, "{}", load_result.message().data());
   return 65;
 }
-int onLexOperationFailed(utils::Status &lex_result) {
+int onLexOperationFailed(const utils::Status &lex_result) {
   dbg(warn, "{}", lex_result.message().data());
   return 65;
 }
@@ -44,10 +44,10 @@ int onLexOperationExit(const lexer &lexer) {
   return 65;
 }
 int onCommandNotFound(const ExecutionContext &ctx) {
-  dbg(error, "Unknown command: {}", ctx.commands.front());
+  dbg(error, "Unknown command: {}", ExecutionContext::command_sv(ctx.commands.front()));
   return 65;
 }
-void writeLexResults(ExecutionContext &ctx, const lexer::tokens_t tokens) {
+void writeLexResults(ExecutionContext &ctx, const lexer::tokens_t& tokens) {
   std::ranges::for_each(tokens, [&ctx](const auto &token) {
     if (token.type.type == TokenType::kLexError) {
       ctx.output_stream << token.to_string() << std::endl;
@@ -64,16 +64,16 @@ int tokenize(ExecutionContext &ctx) {
     return show_msg();
   }
   lexer lexer;
-  utils::Status load_result = lexer.load(*ctx.input_files.begin());
-  if (!load_result.ok()) {
+  if (const utils::Status load_result = lexer.load(*ctx.input_files.begin());
+      !load_result.ok()) {
     return onFileOperationFailed(load_result);
   }
-  utils::Status lex_result = lexer.lex();
-  if (!lex_result.ok()) {
+  if (const utils::Status lex_result = lexer.lex(); !lex_result.ok()) {
     return onLexOperationFailed(lex_result);
   }
   const auto tokens = lexer.get_tokens();
-  writeLexResults(ctx, tokens);
+  if (ctx.commands.front() == ExecutionContext::lex)
+    writeLexResults(ctx, tokens);
   if (!lexer.ok()) {
     return onLexOperationExit(lexer);
   }
@@ -81,7 +81,11 @@ int tokenize(ExecutionContext &ctx) {
   return 0;
 }
 int parse(ExecutionContext &ctx) {
-  throw std::runtime_error("not implemented");
+  // TODO(implement parser);
+	// parser parser;
+	// ...
+  dbg(info, "Parsing...");
+  return 0;
 }
 // clang-format off
 nodiscard_msg(loxo_main)
@@ -96,11 +100,12 @@ int loxo_main(_In_ const int argc,
   if (argc == 0) {
     return show_msg();
   }
-  if (ctx.commands.front() == "tokenize") {
+  if (ctx.commands.front() == ExecutionContext::lex) {
     return tokenize(ctx);
   }
-  if (ctx.commands.front() == "parse") {
+  if (ctx.commands.front() == ExecutionContext::parse) {
     // todo: implement parser
+    tokenize(ctx);
     return parse(ctx);
   }
   return onCommandNotFound(ctx);
