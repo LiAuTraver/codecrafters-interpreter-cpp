@@ -27,11 +27,32 @@ std::any lexer::to_number(string_view_type value) {
     dbg(error, "Unable to convert string to number: {}", value);
     dbg(error, "Error code: {}", std::to_underlying(ec));
     dbg(error, "Error position: {}", p);
-    return std::any();
+    return {};
   }
   return {number};
 }
-lexer::status_t lexer::load(const path_type &filepath) {
+lexer::lexer(lexer &&other) noexcept
+    : head(std::exchange(other.head, 0)),
+      cursor(std::exchange(other.cursor, 0)),
+      contents(std::move(const_cast<string_type&>(other.contents))),
+      lexeme_views(std::move(other.lexeme_views)),
+      current_line(std::exchange(other.current_line, 1)),
+      tokens(std::move(other.tokens)),
+      error_count(std::exchange(other.error_count, 0)) {}
+lexer &lexer::operator=(lexer &&other) noexcept {
+  if (this != &other) {
+    head = std::exchange(other.head, 0);
+    cursor = std::exchange(other.cursor, 0);
+    const_cast<string_type &>(contents) =
+        std::move(const_cast<string_type &>(other.contents));
+    lexeme_views = std::move(other.lexeme_views);
+    current_line = std::exchange(other.current_line, 1);
+    tokens = std::move(other.tokens);
+    error_count = std::exchange(other.error_count, 0);
+  }
+  return *this;
+}
+lexer::status_t lexer::load(const path_type &filepath) const {
   if (not contents.empty())
     return utils::AlreadyExistsError("File already loaded");
   if (not std::filesystem::exists(filepath))
@@ -39,14 +60,6 @@ lexer::status_t lexer::load(const path_type &filepath) {
                                     filepath.string());
   file_reader_t reader(filepath);
   const_cast<string_type &>(contents) = reader.get_contents();
-  return utils::OkStatus();
-}
-lexer::status_t lexer::load(string_type &&content) {
-  if (not contents.empty())
-    return utils::AlreadyExistsError("Content already loaded");
-  const_cast<string_type &>(contents) = std::move(content);
-  tokens.clear();
-  lexeme_views.clear();
   return utils::OkStatus();
 }
 lexer::status_t lexer::load(const std::istream &ss) {
@@ -65,7 +78,7 @@ lexer::status_t lexer::lex() {
     head = cursor;
     next_token();
   }
-  add_token(TokenType::kEndOfFile);
+  add_token(kEndOfFile);
   return utils::OkStatus();
 }
 void lexer::add_identifier() {
@@ -74,7 +87,7 @@ void lexer::add_identifier() {
     add_token(it->second);
     return;
   }
-  add_token(TokenType::kIdentifier, value);
+  add_token(kIdentifier, value);
 }
 void lexer::add_number() {
   auto value = lex_number(false);
@@ -82,7 +95,7 @@ void lexer::add_number() {
     dbg(error, "invalid number.");
     return;
   }
-  add_token(TokenType::kNumber, value);
+  add_token(kNumber, value);
 }
 void lexer::add_string() {
   // hard to do...
@@ -94,7 +107,7 @@ void lexer::add_string() {
     return;
   }
   dbg(trace, "string value: {}", value);
-  add_token(TokenType::kString, value);
+  add_token(kString, value);
 }
 void lexer::add_comment() {
   while (peek() != '\n' && !is_at_end())
@@ -104,45 +117,39 @@ void lexer::next_token() {
   // token1 token2
   // 			 ^ cursor position
   contract_assert(cursor < contents.size());
-  auto c = get();
-  dbg(trace, "c: {}", c);
 
-  switch (c) {
+  switch (auto c = get()) {
   case '(':
-    return add_token(TokenType::kLeftParen);
+    return add_token(kLeftParen);
   case ')':
-    return add_token(TokenType::kRightParen);
+    return add_token(kRightParen);
   case '{':
-    return add_token(TokenType::kLeftBrace);
+    return add_token(kLeftBrace);
   case '}':
-    return add_token(TokenType::kRightBrace);
+    return add_token(kRightBrace);
   case ',':
-    return add_token(TokenType::kComma);
+    return add_token(kComma);
   case '.':
-    return add_token(TokenType::kDot);
+    return add_token(kDot);
   case '-':
-    // todo: negative number
-    return add_token(TokenType::kMinus);
+    // TODO: negative number
+    return add_token(kMinus);
   case '+':
-    return add_token(TokenType::kPlus);
+    return add_token(kPlus);
   case ';':
-    return add_token(TokenType::kSemicolon);
+    return add_token(kSemicolon);
   case '*':
-    return add_token(TokenType::kStar);
+    return add_token(kStar);
   case '!':
-    return add_token(advance_if_is('=') ? TokenType::kBangEqual
-                                        : TokenType::kBang);
+    return add_token(advance_if_is('=') ? kBangEqual : kBang);
   case '=':
-    return add_token(advance_if_is('=') ? TokenType::kEqualEqual
-                                        : TokenType::kEqual);
+    return add_token(advance_if_is('=') ? kEqualEqual : kEqual);
   case '<':
-    return add_token(advance_if_is('=') ? TokenType::kLessEqual
-                                        : TokenType::kLess);
+    return add_token(advance_if_is('=') ? kLessEqual : kLess);
   case '>':
-    return add_token(advance_if_is('=') ? TokenType::kGreaterEqual
-                                        : TokenType::kGreater);
+    return add_token(advance_if_is('=') ? kGreaterEqual : kGreater);
   case '/':
-    return advance_if_is('/') ? add_comment() : add_token(TokenType::kSlash);
+    return advance_if_is('/') ? add_comment() : add_token(kSlash);
   default:
     if (whitespace_chars.find(c) != string_view_type::npos)
       return;
@@ -165,24 +172,24 @@ void lexer::next_token() {
     dbg(error, "unexpected character: {}", c);
   }
 }
-lexer::char_t lexer::peek(size_t offset) {
+lexer::char_t lexer::peek(const size_t offset) const {
   if (is_at_end(offset))
     return 0; // equivalent to '\0'
   return contents[cursor + offset];
 }
-const lexer::char_t &lexer::get(size_t offset) {
+const lexer::char_t &lexer::get(const size_t offset) {
   contract_assert(cursor < contents.size());
   auto &c = contents[cursor];
   cursor += offset;
   return c;
 }
-bool lexer::advance_if_is(char_t expected) {
+bool lexer::advance_if_is(const char_t expected) {
   if (is_at_end() || contents[cursor] != expected)
     return false;
   cursor++;
   return true;
 }
-bool lexer::is_at_end(size_t offset) const {
+bool lexer::is_at_end(const size_t offset) const {
   return cursor + offset >= contents.size();
 }
 void lexer::add_token(token_type_t type, std::any literal) {
@@ -194,7 +201,7 @@ void lexer::add_token(token_type_t type, std::any literal) {
 void lexer::add_lex_error(const error_code_t type) {
   dbg(error, "Lexical error: {}", contents.substr(head, cursor - head));
   error_count++;
-  return add_token(TokenType::kLexError, std::make_any<error_t>(type));
+  return add_token(kLexError, std::make_any<error_t>(type));
 }
 lexer::status_t::Code lexer::lex_string() {
   while (peek() != '"' && !is_at_end()) {
@@ -234,8 +241,9 @@ std::any lexer::lex_number(const bool is_negative) {
   // 789_
   //    ^ cursor position
   auto value = contents.substr(head, cursor - head);
- /// @note codecrafter's test view all of it as double
- return to_number<long double>(value);
+  /// @note codecrafter's test view all of it as double
+  (void)is_floating_point;
+  return to_number<long double>(value);
   // if (is_negative && !is_floating_point) {
   //   return to_number<long long int>(value);
   // }
@@ -247,7 +255,7 @@ std::any lexer::lex_number(const bool is_negative) {
   // }
   // return to_number<double>(value);
 }
-auto lexer::get_tokens() -> lexer::tokens_t { return tokens; }
+auto lexer::get_tokens() -> tokens_t & { return tokens; }
 bool lexer::ok() const noexcept { return !error_count; }
 uint_least32_t lexer::error() const noexcept { return error_count; }
 lexer::string_view_type lexer::lex_identifier() {

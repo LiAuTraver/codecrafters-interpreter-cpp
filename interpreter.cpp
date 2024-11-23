@@ -53,6 +53,7 @@ void alterToolContext(loxograph::ExecutionContext &execution_context) {
     }
   }
 }
+// NOLINTNEXTLINE // <-- why clang-tidy warns the main function?
 int main(int argc, char **argv, char **envp) {
 
   auto &tool_context =
@@ -68,6 +69,7 @@ int main(int argc, char **argv, char **envp) {
                     ? "<no command provided>"
                     : loxograph::ExecutionContext::command_sv(
                           tool_context.commands.front()));
+            dbg(info, "Input files: {}", tool_context.input_files);
             dbg(info, "Execution directory: {}", tool_context.execution_dir);
             dbg(info, "Temp directory: {}", tool_context.tempdir));
 

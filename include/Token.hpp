@@ -21,22 +21,19 @@ public:
   using error_t = lex_error;
 
 public:
-  Token() : type(TokenType::kMonostate) {}
+  Token() = default;
   explicit Token(
       token_type type,
       string_type lexeme = std::string{},
       std::any literal = std::any{},
       uint_least32_t line = std::numeric_limits<
-          std::underlying_type_t<enum token_type::type_t>>::signaling_NaN())
-      : type(type), lexeme(std::move(lexeme)), literal(std::move(literal)),
-        line(line) {}
+          std::underlying_type_t<enum token_type::type_t>>::signaling_NaN());
   explicit Token(
       token_type type,
       string_view_type lexeme = std::string_view{},
       std::any literal = std::any{},
       uint_least32_t line = std::numeric_limits<
-          std::underlying_type_t<enum token_type::type_t>>::signaling_NaN())
-      : type(type), lexeme(lexeme), literal(std::move(literal)), line(line) {}
+          std::underlying_type_t<enum token_type::type_t>>::signaling_NaN());
 
 public:
   string_type number_to_string(FormatPolicy policy) const;
@@ -44,7 +41,7 @@ public:
       to_string(FormatPolicy policy = kDefault) const;
 
 public:
-  token_type type = TokenType::kMonostate;
+  token_type type{TokenType::kMonostate};
   string_type lexeme = string_type();
   dbg_only(mutable) std::any literal = std::any();
   uint_least32_t line = std::numeric_limits<
@@ -63,13 +60,11 @@ private:
 };
 } // namespace net::ancillarycat::loxograph
 
-template <>
-struct std::formatter<net::ancillarycat::loxograph::Token> {
+template <> struct std::formatter<net::ancillarycat::loxograph::Token> {
   constexpr auto parse(std::format_parse_context &ctx) { return ctx.begin(); }
-    template <typename FormatContext>
-    auto format(const net::ancillarycat::loxograph::Token &token,
-                FormatContext &ctx) {
-      return format_to(ctx.out(), "{}", token.to_string());
-    }
+  template <typename FormatContext>
+  auto format(const net::ancillarycat::loxograph::Token &token,
+              FormatContext &ctx) {
+    return format_to(ctx.out(), "{}", token.to_string());
+  }
 };
-

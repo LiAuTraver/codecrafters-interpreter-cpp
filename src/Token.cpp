@@ -42,9 +42,20 @@ inline auto Token::cast_literal() const -> decltype(auto)
 template <typename Ty>
   requires std::is_arithmetic_v<std::remove_cvref_t<Ty>>
 bool Token::is_integer(Ty &&value) const noexcept {
-  return std::trunc(value) == value;
+  return std::trunc(std::forward<Ty>(value)) == value;
 }
-Token::string_type Token::number_to_string(FormatPolicy policy) const {
+Token::Token(const token_type type,
+             string_type lexeme,
+             std::any literal,
+             const uint_least32_t line)
+    : type(type), lexeme(std::move(lexeme)), literal(std::move(literal)),
+      line(line) {}
+Token::Token(const token_type type,
+             const string_view_type lexeme,
+             std::any literal,
+             const uint_least32_t line)
+    : type(type), lexeme(lexeme), literal(std::move(literal)), line(line) {}
+Token::string_type Token::number_to_string(const FormatPolicy policy) const {
   if (auto ptr = cast_literal<long double>()) {
     // 42 -> 42.0
     if (is_integer(*ptr)) {
@@ -199,13 +210,18 @@ Token::string_type Token::to_string(const FormatPolicy policy) const {
     type_sv = "STRING"sv;
     lexeme_sv = lexeme;
     contract_assert(lexeme_sv.front() == '"' && lexeme_sv.back() == '"');
+    if (policy == FormatPolicy::kTokenOnly) {
+      // codecrafter's string lit pase output does not need `"`, so remove them
+      lexeme_sv = lexeme_sv.substr(1, lexeme_sv.size() - 2);
+    }
     // ptr = cast_literal<string_view_type>();
     // literal_sv =
     if (auto ptr = cast_literal<string_view_type>())
       literal_sv = *ptr;
     else
       literal_sv = "<failed to access data>"sv;
-    contract_assert(lexeme_sv.substr(1, lexeme_sv.size() - 2), literal_sv);
+    if (policy == kDefault)
+      contract_assert(lexeme_sv.substr(1, lexeme_sv.size() - 2), literal_sv);
     break;
   case kNumber:
     return number_to_string(policy);

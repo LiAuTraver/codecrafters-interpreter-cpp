@@ -1,16 +1,17 @@
-#include <print>
-#include "expr.hpp"
+#include <string>
 #include "test_env.hpp"
+
+auto get_result(const auto &filepath) {
+  ExecutionContext ec;
+  ec.commands.push_back(ExecutionContext::parse);
+  ec.input_files.push_back(filepath);
+  auto _ = loxo_main(3, nullptr, ec);
+  return ec.output_stream.str();
+}
+
 
 
 TEST(AST, dummy) {
-  // 2 + 3
-  auto lit2 = std::make_shared<Literal>(Token{TokenType::kNumber, "2"sv, 2.0l});
-  auto lit3 = std::make_shared<Literal>(Token{TokenType::kNumber, "3"sv, 3.0l});
-  auto binary =
-      std::make_shared<Binary>(Token{TokenType::kPlus, "+"sv, '+'}, lit2, lit3);
-  auto grouping = std::make_shared<Grouping>(binary);
-  auto astPrinter = ASTPrinter(std::cout);
-  grouping->accept(astPrinter);
-  std::println("{}", astPrinter.to_string());
+	auto result = get_result("Z:/loxograph/examples/parse.expr2.lox");
+	EXPECT_EQ(result, "true\n");
 }
