@@ -2,11 +2,13 @@
 #include <cstdint>
 #include <filesystem>
 #include <limits>
+#include <memory>
 #include <ostream>
 #include <string>
 #include <string_view>
 #include <unordered_set>
 #include "config.hpp"
+#include "parser.hpp"
 
 namespace net::ancillarycat::loxograph {
 class lexer;
@@ -29,7 +31,8 @@ struct ExecutionContext {
   std::filesystem::path tempdir;
   std::ostringstream output_stream;
   std::vector<std::filesystem::path> input_files;
-  loxograph::lexer* lexer = nullptr;
+	std::shared_ptr<class lexer> lexer = nullptr;
+	std::shared_ptr<class parser> parser = nullptr;
   // std::vector<std::filesystem::path> output_files;
   static constexpr auto $null = std::string_view{};
   void addCommands(char **&argv) {

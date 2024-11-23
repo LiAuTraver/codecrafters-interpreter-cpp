@@ -42,7 +42,7 @@ inline auto Token::cast_literal() const -> decltype(auto)
 template <typename Ty>
   requires std::is_arithmetic_v<std::remove_cvref_t<Ty>>
 bool Token::is_integer(Ty &&value) const noexcept {
-  return std::trunc(value) == value;
+  return std::trunc(std::forward<Ty>(value)) == value;
 }
 Token::string_type Token::number_to_string(const FormatPolicy policy) const {
   if (auto ptr = cast_literal<long double>()) {

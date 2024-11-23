@@ -27,14 +27,14 @@ std::any lexer::to_number(string_view_type value) {
     dbg(error, "Unable to convert string to number: {}", value);
     dbg(error, "Error code: {}", std::to_underlying(ec));
     dbg(error, "Error position: {}", p);
-    return std::any();
+    return {};
   }
   return {number};
 }
 lexer::lexer(lexer &&other) noexcept
     : head(std::exchange(other.head, 0)),
       cursor(std::exchange(other.cursor, 0)),
-      contents(std::move(other.contents)),
+      contents(std::move(const_cast<string_type&>(other.contents))),
       lexeme_views(std::move(other.lexeme_views)),
       current_line(std::exchange(other.current_line, 1)),
       tokens(std::move(other.tokens)),
@@ -132,7 +132,7 @@ void lexer::next_token() {
   case '.':
     return add_token(kDot);
   case '-':
-    // todo: negative number
+    // TODO: negative number
     return add_token(kMinus);
   case '+':
     return add_token(kPlus);

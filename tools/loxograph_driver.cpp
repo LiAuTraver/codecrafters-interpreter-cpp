@@ -1,3 +1,4 @@
+#include <cstddef>
 #include <print>
 #if __has_include(<spdlog/spdlog.h>)
 #  include <spdlog/spdlog.h>
@@ -43,8 +44,8 @@ utils::Status onLexOperationFailed(const utils::Status &lex_result) {
   dbg(warn, "{}", lex_result.message().data());
   return utils::Status::kError;
 }
-utils::Status onLexOperationExit(const lexer &lexer) {
-  dbg(error, "lexing process completed with {} error(s).", lexer.error());
+utils::Status onLexOperationExit(const ExecutionContext &ctx) {
+  dbg(error, "lexing process completed with {} error(s).", ctx.lexer->error());
   return utils::Status::kError;
 }
 utils::Status onCommandNotFound(const ExecutionContext &ctx) {
@@ -65,33 +66,31 @@ void writeLexResultsToContextStream(ExecutionContext &ctx, const lexer::tokens_t
     }
   });
 }
-utils::StatusOr<lexer> tokenize(ExecutionContext &ctx) {
+utils::Status tokenize(ExecutionContext &ctx) {
   if (ctx.input_files.size() != 1) {
     return show_msg();
   }
-  lexer lexer;
-  if (const utils::Status load_result = lexer.load(*ctx.input_files.cbegin());
+  // lexer lexer;
+	ctx.lexer = std::make_shared<class lexer>();
+  if (const utils::Status load_result = ctx.lexer->load(*ctx.input_files.cbegin());
       !load_result.ok()) {
     return onFileOperationFailed(load_result);
   }
-  if (const utils::Status lex_result = lexer.lex(); !lex_result.ok()) {
+  if (const utils::Status lex_result = ctx.lexer->lex(); !lex_result.ok()) {
     return onLexOperationFailed(lex_result);
   }
-  const auto tokens = lexer.get_tokens();
-  if (!lexer.ok()) {
-    return onLexOperationExit(lexer);
+  const auto tokens = ctx.lexer->get_tokens();
+  if (!ctx.lexer->ok()) {
+    return onLexOperationExit(ctx);
   }
   dbg(info, "lexing process completed successfully with no errors.");
-  return {std::move(lexer)};
+  return utils::Status::kOkStatus;
 }
-utils::StatusOr<parser> parse(ExecutionContext &ctx) {
+utils::Status parse(ExecutionContext &ctx) {
   dbg(info, "Parsing...");
-  parser parser;
-  parser.set_tokens(ctx.lexer->get_tokens()); //! take ownership
-  auto res = parser.parse();
-  if (res.ok()) {
-    return {std::move(parser)};
-  }
+	ctx.parser = std::make_shared<class parser>();
+  ctx.parser->set_views(ctx.lexer->get_tokens());
+  auto res = ctx.parser->parse();
   return res;
 }
 // clang-format off
@@ -116,33 +115,27 @@ int loxo_main(_In_ const int argc,
     std::println(stderr, "No input files provided.");
     return 1;
   }
-  // lexer lexer;
-  // utils::Status status;
-  utils::StatusOr<lexer> maybe_lexer;
+	utils::Status lex_result;
   if (ctx.commands.front() == ExecutionContext::lex ||
       ctx.commands.front() == ExecutionContext::parse) {
-    maybe_lexer = tokenize(ctx);
+    lex_result = tokenize(ctx);
   }
   if (ctx.commands.front() == ExecutionContext::lex) {
-    auto tokens = (*maybe_lexer).get_tokens();
+    auto tokens = ctx.lexer->get_tokens();
     writeLexResultsToContextStream(ctx, tokens);
     std::cout << ctx.output_stream.str() << std::endl;
-    return maybe_lexer.ok() ? 0 : 65;
+    return lex_result.ok() ? 0 : 65;
   }
-  auto lexer = std::move(*maybe_lexer);
-  ctx.lexer = &lexer;
   if (ctx.commands.front() == ExecutionContext::parse) {
-    if (auto parse_res = parse(ctx)) {
-      parser parser = std::move(*parse_res);
-      auto expr = parser.get_expr();
+    if (auto parse_result = parse(ctx); parse_result.ok()) {
+      auto expr = ctx.parser->get_expr();
       ASTPrinter astPrinter;
-      // ASTPrinter astPrinter(std::cout);
       expr->accept(astPrinter);
-      // std::cout << ctx.output_stream.str() << std::endl;
-      std::cout << astPrinter.to_string() << std::endl;
+      std::cout << ctx.output_stream.str() << std::endl;
+      // std::cout << astPrinter.to_string() << std::endl;
       return 0;
     } else {
-      dbg(error, "Parsing failed: {}", parse_res.message());
+      dbg(error, "Parsing failed: {}", parse_result.message());
       return 65;
     }
   }

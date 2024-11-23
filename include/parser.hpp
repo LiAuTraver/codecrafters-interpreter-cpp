@@ -5,6 +5,7 @@
 #include <vector>
 #include "config.hpp"
 #include "Expr.hpp"
+#include "spdlog/spdlog.h"
 #include "status.hpp"
 #include "Token.hpp"
 #include "TokenType.hpp"
@@ -26,19 +27,19 @@ enum class Precedence : uint8_t {
 class parser {
 public:
   using token_t = Token;
-  using tokens_t = std::vector<token_t>;
+  using token_views_t = std::span<token_t>;
   using token_type_t = Token::token_type;
   using string_type = Token::string_type;
-  using string_view_type = Token::string_view_type;
-  using size_type = tokens_t::size_type;
-  using ssize_type = decltype(std::ssize(std::declval<tokens_t>()));
+  using string_view_type = token_t::string_view_type;
+  using size_type = token_views_t::size_type;
+  using ssize_type = decltype(std::ssize(std::declval<token_views_t>()));
   using expr_t = Expr;
   using expr_ptr_t = std::shared_ptr<expr_t>;
 
 public:
   parser() = default;
   /// @note take ownership
-  parser &set_tokens(const tokens_t &tokens = {}) {
+  parser &set_views(const token_views_t &tokens = {}) {
     this->tokens = tokens;
     return *this;
   }
@@ -76,10 +77,11 @@ public:
 
     // default to add a group as the root node
     if (!expr_head)
-      return std::make_shared<Grouping>(std::make_shared<Literal>(Token{TokenType::kNil, "nil"sv, 0.0l}));
+      return std::make_shared<Grouping>(
+          std::make_shared<Literal>(Token{TokenType::kNil, "nil"sv, 0.0l}));
     // auto group = std::make_shared<Grouping>(expr_head);
     // return group;
-		return expr_head;
+    return expr_head;
   }
 
 private:
@@ -161,7 +163,8 @@ private:
       get();
       return std::make_shared<Grouping>(expr);
     }
-
+    dbg(critical, "Not implemented.");
+    contract_assert(false);
     return nullptr;
   }
 
@@ -175,7 +178,7 @@ private:
   }
 
 private:
-  tokens_t tokens;
+  token_views_t tokens;
   size_type current = 0;
   expr_ptr_t expr_head = nullptr;
 };
