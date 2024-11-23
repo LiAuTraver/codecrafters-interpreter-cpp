@@ -126,7 +126,8 @@ int loxo_main(_In_ const int argc,
     auto tokens = ctx.lexer->get_tokens();
     writeLexResultsToContextStream(ctx, tokens);
     // codecrafter's test needs stdout and stderr
-    std::cout << ctx.error_stream.str() << ctx.output_stream.str() << std::endl;
+    std::cerr << ctx.error_stream.str() ;
+    std::cout << ctx.output_stream.str() << std::endl;
     return lex_result.ok() ? 0 : 65;
   }
   if (ctx.commands.front() == ExecutionContext::parse) {
