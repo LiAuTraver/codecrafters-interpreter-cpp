@@ -18,6 +18,7 @@ auto parser::get(const size_type offset) -> token_t {
   return token;
 }
 auto parser::parse() -> utils::Status {
+	// TODO: do not use exceptions
   try {
     expr_head = expression();
     return utils::OkStatus();
@@ -121,7 +122,7 @@ auto parser::primary() -> expr_ptr_t { // NOLINT(misc-no-recursion)
       // auto _ = recovery_parse(
       //     {parse_error::kMissingParenthesis, "Expect expression."});
       // std::cerr << _->to_string() << std::endl;
-      throw recovery_parse(
+			throw recovery_parse(
           {parse_error::kMissingParenthesis, "Expect expression."});
     }
     get();

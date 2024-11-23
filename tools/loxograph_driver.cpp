@@ -140,6 +140,8 @@ int loxo_main(_In_ const int argc,
       return 0;
     } else {
       dbg(error, "Parsing failed: {}", parse_result.message());
+      ctx.error_stream << parse_result.message() << std::endl;
+      // for codecrafter's test
       std::cerr << parse_result.message() << std::endl;
       return 65;
     }

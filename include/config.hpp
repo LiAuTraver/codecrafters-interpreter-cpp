@@ -270,7 +270,7 @@ struct ::fmt::formatter<::std::stacktrace> : ::fmt::formatter<::std::string> {
   [[maybe_unused]] /* LOXOGRAPH_API */                                         \
   static           /* <- msvc can't get through this.*/                        \
       const auto LOXOGRAPH_INITIALIZATION =                                    \
-          [](void) static constexpr /* <- msvc can't get through this.*/       \
+          [](void) /* static constexpr <- msvc can't get through this.*/       \
       -> ::std::nullptr_t {                                                    \
     ::std::cout << ::std::unitbuf;                                             \
     ::std::cerr << ::std::unitbuf;                                             \

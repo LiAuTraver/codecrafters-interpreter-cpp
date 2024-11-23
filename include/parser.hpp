@@ -59,6 +59,9 @@ private:
   auto unary() -> expr_ptr_t;
   auto call() /* -> expr_ptr_t */ { TODO("implement call"); }
   auto primary() -> expr_ptr_t;
+  /// FIXME: 1. do not use exceptions for control flow(possiblly)
+  /// <br>
+  /// FIXME: 2. add a field to the parser to track the error, not returns a shared_ptr
   auto recovery_parse(const parse_error &) -> expr_ptr_t;
 
 private:

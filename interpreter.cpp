@@ -17,12 +17,6 @@
 #if __has_include(<fmt/core.h>)
 #  include <fmt/core.h>
 #endif
-#if __has_include(<sal.h>)
-#  include <sal.h>
-#else
-#  define _In_
-#  define _Inout_
-#endif
 #include "tools/execution_context.hpp"
 
 

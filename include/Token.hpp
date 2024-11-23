@@ -1,7 +1,7 @@
 #pragma once
 #include <any>
-#include <cstdint>
 #include <concepts>
+#include <cstdint>
 #include <limits>
 #include <numeric>
 
@@ -45,14 +45,18 @@ public:
       to_string(FormatPolicy policy = kDefault) const;
 
 public:
+  /// @brief the type of the token
   token_type type{TokenType::kMonostate};
+  /// @brief the lexeme. (the actual string)
   string_type lexeme = string_type();
+  /// @brief the literal value of the token
   dbg_only(mutable) std::any literal = std::any();
+  /// @brief the line number where the token is found
   uint_least32_t line = std::numeric_limits<
       std::underlying_type_t<enum token_type::type_t>>::signaling_NaN();
-  friend auto format_as(const Token &) -> Token::string_type;
 
 private:
+  friend auto format_as(const Token &) -> Token::string_type;
   template <typename Ty>
   inline auto cast_literal() const
       -> decltype(auto) // <- mix const/no-const pointer would result in a
