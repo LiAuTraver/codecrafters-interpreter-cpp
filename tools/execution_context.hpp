@@ -30,6 +30,7 @@ struct ExecutionContext {
   std::filesystem::path execution_dir;
   std::filesystem::path tempdir;
   std::ostringstream output_stream;
+  std::ostringstream error_stream;
   std::vector<std::filesystem::path> input_files;
   std::shared_ptr<class lexer> lexer = nullptr;
   std::shared_ptr<class parser> parser = nullptr;

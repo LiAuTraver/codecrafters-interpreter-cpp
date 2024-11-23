@@ -54,10 +54,11 @@ utils::Status onCommandNotFound(const ExecutionContext &ctx) {
       ExecutionContext::command_sv(ctx.commands.front()));
   return utils::Status::kCommandNotFound;
 }
-void writeLexResultsToContextStream(ExecutionContext &ctx, const lexer::tokens_t &tokens) {
+void writeLexResultsToContextStream(ExecutionContext &ctx,
+                                    const lexer::tokens_t &tokens) {
   std::ranges::for_each(tokens, [&ctx](const auto &token) {
     if (token.type.type == TokenType::kLexError) {
-      ctx.output_stream << token.to_string() << std::endl;
+      ctx.error_stream << token.to_string() << std::endl;
     }
   });
   std::ranges::for_each(tokens, [&ctx](const auto &token) {
@@ -71,8 +72,9 @@ utils::Status tokenize(ExecutionContext &ctx) {
     return show_msg();
   }
   // lexer lexer;
-	ctx.lexer = std::make_shared<class lexer>();
-  if (const utils::Status load_result = ctx.lexer->load(*ctx.input_files.cbegin());
+  ctx.lexer = std::make_shared<class lexer>();
+  if (const utils::Status load_result =
+          ctx.lexer->load(*ctx.input_files.cbegin());
       !load_result.ok()) {
     return onFileOperationFailed(load_result);
   }
@@ -88,7 +90,7 @@ utils::Status tokenize(ExecutionContext &ctx) {
 }
 utils::Status parse(ExecutionContext &ctx) {
   dbg(info, "Parsing...");
-	ctx.parser = std::make_shared<class parser>();
+  ctx.parser = std::make_shared<class parser>();
   ctx.parser->set_views(ctx.lexer->get_tokens());
   auto res = ctx.parser->parse();
   return res;
@@ -115,7 +117,7 @@ int loxo_main(_In_ const int argc,
     std::println(stderr, "No input files provided.");
     return 1;
   }
-	utils::Status lex_result;
+  utils::Status lex_result;
   if (ctx.commands.front() == ExecutionContext::lex ||
       ctx.commands.front() == ExecutionContext::parse) {
     lex_result = tokenize(ctx);
@@ -123,7 +125,8 @@ int loxo_main(_In_ const int argc,
   if (ctx.commands.front() == ExecutionContext::lex) {
     auto tokens = ctx.lexer->get_tokens();
     writeLexResultsToContextStream(ctx, tokens);
-    std::cout << ctx.output_stream.str() << std::endl;
+    // codecrafter's test needs stdout and stderr
+    std::cout << ctx.error_stream.str() << ctx.output_stream.str() << std::endl;
     return lex_result.ok() ? 0 : 65;
   }
   if (ctx.commands.front() == ExecutionContext::parse) {
