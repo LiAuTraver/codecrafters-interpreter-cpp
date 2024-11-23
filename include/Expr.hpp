@@ -1,9 +1,17 @@
 #pragma once
 
+#include <concepts>
+#include <iostream>
 #include <memory>
+#include <sstream>
+#include <string>
+#include <string_view>
 #include <utility>
+#include <vector>
+
 #include "config.hpp"
 #include "loxo_fwd.hpp"
+#include "parse_error.hpp"
 #include "Token.hpp"
 
 namespace net::ancillarycat::loxograph {
@@ -28,11 +36,14 @@ private:
   virtual void visit_impl(const Unary &expr) = 0;
   virtual void visit_impl(const Binary &expr) = 0;
   virtual void visit_impl(const Grouping &expr) = 0;
+  virtual void visit_impl(const IllegalExpr &expr) = 0;
 };
 /// @interface Expr
 class Expr {
+public:
   using ostream_t = std::ostream;
   using ostringstream_t = std::ostringstream;
+  using token_t = Token;
 
 public:
   using string_type = std::string;
@@ -83,11 +94,12 @@ private:
     visitor.visit(*this);
   }
   virtual string_type to_string_impl() const override {
-    return "(" + op.to_string(Token::kTokenOnly) + " " + expr->to_string() + ")";
+    return "(" + op.to_string(Token::kTokenOnly) + " " + expr->to_string() +
+           ")";
   }
 
 public:
-  Token op;
+  token_t op;
   std::shared_ptr<Expr> expr;
 };
 
@@ -103,8 +115,8 @@ private:
     visitor.visit(*this);
   }
   virtual string_type to_string_impl() const override {
-    return "(" + op.to_string(Token::kTokenOnly) + " " + left->to_string() + " " +
-           right->to_string() + ")";
+    return "(" + op.to_string(Token::kTokenOnly) + " " + left->to_string() +
+           " " + right->to_string() + ")";
   }
 
 public:
@@ -124,7 +136,7 @@ private:
     visitor.visit(*this);
   }
   virtual string_type to_string_impl() const override {
-  /// strange print format, but codecrafter's test needs this.
+    /// strange print format, but codecrafter's test needs this.
     return "(group " + expr->to_string() + ")";
   }
 
@@ -132,12 +144,36 @@ public:
   std::shared_ptr<Expr> expr;
 };
 
+/// @implements Expr
+class IllegalExpr : public Expr {
+public:
+  virtual ~IllegalExpr() = default;
+  IllegalExpr(Token token, parse_error error)
+      : token(std::move(token)), error(std::move(error)) {}
+
+private:
+  virtual void accept_impl(ExprVisitor &visitor) override {
+    visitor.visit(*this);
+  }
+  virtual std::string to_string_impl() const override {
+    return utils::format("[line {}] Error at '{}': {}",
+                         token.line,
+                         token.to_string(Token::kTokenOnly),
+                         error.message());
+  }
+
+public:
+  token_t token;
+  parse_error error;
+  // std::shared_ptr<IllegalExpr> next = nullptr;
+};
 class DummyVisitor : public ExprVisitor {
 public:
   virtual void visit_impl(const Literal &expr) override {}
   virtual void visit_impl(const Unary &expr) override {}
   virtual void visit_impl(const Binary &expr) override {}
   virtual void visit_impl(const Grouping &expr) override {}
+  virtual void visit_impl(const IllegalExpr &expr) override {}
 };
 
 class ASTPrinter : public ExprVisitor {
@@ -169,9 +205,14 @@ private:
     dbg(info, "Grouping: {}", expr.to_string());
     oss << expr << std::endl;
   }
+  virtual void visit_impl(const IllegalExpr &expr) override {
+    dbg(info, "IllegalExpr: {}", expr.to_string());
+    error_stream << expr << std::endl;
+  }
 
 private:
   ostringstream_t oss;
+  ostringstream_t error_stream;
 };
 } // namespace net::ancillarycat::loxograph
 

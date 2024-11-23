@@ -2,6 +2,7 @@
 #include <std.hh>
 #include "config.hpp"
 #include "Expr.hpp"
+#include "parse_error.hpp"
 #include "status.hpp"
 #include "Token.hpp"
 #include "TokenType.hpp"
@@ -20,6 +21,7 @@ enum class Precedence : uint8_t {
   kCall = 6,
   kPrimary = 7,
 };
+
 class LOXOGRAPH_API parser {
 public:
   using token_t = Token;
@@ -35,8 +37,7 @@ public:
 
 public:
   parser() = default;
-  /// @note take ownership
-  parser &set_views(const token_views_t &tokens = {});
+  parser &set_views(const token_views_t & = {});
 
 public:
   /// @brief main entry point for parsing.
@@ -58,13 +59,19 @@ private:
   auto unary() -> expr_ptr_t;
   auto call() /* -> expr_ptr_t */ { TODO("implement call"); }
   auto primary() -> expr_ptr_t;
+  auto recovery_parse(const parse_error &) -> expr_ptr_t;
 
 private:
   template <typename... Args>
     requires(std::is_enum_v<std::common_type_t<Args...>>)
-  bool inspect(Args &&...args);
-  bool is_at_end(size_type offset = 0) const;
-  auto get(size_type offset = 1) -> token_t;
+  bool inspect(Args &&...);
+  /// @brief check if the current token is at(or past) the end of the token
+  bool is_at_end(size_type = 0) const;
+  auto get(size_type = 1) -> token_t;
+  /// @brief get the current token(or the token at the offset) without advancing
+  /// the cursor
+  /// @param self the parser object
+  /// @param offset the offset from the current token(optional, default to 0)
   /// @note i dont want to write 4 different constness-related overloads. so
   /// just use deducing this.
   auto peek(this auto &&self, const ssize_type offset = 0) -> decltype(auto) {
@@ -77,6 +84,7 @@ private:
   token_views_t tokens;
   size_type current = 0;
   expr_ptr_t expr_head = nullptr;
+  bool is_in_panic = false;
 };
 template <typename... Args>
   requires(std::is_enum_v<std::common_type_t<Args...>>)

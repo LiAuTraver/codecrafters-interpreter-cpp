@@ -1,9 +1,17 @@
-#include "std.hh"
+#include <concepts>
+#include <limits>
+#include <numeric>
+#include <string>
+#include <string_view>
+#include <type_traits>
+#include <utility>
+#include <any>
 
 #include "config.hpp"
-#include "lex_error.hpp"
 #include "loxo_fwd.hpp"
+
 #include "Token.hpp"
+#include "lex_error.hpp"
 
 namespace net::ancillarycat::loxograph {
 // clang-format off

@@ -1,5 +1,9 @@
 #pragma once
 #include <source_location>
+#include <string>
+#include <string_view>
+#include <utility>
+#include <limits>
 
 #include "config.hpp"
 #include "loxo_fwd.hpp"
@@ -18,6 +22,7 @@ public:
     kInvalidArgument = 6,
     kCommandNotFound = 7,
     kEmptyInput = 8,
+    kParseError = 9,
     kUnknownError = std::numeric_limits<uint8_t>::max()
   };
 
@@ -28,7 +33,7 @@ public:
   nodiscard_msg(Status)
       Status(Code,
              string_view = "<no message provided>",
-             std::source_location = std::source_location::current());
+             const std::source_location & = std::source_location::current());
   nodiscard_msg(Status) Status(Status &&) noexcept;
   nodiscard_msg(Status) Status(const Status &);
   Status &operator=(const Status &that);

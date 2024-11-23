@@ -1,7 +1,10 @@
 #pragma once
-
 #include <unordered_map>
+#include <string>
+#include <string_view>
+#include <cstdint>
 
+#include "config.hpp"
 #include "loxo_fwd.hpp"
 
 namespace net::ancillarycat::loxograph {

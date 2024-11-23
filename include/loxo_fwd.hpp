@@ -4,8 +4,13 @@
 
 #ifdef LOXOGRAPH_USE_FMT_FORMAT
 #  include <fmt.hh>
+#else
+#  include <format>
+#  include <print>
 #endif
-#include <std.hh>
+#include <filesystem>
+#include <string>
+#include <string_view>
 namespace net::ancillarycat::utils {
 /// @brief A class that represents the status of a function call. it's designed
 /// to be as identical as possible to the `absl::Status` class, for
@@ -44,6 +49,7 @@ class Literal;
 class Unary;
 class Binary;
 class Grouping;
+class IllegalExpr;
 
 class ExprVisitor;
 class DummyVisitor;

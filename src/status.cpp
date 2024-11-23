@@ -6,9 +6,9 @@
 #include "status.hpp"
 namespace net::ancillarycat::utils {
 using namespace std::string_view_literals;
-Status::Status(Code code,
-               std::string_view message,
-               std::source_location location)
+Status::Status(const Code code,
+               const std::string_view message,
+               const std::source_location &location)
     : my_code(code), my_message(message), my_location(location) {}
 Status::Status(Status &&that) noexcept
     : my_code(that.my_code), my_message(std::move(that.my_message)),
@@ -57,22 +57,22 @@ Status OkStatus(const std::source_location &location) {
   return Status(Status::kOkStatus, "OkStatus", location);
 }
 LOXOGRAPH_API
-Status AlreadyExistsError(std::string_view message,
+Status AlreadyExistsError(const std::string_view message,
                           const std::source_location &location) {
   return Status(Status::kAlreadyExistsError, message, location);
 }
 LOXOGRAPH_API
-Status FileNotFoundError(std::string_view message,
+Status FileNotFoundError(const std::string_view message,
                          const std::source_location &location) {
   return Status(Status::kNotFoundError, message, location);
 }
 LOXOGRAPH_API
-Status UnknownError(std::string_view message,
+Status UnknownError(const std::string_view message,
                     const std::source_location &location) {
   return Status(Status::kUnknownError, message, location);
 }
 LOXOGRAPH_API
-Status PermissionDeniedError(std::string_view message,
+Status PermissionDeniedError(const std::string_view message,
                              const std::source_location &location) {
   return Status(Status::kPermissionDeniedError, message, location);
 }

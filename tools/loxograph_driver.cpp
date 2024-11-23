@@ -1,5 +1,7 @@
+#include <algorithm>
 #include <cstddef>
 #include <print>
+#include <ranges>
 #if __has_include(<spdlog/spdlog.h>)
 #  include <spdlog/spdlog.h>
 #endif
@@ -20,9 +22,6 @@
 #else
 #  include <unistd.h>
 #endif
-
-#include <algorithm>
-#include <ranges>
 
 #include "config.hpp"
 #include "execution_context.hpp"
@@ -71,7 +70,6 @@ utils::Status tokenize(ExecutionContext &ctx) {
   if (ctx.input_files.size() != 1) {
     return show_msg();
   }
-  // lexer lexer;
   ctx.lexer = std::make_shared<class lexer>();
   if (const utils::Status load_result =
           ctx.lexer->load(*ctx.input_files.cbegin());
@@ -94,6 +92,11 @@ utils::Status parse(ExecutionContext &ctx) {
   ctx.parser->set_views(ctx.lexer->get_tokens());
   auto res = ctx.parser->parse();
   return res;
+}
+void writeParseResultToContextStream(ExecutionContext &ctx) {
+  ASTPrinter astPrinter;
+  ctx.parser->get_expr()->accept(astPrinter);
+  ctx.output_stream << astPrinter.to_string();
 }
 // clang-format off
 nodiscard_msg(loxo_main)
@@ -126,20 +129,18 @@ int loxo_main(_In_ const int argc,
     auto tokens = ctx.lexer->get_tokens();
     writeLexResultsToContextStream(ctx, tokens);
     // codecrafter's test needs stdout and stderr
-    std::cerr << ctx.error_stream.str() ;
+    std::cerr << ctx.error_stream.str();
     std::cout << ctx.output_stream.str() << std::endl;
     return lex_result.ok() ? 0 : 65;
   }
   if (ctx.commands.front() == ExecutionContext::parse) {
     if (auto parse_result = parse(ctx); parse_result.ok()) {
-      auto expr = ctx.parser->get_expr();
-      ASTPrinter astPrinter;
-      expr->accept(astPrinter);
-      ctx.output_stream << astPrinter.to_string();
+      writeParseResultToContextStream(ctx);
       std::cout << ctx.output_stream.str() << std::endl;
       return 0;
     } else {
       dbg(error, "Parsing failed: {}", parse_result.message());
+      std::cerr << parse_result.message() << std::endl;
       return 65;
     }
   }

@@ -18,8 +18,12 @@ auto parser::get(const size_type offset) -> token_t {
   return token;
 }
 auto parser::parse() -> utils::Status {
-  expr_head = expression();
-  return utils::OkStatus();
+  try {
+    expr_head = expression();
+    return utils::OkStatus();
+  } catch (const expr_ptr_t &expr) {
+    return utils::Status{utils::Status::kParseError, expr->to_string()};
+  }
 }
 auto parser::get_expr() const -> expr_ptr_t {
 
@@ -101,13 +105,44 @@ auto parser::primary() -> expr_ptr_t { // NOLINT(misc-no-recursion)
     get();
     auto expr = expression();
     if (!inspect(kRightParen)) {
-      contract_assert(false);
+      // invalid syntax reached
+      // is_in_panic = true;
+      // TODO vvvvvv
+      // auto error_expr = recovery_parse(
+      //     {parse_error::kMissingParenthesis, "Expect expression."});
+      // if (is_at_end()) {
+      //
+      // } else if (inspect(kSemicolon)) {
+      //   get();
+      // } else {
+      //   dbg(critical, "unreachable code reached: {}", LOXOGRAPH_STACKTRACE);
+      //   contract_assert(false);
+      // }
+      // auto _ = recovery_parse(
+      //     {parse_error::kMissingParenthesis, "Expect expression."});
+      // std::cerr << _->to_string() << std::endl;
+      throw recovery_parse(
+          {parse_error::kMissingParenthesis, "Expect expression."});
     }
     get();
     return std::make_shared<Grouping>(expr);
   }
-  dbg(critical, "Not implemented.");
-  contract_assert(false);
-  return nullptr;
+  // invalid syntax reached
+
+  throw recovery_parse({parse_error::kUnknownError, "Expect expression."});
+}
+auto parser::recovery_parse(const parse_error &parse_error) -> expr_ptr_t {
+  /// advance until we have a semicolon
+  // cueerntly cursor is at the error token: peek() returns the error token,
+  // get() returns the error token and advances the cursor
+  auto error_token = get();
+  dbg(warn, "error at {}", error_token);
+  auto error_expr = std::make_shared<IllegalExpr>(error_token, parse_error);
+  while (!is_at_end() && !inspect(kSemicolon)) {
+    dbg_block(auto discarded_token = peek();
+              dbg(warn, "discarding {}", discarded_token););
+    get();
+  }
+  return error_expr;
 }
 } // namespace net::ancillarycat::loxograph

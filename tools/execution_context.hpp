@@ -9,9 +9,15 @@
 #include <unordered_set>
 #include "config.hpp"
 #include "parser.hpp"
-
+// clang-format off
 namespace net::ancillarycat::loxograph {
 class lexer;
+struct ExecutionContext;
+nodiscard_msg(loxo_main) extern
+int loxo_main(_In_ int ,
+              _In_ char**,
+              _Inout_ ExecutionContext &);
+// clang-format on
 /// mimic the from llvm clang-driver's ToolContext
 struct ExecutionContext {
   enum commands_t : uint8_t {

@@ -1,3 +1,4 @@
+#include <cstddef>
 #include <cstdio>
 #include <filesystem>
 #include <fstream>
@@ -22,23 +23,12 @@
 #  define _In_
 #  define _Inout_
 #endif
-#include <cstddef>
-#include <iostream>
-#include "config.hpp"
-#include "loxo_fwd.hpp"
 #include "tools/execution_context.hpp"
 
-// clang-format off
-namespace net::ancillarycat::loxograph {
-LOXOGRAPH_INITIALIZATION(trace);
-nodiscard_msg(loxo_main) extern
-int loxo_main(_In_ int ,
-              _In_ char**,
-              _Inout_ ExecutionContext &);
-// clang-format on
 
-} // namespace net::ancillarycat::loxograph
+LOXOGRAPH_INITIALIZATION(trace);
 using namespace net::ancillarycat;
+
 void alterToolContext(loxograph::ExecutionContext &execution_context) {
   static auto debugInputFilePath =
       utils::path{"Z:/loxograph/examples/dynamic.lox"};

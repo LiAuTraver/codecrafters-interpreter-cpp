@@ -1,5 +1,9 @@
 #pragma once
 #include <any>
+#include <cstdint>
+#include <concepts>
+#include <limits>
+#include <numeric>
 
 #include "config.hpp"
 #include "loxo_fwd.hpp"

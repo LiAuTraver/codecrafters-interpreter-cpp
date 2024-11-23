@@ -1,4 +1,17 @@
-#include "std.hh"
+#include <concepts>
+#include <locale>
+#include <source_location>
+#include <string>
+#include <string_view>
+#include <unordered_map>
+#include <vector>
+#include <charconv>
+#include <any>
+#include <filesystem>
+#include <fstream>
+#include <iostream>
+#include <sstream>
+#include <utility>
 
 #include "config.hpp"
 #include "lex_error.hpp"

@@ -1,4 +1,3 @@
-#include <string>
 #include "test_env.hpp"
 
 auto get_result(const auto &filepath) {
@@ -9,9 +8,7 @@ auto get_result(const auto &filepath) {
   return ec.output_stream.str();
 }
 
-
-
 TEST(AST, dummy) {
-	auto result = get_result("Z:/loxograph/examples/parse.expr2.lox");
-	EXPECT_EQ(result, "true\n");
+  auto result = get_result("Z:/loxograph/examples/parse.expr2.lox");
+  EXPECT_EQ(result, "true\n");
 }
