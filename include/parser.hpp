@@ -47,29 +47,23 @@ public:
   auto get_expr() const -> expr_ptr_t;
 
 private:
-  /// @note euqality has the lowest precedence
+  /// @brief euqality has the lowest precedence
   auto expression() -> expr_ptr_t;
-  /// @note equality has the second lowest precedence;
+  /// @brief equality has the second lowest precedence;
   ///			comparison generates equality.
   auto equality() -> expr_ptr_t;
-  /// @note dittos
   auto comparison() -> expr_ptr_t;
-  /// @note dittos
   auto term() -> expr_ptr_t;
-  // /// @note dittos
   auto factor() -> expr_ptr_t;
-  // /// @note dittos
   auto unary() -> expr_ptr_t;
-  // /// @note dittos
-  auto call() -> expr_ptr_t { TODO("implement call"); }
-  // /// @note dittos
+  auto call() /* -> expr_ptr_t */ { TODO("implement call"); }
   auto primary() -> expr_ptr_t;
 
 private:
   template <typename... Args>
     requires(std::is_enum_v<std::common_type_t<Args...>>)
   bool inspect(Args &&...args);
-  bool is_at_end(const size_type offset = 0) const;
+  bool is_at_end(size_type offset = 0) const;
   auto get(size_type offset = 1) -> token_t;
   /// @note i dont want to write 4 different constness-related overloads. so
   /// just use deducing this.

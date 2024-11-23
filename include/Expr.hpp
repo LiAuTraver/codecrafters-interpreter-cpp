@@ -83,7 +83,7 @@ private:
     visitor.visit(*this);
   }
   virtual string_type to_string_impl() const override {
-    return op.to_string(Token::kTokenOnly) + " " + expr->to_string();
+    return "(" + op.to_string(Token::kTokenOnly) + " " + expr->to_string() + ")";
   }
 
 public:
@@ -103,8 +103,8 @@ private:
     visitor.visit(*this);
   }
   virtual string_type to_string_impl() const override {
-    return op.to_string(Token::kTokenOnly) + " " + left->to_string() + " " +
-           right->to_string();
+    return "(" + op.to_string(Token::kTokenOnly) + " " + left->to_string() + " " +
+           right->to_string() + ")";
   }
 
 public:
@@ -124,6 +124,7 @@ private:
     visitor.visit(*this);
   }
   virtual string_type to_string_impl() const override {
+  /// strange print format, but codecrafter's test needs this.
     return "(group " + expr->to_string() + ")";
   }
 
