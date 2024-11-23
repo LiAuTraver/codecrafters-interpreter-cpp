@@ -131,8 +131,8 @@ int loxo_main(_In_ const int argc,
       auto expr = ctx.parser->get_expr();
       ASTPrinter astPrinter;
       expr->accept(astPrinter);
+      ctx.output_stream << astPrinter.to_string();
       std::cout << ctx.output_stream.str() << std::endl;
-      // std::cout << astPrinter.to_string() << std::endl;
       return 0;
     } else {
       dbg(error, "Parsing failed: {}", parse_result.message());
