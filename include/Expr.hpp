@@ -124,7 +124,7 @@ private:
     visitor.visit(*this);
   }
   virtual string_type to_string_impl() const override {
-    return "(" + expr->to_string() + ")";
+    return "(group " + expr->to_string() + ")";
   }
 
 public:

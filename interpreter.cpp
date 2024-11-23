@@ -53,6 +53,7 @@ void alterToolContext(loxograph::ExecutionContext &execution_context) {
     }
   }
 }
+// NOLINTNEXTLINE // <-- why clang-tidy warns the main function?
 int main(int argc, char **argv, char **envp) {
 
   auto &tool_context =
