@@ -19,7 +19,7 @@
 #  include <fmt/core.h>
 #  include <fmt/format.h>
 #endif
-#include "tools/execution_context.hpp"
+#include "execution_context.hpp"
 
 LOXOGRAPH_INITIALIZATION(trace);
 using namespace net::ancillarycat;
@@ -55,6 +55,7 @@ int main(int argc, char **argv, char **envp) {
                     : loxograph::ExecutionContext::command_sv(
                           tool_context.commands.front()));
             // dbg(info, "Input files: {}", tool_context.input_files);
+						// MSVC failed 										^^^^^^^^(a vec of path)
             std::ranges::for_each(
                 tool_context.input_files,
                 [](const auto &file) { dbg(info, "Input file: {}", file); });

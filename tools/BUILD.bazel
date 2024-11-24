@@ -1,2 +1,22 @@
-exports_files(["loxograph_driver.cpp"])
-exports_files(["execution_context.hpp"])
+cc_binary(
+    name = "interpreter",
+    srcs = [
+        "interpreter.cpp",
+        "loxograph_driver.cpp",
+				"execution_context.hpp",
+    ] ,
+    copts = [
+        "/std:c++latest",
+    ],
+    defines = [
+        "AC_CPP_DEBUG",
+        "LIBLOCOGRAPH_SHARED",
+    ],
+    includes = [
+        "driver/include",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//driver:driver",
+    ],
+)

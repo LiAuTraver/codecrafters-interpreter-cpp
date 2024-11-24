@@ -1,0 +1,6 @@
+vcpkg-installed
+build
+cmake-build-debug
+cmake-build-release
+bazel-out
+bazel-bin

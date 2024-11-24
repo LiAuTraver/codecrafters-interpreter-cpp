@@ -7,13 +7,13 @@
 #include <string>
 #include <string_view>
 #include <unordered_set>
-#include "../include/config.hpp"
+#include "../driver/include/config.hpp"
 // clang-format off
 namespace net::ancillarycat::loxograph {
 class lexer;
 class parser;
 struct ExecutionContext;
-nodiscard_msg(loxo_main) extern LOXOGRAPH_API
+nodiscard_msg(loxo_main) extern
 int loxo_main(_In_ int ,
               _In_ char**,
               _Inout_ ExecutionContext &);

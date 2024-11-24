@@ -23,11 +23,11 @@
 #  include <unistd.h>
 #endif
 
-#include "config.hpp"
+#include "../driver/include/config.hpp"
 #include "execution_context.hpp"
-#include "lexer.hpp"
-#include "parser.hpp"
-#include "status.hpp"
+#include "../driver/include/lexer.hpp"
+#include "../driver/include/parser.hpp"
+#include "../driver/include/status.hpp"
 
 namespace net::ancillarycat::loxograph {
 utils::Status show_msg() {
@@ -99,7 +99,7 @@ void writeParseResultToContextStream(ExecutionContext &ctx) {
   ctx.output_stream << astPrinter.to_string();
 }
 // clang-format off
-nodiscard_msg(loxo_main) LOXOGRAPH_API
+nodiscard_msg(loxo_main)
 int loxo_main(_In_ const int argc,
               _In_opt_ char **argv, //! @note argv can be nullptr(debug mode or google test)
               _Inout_ ExecutionContext &ctx)

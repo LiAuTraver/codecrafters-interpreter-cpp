@@ -1,14 +1,15 @@
 cc_test(
-   name = "dummy_test",
-   srcs = ["AST.cpp, test_env.hpp, tools/execution_context.hpp"],
-   includes = ["include"],
-   copts = [
-       "/Iexternal/gtest/googletest/include",
-       "/Iexternal/gtest/googletest",
-				"/std:c++latest",
-   ],
-   deps = [
-       "//:driver",
-       "@googletest//:gtest_main",
-   ],
+    name = "dummy",
+    srcs = ["AST.cpp, test_env.hpp, tools/execution_context.hpp"],
+    copts = [
+        "/Iexternal/gtest/googletest/include",
+        "/Iexternal/gtest/googletest",
+        "/std:c++latest",
+    ],
+		defines = ["AC_CPP_DEBUG"],
+    includes = ["driver/include"],
+    deps = [
+        "//driver:driver",
+        "@googletest//:gtest_main",
+    ],
 )
