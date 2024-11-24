@@ -1,0 +1,48 @@
+cc_binary(
+    name = "interpreter",
+    srcs = [
+        "interpreter.cpp",
+        "//tools:loxograph_driver.cpp",
+    ],
+    copts = [
+        "/std:c++latest",
+    ],
+    defines = [
+        "AC_CPP_DEBUG",
+        "LIBLOCOGRAPH_SHARED",
+    ],
+    includes = [
+        "include",
+        "tools",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":driver",
+        "@fmt",
+        "@spdlog",
+    ],
+)
+
+driver_srcs = glob(["src/*.cpp"])
+
+driver_includes = ["include"]
+
+cc_library(
+    name = "driver",
+    srcs = driver_srcs,
+    copts = [
+        "/std:c++latest",
+    ],
+    defines = [
+        "AC_CPP_DEBUG",
+        "LIBLOCOGRAPH_SHARED",
+        "driver_EXPORTS",
+    ],
+    includes = driver_includes,
+    linkstatic = False,
+    visibility = ["//visibility:public"],
+    deps = [
+        "@fmt",
+        "@spdlog",
+    ],
+)

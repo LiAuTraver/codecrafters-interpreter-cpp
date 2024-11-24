@@ -99,7 +99,7 @@ void writeParseResultToContextStream(ExecutionContext &ctx) {
   ctx.output_stream << astPrinter.to_string();
 }
 // clang-format off
-nodiscard_msg(loxo_main)
+nodiscard_msg(loxo_main) LOXOGRAPH_API
 int loxo_main(_In_ const int argc,
               _In_opt_ char **argv, //! @note argv can be nullptr(debug mode or google test)
               _Inout_ ExecutionContext &ctx)

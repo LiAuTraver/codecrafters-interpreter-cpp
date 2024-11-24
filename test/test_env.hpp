@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 #include <filesystem>
 #include "../tools/execution_context.hpp"
-#include "config.hpp"
+#include "../include/config.hpp"
 static inline auto you_should_not_include_this_header_file_twice =
     []() -> std::nullptr_t {
   LOXOGRAPH_INITIALIZATION(trace);

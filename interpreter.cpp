@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <cstddef>
 #include <cstdio>
 #include <filesystem>
@@ -16,16 +17,16 @@
 #endif
 #if __has_include(<fmt/core.h>)
 #  include <fmt/core.h>
+#  include <fmt/format.h>
 #endif
 #include "tools/execution_context.hpp"
-
 
 LOXOGRAPH_INITIALIZATION(trace);
 using namespace net::ancillarycat;
 
 void alterToolContext(loxograph::ExecutionContext &execution_context) {
   static auto debugInputFilePath =
-      utils::path{"Z:/loxograph/examples/dynamic.lox"};
+      std::filesystem::path{"Z:/loxograph/examples/dynamic.lox"};
   if (execution_context.commands.empty())
     execution_context.commands.emplace_back(loxograph::ExecutionContext::parse);
   if (execution_context.input_files.empty()) {
@@ -53,7 +54,10 @@ int main(int argc, char **argv, char **envp) {
                     ? "<no command provided>"
                     : loxograph::ExecutionContext::command_sv(
                           tool_context.commands.front()));
-            dbg(info, "Input files: {}", tool_context.input_files);
+            // dbg(info, "Input files: {}", tool_context.input_files);
+            std::ranges::for_each(
+                tool_context.input_files,
+                [](const auto &file) { dbg(info, "Input file: {}", file); });
             dbg(info, "Execution directory: {}", tool_context.execution_dir);
             dbg(info, "Temp directory: {}", tool_context.tempdir));
 

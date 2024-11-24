@@ -3,7 +3,8 @@
 #include "config.hpp"
 
 #ifdef LOXOGRAPH_USE_FMT_FORMAT
-#  include <fmt.hh>
+#  include <fmt/core.h>
+#  include <fmt/format.h>
 #else
 #  include <format>
 #  include <print>
