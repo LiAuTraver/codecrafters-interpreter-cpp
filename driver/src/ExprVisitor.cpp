@@ -116,7 +116,7 @@ ExprVisitor::expr_result_t ExprEvaluator::visit_impl(const Binary &expr) const {
         lhs.type().name(),
         rhs.type().name());
     dbg(warn, "current implementation only support same type binary operation");
-    return {};
+    return {syntax::False};
   }
   if (expr.op.type == TokenType::kEqualEqual) {
     return {is_deep_equal(lhs, rhs)};
