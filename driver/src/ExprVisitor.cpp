@@ -21,7 +21,8 @@ ExprEvaluator::is_true_value(const expr_result_t &value) const {
   if (value.type() == typeid(syntax::True)) {
     return syntax::True{};
   }
-  if (value.type() == typeid(syntax::False) || value.type() == typeid(syntax::Nil)) {
+  if (value.type() == typeid(syntax::False) ||
+      value.type() == typeid(syntax::Nil)) {
     return syntax::False{};
   }
   // fixme: double 0 is false or not?
@@ -109,10 +110,10 @@ ExprVisitor::expr_result_t ExprEvaluator::visit_impl(const Binary &expr) const {
       expr.op.type == TokenType::kEqualEqual) {
     return {is_deep_equal(lhs, rhs)};
   }
-  if (lhs.type() == typeid(string_view_type)) {
+  if (lhs.type() == typeid(syntax::String)) {
     if (expr.op.type == TokenType::kPlus) {
-      return {string_type{*utils::get_if<string_view_type>(lhs)} +
-              string_type{*utils::get_if<string_view_type>(rhs)}};
+      return {syntax::String{std::any_cast<syntax::String>(lhs) +
+                             std::any_cast<syntax::String>(rhs)}};
     }
   }
   if (lhs.type() == typeid(long double)) {

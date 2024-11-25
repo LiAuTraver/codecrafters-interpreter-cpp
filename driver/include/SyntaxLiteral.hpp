@@ -28,6 +28,12 @@ public:
   String(const string_view_type value) : value(value) {}
   virtual ~String() override = default;
 
+public:
+  String &operator+(const String &rhs) {
+    value += rhs.value;
+    return *this;
+  }
+
 private:
   auto to_string_impl(const utils::FormatPolicy &format_policy) const
       -> string_type override {
@@ -55,6 +61,7 @@ class Nil : public Value {
 public:
   constexpr Nil() = default;
   virtual ~Nil() = default;
+
 private:
   auto to_string_impl(const utils::FormatPolicy &format_policy) const
       -> string_type override {

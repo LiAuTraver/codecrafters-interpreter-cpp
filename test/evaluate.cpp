@@ -25,3 +25,8 @@ TEST(nil,nil){
   auto res = get_result("Z:/loxograph/examples/dynamic.lox");
   EXPECT_EQ(res, "false\n");
 }
+
+TEST(math,intermediate){
+  auto res = get_result("Z:/loxograph/examples/eval.cal.lox");
+  EXPECT_EQ(res, "75\n");
+}
