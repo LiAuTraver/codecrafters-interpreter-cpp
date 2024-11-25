@@ -27,10 +27,28 @@ ExprEvaluator::is_true_value(const expr_result_t &value) const {
   // }
   return syntax::True;
 }
-bool ExprEvaluator::is_deep_equal(const expr_result_t &lhs,
-                                  const expr_result_t &rhs) const {
+syntax::Boolean ExprEvaluator::is_deep_equal(const expr_result_t &lhs,
+                                             const expr_result_t &rhs) const {
+  if (lhs.type() != rhs.type()) {
+    return false;
+  }
+  if (lhs.type() == typeid(syntax::Nil)) {
+    return true;
+  }
+  if (lhs.type() == typeid(syntax::Boolean)) {
+    return {*utils::get_if<syntax::Boolean>(lhs) ==
+           *utils::get_if<syntax::Boolean>(rhs)};
+  }
+  if (lhs.type() == typeid(syntax::String)) {
+    return {*utils::get_if<syntax::String>(lhs) ==
+           *utils::get_if<syntax::String>(rhs)};
+  }
+  if (lhs.type() == typeid(long double)) {
+    return {syntax::Boolean{*utils::get_if<long double>(lhs) ==
+           *utils::get_if<long double>(rhs)}};
+  }
   /// TODO: how on earth can i implement this?
-  return false; // TODO: temporary solution
+  return syntax::False; // TODO: temporary solution
 }
 utils::Status ExprEvaluator::evaluate(const Expr &expr) const try {
   const_cast<expr_result_t &>(res) = expr.accept(*this);
@@ -100,9 +118,11 @@ ExprVisitor::expr_result_t ExprEvaluator::visit_impl(const Binary &expr) const {
     dbg(warn, "current implementation only support same type binary operation");
     return {};
   }
-  if (expr.op.type == TokenType::kBangEqual or
-      expr.op.type == TokenType::kEqualEqual) {
+  if (expr.op.type == TokenType::kEqualEqual) {
     return {is_deep_equal(lhs, rhs)};
+  }
+  if (expr.op.type == TokenType::kBangEqual) {
+    return {!is_deep_equal(lhs, rhs)};
   }
   if (lhs.type() == typeid(syntax::String)) {
     if (expr.op.type == TokenType::kPlus) {
