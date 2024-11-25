@@ -1,0 +1,14 @@
+load("//test:loxo_add_test.bzl", "loxo_add_test")
+
+loxo_add_test(
+		"dummy",
+		"AST.cpp",
+)
+loxo_add_test(
+		"scan",
+		"scan.cpp",
+)
+loxo_add_test(
+		"evaluate",
+		"evaluate.cpp",
+)

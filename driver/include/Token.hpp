@@ -1,7 +1,7 @@
 #pragma once
 #include <any>
-#include <cstdint>
 #include <concepts>
+#include <cstdint>
 #include <limits>
 #include <numeric>
 
@@ -10,57 +10,50 @@
 #include "TokenType.hpp"
 
 namespace net::ancillarycat::loxograph {
-class LOXOGRAPH_API Token {
+class LOXOGRAPH_API Token : public utils::Printable {
 public:
-  enum FormatPolicy : uint8_t;
-  enum FormatPolicy : uint8_t {
-    kDefault = 0,
-    kTokenOnly = 1,
-  };
-
-public:
-  using string_type = TokenType::string_t;
-  using string_view_type = TokenType::string_view_t;
   using token_type = TokenType;
   using error_t = lex_error;
+  using string_view_type = utils::string_view;
 
 public:
   Token() = default;
   explicit Token(
-      token_type type,
+      const token_type &type,
       string_type lexeme = std::string{},
       std::any literal = std::any{},
       uint_least32_t line = std::numeric_limits<
           std::underlying_type_t<enum token_type::type_t>>::signaling_NaN());
   explicit Token(
-      token_type type,
+      const token_type &type,
       string_view_type lexeme = std::string_view{},
       std::any literal = std::any{},
       uint_least32_t line = std::numeric_limits<
           std::underlying_type_t<enum token_type::type_t>>::signaling_NaN());
 
 public:
-  string_type number_to_string(FormatPolicy policy) const;
-  nodiscard_msg(string_t) string_type
-      to_string(FormatPolicy policy = kDefault) const;
+  string_type number_to_string(utils::FormatPolicy policy) const;
+private:
+  auto to_string_impl(const utils::FormatPolicy &) const -> string_type override;
 
 public:
+  /// @brief the type of the token
   token_type type{TokenType::kMonostate};
+  /// @brief the lexeme. (the actual string)
   string_type lexeme = string_type();
+  /// @brief the literal value of the token
   dbg_only(mutable) std::any literal = std::any();
+  /// @brief the line number where the token is found
   uint_least32_t line = std::numeric_limits<
       std::underlying_type_t<enum token_type::type_t>>::signaling_NaN();
-  friend auto format_as(const Token &) -> Token::string_type;
 
 private:
+  friend auto format_as(const Token &) -> Token::string_type;
   template <typename Ty>
   inline auto cast_literal() const
       -> decltype(auto) // <- mix const/no-const pointer would result in a
                         // compile error
     requires std::default_initializable<Ty>;
-  template <typename Ty>
-    requires std::is_arithmetic_v<std::remove_cvref_t<Ty>>
-  inline bool is_integer(Ty &&value) const noexcept;
 };
 } // namespace net::ancillarycat::loxograph
 

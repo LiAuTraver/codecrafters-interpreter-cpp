@@ -1,0 +1,16 @@
+cc_binary(
+		name = "benchmark",
+		srcs = [
+				"benchmark.cpp"
+		],
+		copts = [
+				"/std:c++latest"
+		],
+		defines = [
+				"AC_CPP_DEBUG",
+				"LIBLOCOGRAPH_SHARED"
+		],
+		deps = [
+				"@google_benchmark//:benchmark",
+		],
+)

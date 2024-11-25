@@ -22,12 +22,6 @@ Status::Status(const Status &that) {
   my_message = that.my_message;
   my_location = that.my_location;
 }
-Status &Status::operator=(const Status &that) {
-  my_code = that.my_code;
-  my_message = that.my_message;
-  my_location = that.my_location;
-  return *this;
-}
 Status &Status::operator=(Status &&that) noexcept {
   my_code = that.my_code;
   my_message = std::move(that.my_message);
@@ -54,26 +48,46 @@ std::string Status::from_source_location() const {
 }
 LOXOGRAPH_API
 Status OkStatus(const std::source_location &location) {
-  return Status(Status::kOkStatus, "OkStatus", location);
+  return {Status::kOkStatus, "OkStatus", location};
 }
 LOXOGRAPH_API
 Status AlreadyExistsError(const std::string_view message,
                           const std::source_location &location) {
-  return Status(Status::kAlreadyExistsError, message, location);
+  return {Status::kAlreadyExistsError, message, location};
 }
 LOXOGRAPH_API
 Status FileNotFoundError(const std::string_view message,
                          const std::source_location &location) {
-  return Status(Status::kNotFoundError, message, location);
+  return {Status::kNotFoundError, message, location};
 }
 LOXOGRAPH_API
 Status UnknownError(const std::string_view message,
                     const std::source_location &location) {
-  return Status(Status::kUnknownError, message, location);
+  return {Status::kUnknownError, message, location};
 }
 LOXOGRAPH_API
 Status PermissionDeniedError(const std::string_view message,
                              const std::source_location &location) {
-  return Status(Status::kPermissionDeniedError, message, location);
+  return {Status::kPermissionDeniedError, message, location};
+}
+nodiscard_msg(Status) LOXOGRAPH_API Status
+    InvalidArgument(const string_view message,
+                    const std::source_location &location) {
+  return {Status::kInvalidArgument, message, location};
+}
+nodiscard_msg(Status) LOXOGRAPH_API Status
+    CommandNotFound(const string_view message,
+                    const std::source_location &location) {
+  return {Status::kCommandNotFound, message, location};
+}
+nodiscard_msg(Status) LOXOGRAPH_API Status
+    EmptyInput(const string_view message,
+               const std::source_location &location) {
+  return {Status::kEmptyInput, message, location};
+}
+nodiscard_msg(Status) LOXOGRAPH_API Status
+    ParseError(const string_view message,
+               const std::source_location &location) {
+  return {Status::kParseError, message, location};
 }
 } // namespace net::ancillarycat::utils

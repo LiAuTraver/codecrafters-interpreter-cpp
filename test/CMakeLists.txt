@@ -42,7 +42,7 @@ gtest_discover_tests(spdlog_test)
 
 add_executable(scan_test
         scan.cpp
-        ../tools/loxograph_driver.cpp
+        ../shared/loxograph_driver.cpp
 )
 target_link_libraries(scan_test PRIVATE
         spdlog::spdlog
@@ -57,7 +57,7 @@ gtest_discover_tests(scan_test)
 
 add_executable(AST_test
         AST.cpp
-        ../tools/loxograph_driver.cpp
+        ../shared/loxograph_driver.cpp
 )
 target_link_libraries(AST_test PRIVATE
         spdlog::spdlog
@@ -69,3 +69,18 @@ target_link_libraries(AST_test PRIVATE
 )
 copy_dlls_for(AST_test)
 gtest_discover_tests(AST_test)
+
+add_executable(evaluate_test
+        evaluate.cpp
+        ../shared/loxograph_driver.cpp
+)
+target_link_libraries(evaluate_test PRIVATE
+        spdlog::spdlog
+        fmt::fmt
+        GTest::gtest
+        GTest::gtest_main
+        magic_enum::magic_enum
+        driver
+)
+copy_dlls_for(evaluate_test)
+gtest_discover_tests(evaluate_test)

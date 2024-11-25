@@ -1,5 +1,17 @@
 #pragma once
-#include <std.hh>
+
+#include <memory>
+#include <span>
+#include <string>
+#include <string_view>
+#include <vector>
+#include <variant>
+#include <iostream>
+#include <source_location>
+#include <type_traits>
+#include <utility>
+
+
 #include "config.hpp"
 #include "Expr.hpp"
 #include "parse_error.hpp"
@@ -31,7 +43,7 @@ public:
   using string_view_type = token_t::string_view_type;
   using size_type = token_views_t::size_type;
   using ssize_type = decltype(std::ssize(std::declval<token_views_t>()));
-  using expr_t = Expr;
+  using expr_t = expression::Expr;
   using expr_ptr_t = std::shared_ptr<expr_t>;
   using enum token_type_t::type_t;
 
@@ -59,6 +71,9 @@ private:
   auto unary() -> expr_ptr_t;
   auto call() /* -> expr_ptr_t */ { TODO("implement call"); }
   auto primary() -> expr_ptr_t;
+  /// FIXME: 1. do not use exceptions for control flow(possiblly)
+  /// <br>
+  /// FIXME: 2. add a field to the parser to track the error, not returns a shared_ptr
   auto recovery_parse(const parse_error &) -> expr_ptr_t;
 
 private:

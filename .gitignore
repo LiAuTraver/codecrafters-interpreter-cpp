@@ -57,4 +57,10 @@ vcpkg_installed
 .vs
 
 .cache
-*.lox
+# *.lox
+
+### Bazel specific files ###
+Testing
+MODULE.bazel.lock
+bazel-*
+.clwb

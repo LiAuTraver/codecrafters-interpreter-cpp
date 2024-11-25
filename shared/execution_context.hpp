@@ -1,4 +1,5 @@
 #pragma once
+
 #include <cstdint>
 #include <filesystem>
 #include <limits>
@@ -7,11 +8,17 @@
 #include <string>
 #include <string_view>
 #include <unordered_set>
+#include <vector>
+
 #include "config.hpp"
-#include "parser.hpp"
+namespace net::ancillarycat::loxograph::expression {
+class ExprVisitor;
+class ExprEvaluator;
+}
 // clang-format off
 namespace net::ancillarycat::loxograph {
 class lexer;
+class parser;
 struct ExecutionContext;
 nodiscard_msg(loxo_main) extern
 int loxo_main(_In_ int ,
@@ -21,13 +28,16 @@ int loxo_main(_In_ int ,
 /// mimic the from llvm clang-driver's ToolContext
 struct ExecutionContext {
   enum commands_t : uint8_t {
-    help = 0,
-    lex = 1,
-    parse = 2,
-    compile = 4,
-    run = 8,
-    test = 16,
-    version,
+    help = 1 << 0,
+    lex = 1 << 1,
+    parse = 1 << 2,
+    interpret = 1 << 3,
+    version = 1 << 4,
+    run = 1 << 5,
+    test = 1 << 6,
+    needs_lex = lex | parse | interpret,
+    needs_parse = parse | interpret,
+    needs_interpret = interpret,
     unknown = std::numeric_limits<uint8_t>::max(),
   };
   std::filesystem::path executable_name;
@@ -40,6 +50,7 @@ struct ExecutionContext {
   std::vector<std::filesystem::path> input_files;
   std::shared_ptr<class lexer> lexer = nullptr;
   std::shared_ptr<class parser> parser = nullptr;
+  std::shared_ptr<expression::ExprEvaluator> interpreter = nullptr;
   // std::vector<std::filesystem::path> output_files;
   static constexpr auto $null = std::string_view{};
   void addCommands(char **&argv);
@@ -54,8 +65,8 @@ inline void ExecutionContext::addCommands(char **&argv) {
     commands.emplace_back(commands_t::parse);
   } else if (std::string_view(*(argv + 1)) == "tokenize") {
     commands.emplace_back(commands_t::lex);
-  } else if (std::string_view(*(argv + 1)) == "compile") {
-    commands.emplace_back(commands_t::compile);
+  } else if (std::string_view(*(argv + 1)) == "evaluate") {
+    commands.emplace_back(commands_t::interpret);
   } else if (std::string_view(*(argv + 1)) == "run") {
     commands.emplace_back(commands_t::run);
   } else if (std::string_view(*(argv + 1)) == "test") {
@@ -102,7 +113,7 @@ inline std::string_view ExecutionContext::command_sv(const commands_t &cmd) {
     return "parse"sv;
   case lex:
     return "tokenize"sv;
-  case compile:
+  case interpret:
     return "compile"sv;
   case run:
     return "run"sv;

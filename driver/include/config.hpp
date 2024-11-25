@@ -16,6 +16,16 @@
 #  define LOXOGRAPH_INLINE inline
 #endif
 
+#if __has_include(<sal.h>)
+#  include <sal.h>
+#else
+#  define _In_
+#  define _Inout_
+#  define _Out_
+#  define _Outptr_
+#  define _Outptr_result_maybenull_
+#endif
+
 #if defined(AC_CPP_DEBUG)
 /// @def LOXOGRAPH_DEBUG_ENABLED
 /// @note only defined in debug mode; never define it when submitting the code
@@ -142,8 +152,6 @@ struct ::fmt::formatter<::std::stacktrace> : ::fmt::formatter<::std::string> {
     switch (0)                                                                 \
     case 0:                                                                    \
     default:
-/// @note like `stacktrace`, `source_location` is not fully supported
-/// sometimes.
 #  define LOXOGRAPH_FILENAME (::std::source_location::current().file_name())
 #  define LOXOGRAPH_FUNCTION_NAME LOXOGRAPH_DEBUG_FUNCTION_NAME
 #  define LOXOGRAPH_LINE (::std::source_location::current().line())
@@ -270,7 +278,7 @@ struct ::fmt::formatter<::std::stacktrace> : ::fmt::formatter<::std::string> {
   [[maybe_unused]] /* LOXOGRAPH_API */                                         \
   static           /* <- msvc can't get through this.*/                        \
       const auto LOXOGRAPH_INITIALIZATION =                                    \
-          [](void) static constexpr /* <- msvc can't get through this.*/       \
+          [](void) /* static constexpr <- msvc can't get through this.*/       \
       -> ::std::nullptr_t {                                                    \
     ::std::cout << ::std::unitbuf;                                             \
     ::std::cerr << ::std::unitbuf;                                             \
@@ -307,8 +315,7 @@ struct ::fmt::formatter<::std::stacktrace> : ::fmt::formatter<::std::string> {
 #define dbg_only(...) LOXOGRAPH_DEBUG_ONLY(__VA_ARGS__)
 // if exception was disabled, do nothing.
 #if defined(__cpp_exceptions) && __cpp_exceptions
-#define TODO(...) throw ::std::logic_error("TODO: " #__VA_ARGS__)
+#  define TODO(...) throw ::std::logic_error("TODO: " #__VA_ARGS__)
 #else
-#define TODO(...)                                                               \
-	LOXOGRAPH_DEBUG_LOGGING(critical, "TODO: " #__VA_ARGS__)
+#  define TODO(...) LOXOGRAPH_DEBUG_LOGGING(critical, "TODO: " #__VA_ARGS__)
 #endif

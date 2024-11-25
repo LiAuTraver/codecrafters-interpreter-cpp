@@ -1,17 +1,17 @@
-#include <concepts>
-#include <locale>
-#include <source_location>
-#include <string>
-#include <string_view>
-#include <unordered_map>
-#include <vector>
-#include <charconv>
 #include <any>
+#include <charconv>
+#include <concepts>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <locale>
+#include <source_location>
 #include <sstream>
+#include <string>
+#include <string_view>
+#include <unordered_map>
 #include <utility>
+#include <vector>
 
 #include "config.hpp"
 #include "lex_error.hpp"
@@ -47,7 +47,7 @@ std::any lexer::to_number(string_view_type value) {
 lexer::lexer(lexer &&other) noexcept
     : head(std::exchange(other.head, 0)),
       cursor(std::exchange(other.cursor, 0)),
-      contents(std::move(const_cast<string_type&>(other.contents))),
+      contents(std::move(const_cast<string_type &>(other.contents))),
       lexeme_views(std::move(other.lexeme_views)),
       current_line(std::exchange(other.current_line, 1)),
       tokens(std::move(other.tokens)),
@@ -97,7 +97,20 @@ lexer::status_t lexer::lex() {
 void lexer::add_identifier() {
   auto value = lex_identifier();
   if (auto it = keywords.find(value); it != keywords.end()) {
-    add_token(it->second);
+    // add_token(it->second);
+    switch (it->second.type) {
+    case kTrue:
+      add_token(kTrue, true);
+      break;
+    case kFalse:
+      add_token(kFalse, false);
+      break;
+    case kNil:
+      add_token(kNil, nullptr);
+    default:
+      dbg(warn, "unimplemented keyword: {}", value);
+      add_token(it->second);
+    }
     return;
   }
   add_token(kIdentifier, value);

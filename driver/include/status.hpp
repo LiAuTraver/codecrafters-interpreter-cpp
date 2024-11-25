@@ -36,7 +36,7 @@ public:
              const std::source_location & = std::source_location::current());
   nodiscard_msg(Status) Status(Status &&) noexcept;
   nodiscard_msg(Status) Status(const Status &);
-  Status &operator=(const Status &that);
+  Status &operator=(const Status &) = default;
   Status &operator=(Status &&that) noexcept;
   virtual ~Status() = default;
 
@@ -91,27 +91,22 @@ public:
     return *this;
   }
 
-  value_type value() const {
-    contract_assert(ok());
-    return my_value;
-  }
+	value_type value(this auto&& self) {
+		contract_assert(self.ok());
+		return self.my_value;
+	}
 
-  value_type value_or(value_type && default_value) const {
-    return ok() ? my_value : std::move(default_value);
-  }
+	value_type value_or(this auto&& self, const value_type &default_value) {
+		return self.ok() ? self.my_value : default_value;
+	}
 
   explicit operator bool() const { return ok(); }
 
-  value_type operator*() const { return my_value; }
-  value_type operator->() const {
-    contract_assert(ok());
-    return my_value;
-  }
-  value_type &operator*() { return my_value; }
-  value_type &operator->() {
-    contract_assert(ok());
-    return my_value;
-  }
+	value_type operator*(this auto&& self) { return self.my_value; }
+	value_type operator->(this auto&& self) {
+		contract_assert(self.ok());
+		return self.my_value;
+	}
 
 private:
   value_type my_value;
@@ -132,4 +127,17 @@ nodiscard_msg(Status) LOXOGRAPH_API Status UnknownError(
 nodiscard_msg(Status) LOXOGRAPH_API Status PermissionDeniedError(
     string_view,
     const std::source_location & = std::source_location::current());
+nodiscard_msg(Status) LOXOGRAPH_API Status InvalidArgument(
+		string_view,
+		const std::source_location & = std::source_location::current());
+nodiscard_msg(Status) LOXOGRAPH_API Status CommandNotFound(
+		string_view,
+		const std::source_location & = std::source_location::current());
+nodiscard_msg(Status) LOXOGRAPH_API Status EmptyInput(
+		string_view,
+		const std::source_location & = std::source_location::current());
+nodiscard_msg(Status) LOXOGRAPH_API Status ParseError(
+		string_view,
+		const std::source_location & = std::source_location::current());
+		
 } // namespace net::ancillarycat::utils
