@@ -156,11 +156,10 @@ auto ExprEvaluator::to_string_impl(
 // print as-is
 #if AC_CPP_DEBUG
     return utils::format(
-        "{:.f}",
-        *ptr); // std::format failed to handle `.f` withouth a number;
-               // anyway, codecrafter's test just requires .1.
+        "{}",
+        *ptr); // std::format failed to handle `.f` without a number;
 #else
-    return utils::format("{:.1f}", *ptr);
+    return utils::format("{}", *ptr);
 #endif
   }
   if (res.type() == typeid(syntax::String))
