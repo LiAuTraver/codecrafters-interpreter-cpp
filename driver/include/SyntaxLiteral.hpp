@@ -72,37 +72,48 @@ private:
     return "nil"sv;
   }
 };
-class True : public Value {
+class Boolean : public Value {
 public:
-  constexpr True() = default;
-  virtual ~True() = default;
+  constexpr Boolean() = default;
+  constexpr Boolean(const bool value) : value(value) {}
+  constexpr Boolean(const long double value) : value(!!value) {}
+  Boolean(const Boolean &value) : value(value.value) {}
+  Boolean &operator=(const Boolean &value) {
+    this->value = value.value;
+    return *this;
+  }
+  Boolean(Boolean &&value) noexcept : value(std::move(value.value)) {}
+  Boolean &operator=(Boolean &&value) noexcept {
+    this->value = std::move(value.value);
+    return *this;
+  }
+  auto operator==(const Boolean &rhs) const -> bool {
+    return value == rhs.value;
+  }
+  auto operator<=>(const Boolean &rhs) const -> std::strong_ordering {
+    return value <=> rhs.value;
+  }
+  auto operator!() const -> Boolean { return Boolean{!value}; }
+
+  virtual ~Boolean() = default;
 
 private:
   auto to_string_impl(const utils::FormatPolicy &format_policy) const
       -> string_type override {
-    return "true"s;
+      contract_assert(value.has_value());
+    return value.value() ? "true"s : "false"s;
   }
-  auto to_string_view_impl(const utils::FormatPolicy &format_policy) const
-      -> string_view_type override {
-    return "true"sv;
+  auto to_string_view_impl(const utils::FormatPolicy &format_policy) const -> string_view_type override{
+    contract_assert(value.has_value());
+    return value.value() ? "true"sv : "false"sv;
   }
-};
-class False : public Value {
-public:
-  constexpr False() = default;
-  virtual ~False() = default;
 
 private:
-  auto to_string_impl(const utils::FormatPolicy &format_policy) const
-      -> string_type override {
-    return "false"s;
-  }
-  auto to_string_view_impl(const utils::FormatPolicy &format_policy) const
-      -> string_view_type override {
-    return "false"sv;
-  }
+  std::optional<bool> value = std::nullopt;
 };
-
+static constexpr auto True = Boolean{true};
+static constexpr auto False = Boolean{false};
+inline constexpr auto operator!(const Nil &) noexcept -> Boolean { return True; }
 class Number : public Value {
 public:
   constexpr Number() = default;
@@ -135,22 +146,6 @@ private:
     return buffer;
   }
 };
-auto operator!(const True &) noexcept -> False;
-auto operator!(const False &) noexcept -> True;
-auto operator!(const Nil &) noexcept -> True;
-constexpr auto operator<=>(const False &, const False &) noexcept {
-  return True{};
-}
-constexpr auto operator<=>(const True &, const True &) noexcept {
-  return True{};
-}
-constexpr auto operator<=>(const Nil &, const Nil &) noexcept { return True{}; }
-constexpr auto operator<=>(const False &, const True &) noexcept {
-  return False{};
-}
-constexpr auto operator<=>(const True &, const False &) noexcept {
-  return False{};
-}
 class And : public Keyword {
 public:
   constexpr And() = default;

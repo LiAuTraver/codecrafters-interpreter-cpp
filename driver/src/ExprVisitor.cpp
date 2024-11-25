@@ -15,21 +15,20 @@ namespace net::ancillarycat::loxograph::expression {
 ExprVisitor::expr_result_t
 ExprEvaluator::is_true_value(const expr_result_t &value) const {
   if (!value.has_value()) {
-    return syntax::False{};
+    return syntax::False;
   }
 
-  if (value.type() == typeid(syntax::True)) {
-    return syntax::True{};
+  if (value.type() == typeid(syntax::Boolean)) {
+    return value;
   }
-  if (value.type() == typeid(syntax::False) ||
-      value.type() == typeid(syntax::Nil)) {
-    return syntax::False{};
+  if (value.type() == typeid(syntax::Nil)) {
+    return syntax::False;
   }
   // fixme: double 0 is false or not?
   // if (value.type() == typeid(long double)){
   //   return {*utils::cast_literal<long double>(value) != 0L};
   // }
-  return syntax::True{};
+  return syntax::True;
 }
 bool ExprEvaluator::is_deep_equal(const expr_result_t &lhs,
                                   const expr_result_t &rhs) const {
@@ -60,10 +59,10 @@ ExprEvaluator::visit_impl(const Literal &expr) const {
     return {syntax::Nil{}};
   }
   if (expr.literal.type.type == TokenType::kTrue) {
-    return {syntax::True{}};
+    return {syntax::True};
   }
   if (expr.literal.type.type == TokenType::kFalse) {
-    return {syntax::False{}};
+    return {syntax::False};
   }
   if (expr.literal.type.type == TokenType::kString) {
     return {
@@ -83,11 +82,8 @@ ExprVisitor::expr_result_t ExprEvaluator::visit_impl(const Unary &expr) const {
   }
   if (expr.op.type == TokenType::kBang) {
     auto value = is_true_value(inner_expr);
-    if (std::any_cast<syntax::True>(&value)) {
-      return syntax::False{};
-    }
-    if (std::any_cast<syntax::False>(&value)) {
-      return syntax::True{};
+    if (auto ptr = utils::get_if<syntax::Boolean>(&value)) {
+      return syntax::False;
     }
     dbg(error, "unreachable code reached: {}", LOXOGRAPH_STACKTRACE);
   }
@@ -130,13 +126,13 @@ ExprVisitor::expr_result_t ExprEvaluator::visit_impl(const Binary &expr) const {
     case TokenType::kStar:
       return {*real_lhs * *real_rhs};
     case TokenType::kGreater:
-      return {*real_lhs > *real_rhs};
+      return syntax::Boolean{*real_lhs > *real_rhs};
     case TokenType::kGreaterEqual:
-      return {*real_lhs >= *real_rhs};
+      return syntax::Boolean{*real_lhs >= *real_rhs};
     case TokenType::kLess:
-      return {*real_lhs < *real_rhs};
+      return syntax::Boolean{*real_lhs < *real_rhs};
     case TokenType::kLessEqual:
-      return {*real_lhs <= *real_rhs};
+      return syntax::Boolean{*real_lhs <= *real_rhs};
     default:
       break;
     }
