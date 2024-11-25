@@ -1,15 +1,14 @@
-cc_test(
-    name = "dummy",
-    srcs = ["AST.cpp, test_env.hpp, tools/execution_context.hpp"],
-    copts = [
-        "/Iexternal/gtest/googletest/include",
-        "/Iexternal/gtest/googletest",
-        "/std:c++latest",
-    ],
-		defines = ["AC_CPP_DEBUG"],
-    includes = ["driver/include"],
-    deps = [
-        "//driver:driver",
-        "@googletest//:gtest_main",
-    ],
+load("//test:loxo_add_test.bzl", "loxo_add_test")
+
+loxo_add_test(
+		"dummy",
+		"AST.cpp",
+)
+loxo_add_test(
+		"scan",
+		"scan.cpp",
+)
+loxo_add_test(
+		"evaluate",
+		"evaluate.cpp",
 )

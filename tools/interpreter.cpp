@@ -19,7 +19,7 @@
 #  include <fmt/core.h>
 #  include <fmt/format.h>
 #endif
-#include "execution_context.hpp"
+#include "../shared/execution_context.hpp"
 
 LOXOGRAPH_INITIALIZATION(trace);
 using namespace net::ancillarycat;
@@ -28,7 +28,7 @@ void alterToolContext(loxograph::ExecutionContext &execution_context) {
   static auto debugInputFilePath =
       std::filesystem::path{"Z:/loxograph/examples/dynamic.lox"};
   if (execution_context.commands.empty())
-    execution_context.commands.emplace_back(loxograph::ExecutionContext::parse);
+    execution_context.commands.emplace_back(loxograph::ExecutionContext::interpret);
   if (execution_context.input_files.empty()) {
     if (exists(debugInputFilePath))
       execution_context.input_files.emplace_back(debugInputFilePath);

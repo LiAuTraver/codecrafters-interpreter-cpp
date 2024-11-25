@@ -5,13 +5,13 @@
 #include "loxo_fwd.hpp"
 #include "TokenType.hpp"
 namespace net::ancillarycat::loxograph {
-TokenType::string_view_t TokenType::to_string_view() const noexcept {
-  return string_view_t{format_as(*this)};
+TokenType::string_view_type TokenType::to_string_view_impl(const utils::FormatPolicy &) const {
+  return string_view_type{format_as(*this)};
 }
-TokenType::string_t TokenType::to_string() const noexcept {
-  return string_t{format_as(*this)};
+TokenType::string_type TokenType::to_string_impl(const utils::FormatPolicy &) const  {
+  return string_type{format_as(*this)};
 }
-auto format_as(TokenType t) noexcept -> TokenType::string_view_t {
+auto format_as(const TokenType &t) noexcept -> TokenType::string_view_type {
   using enum TokenType::type_t;
   switch (t.type) {
   case kMonostate:
@@ -102,10 +102,3 @@ auto format_as(TokenType t) noexcept -> TokenType::string_view_t {
   }
 }
 } // namespace net::ancillarycat::loxograph
-auto std::formatter<net::ancillarycat::loxograph::TokenType, char>::format(
-    net::ancillarycat::loxograph::TokenType t,
-    std::format_context &ctx) const -> decltype(ctx.out()) {
-  return ::std::
-      formatter<net::ancillarycat::loxograph::TokenType::string_view_t>::format(
-          t.to_string_view(), ctx);
-}

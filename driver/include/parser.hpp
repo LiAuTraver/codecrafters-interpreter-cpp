@@ -43,7 +43,7 @@ public:
   using string_view_type = token_t::string_view_type;
   using size_type = token_views_t::size_type;
   using ssize_type = decltype(std::ssize(std::declval<token_views_t>()));
-  using expr_t = Expr;
+  using expr_t = expression::Expr;
   using expr_ptr_t = std::shared_ptr<expr_t>;
   using enum token_type_t::type_t;
 

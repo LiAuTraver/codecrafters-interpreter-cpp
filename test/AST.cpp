@@ -1,5 +1,6 @@
 #include "test_env.hpp"
 
+namespace {
 auto get_result(const auto &filepath) {
   ExecutionContext ec;
   ec.commands.push_back(ExecutionContext::parse);
@@ -9,6 +10,7 @@ auto get_result(const auto &filepath) {
   }
   return ec.error_stream.str() + ec.output_stream.str();
 }
+} // namespace
 
 TEST(AST, dummy) {
   auto result = get_result("Z:/loxograph/examples/parse.expr2.lox");

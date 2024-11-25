@@ -1,0 +1,4 @@
+exports_files(
+    ["loxograph_driver.cpp", "execution_context.hpp"],
+    visibility = ["//visibility:public"],
+)

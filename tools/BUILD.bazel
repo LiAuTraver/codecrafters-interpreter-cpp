@@ -2,18 +2,19 @@ cc_binary(
     name = "interpreter",
     srcs = [
         "interpreter.cpp",
-        "loxograph_driver.cpp",
-				"execution_context.hpp",
+				"//shared:loxograph_driver.cpp",
+				"//shared:execution_context.hpp",
     ] ,
     copts = [
         "/std:c++latest",
     ],
     defines = [
         "AC_CPP_DEBUG",
-        "LIBLOCOGRAPH_SHARED",
+        "LIBLOXOGRAPH_SHARED",
     ],
     includes = [
         "driver/include",
+				"shared/",
     ],
     visibility = ["//visibility:public"],
     deps = [

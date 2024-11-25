@@ -1,3 +1,4 @@
+#include <any>
 #include <concepts>
 #include <limits>
 #include <numeric>
@@ -5,13 +6,14 @@
 #include <string_view>
 #include <type_traits>
 #include <utility>
-#include <any>
+#include <cmath>
+#include <source_location>
 
 #include "config.hpp"
 #include "loxo_fwd.hpp"
 
-#include "Token.hpp"
 #include "lex_error.hpp"
+#include "Token.hpp"
 
 namespace net::ancillarycat::loxograph {
 // clang-format off
@@ -28,48 +30,27 @@ template <typename Ty>
 inline auto Token::cast_literal() const -> decltype(auto)
   requires std::default_initializable<Ty>
 {
-  const auto ptr = std::any_cast<Ty>(&literal);
-  if (ptr) {
-    dbg(info, "literal type: {}, value: {}", typeid(Ty).name(), *ptr);
-  } else {
-    dbg_block({
-      dbg(error, "bad any cast: {}", LOXOGRAPH_STACKTRACE);
-      dbg(info,
-          "Expect type: {}, actual type: {}",
-          typeid(Ty).name(),
-          literal.type().name());
-      dbg(warn,
-          "\033[033mNote: this lexer treat all number as long double; meybe "
-          "you "
-          "accidentally passed an integer?\033[0m");
-      contract_assert(0);
-    });
-  }
-  return ptr;
+  return utils::get_if<Ty>(literal);
 }
-template <typename Ty>
-  requires std::is_arithmetic_v<std::remove_cvref_t<Ty>>
-bool Token::is_integer(Ty &&value) const noexcept {
-  return std::trunc(std::forward<Ty>(value)) == value;
-}
-Token::Token(const token_type type,
+Token::Token(const token_type &type,
              string_type lexeme,
              std::any literal,
              const uint_least32_t line)
     : type(type), lexeme(std::move(lexeme)), literal(std::move(literal)),
       line(line) {}
-Token::Token(const token_type type,
+Token::Token(const token_type &type,
              const string_view_type lexeme,
              std::any literal,
              const uint_least32_t line)
     : type(type), lexeme(lexeme), literal(std::move(literal)), line(line) {}
-Token::string_type Token::number_to_string(const FormatPolicy policy) const {
+Token::string_type
+Token::number_to_string(const utils::FormatPolicy policy) const {
   if (auto ptr = cast_literal<long double>()) {
     // 42 -> 42.0
-    if (is_integer(*ptr)) {
-      if (policy == kDefault)
+    if (utils::is_integer(*ptr)) {
+      if (policy == utils::kDefault)
         return utils::format("NUMBER {} {:.1f}", lexeme, *ptr);
-      else if (policy == kTokenOnly)
+      else if (policy == utils::kTokenOnly)
         return utils::format("{:.1f}", *ptr);
       else {
         dbg(critical, "unreachable code reached: {}", LOXOGRAPH_STACKTRACE);
@@ -78,9 +59,9 @@ Token::string_type Token::number_to_string(const FormatPolicy policy) const {
       }
     }
     //  leave as is
-    if (policy == kDefault)
+    if (policy == utils::kDefault)
       return utils::format("NUMBER {} {}", lexeme, *ptr);
-    else if (policy == kTokenOnly)
+    else if (policy == utils::kTokenOnly)
       return utils::format("{}", *ptr);
     else {
       dbg(critical, "unreachable code reached: {}", LOXOGRAPH_STACKTRACE);
@@ -89,9 +70,9 @@ Token::string_type Token::number_to_string(const FormatPolicy policy) const {
     }
   } else {
     dbg_block(literal = nullptr;);
-    if (policy == kDefault)
+    if (policy == utils::kDefault)
       return utils::format("NUMBER {} {}", lexeme, "<failed to access data>");
-    else if (policy == kTokenOnly)
+    else if (policy == utils::kTokenOnly)
       return utils::format("{}", "<failed to access data>");
     else {
       dbg(critical, "unreachable code reached: {}", LOXOGRAPH_STACKTRACE);
@@ -100,7 +81,8 @@ Token::string_type Token::number_to_string(const FormatPolicy policy) const {
     }
   }
 }
-Token::string_type Token::to_string(const FormatPolicy policy) const {
+Token::string_type
+Token::to_string_impl(const utils::FormatPolicy &policy) const {
   using namespace std::string_literals;
   using enum TokenType::type_t;
   auto type_sv = ""sv;
@@ -218,7 +200,7 @@ Token::string_type Token::to_string(const FormatPolicy policy) const {
     type_sv = "STRING"sv;
     lexeme_sv = lexeme;
     contract_assert(lexeme_sv.front() == '"' && lexeme_sv.back() == '"');
-    if (policy == FormatPolicy::kTokenOnly) {
+    if (policy == utils::FormatPolicy::kTokenOnly) {
       // codecrafter's string lit pase output does not need `"`, so remove them
       lexeme_sv = lexeme_sv.substr(1, lexeme_sv.size() - 2);
     }
@@ -228,7 +210,7 @@ Token::string_type Token::to_string(const FormatPolicy policy) const {
       literal_sv = *ptr;
     else
       literal_sv = "<failed to access data>"sv;
-    if (policy == kDefault)
+    if (policy == utils::kDefault)
       contract_assert(lexeme_sv.substr(1, lexeme_sv.size() - 2), literal_sv);
     break;
   case kNumber:
@@ -319,7 +301,7 @@ Token::string_type Token::to_string(const FormatPolicy policy) const {
     literal_sv = "null"sv;
     break;
   case kLexError:
-    if (policy == kDefault) {
+    if (policy == utils::kDefault) {
       // /// @note message is different from the other cases.
       if (auto ptr = cast_literal<error_t>())
         return ptr->to_string(lexeme, line);
@@ -335,11 +317,11 @@ Token::string_type Token::to_string(const FormatPolicy policy) const {
     contract_assert(false);
     break;
   }
-  if (policy == kDefault) {
+  if (policy == utils::kDefault) {
     /// @note DON'T use `.data()` since it's not null-terminated and will the
     /// string will last till the end
     return utils::format("{} {} {}", type_sv, lexeme_sv, literal_sv);
-  } else if (policy == kTokenOnly) {
+  } else if (policy == utils::kTokenOnly) {
     // for ast print.
     return utils::format("{}", lexeme_sv);
   } else {
@@ -348,7 +330,8 @@ Token::string_type Token::to_string(const FormatPolicy policy) const {
     std::unreachable();
   }
 }
+
 auto format_as(const Token &token) -> Token::string_type {
-  return token.to_string();
+  return token.to_string(utils::FormatPolicy::kDefault);
 }
 } // namespace net::ancillarycat::loxograph

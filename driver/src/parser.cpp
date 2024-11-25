@@ -27,13 +27,9 @@ auto parser::parse() -> utils::Status {
   }
 }
 auto parser::get_expr() const -> expr_ptr_t {
-
-  // default to add a group as the root node
   if (!expr_head)
-    return std::make_shared<Grouping>(
-        std::make_shared<Literal>(Token{TokenType::kNil, "nil"sv, 0.0l}));
-  // auto group = std::make_shared<Grouping>(expr_head);
-  // return group;
+    return std::make_shared<expression::Grouping>(
+        std::make_shared<expression::Literal>(Token{TokenType::kNil, "nil"sv, 0.0l}));
   return expr_head;
 }
 auto parser::expression() -> expr_ptr_t { // NOLINT(misc-no-recursion)
@@ -44,7 +40,7 @@ auto parser::equality() -> expr_ptr_t { // NOLINT(misc-no-recursion)
   while (inspect(kEqualEqual, kBangEqual)) {
     auto op = get();
     auto right = comparison();
-    equalityExpr = std::make_shared<Binary>(op, equalityExpr, right);
+    equalityExpr = std::make_shared<expression::Binary>(op, equalityExpr, right);
   }
   return equalityExpr;
 }
@@ -53,7 +49,7 @@ auto parser::comparison() -> expr_ptr_t { // NOLINT(misc-no-recursion)
   while (inspect(kGreater, kGreaterEqual, kLess, kLessEqual)) {
     auto op = get();
     auto right = term();
-    comparisonExpr = std::make_shared<Binary>(op, comparisonExpr, right);
+    comparisonExpr = std::make_shared<expression::Binary>(op, comparisonExpr, right);
   }
   return comparisonExpr;
 }
@@ -62,7 +58,7 @@ auto parser::term() -> expr_ptr_t { // NOLINT(misc-no-recursion)
   while (inspect(kMinus, kPlus)) {
     auto op = get();
     auto right = factor();
-    termExpr = std::make_shared<Binary>(op, termExpr, right);
+    termExpr = std::make_shared<expression::Binary>(op, termExpr, right);
   }
   return termExpr;
 }
@@ -71,7 +67,7 @@ auto parser::factor() -> expr_ptr_t { // NOLINT(misc-no-recursion)
   while (inspect(kSlash, kStar)) {
     auto op = get();
     auto right = unary();
-    factorExpr = std::make_shared<Binary>(op, factorExpr, right);
+    factorExpr = std::make_shared<expression::Binary>(op, factorExpr, right);
   }
   return factorExpr;
 }
@@ -79,22 +75,22 @@ auto parser::unary() -> expr_ptr_t { // NOLINT(misc-no-recursion)
   if (inspect(kBang, kMinus)) {
     auto op = get();
     auto right = unary();
-    return std::make_shared<Unary>(op, right);
+    return std::make_shared<expression::Unary>(op, right);
   }
   return primary();
 }
 auto parser::primary() -> expr_ptr_t { // NOLINT(misc-no-recursion)
   // TODO: implement
   if (inspect(kFalse))
-    return std::make_shared<Literal>(get());
+    return std::make_shared<expression::Literal>(get());
   if (inspect(kTrue))
-    return std::make_shared<Literal>(get());
+    return std::make_shared<expression::Literal>(get());
   if (inspect(kNil))
-    return std::make_shared<Literal>(get());
+    return std::make_shared<expression::Literal>(get());
   if (inspect(kNumber))
-    return std::make_shared<Literal>(get());
+    return std::make_shared<expression::Literal>(get());
   if (inspect(kString))
-    return std::make_shared<Literal>(get());
+    return std::make_shared<expression::Literal>(get());
   // {
   // // codecafter's test does not need quotes around strings, so remove them
   // auto token = get();
@@ -126,7 +122,7 @@ auto parser::primary() -> expr_ptr_t { // NOLINT(misc-no-recursion)
           {parse_error::kMissingParenthesis, "Expect expression."});
     }
     get();
-    return std::make_shared<Grouping>(expr);
+    return std::make_shared<expression::Grouping>(expr);
   }
   // invalid syntax reached
 
@@ -138,7 +134,7 @@ auto parser::recovery_parse(const parse_error &parse_error) -> expr_ptr_t {
   // get() returns the error token and advances the cursor
   auto error_token = get();
   dbg(warn, "error at {}", error_token);
-  auto error_expr = std::make_shared<IllegalExpr>(error_token, parse_error);
+  auto error_expr = std::make_shared<expression::IllegalExpr>(error_token, parse_error);
   while (!is_at_end() && !inspect(kSemicolon)) {
     dbg_block(auto discarded_token = peek();
               dbg(warn, "discarding {}", discarded_token););
