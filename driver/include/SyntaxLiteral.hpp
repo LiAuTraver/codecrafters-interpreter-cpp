@@ -51,14 +51,20 @@ private:
     return buffer;
   }
 };
-class String : public SyntaxLiteral {
+class String : public SyntaxLiteral, public utils::Viewable {
 public:
   constexpr String() = default;
+  String(const string_type &value) : value(value) {}
+  String(const string_view_type value) : value(value) {}
   virtual ~String() override = default;
 
 private:
   auto to_string_impl(const utils::FormatPolicy &format_policy) const
       -> string_type override {
+    return value;
+  }
+  auto to_string_view_impl(const utils::FormatPolicy &format_policy) const
+      -> string_view_type override {
     return value;
   }
 

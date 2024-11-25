@@ -45,6 +45,7 @@ ExprEvaluator::visit_impl(const Literal &expr) const {
   //        shall be fixed in the future.
   // return expr.literal.literal; // <- std::any
   // Expr ^^^ Token ^^^
+  dbg(info, "literal type: {}", expr.literal.type);
   if (expr.literal.type.type == TokenType::kMonostate) {
     dbg(critical, "should not happen.");
     contract_assert(false);
@@ -58,6 +59,10 @@ ExprEvaluator::visit_impl(const Literal &expr) const {
   }
   if (expr.literal.type.type == TokenType::kFalse) {
     return {syntax::False{}};
+  }
+  if (expr.literal.type.type == TokenType::kString) {
+    return {
+        syntax::String{*utils::get_if<string_view_type>(expr.literal.literal)}};
   }
   // temporary solution.
   return expr.literal.literal;
@@ -152,11 +157,14 @@ auto ExprEvaluator::to_string_impl(
 #if AC_CPP_DEBUG
     return utils::format(
         "{:.f}",
-        *ptr); //! std::format failed to handle `.f` withouth a number
+        *ptr); // std::format failed to handle `.f` withouth a number;
+               // anyway, codecrafter's test just requires .1.
 #else
     return utils::format("{:.1f}", *ptr);
 #endif
   }
+  if (res.type() == typeid(syntax::String))
+    return utils::get_if<syntax::String>(res)->to_string();
   if (res.type() == typeid(syntax::True))
     return "true"s;
   if (res.type() == typeid(syntax::False))

@@ -106,7 +106,7 @@ void lexer::add_identifier() {
       add_token(kFalse, false);
       break;
     case kNil:
-      add_token(kNil, "nonsense");
+      add_token(kNil, nullptr);
       break;
     default:
       dbg(warn, "unimplemented keyword: {}", value);

@@ -13,11 +13,11 @@ auto get_result(const auto &filepath) {
 } // namespace
 
 TEST(AST, dummy) {
-  auto result = get_result("Z:/loxograph/examples/dynamic.lox");
-  EXPECT_EQ(result, "(group nil)\n");
+  auto result = get_result("Z:/loxograph/examples/parse.expr2.lox");
+  EXPECT_EQ(result, "true\n");
 }
 
-// TEST(parse, error) {
-//   auto result = get_result("Z:/loxograph/examples/parse.expr7.lox");
-//   EXPECT_EQ(result, "[line 1] Error at ')': Expect expression.\n");
-// }
+TEST(parse, error) {
+  auto result = get_result("Z:/loxograph/examples/parse.expr7.lox");
+  EXPECT_EQ(result, "[line 1] Error at ')': Expect expression.\n");
+}

@@ -10,11 +10,11 @@
 #  include <print>
 #endif
 #include <any>
+#include <cmath>
 #include <filesystem>
+#include <source_location>
 #include <string>
 #include <string_view>
-#include <source_location>
-#include <cmath>
 namespace net::ancillarycat::utils {
 /// @brief A class that represents the status of a function call. it's designed
 /// to be as identical as possible to the `absl::Status` class, for
@@ -61,6 +61,11 @@ public:
 private:
   virtual auto to_string_impl(const FormatPolicy &format_policy) const
       -> string_type = 0;
+  friend auto format_as(const Printable &p,
+                        const FormatPolicy &format_policy = kDefault)
+      -> string_type {
+    return p.to_string(format_policy);
+  }
 };
 
 class Viewable {
@@ -159,17 +164,18 @@ static constexpr auto newline_chars = "\n\v\f"sv;
 } // namespace net::ancillarycat::loxograph
 
 #ifdef LOXOGRAPH_USE_FMT_FORMAT
-template <> struct fmt::formatter<net::ancillarycat::utils::Printable> {
-  constexpr auto parse(::fmt::format_parse_context &ctx) { return ctx.begin(); }
-  template <typename FormatContext>
-  auto format(const net::ancillarycat::utils::Printable &p,
-              FormatContext &ctx) {
-    return ::fmt::format_to(
-        ctx.out(),
-        "{}",
-        p.to_string(net::ancillarycat::utils::FormatPolicy::kDefault));
-  }
-};
+/// @note no need if we have `format_as` function
+// template <> struct fmt::formatter<net::ancillarycat::utils::Printable> {
+//   constexpr auto parse(::fmt::format_parse_context &ctx) { return
+//   ctx.begin(); } template <typename FormatContext> auto format(const
+//   net::ancillarycat::utils::Printable &p,
+//               FormatContext &ctx) const{
+//     return ::fmt::format_to(
+//         ctx.out(),
+//         "{}",
+//         p.to_string(net::ancillarycat::utils::FormatPolicy::kDefault));
+//   }
+// };
 #else
 template <> struct std::formatter<net::ancillarycat::utils::Printable> {
   constexpr auto parse(::std::format_parse_context &ctx) { return ctx.begin(); }
