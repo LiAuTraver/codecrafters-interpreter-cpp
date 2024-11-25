@@ -4,6 +4,7 @@
 #include "config.hpp"
 #include "loxo_fwd.hpp"
 #include "status.hpp"
+#include "SyntaxLiteral.hpp"
 
 namespace net::ancillarycat::loxograph::expression {
 /// @interface ExprVisitor
@@ -70,8 +71,9 @@ private:
   virtual expr_result_t visit_impl(const IllegalExpr &expr) const override;
   /// @note in Lisp/Scheme, only `#f` is false, everything else is true; we also
   /// make `nil` as false.
-  bool is_true_value(const expr_result_t &value) const;
-  bool is_deep_equal(const expr_result_t &lhs, const expr_result_t &rhs) const;
+  ExprVisitor::expr_result_t is_true_value(const expr_result_t &value) const;
+  syntax::Boolean is_deep_equal(const expr_result_t &lhs,
+                                const expr_result_t &rhs) const;
 
 private:
   auto to_string_impl(const utils::FormatPolicy &)const -> string_type override;

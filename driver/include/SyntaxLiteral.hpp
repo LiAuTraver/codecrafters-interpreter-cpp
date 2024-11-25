@@ -14,12 +14,109 @@ class SyntaxLiteral;
 class Keyword;
 class String;
 class Number;
+class Value;
+class False;
 class SyntaxLiteral : public utils::Printable {
 public:
   constexpr SyntaxLiteral() = default;
   virtual ~SyntaxLiteral() override = default;
 };
-class Number : public SyntaxLiteral {
+class Keyword : public SyntaxLiteral, public utils::Viewable {
+public:
+  constexpr Keyword() = default;
+  virtual ~Keyword() override = default;
+};
+class Value : public SyntaxLiteral, public utils::Viewable {
+public:
+  constexpr Value() = default;
+  virtual ~Value() override = default;
+};
+class Nil : public Value {
+public:
+  constexpr Nil() = default;
+  virtual ~Nil() = default;
+
+private:
+  auto to_string_impl(const utils::FormatPolicy &format_policy) const
+      -> string_type override {
+    return "nil"s;
+  }
+  auto to_string_view_impl(const utils::FormatPolicy &format_policy) const
+      -> string_view_type override {
+    return "nil"sv;
+  }
+};
+class Boolean : public Value {
+public:
+  constexpr Boolean() = default;
+  constexpr Boolean(const bool value) : value(value) {}
+  constexpr Boolean(const long double value) : value(!!value) {}
+  Boolean(const Boolean &value) : value(value.value) {}
+  Boolean &operator=(const Boolean &value) {
+    this->value = value.value;
+    return *this;
+  }
+  Boolean(Boolean &&value) noexcept : value(std::move(value.value)) {}
+  Boolean &operator=(Boolean &&value) noexcept {
+    this->value = std::move(value.value);
+    return *this;
+  }
+  auto operator==(const Boolean &rhs) const -> bool {
+    return value == rhs.value;
+  }
+  auto operator<=>(const Boolean &rhs) const -> std::strong_ordering {
+    return value <=> rhs.value;
+  }
+  auto operator!() const -> Boolean { return Boolean{!value.value()}; }
+
+  virtual ~Boolean() = default;
+
+private:
+  auto to_string_impl(const utils::FormatPolicy &format_policy) const
+      -> string_type override {
+      contract_assert(value.has_value());
+    return value.value() ? "true"s : "false"s;
+  }
+  auto to_string_view_impl(const utils::FormatPolicy &format_policy) const -> string_view_type override{
+    contract_assert(value.has_value());
+    return value.value() ? "true"sv : "false"sv;
+  }
+
+private:
+  std::optional<bool> value = std::nullopt;
+};
+static constexpr auto True = Boolean{true};
+static constexpr auto False = Boolean{false};
+
+class String : public SyntaxLiteral, public utils::Viewable {
+public:
+  constexpr String() = default;
+  String(const string_type &value) : value(value) {}
+  String(const string_view_type value) : value(value) {}
+  virtual ~String() override = default;
+
+public:
+  String &operator+(const String &rhs) {
+    value += rhs.value;
+    return *this;
+  }
+  Boolean operator==(const String &rhs) const { return value == rhs.value; }
+
+private:
+  auto to_string_impl(const utils::FormatPolicy &format_policy) const
+      -> string_type override {
+    return value;
+  }
+  auto to_string_view_impl(const utils::FormatPolicy &format_policy) const
+      -> string_view_type override {
+    return value;
+  }
+
+private:
+  string_type value;
+};
+inline constexpr auto operator!(const Nil &) noexcept -> Boolean { return True; }
+class Number : public Value {
 public:
   constexpr Number() = default;
   Number(const long double value) : value(value) {}
@@ -49,70 +146,6 @@ private:
       buffer = "<failed to convert number to string>";
     }
     return buffer;
-  }
-};
-class String : public SyntaxLiteral {
-public:
-  constexpr String() = default;
-  virtual ~String() override = default;
-
-private:
-  auto to_string_impl(const utils::FormatPolicy &format_policy) const
-      -> string_type override {
-    return value;
-  }
-
-private:
-  string_type value;
-};
-class Keyword : public SyntaxLiteral, public utils::Viewable {
-public:
-  constexpr Keyword() = default;
-  virtual ~Keyword() override = default;
-};
-class Nil : public Keyword {
-public:
-  constexpr Nil() = default;
-  virtual ~Nil() = default;
-
-private:
-  auto to_string_impl(const utils::FormatPolicy &format_policy) const
-      -> string_type override {
-    return "nil"s;
-  }
-  auto to_string_view_impl(const utils::FormatPolicy &format_policy) const
-      -> string_view_type override {
-    return "nil"sv;
-  }
-};
-class True : public Keyword {
-public:
-  constexpr True() = default;
-  virtual ~True() = default;
-
-private:
-  auto to_string_impl(const utils::FormatPolicy &format_policy) const
-      -> string_type override {
-    return "true"s;
-  }
-  auto to_string_view_impl(const utils::FormatPolicy &format_policy) const
-      -> string_view_type override {
-    return "true"sv;
-  }
-};
-class False : public Keyword {
-public:
-  constexpr False() = default;
-  virtual ~False() = default;
-
-private:
-  auto to_string_impl(const utils::FormatPolicy &format_policy) const
-      -> string_type override {
-    return "false"s;
-  }
-  auto to_string_view_impl(const utils::FormatPolicy &format_policy) const
-      -> string_view_type override {
-    return "false"sv;
   }
 };
 class And : public Keyword {

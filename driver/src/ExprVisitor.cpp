@@ -12,24 +12,43 @@
 #include "SyntaxLiteral.hpp"
 
 namespace net::ancillarycat::loxograph::expression {
-bool ExprEvaluator::is_true_value(const expr_result_t &value) const {
-  if (!value.has_value()) {
-    return false;
+ExprVisitor::expr_result_t
+ExprEvaluator::is_true_value(const expr_result_t &value) const {
+  if (!value.has_value() or value.type() == typeid(syntax::Nil)) {
+    return syntax::False;
   }
 
-  if (value.type() == typeid(bool)) {
-    return *utils::get_if<bool>(value);
+  if (value.type() == typeid(syntax::Boolean)) {
+    return value;
   }
   // fixme: double 0 is false or not?
   // if (value.type() == typeid(long double)){
   //   return {*utils::cast_literal<long double>(value) != 0L};
   // }
-  return true;
+  return syntax::True;
 }
-bool ExprEvaluator::is_deep_equal(const expr_result_t &lhs,
-                                  const expr_result_t &rhs) const {
+syntax::Boolean ExprEvaluator::is_deep_equal(const expr_result_t &lhs,
+                                             const expr_result_t &rhs) const {
+  if (lhs.type() != rhs.type()) {
+    return false;
+  }
+  if (lhs.type() == typeid(syntax::Nil)) {
+    return true;
+  }
+  if (lhs.type() == typeid(syntax::Boolean)) {
+    return {*utils::get_if<syntax::Boolean>(lhs) ==
+           *utils::get_if<syntax::Boolean>(rhs)};
+  }
+  if (lhs.type() == typeid(syntax::String)) {
+    return {*utils::get_if<syntax::String>(lhs) ==
+           *utils::get_if<syntax::String>(rhs)};
+  }
+  if (lhs.type() == typeid(long double)) {
+    return {syntax::Boolean{*utils::get_if<long double>(lhs) ==
+           *utils::get_if<long double>(rhs)}};
+  }
   /// TODO: how on earth can i implement this?
-  return false; // TODO: temporary solution
+  return syntax::False; // TODO: temporary solution
 }
 utils::Status ExprEvaluator::evaluate(const Expr &expr) const try {
   const_cast<expr_result_t &>(res) = expr.accept(*this);
@@ -45,6 +64,7 @@ ExprEvaluator::visit_impl(const Literal &expr) const {
   //        shall be fixed in the future.
   // return expr.literal.literal; // <- std::any
   // Expr ^^^ Token ^^^
+  dbg(info, "literal type: {}", expr.literal.type);
   if (expr.literal.type.type == TokenType::kMonostate) {
     dbg(critical, "should not happen.");
     contract_assert(false);
@@ -54,10 +74,14 @@ ExprEvaluator::visit_impl(const Literal &expr) const {
     return {syntax::Nil{}};
   }
   if (expr.literal.type.type == TokenType::kTrue) {
-    return {syntax::True{}};
+    return {syntax::True};
   }
   if (expr.literal.type.type == TokenType::kFalse) {
-    return {syntax::False{}};
+    return {syntax::False};
+  }
+  if (expr.literal.type.type == TokenType::kString) {
+    return {
+        syntax::String{*utils::get_if<string_view_type>(expr.literal.literal)}};
   }
   // temporary solution.
   return expr.literal.literal;
@@ -72,7 +96,12 @@ ExprVisitor::expr_result_t ExprEvaluator::visit_impl(const Unary &expr) const {
     return {};
   }
   if (expr.op.type == TokenType::kBang) {
-    return {!is_true_value(inner_expr)};
+    auto value = is_true_value(inner_expr);
+    if (auto ptr = utils::get_if<syntax::Boolean>(value)) {
+      dbg(trace, "unary not: {}", *ptr);
+      return {syntax::Boolean{!(*ptr)}};
+    }
+    dbg(error, "unreachable code reached: {}", LOXOGRAPH_STACKTRACE);
   }
   dbg(critical, "unreachable code reached: {}", LOXOGRAPH_STACKTRACE);
   contract_assert(false);
@@ -87,16 +116,18 @@ ExprVisitor::expr_result_t ExprEvaluator::visit_impl(const Binary &expr) const {
         lhs.type().name(),
         rhs.type().name());
     dbg(warn, "current implementation only support same type binary operation");
-    return {};
+    return {syntax::False};
   }
-  if (expr.op.type == TokenType::kBangEqual or
-      expr.op.type == TokenType::kEqualEqual) {
+  if (expr.op.type == TokenType::kEqualEqual) {
     return {is_deep_equal(lhs, rhs)};
   }
-  if (lhs.type() == typeid(string_view_type)) {
+  if (expr.op.type == TokenType::kBangEqual) {
+    return {!is_deep_equal(lhs, rhs)};
+  }
+  if (lhs.type() == typeid(syntax::String)) {
     if (expr.op.type == TokenType::kPlus) {
-      return {string_type{*utils::get_if<string_view_type>(lhs)} +
-              string_type{*utils::get_if<string_view_type>(rhs)}};
+      return {syntax::String{std::any_cast<syntax::String>(lhs) +
+                             std::any_cast<syntax::String>(rhs)}};
     }
   }
   if (lhs.type() == typeid(long double)) {
@@ -113,13 +144,13 @@ ExprVisitor::expr_result_t ExprEvaluator::visit_impl(const Binary &expr) const {
     case TokenType::kStar:
       return {*real_lhs * *real_rhs};
     case TokenType::kGreater:
-      return {*real_lhs > *real_rhs};
+      return syntax::Boolean{*real_lhs > *real_rhs};
     case TokenType::kGreaterEqual:
-      return {*real_lhs >= *real_rhs};
+      return syntax::Boolean{*real_lhs >= *real_rhs};
     case TokenType::kLess:
-      return {*real_lhs < *real_rhs};
+      return syntax::Boolean{*real_lhs < *real_rhs};
     case TokenType::kLessEqual:
-      return {*real_lhs <= *real_rhs};
+      return syntax::Boolean{*real_lhs <= *real_rhs};
     default:
       break;
     }
@@ -151,18 +182,19 @@ auto ExprEvaluator::to_string_impl(
 // print as-is
 #if AC_CPP_DEBUG
     return utils::format(
-        "{:.f}",
-        *ptr); //! std::format failed to handle `.f` withouth a number
+        "{}",
+        *ptr); // std::format failed to handle `.f` without a number;
 #else
-    return utils::format("{:.1f}", *ptr);
+    return utils::format("{}", *ptr);
 #endif
   }
-  if (res.type() == typeid(syntax::True))
-    return "true"s;
-  if (res.type() == typeid(syntax::False))
-    return "false"s;
+  if (res.type() == typeid(syntax::String))
+    return utils::get_if<syntax::String>(res)->to_string();
+  if (res.type() == typeid(syntax::Boolean))
+    return utils::get_if<syntax::Boolean>(res)->to_string();
   if (res.type() == typeid(syntax::Nil))
     return "nil"s;
+  dbg(error, "unimplemented type: {}", res.type().name());
   return "<unknown type>";
 }
 
