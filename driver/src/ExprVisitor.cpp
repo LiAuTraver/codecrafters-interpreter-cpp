@@ -8,8 +8,8 @@
 
 #include "Expr.hpp"
 #include "ExprVisitor.hpp"
-
 #include "status.hpp"
+#include "SyntaxLiteral.hpp"
 
 namespace net::ancillarycat::loxograph::expression {
 bool ExprEvaluator::is_true_value(const expr_result_t &value) const {
@@ -40,11 +40,27 @@ utils::Status ExprEvaluator::evaluate(const Expr &expr) const try {
 ExprVisitor::expr_result_t
 ExprEvaluator::visit_impl(const Literal &expr) const {
   // FIXME: a bug. token has type recorded, and some token such as `true`,
-  // `false`, `nil` has their type, but no literal i put into this any.
+  //        `false`, `nil` has their type, but no literal i put into this any.
   //        now temporary solution: in lex add some of them into literal.
   //        shall be fixed in the future.
-  return expr.literal.literal; // <- std::any
+  // return expr.literal.literal; // <- std::any
   // Expr ^^^ Token ^^^
+  if (expr.literal.type.type == TokenType::kMonostate) {
+    dbg(critical, "should not happen.");
+    contract_assert(false);
+    return {};
+  }
+  if (expr.literal.type.type == TokenType::kNil) {
+    return {syntax::Nil{}};
+  }
+  if (expr.literal.type.type == TokenType::kTrue) {
+    return {syntax::True{}};
+  }
+  if (expr.literal.type.type == TokenType::kFalse) {
+    return {syntax::False{}};
+  }
+  // temporary solution.
+  return expr.literal.literal;
 }
 ExprVisitor::expr_result_t ExprEvaluator::visit_impl(const Unary &expr) const {
   auto inner_expr =
@@ -131,20 +147,21 @@ auto ExprEvaluator::to_string_impl(
     if (utils::is_integer(*ptr)) {
       // print as integer(no decimal point)
       return utils::format("{:.0f}", *ptr);
-    } else {
+    }
 // print as-is
 #if AC_CPP_DEBUG
-      return utils::format(
-          "{:.f}",
-          *ptr); //! std::format failed to handle `.f` withouth a number
+    return utils::format(
+        "{:.f}",
+        *ptr); //! std::format failed to handle `.f` withouth a number
 #else
-      return utils::format("{:.1f}", *ptr);
+    return utils::format("{:.1f}", *ptr);
 #endif
-    }
   }
-  if (res.type() == typeid(bool))
-    return *utils::get_if<bool>(res) ? "true"s : "false"s;
-  if (res.type() == typeid(void))
+  if (res.type() == typeid(syntax::True))
+    return "true"s;
+  if (res.type() == typeid(syntax::False))
+    return "false"s;
+  if (res.type() == typeid(syntax::Nil))
     return "nil"s;
   return "<unknown type>";
 }
