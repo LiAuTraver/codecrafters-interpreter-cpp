@@ -12,19 +12,23 @@
 #include "SyntaxLiteral.hpp"
 
 namespace net::ancillarycat::loxograph::expression {
-bool ExprEvaluator::is_true_value(const expr_result_t &value) const {
+ExprVisitor::expr_result_t
+ExprEvaluator::is_true_value(const expr_result_t &value) const {
   if (!value.has_value()) {
-    return false;
+    return syntax::False{};
   }
 
-  if (value.type() == typeid(bool)) {
-    return *utils::get_if<bool>(value);
+  if (value.type() == typeid(syntax::True)) {
+    return syntax::True{};
+  }
+  if (value.type() == typeid(syntax::False)) {
+    return syntax::False{};
   }
   // fixme: double 0 is false or not?
   // if (value.type() == typeid(long double)){
   //   return {*utils::cast_literal<long double>(value) != 0L};
   // }
-  return true;
+  return syntax::True{};
 }
 bool ExprEvaluator::is_deep_equal(const expr_result_t &lhs,
                                   const expr_result_t &rhs) const {
@@ -77,7 +81,14 @@ ExprVisitor::expr_result_t ExprEvaluator::visit_impl(const Unary &expr) const {
     return {};
   }
   if (expr.op.type == TokenType::kBang) {
-    return {!is_true_value(inner_expr)};
+    auto value = is_true_value(inner_expr);
+    if (value.type() == typeid(syntax::True)) {
+      return syntax::False{};
+    }
+    if (value.type() == typeid(syntax::False)) {
+      return syntax::True{};
+    }
+    dbg(error, "unreachable code reached: {}", LOXOGRAPH_STACKTRACE);
   }
   dbg(critical, "unreachable code reached: {}", LOXOGRAPH_STACKTRACE);
   contract_assert(false);
@@ -170,6 +181,7 @@ auto ExprEvaluator::to_string_impl(
     return "false"s;
   if (res.type() == typeid(syntax::Nil))
     return "nil"s;
+  dbg(error, "unimplemented type: {}", res.type().name());
   return "<unknown type>";
 }
 

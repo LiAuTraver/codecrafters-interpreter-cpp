@@ -23,5 +23,5 @@ TEST(bool,true){
 
 TEST(nil,nil){
   auto res = get_result("Z:/loxograph/examples/dynamic.lox");
-  EXPECT_EQ(res, "24.71\n");
+  EXPECT_EQ(res, "false\n");
 }

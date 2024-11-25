@@ -10,6 +10,7 @@
 ///       you can't evaluate the result in `evaluate` method; yet it went well
 ///       when just parsing and lexing.
 namespace net::ancillarycat::loxograph::syntax {
+class False;
 class SyntaxLiteral;
 class Keyword;
 class String;
@@ -121,6 +122,23 @@ private:
     return "false"sv;
   }
 };
+auto operator!(const True &) noexcept -> False;
+auto operator!(const False &) noexcept -> True;
+constexpr auto operator<=>(const False &, const False &) noexcept {
+  return std::strong_ordering::equal;
+}
+constexpr auto operator<=>(const True &, const True &) noexcept {
+  return std::strong_ordering::equal;
+}
+constexpr auto operator<=>(const Nil &, const Nil &) noexcept {
+  return std::strong_ordering::equal;
+}
+constexpr auto operator<=>(const False &, const True &) noexcept {
+  return false;
+}
+constexpr auto operator<=>(const True &, const False &) noexcept {
+  return false;
+}
 class And : public Keyword {
 public:
   constexpr And() = default;
