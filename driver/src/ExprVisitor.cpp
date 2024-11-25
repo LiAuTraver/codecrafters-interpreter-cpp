@@ -14,15 +14,12 @@
 namespace net::ancillarycat::loxograph::expression {
 ExprVisitor::expr_result_t
 ExprEvaluator::is_true_value(const expr_result_t &value) const {
-  if (!value.has_value()) {
+  if (!value.has_value() or value.type() == typeid(syntax::Nil)) {
     return syntax::False;
   }
 
   if (value.type() == typeid(syntax::Boolean)) {
     return value;
-  }
-  if (value.type() == typeid(syntax::Nil)) {
-    return syntax::False;
   }
   // fixme: double 0 is false or not?
   // if (value.type() == typeid(long double)){
@@ -82,8 +79,9 @@ ExprVisitor::expr_result_t ExprEvaluator::visit_impl(const Unary &expr) const {
   }
   if (expr.op.type == TokenType::kBang) {
     auto value = is_true_value(inner_expr);
-    if (auto ptr = utils::get_if<syntax::Boolean>(&value)) {
-      return syntax::False;
+    if (auto ptr = utils::get_if<syntax::Boolean>(value)) {
+      dbg(trace, "unary not: {}", *ptr);
+      return {syntax::Boolean{!(*ptr)}};
     }
     dbg(error, "unreachable code reached: {}", LOXOGRAPH_STACKTRACE);
   }
@@ -172,10 +170,8 @@ auto ExprEvaluator::to_string_impl(
   }
   if (res.type() == typeid(syntax::String))
     return utils::get_if<syntax::String>(res)->to_string();
-  if (res.type() == typeid(syntax::True))
-    return "true"s;
-  if (res.type() == typeid(syntax::False))
-    return "false"s;
+  if (res.type() == typeid(syntax::Boolean))
+    return utils::get_if<syntax::Boolean>(res)->to_string();
   if (res.type() == typeid(syntax::Nil))
     return "nil"s;
   dbg(error, "unimplemented type: {}", res.type().name());

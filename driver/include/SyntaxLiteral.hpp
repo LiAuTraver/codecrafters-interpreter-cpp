@@ -93,7 +93,7 @@ public:
   auto operator<=>(const Boolean &rhs) const -> std::strong_ordering {
     return value <=> rhs.value;
   }
-  auto operator!() const -> Boolean { return Boolean{!value}; }
+  auto operator!() const -> Boolean { return Boolean{!value.value()}; }
 
   virtual ~Boolean() = default;
 
