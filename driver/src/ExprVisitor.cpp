@@ -21,7 +21,7 @@ ExprEvaluator::is_true_value(const expr_result_t &value) const {
   if (value.type() == typeid(syntax::True)) {
     return syntax::True{};
   }
-  if (value.type() == typeid(syntax::False)) {
+  if (value.type() == typeid(syntax::False) || value.type() == typeid(syntax::Nil)) {
     return syntax::False{};
   }
   // fixme: double 0 is false or not?
@@ -82,10 +82,10 @@ ExprVisitor::expr_result_t ExprEvaluator::visit_impl(const Unary &expr) const {
   }
   if (expr.op.type == TokenType::kBang) {
     auto value = is_true_value(inner_expr);
-    if (value.type() == typeid(syntax::True)) {
+    if (std::any_cast<syntax::True>(&value)) {
       return syntax::False{};
     }
-    if (value.type() == typeid(syntax::False)) {
+    if (std::any_cast<syntax::False>(&value)) {
       return syntax::True{};
     }
     dbg(error, "unreachable code reached: {}", LOXOGRAPH_STACKTRACE);

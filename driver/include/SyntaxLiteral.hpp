@@ -10,17 +10,93 @@
 ///       you can't evaluate the result in `evaluate` method; yet it went well
 ///       when just parsing and lexing.
 namespace net::ancillarycat::loxograph::syntax {
-class False;
 class SyntaxLiteral;
 class Keyword;
 class String;
 class Number;
+class Value;
+class False;
 class SyntaxLiteral : public utils::Printable {
 public:
   constexpr SyntaxLiteral() = default;
   virtual ~SyntaxLiteral() override = default;
 };
-class Number : public SyntaxLiteral {
+class String : public SyntaxLiteral, public utils::Viewable {
+public:
+  constexpr String() = default;
+  String(const string_type &value) : value(value) {}
+  String(const string_view_type value) : value(value) {}
+  virtual ~String() override = default;
+
+private:
+  auto to_string_impl(const utils::FormatPolicy &format_policy) const
+      -> string_type override {
+    return value;
+  }
+  auto to_string_view_impl(const utils::FormatPolicy &format_policy) const
+      -> string_view_type override {
+    return value;
+  }
+
+private:
+  string_type value;
+};
+class Keyword : public SyntaxLiteral, public utils::Viewable {
+public:
+  constexpr Keyword() = default;
+  virtual ~Keyword() override = default;
+};
+class Value : public SyntaxLiteral, public utils::Viewable {
+public:
+  constexpr Value() = default;
+  virtual ~Value() override = default;
+};
+class Nil : public Value {
+public:
+  constexpr Nil() = default;
+  virtual ~Nil() = default;
+private:
+  auto to_string_impl(const utils::FormatPolicy &format_policy) const
+      -> string_type override {
+    return "nil"s;
+  }
+  auto to_string_view_impl(const utils::FormatPolicy &format_policy) const
+      -> string_view_type override {
+    return "nil"sv;
+  }
+};
+class True : public Value {
+public:
+  constexpr True() = default;
+  virtual ~True() = default;
+
+private:
+  auto to_string_impl(const utils::FormatPolicy &format_policy) const
+      -> string_type override {
+    return "true"s;
+  }
+  auto to_string_view_impl(const utils::FormatPolicy &format_policy) const
+      -> string_view_type override {
+    return "true"sv;
+  }
+};
+class False : public Value {
+public:
+  constexpr False() = default;
+  virtual ~False() = default;
+
+private:
+  auto to_string_impl(const utils::FormatPolicy &format_policy) const
+      -> string_type override {
+    return "false"s;
+  }
+  auto to_string_view_impl(const utils::FormatPolicy &format_policy) const
+      -> string_view_type override {
+    return "false"sv;
+  }
+};
+
+class Number : public Value {
 public:
   constexpr Number() = default;
   Number(const long double value) : value(value) {}
@@ -52,92 +128,21 @@ private:
     return buffer;
   }
 };
-class String : public SyntaxLiteral, public utils::Viewable {
-public:
-  constexpr String() = default;
-  String(const string_type &value) : value(value) {}
-  String(const string_view_type value) : value(value) {}
-  virtual ~String() override = default;
-
-private:
-  auto to_string_impl(const utils::FormatPolicy &format_policy) const
-      -> string_type override {
-    return value;
-  }
-  auto to_string_view_impl(const utils::FormatPolicy &format_policy) const
-      -> string_view_type override {
-    return value;
-  }
-
-private:
-  string_type value;
-};
-class Keyword : public SyntaxLiteral, public utils::Viewable {
-public:
-  constexpr Keyword() = default;
-  virtual ~Keyword() override = default;
-};
-class Nil : public Keyword {
-public:
-  constexpr Nil() = default;
-  virtual ~Nil() = default;
-
-private:
-  auto to_string_impl(const utils::FormatPolicy &format_policy) const
-      -> string_type override {
-    return "nil"s;
-  }
-  auto to_string_view_impl(const utils::FormatPolicy &format_policy) const
-      -> string_view_type override {
-    return "nil"sv;
-  }
-};
-class True : public Keyword {
-public:
-  constexpr True() = default;
-  virtual ~True() = default;
-
-private:
-  auto to_string_impl(const utils::FormatPolicy &format_policy) const
-      -> string_type override {
-    return "true"s;
-  }
-  auto to_string_view_impl(const utils::FormatPolicy &format_policy) const
-      -> string_view_type override {
-    return "true"sv;
-  }
-};
-class False : public Keyword {
-public:
-  constexpr False() = default;
-  virtual ~False() = default;
-
-private:
-  auto to_string_impl(const utils::FormatPolicy &format_policy) const
-      -> string_type override {
-    return "false"s;
-  }
-  auto to_string_view_impl(const utils::FormatPolicy &format_policy) const
-      -> string_view_type override {
-    return "false"sv;
-  }
-};
 auto operator!(const True &) noexcept -> False;
 auto operator!(const False &) noexcept -> True;
+auto operator!(const Nil &) noexcept -> True;
 constexpr auto operator<=>(const False &, const False &) noexcept {
-  return std::strong_ordering::equal;
+  return True{};
 }
 constexpr auto operator<=>(const True &, const True &) noexcept {
-  return std::strong_ordering::equal;
+  return True{};
 }
-constexpr auto operator<=>(const Nil &, const Nil &) noexcept {
-  return std::strong_ordering::equal;
-}
+constexpr auto operator<=>(const Nil &, const Nil &) noexcept { return True{}; }
 constexpr auto operator<=>(const False &, const True &) noexcept {
-  return false;
+  return False{};
 }
 constexpr auto operator<=>(const True &, const False &) noexcept {
-  return false;
+  return False{};
 }
 class And : public Keyword {
 public:
