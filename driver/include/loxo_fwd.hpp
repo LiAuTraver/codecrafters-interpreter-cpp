@@ -120,10 +120,10 @@ inline auto get_if(const std::any &literal) -> decltype(auto)
           "\033[033mNote: this lexer treat all number as long double; meybe "
           "you "
           "accidentally passed an integer?\033[0m");
-      contract_assert(0);
+      // contract_assert(0);
     });
 
-  dbg(info, "literal type: {}, value: {}", typeid(Ty).name(), *ptr);
+  // dbg(info, "literal type: {}, value: {}", typeid(Ty).name(), *ptr);
   return ptr;
 }
 template <typename Ty>

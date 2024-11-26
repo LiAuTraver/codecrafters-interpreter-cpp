@@ -2,68 +2,60 @@
 #include <ostream>
 #include <source_location>
 #include <sstream>
+#include <utility>
+#include <variant>
 
 #include "config.hpp"
 #include "loxo_fwd.hpp"
 
+#include "Evaluatable.hpp"
 #include "Expr.hpp"
 #include "ExprVisitor.hpp"
 #include "status.hpp"
-#include "SyntaxLiteral.hpp"
 
 namespace net::ancillarycat::loxograph::expression {
-ExprVisitor::expr_result_t
-ExprEvaluator::is_true_value(const expr_result_t &value) const {
-  if (!value.has_value() or value.type() == typeid(syntax::Nil)) {
-    return syntax::False;
+syntax::Boolean ExprEvaluator::is_true_value(const value_t &value) const {
+  if (std::holds_alternative<syntax::Nil>(value)) {
+    return syntax::Boolean::make_false(std::get<syntax::Nil>(value).get_line());
   }
 
-  if (value.type() == typeid(syntax::Boolean)) {
-    return value;
+  if (std::holds_alternative<syntax::Boolean>(value)) {
+    return std::get<syntax::Boolean>(value);
   }
+
   // fixme: double 0 is false or not?
-  // if (value.type() == typeid(long double)){
-  //   return {*utils::cast_literal<long double>(value) != 0L};
-  // }
   return syntax::True;
 }
-syntax::Boolean ExprEvaluator::is_deep_equal(const expr_result_t &lhs,
-                                             const expr_result_t &rhs) const {
-  if (lhs.type() != rhs.type()) {
-    return false;
+ExprEvaluator::value_t ExprEvaluator::is_deep_equal(const value_t &lhs,
+                                                    const value_t &rhs) const {
+  if (lhs.index() != rhs.index()) {
+    return syntax::False;
   }
-  if (lhs.type() == typeid(syntax::Nil)) {
-    return true;
+  if (std::holds_alternative<syntax::Nil>(lhs)) {
+    return syntax::Boolean::make_true(std::get<syntax::Nil>(lhs).get_line());
   }
-  if (lhs.type() == typeid(syntax::Boolean)) {
-    return {*utils::get_if<syntax::Boolean>(lhs) ==
-            *utils::get_if<syntax::Boolean>(rhs)};
+  if (std::holds_alternative<syntax::Boolean>(lhs)) {
+    return std::get<syntax::Boolean>(lhs) == std::get<syntax::Boolean>(rhs);
   }
-  if (lhs.type() == typeid(syntax::String)) {
-    return {*utils::get_if<syntax::String>(lhs) ==
-            *utils::get_if<syntax::String>(rhs)};
+  if (std::holds_alternative<syntax::String>(lhs)) {
+    return std::get<syntax::String>(lhs) == std::get<syntax::String>(rhs);
   }
-  if (lhs.type() == typeid(long double)) {
-    return {syntax::Boolean{*utils::get_if<long double>(lhs) ==
-                            *utils::get_if<long double>(rhs)}};
+  if (std::holds_alternative<syntax::Number>(lhs)) {
+    return std::get<syntax::Number>(lhs) == std::get<syntax::Number>(rhs);
   }
-  /// TODO: how on earth can i implement this?
-  return syntax::False; // TODO: temporary solution
+  return syntax::ErrorSyntax{"unimplemented deep equal"sv, 0};
 }
-utils::Status ExprEvaluator::evaluate(const Expr &expr) const try {
-  const_cast<expr_result_t &>(res) = expr.accept(*this);
+utils::Status ExprEvaluator::evaluate(const Expr &expr) const {
+  const_cast<value_t &>(res) = expr.accept(*this);
+  if (std::holds_alternative<syntax::ErrorSyntax>(res)) {
+    return utils::InvalidArgument(std::get<syntax::ErrorSyntax>(res).to_string());
+  }
+  if (std::holds_alternative<std::monostate>(res)) {
+    return utils::EmptyInput("no expr was evaluated.");
+  }
   return utils::OkStatus();
-} catch (const std::exception &e) {
-  return {utils::InvalidArgument(e.what())};
 }
-ExprVisitor::expr_result_t
-ExprEvaluator::visit_impl(const Literal &expr) const {
-  // FIXME: a bug. token has type recorded, and some token such as `true`,
-  //        `false`, `nil` has their type, but no literal i put into this any.
-  //        now temporary solution: in lex add some of them into literal.
-  //        shall be fixed in the future.
-  // return expr.literal.literal; // <- std::any
-  // Expr ^^^ Token ^^^
+ExprEvaluator::value_t ExprEvaluator::visit_impl(const Literal &expr) const {
   dbg(info, "literal type: {}", expr.literal.type);
   if (expr.literal.type.type == TokenType::kMonostate) {
     dbg(critical, "should not happen.");
@@ -71,157 +63,159 @@ ExprEvaluator::visit_impl(const Literal &expr) const {
     return {};
   }
   if (expr.literal.type.type == TokenType::kNil) {
-    return {syntax::Nil{}};
+    return syntax::Nil{expr.literal.line};
   }
   if (expr.literal.type.type == TokenType::kTrue) {
-    return {syntax::True};
+    return syntax::Boolean{true, expr.literal.line};
   }
   if (expr.literal.type.type == TokenType::kFalse) {
-    return {syntax::False};
+    return syntax::Boolean{false, expr.literal.line};
   }
   if (expr.literal.type.type == TokenType::kString) {
-    return {
-        syntax::String{*utils::get_if<string_view_type>(expr.literal.literal)}};
+    return syntax::String{std::any_cast<string_view_type>(expr.literal.literal),
+                          expr.literal.line};
+  }
+  if (expr.literal.type.type == TokenType::kNumber) {
+    return syntax::Number{std::any_cast<long double>(expr.literal.literal),
+                          expr.literal.line};
   }
   // temporary solution.
-  return expr.literal.literal;
+  // return expr.literal.literal;
+  return syntax::ErrorSyntax{"Expected literal value"s, expr.literal.line};
 }
-ExprVisitor::expr_result_t ExprEvaluator::visit_impl(const Unary &expr) const {
-  auto inner_expr =
-      expr.expr->accept(*this); // fixme: bug here, infinite recursion
+
+ExprEvaluator::value_t ExprEvaluator::visit_impl(const Unary &expr) const {
+  auto inner_expr = expr.expr->accept(*this);
   if (expr.op.type == TokenType::kMinus) {
-    if (inner_expr.type() == typeid(long double)) {
-      auto ptr = utils::get_if<long double>(inner_expr);
-      return {-(*ptr)};
+    if (std::holds_alternative<syntax::Number>(inner_expr)) {
+      auto value = std::get<syntax::Number>(inner_expr);
+      dbg(trace, "unary minus: {}", value);
+      return syntax::Number{value * (-1)};
     }
     // todo: error handling
-    return {};
+    return syntax::ErrorSyntax{"Operand must be a number."s, expr.op.line};
   }
   if (expr.op.type == TokenType::kBang) {
     auto value = is_true_value(inner_expr);
-    if (auto ptr = utils::get_if<syntax::Boolean>(value)) {
-      dbg(trace, "unary not: {}", *ptr);
-      return {syntax::Boolean{!(*ptr)}};
-    }
-    dbg(error, "unreachable code reached: {}", LOXOGRAPH_STACKTRACE);
+    dbg(trace, "unary bang: {}", value);
+    return syntax::Boolean{!value};
   }
   dbg(critical, "unreachable code reached: {}", LOXOGRAPH_STACKTRACE);
   contract_assert(false);
+  // todo
   return {};
 }
-ExprVisitor::expr_result_t ExprEvaluator::visit_impl(const Binary &expr) const {
-  auto lhs = expr.left->accept(*this); // shall get a string or a number
+
+ExprEvaluator::value_t ExprEvaluator::visit_impl(const Binary &expr) const {
+  auto lhs = expr.left->accept(*this);
   auto rhs = expr.right->accept(*this);
   if (expr.op.type == TokenType::kEqualEqual) {
-    return {is_deep_equal(lhs, rhs)};
+    return is_deep_equal(lhs, rhs);
   }
   if (expr.op.type == TokenType::kBangEqual) {
-    return {!is_deep_equal(lhs, rhs)};
+    auto result = is_deep_equal(lhs, rhs);
+    if (std::holds_alternative<syntax::Boolean>(result)) {
+      return syntax::Boolean{!std::get<syntax::Boolean>(result)};
+    }
+    return result;
   }
-  if (lhs.type() != rhs.type()) {
-    dbg(error,
-        "type mismatch: lhs: {}, rhs: {}",
-        lhs.type().name(),
-        rhs.type().name());
+  if (lhs.index() != rhs.index()) {
+    dbg(error, "type mismatch: lhs: {}, rhs: {}", lhs.index(), rhs.index());
     dbg(warn, "current implementation only support same type binary operation");
-    return {syntax::False};
+    return syntax::ErrorSyntax{"type mismatch"s, expr.op.line};
   }
-  if (lhs.type() == typeid(syntax::String)) {
+  if (std::holds_alternative<syntax::String>(lhs)) {
     if (expr.op.type == TokenType::kPlus) {
-      return {syntax::String{std::any_cast<syntax::String>(lhs) +
-                             std::any_cast<syntax::String>(rhs)}};
+      return syntax::String{std::get<syntax::String>(lhs) +
+                            std::get<syntax::String>(rhs)};
     }
   }
-  if (lhs.type() == typeid(long double)) {
-    auto real_lhs = utils::get_if<long double>(lhs);
-    auto real_rhs = utils::get_if<long double>(rhs);
-    contract_assert(real_lhs and real_rhs);
+  if (std::holds_alternative<syntax::Number>(lhs)) {
+    auto real_lhs = std::get<syntax::Number>(lhs);
+    auto real_rhs = std::get<syntax::Number>(rhs);
     switch (expr.op.type.type) {
     case TokenType::kMinus:
-      return {*real_lhs - *real_rhs};
+      return syntax::Number{real_lhs - real_rhs};
     case TokenType::kPlus:
-      return {*real_lhs + *real_rhs};
+      return syntax::Number{real_lhs + real_rhs};
     case TokenType::kSlash:
-      return {*real_lhs / *real_rhs};
+      return syntax::Number{real_lhs / real_rhs};
     case TokenType::kStar:
-      return {*real_lhs * *real_rhs};
+      return syntax::Number{real_lhs * real_rhs};
     case TokenType::kGreater:
-      return syntax::Boolean{*real_lhs > *real_rhs};
+      return syntax::Boolean{real_lhs > real_rhs};
     case TokenType::kGreaterEqual:
-      return syntax::Boolean{*real_lhs >= *real_rhs};
+      return syntax::Boolean{real_lhs >= real_rhs};
     case TokenType::kLess:
-      return syntax::Boolean{*real_lhs < *real_rhs};
+      return syntax::Boolean{real_lhs < real_rhs};
     case TokenType::kLessEqual:
-      return syntax::Boolean{*real_lhs <= *real_rhs};
+      return syntax::Boolean{real_lhs <= real_rhs};
     default:
       break;
     }
   }
   dbg(error, "unimplemented binary operator: {}", expr.op.to_string());
   contract_assert(false);
-  return {};
+  return syntax::ErrorSyntax{"unimplemented binary operator"s, expr.op.line};
 }
-ExprVisitor::expr_result_t
-ExprEvaluator::visit_impl(const Grouping &expr) const {
+ExprEvaluator::value_t ExprEvaluator::visit_impl(const Grouping &expr) const {
   return {expr.expr->accept(*this)};
 }
-ExprVisitor::expr_result_t
+ExprEvaluator::value_t
 ExprEvaluator::visit_impl(const IllegalExpr &expr) const {
-  return {};
-}
-auto ExprEvaluator::to_string_impl(
-    const utils::FormatPolicy &format_policy) const -> string_type {
-  if (!res.has_value())
-    return "<no result>";
-  if (res.type() == typeid(long double))
-  // return utils::format("{:.1f}", *utils::get_if<long double>(res));
-  {
-    auto ptr = utils::get_if<long double>(res);
-    if (utils::is_integer(*ptr)) {
-      // print as integer(no decimal point)
-      return utils::format("{:.0f}", *ptr);
-    }
-    // print as-is
-    return utils::format("{}", *ptr);
-  }
-  if (res.type() == typeid(syntax::String))
-    return utils::get_if<syntax::String>(res)->to_string();
-  if (res.type() == typeid(syntax::Boolean))
-    return utils::get_if<syntax::Boolean>(res)->to_string();
-  if (res.type() == typeid(syntax::Nil))
-    return "nil"s;
-  dbg(error, "unimplemented type: {}", res.type().name());
-  return "<unknown type>";
+  return syntax::ErrorSyntax{"Illegal expression"s, expr.token.line};
 }
 
-ExprVisitor::expr_result_t ASTPrinter::visit_impl(const Literal &expr) const {
+ExprEvaluator::value_t ASTPrinter::visit_impl(const Literal &expr) const {
   dbg(info, "Literal: {}", expr.to_string());
   oss << expr << std::endl;
   return {};
 }
-ExprVisitor::expr_result_t ASTPrinter::visit_impl(const Unary &expr) const {
+ExprEvaluator::value_t ASTPrinter::visit_impl(const Unary &expr) const {
   dbg(info, "Unary: {}", expr.to_string());
   oss << expr << std::endl;
   return {};
 }
-ExprVisitor::expr_result_t ASTPrinter::visit_impl(const Binary &expr) const {
+ExprEvaluator::value_t ASTPrinter::visit_impl(const Binary &expr) const {
   dbg(info, "Binary: {}", expr.to_string());
   oss << expr << std::endl;
   return {};
 }
-ExprVisitor::expr_result_t ASTPrinter::visit_impl(const Grouping &expr) const {
+
+auto ExprEvaluator::to_string_impl(
+    const utils::FormatPolicy &format_policy) const -> string_type {
+  if (std::holds_alternative<std::monostate>(res))
+    return "<no result>";
+  if (std::holds_alternative<syntax::Number>(res))
+    return std::get<syntax::Number>(res).to_string();
+  if (std::holds_alternative<syntax::String>(res))
+    return std::get<syntax::String>(res).to_string();
+  if (std::holds_alternative<syntax::Boolean>(res))
+    return std::get<syntax::Boolean>(res).to_string();
+  if (std::holds_alternative<syntax::Nil>(res))
+    return "nil"s;
+  if (std::holds_alternative<syntax::ErrorSyntax>(res))
+    return std::get<syntax::ErrorSyntax>(res).to_string();
+  dbg(error, "unimplemented type: {}", res.index());
+  return "<unknown type>";
+}
+
+ExprEvaluator::value_t ASTPrinter::visit_impl(const Grouping &expr) const {
   dbg(info, "Grouping: {}", expr.to_string());
   oss << expr << std::endl;
   return {};
 }
-ExprVisitor::expr_result_t
-ASTPrinter::visit_impl(const IllegalExpr &expr) const {
+ExprEvaluator::value_t ASTPrinter::visit_impl(const IllegalExpr &expr) const {
   dbg(info, "IllegalExpr: {}", expr.to_string());
   error_stream << expr << std::endl;
   return {};
 }
-utils::Printable::string_type
-ASTPrinter::to_string_impl(const utils::FormatPolicy &) const {
+auto ASTPrinter::to_string_impl(const utils::FormatPolicy &format_policy) const
+    -> string_type {
   return oss.str();
+}
+auto ASTPrinter::to_string_view_impl(const utils::FormatPolicy &) const
+    -> utils::Viewable::string_view_type {
+  return oss.view();
 }
 } // namespace net::ancillarycat::loxograph::expression

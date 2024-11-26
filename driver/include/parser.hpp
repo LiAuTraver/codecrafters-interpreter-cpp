@@ -85,7 +85,7 @@ private:
   token_views_t tokens;
   size_type current = 0;
   expr_ptr_t expr_head = nullptr;
-  bool is_in_panic = false;
+  // bool is_in_panic = false;
 };
 template <typename... Args>
   requires(std::is_enum_v<std::common_type_t<Args...>>)
