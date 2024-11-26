@@ -82,6 +82,7 @@ public:
   auto operator==(const Boolean &) const -> Boolean;
   static auto make_true(uint_least32_t) -> Boolean;
   static auto make_false(uint_least32_t) -> Boolean;
+  auto is_true() const noexcept -> bool;
   virtual ~Boolean() = default;
 
 private:
@@ -200,6 +201,7 @@ private:
       -> string_type override;
   auto to_string_view_impl(const utils::FormatPolicy &) const
       -> string_view_type override;
+
 private:
   string_type message;
 };
