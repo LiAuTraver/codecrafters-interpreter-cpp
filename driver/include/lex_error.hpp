@@ -5,6 +5,7 @@
 
 #include "config.hpp"
 #include "loxo_fwd.hpp"
+#include "fmt.hpp"
 
 namespace net::ancillarycat::loxograph {
 class LOXOGRAPH_API lex_error {
@@ -25,7 +26,7 @@ public:
   lex_error(lex_error &&that) = default;
   lex_error &operator=(const lex_error &) = default;
   lex_error &operator=(lex_error &&that) = default;
-  explicit lex_error(type_t type) : type(type) {}
+  explicit lex_error(const type_t type) : type(type) {}
 
 public:
   type_t type = kMonostate;

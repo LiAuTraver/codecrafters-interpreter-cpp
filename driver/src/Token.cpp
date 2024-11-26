@@ -15,6 +15,8 @@
 #include "lex_error.hpp"
 #include "Token.hpp"
 
+#include "fmt.hpp"
+
 namespace net::ancillarycat::loxograph {
 // clang-format off
 /*!

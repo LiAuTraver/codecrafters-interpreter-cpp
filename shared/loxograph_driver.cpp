@@ -81,7 +81,6 @@ utils::Status tokenize(ExecutionContext &ctx) {
   if ( !lex_result.ok()) {
     return onLexOperationFailed(lex_result);
   }
-  const auto tokens = ctx.lexer->get_tokens();
   if (!ctx.lexer->ok()) {
     return onLexOperationExit(ctx);
   }
@@ -105,7 +104,8 @@ utils::Status interpret(ExecutionContext &ctx) {
 }
 void writeParseResultToContextStream(ExecutionContext &ctx) {
   expression::ASTPrinter astPrinter;
-  auto _ = ctx.parser->get_expr()->accept(astPrinter);
+  auto res  = astPrinter.evaluate(*ctx.parser->get_expr());
+  contract_assert(res.ok());
   ctx.output_stream << astPrinter.to_string();
 }
 void writeExprResultToContextStream(ExecutionContext &ctx) {

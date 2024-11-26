@@ -1,24 +1,24 @@
 #pragma once
 
+#include <iostream>
 #include <memory>
+#include <source_location>
 #include <span>
 #include <string>
 #include <string_view>
-#include <vector>
-#include <variant>
-#include <iostream>
-#include <source_location>
 #include <type_traits>
 #include <utility>
-
+#include <variant>
+#include <vector>
 
 #include "config.hpp"
-#include "Expr.hpp"
 #include "parse_error.hpp"
 #include "status.hpp"
 #include "Token.hpp"
 #include "TokenType.hpp"
-
+namespace net::ancillarycat::loxograph::expression {
+class Expr;
+}
 namespace net::ancillarycat::loxograph {
 class LOXOGRAPH_API parser {
 public:
@@ -59,7 +59,8 @@ private:
   auto primary() -> expr_ptr_t;
   /// FIXME: 1. do not use exceptions for control flow(possiblly)
   /// <br>
-  /// FIXME: 2. add a field to the parser to track the error, not returns a shared_ptr
+  /// FIXME: 2. add a field to the parser to track the error, not returns a
+  /// shared_ptr
   auto recovery_parse(const parse_error &) -> expr_ptr_t;
 
 private:

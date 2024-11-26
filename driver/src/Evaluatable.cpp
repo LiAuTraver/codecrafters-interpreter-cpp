@@ -1,5 +1,6 @@
 #include "config.hpp"
 #include "loxo_fwd.hpp"
+#include "fmt.hpp"
 
 #include "Evaluatable.hpp"
 
@@ -23,6 +24,7 @@ Value::operator Boolean() const noexcept {
 Boolean Value::operator!() const noexcept {
   return Boolean{(!(this->operator Boolean().is_true()))};
 }
+
 Boolean::Boolean(const Boolean &value)
     : Value(value.get_line()), value(value.value) {}
 Boolean &Boolean::operator=(const Boolean &value) {

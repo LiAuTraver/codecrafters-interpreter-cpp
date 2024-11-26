@@ -33,6 +33,10 @@ public:
   auto visit(const DerivedExpr &expr) const {
     return visit_impl(expr);
   }
+  auto evaluate(const Expr &expr) const { return evaluate_impl(expr); }
+  auto get_result() const {
+    return get_result_impl();
+  }
 
 private:
   virtual value_t visit_impl(const Literal &) const = 0;
@@ -40,6 +44,8 @@ private:
   virtual value_t visit_impl(const Binary &) const = 0;
   virtual value_t visit_impl(const Grouping &) const = 0;
   virtual value_t visit_impl(const IllegalExpr &) const = 0;
+  virtual utils::Status evaluate_impl(const Expr &) const = 0;
+  virtual value_t get_result_impl() const = 0;
 };
 /// @brief a dummy visitor that does nothing but test compilation
 /// @implements ExprVisitor
@@ -66,6 +72,12 @@ private:
       -> string_type override {
     return "dummy visitor"s;
   }
+  utils::Status evaluate_impl(const Expr &) const override {
+    return utils::InvalidArgument("dummy visitor");
+  }
+  value_t get_result_impl() const override {
+    return {std::monostate{}};
+  }
 } inline static constexpr _dummy_visitor;
 /// @implements ExprVisitor
 class LOXOGRAPH_API ExprEvaluator : public ExprVisitor {
@@ -73,21 +85,18 @@ public:
   ExprEvaluator() = default;
   virtual ~ExprEvaluator() override = default;
 
-public:
-  utils::Status evaluate(const Expr &expr) const;
-
 private:
-  virtual value_t visit_impl(const Literal &expr) const override;
-  virtual value_t visit_impl(const Unary &expr) const override;
-  virtual value_t visit_impl(const Binary &expr) const override;
-  virtual value_t visit_impl(const Grouping &expr) const override;
-  virtual value_t visit_impl(const IllegalExpr &expr) const override;
+  virtual value_t visit_impl(const Literal &) const override;
+  virtual value_t visit_impl(const Unary &) const override;
+  virtual value_t visit_impl(const Binary &) const override;
+  virtual value_t visit_impl(const Grouping &) const override;
+  virtual value_t visit_impl(const IllegalExpr &) const override;
+  virtual utils::Status evaluate_impl(const Expr &) const override;
   /// @note in Lisp/Scheme, only `#f` is false, everything else is true; we also
   /// make `nil` as false.
-  syntax::Boolean is_true_value(const value_t &value) const;
-  value_t is_deep_equal(const value_t &lhs, const value_t &rhs) const;
-
-private:
+  syntax::Boolean is_true_value(const value_t &) const;
+  value_t is_deep_equal(const value_t &lhs, const value_t &) const;
+  virtual value_t get_result_impl() const override;
   auto to_string_impl(const utils::FormatPolicy &) const
       -> string_type override;
 
@@ -105,17 +114,20 @@ public:
   virtual ~ASTPrinter() override = default;
 
 private:
-  virtual value_t visit_impl(const Literal &expr) const override;
-  virtual value_t visit_impl(const Unary &expr) const override;
-  virtual value_t visit_impl(const Binary &expr) const override;
-  virtual value_t visit_impl(const Grouping &expr) const override;
-  virtual value_t visit_impl(const IllegalExpr &expr) const override;
+  virtual value_t visit_impl(const Literal &) const override;
+  virtual value_t visit_impl(const Unary &) const override;
+  virtual value_t visit_impl(const Binary &) const override;
+  virtual value_t visit_impl(const Grouping &) const override;
+  virtual value_t visit_impl(const IllegalExpr &) const override;
+  virtual utils::Status evaluate_impl(const Expr &) const override;
   virtual string_type
   to_string_impl(const utils::FormatPolicy &) const override;
   auto to_string_view_impl(const utils::FormatPolicy &) const
       -> utils::Viewable::string_view_type override;
+  value_t get_result_impl() const override;
 
 private:
+  value_t res{std::monostate{}};
   mutable ostringstream_t oss;
   mutable ostringstream_t error_stream;
 };

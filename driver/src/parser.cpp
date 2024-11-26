@@ -1,6 +1,10 @@
-#include "parser.hpp"
+
 #include "config.hpp"
 #include "loxo_fwd.hpp"
+#include "parser.hpp"
+#include "Expr.hpp"
+#include "fmt.hpp"
+
 
 namespace net::ancillarycat::loxograph {
 

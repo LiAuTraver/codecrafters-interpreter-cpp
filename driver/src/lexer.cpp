@@ -17,6 +17,7 @@
 #include "lex_error.hpp"
 #include "lexer.hpp"
 #include "Token.hpp"
+#include "fmt.hpp"
 
 /// @namespace net::ancillarycat::loxograph
 namespace net::ancillarycat::loxograph {
