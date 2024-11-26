@@ -5,6 +5,7 @@
 #include <unordered_map>
 
 #include "config.hpp"
+#include "fmt.hpp"
 #include "loxo_fwd.hpp"
 
 namespace net::ancillarycat::loxograph {

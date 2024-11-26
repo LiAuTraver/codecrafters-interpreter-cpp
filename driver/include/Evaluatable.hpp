@@ -8,6 +8,7 @@
 #include <utility>
 
 #include "config.hpp"
+#include "fmt.hpp"
 #include "loxo_fwd.hpp"
 
 namespace net::ancillarycat::loxograph::syntax {
@@ -27,7 +28,7 @@ class ErrorSyntax;
 class Evaluatable : public utils::Printable {
 public:
   constexpr Evaluatable() = default;
-  explicit Evaluatable(uint_least32_t line) : line(line) {}
+  explicit constexpr Evaluatable(const uint_least32_t line) : line(line) {}
   virtual ~Evaluatable() override = default;
   auto operator=(const Evaluatable &) -> Evaluatable & = default;
   uint_least32_t get_line() const { return line; }
@@ -40,7 +41,7 @@ private:
 class Keyword : public Evaluatable, public utils::Viewable {
 public:
   constexpr Keyword() = default;
-  explicit Keyword(uint_least32_t line) : Evaluatable(line) {}
+  explicit Keyword(const uint_least32_t line) : Evaluatable(line) {}
   Keyword(const Keyword &) = default;
   Keyword(Keyword &&) noexcept = default;
   Keyword &operator=(const Keyword &) = default;
@@ -60,7 +61,7 @@ private:
 class Value : public Evaluatable {
 public:
   constexpr Value() = default;
-  Value(uint_least32_t line) : Evaluatable(line) {}
+  constexpr Value(const uint_least32_t line) : Evaluatable(line) {}
   virtual ~Value() override = default;
   explicit operator Boolean() const noexcept;
   Boolean operator!() const noexcept;
@@ -69,12 +70,14 @@ public:
 class Boolean : public Value, public utils::Viewable {
 public:
   constexpr Boolean() = default;
-  constexpr Boolean(
-      bool,
-      uint_least32_t line = std::numeric_limits<uint_least32_t>::quiet_NaN());
-  constexpr Boolean(
-      long double,
-      uint_least32_t line = std::numeric_limits<uint_least32_t>::quiet_NaN());
+  constexpr Boolean(bool value,
+                    const uint_least32_t line =
+                        std::numeric_limits<uint_least32_t>::quiet_NaN())
+      : Value(line), value(value) {}
+  constexpr Boolean(long double,
+                    const uint_least32_t line =
+                        std::numeric_limits<uint_least32_t>::quiet_NaN())
+      : Value(line), value(true) {}
   Boolean(const Boolean &);
   Boolean &operator=(const Boolean &);
   Boolean(Boolean &&) noexcept;
@@ -82,6 +85,7 @@ public:
   auto operator==(const Boolean &) const -> Boolean;
   static auto make_true(uint_least32_t) -> Boolean;
   static auto make_false(uint_least32_t) -> Boolean;
+  auto is_true() const noexcept -> bool;
   virtual ~Boolean() = default;
 
 private:
@@ -92,16 +96,12 @@ private:
 
 private:
   std::optional<bool> value = std::nullopt;
-} static inline const True = {true}, False = {false};
-constexpr Boolean::Boolean(const bool value, uint_least32_t line)
-    : Value(line), value(value) {}
-constexpr Boolean::Boolean(const long double value, uint_least32_t line)
-    : Value(line), value(!!value) {}
+} static inline constexpr True{true, 0}, False{false, 0};
 
 class Nil : public Value, public utils::Viewable {
 public:
   constexpr Nil() = default;
-  Nil(uint_least32_t line) : Value(line) {}
+  Nil(const uint_least32_t line) : Value(line) {}
   Nil(const Nil &) = default;
   Nil(Nil &&) noexcept {}
   Nil &operator=(const Nil &);
@@ -200,6 +200,7 @@ private:
       -> string_type override;
   auto to_string_view_impl(const utils::FormatPolicy &) const
       -> string_view_type override;
+
 private:
   string_type message;
 };

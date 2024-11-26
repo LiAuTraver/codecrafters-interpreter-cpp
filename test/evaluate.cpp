@@ -18,14 +18,26 @@ TEST(add, integer) {
   EXPECT_EQ(callback, 0);
 }
 
+TEST(compare, string) {
+  auto [callback, str] = get_result("Z:/loxograph/examples/eval.str2.lox");
+  EXPECT_EQ(str, "true\n");
+  EXPECT_EQ(callback, 0);
+}
+
 TEST(bool, true) {
   auto [callback, str] = get_result("Z:/loxograph/examples/eval.true.lox");
   EXPECT_EQ(str, "true\n");
   EXPECT_EQ(callback, 0);
 }
 
-TEST(nil, nil) {
-  auto [callback, str] = get_result("Z:/loxograph/examples/dynamic.lox");
+TEST(compare, strnum) {
+  auto [callback, str] = get_result("Z:/loxograph/examples/eval.strnum.lox");
+  EXPECT_EQ(str, "false\n");
+  EXPECT_EQ(callback, 0);
+}
+
+TEST(error, unarystr) {
+  auto [callback, str] = get_result("Z:/loxograph/examples/eval.unarystr.lox");
   EXPECT_EQ(str, "Operand must be a number.\n[line 1]\n");
   EXPECT_EQ(callback, 70);
 }

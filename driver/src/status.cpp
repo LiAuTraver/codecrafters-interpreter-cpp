@@ -4,6 +4,7 @@
 
 #include "config.hpp"
 #include "status.hpp"
+#include "fmt.hpp"
 namespace net::ancillarycat::utils {
 using namespace std::string_view_literals;
 Status::Status(const Code code,
@@ -38,7 +39,7 @@ std::source_location Status::location() const { return my_location; }
 std::string Status::stacktrace() const { return LOXOGRAPH_STACKTRACE; }
 void Status::ignore_error() const { contract_assert(ok()); }
 std::string Status::from_source_location() const {
-  return std::format("file {0}\n"
+  return utils::format("file {0}\n"
                      "              function {1},\n"
                      "              Ln {2} Col {3}\n",
                      my_location.file_name(),

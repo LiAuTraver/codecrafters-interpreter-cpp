@@ -11,6 +11,7 @@
 #include "Evaluatable.hpp"
 #include "Expr.hpp"
 #include "ExprVisitor.hpp"
+#include "fmt.hpp"
 #include "status.hpp"
 
 namespace net::ancillarycat::loxograph::expression {
@@ -45,10 +46,13 @@ ExprEvaluator::value_t ExprEvaluator::is_deep_equal(const value_t &lhs,
   }
   return syntax::ErrorSyntax{"unimplemented deep equal"sv, 0};
 }
-utils::Status ExprEvaluator::evaluate(const Expr &expr) const {
+ExprVisitor::value_t ExprEvaluator::get_result_impl() const { return res; }
+
+utils::Status ExprEvaluator::evaluate_impl(const Expr &expr) const {
   const_cast<value_t &>(res) = expr.accept(*this);
   if (std::holds_alternative<syntax::ErrorSyntax>(res)) {
-    return utils::InvalidArgument(std::get<syntax::ErrorSyntax>(res).to_string());
+    return utils::InvalidArgument(
+        std::get<syntax::ErrorSyntax>(res).to_string());
   }
   if (std::holds_alternative<std::monostate>(res)) {
     return utils::EmptyInput("no expr was evaluated.");
@@ -122,7 +126,8 @@ ExprEvaluator::value_t ExprEvaluator::visit_impl(const Binary &expr) const {
   if (lhs.index() != rhs.index()) {
     dbg(error, "type mismatch: lhs: {}, rhs: {}", lhs.index(), rhs.index());
     dbg(warn, "current implementation only support same type binary operation");
-    return syntax::ErrorSyntax{"type mismatch"s, expr.op.line};
+    return syntax::ErrorSyntax{"Operands must be two numbers or two strings."s,
+                               expr.op.line};
   }
   if (std::holds_alternative<syntax::String>(lhs)) {
     if (expr.op.type == TokenType::kPlus) {
@@ -166,6 +171,10 @@ ExprEvaluator::visit_impl(const IllegalExpr &expr) const {
   return syntax::ErrorSyntax{"Illegal expression"s, expr.token.line};
 }
 
+auto ASTPrinter::evaluate_impl(const Expr &expr) const -> utils::Status {
+  const_cast<value_t&>(res) =  expr.accept(*this);
+  return utils::Status::kOkStatus;
+}
 ExprEvaluator::value_t ASTPrinter::visit_impl(const Literal &expr) const {
   dbg(info, "Literal: {}", expr.to_string());
   oss << expr << std::endl;
@@ -218,4 +227,5 @@ auto ASTPrinter::to_string_view_impl(const utils::FormatPolicy &) const
     -> utils::Viewable::string_view_type {
   return oss.view();
 }
+ExprVisitor::value_t ASTPrinter::get_result_impl() const { return res; }
 } // namespace net::ancillarycat::loxograph::expression

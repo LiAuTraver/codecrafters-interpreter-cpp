@@ -3,6 +3,7 @@
 
 #include "Expr.hpp"
 #include "ExprVisitor.hpp"
+#include "fmt.hpp"
 
 namespace net::ancillarycat::loxograph::expression {
 Expr::expr_result_t Literal::accept_impl(const ExprVisitor &visitor) const {

@@ -1,5 +1,6 @@
 #include "config.hpp"
 #include "loxo_fwd.hpp"
+#include "fmt.hpp"
 
 #include "Evaluatable.hpp"
 
@@ -21,15 +22,18 @@ Value::operator Boolean() const noexcept {
   return Boolean::make_true(get_line());
 }
 Boolean Value::operator!() const noexcept {
-  return Boolean{this->operator Boolean()};
+  return Boolean{(!(this->operator Boolean().is_true()))};
 }
-Boolean::Boolean(const Boolean &value) : Value(value.get_line()), value(value.value) {}
+
+Boolean::Boolean(const Boolean &value)
+    : Value(value.get_line()), value(value.value) {}
 Boolean &Boolean::operator=(const Boolean &value) {
   this->value = value.value;
   Evaluatable::operator=(value);
   return *this;
 }
-Boolean::Boolean(Boolean &&value) noexcept : Value(value.get_line()), value(value.value) {}
+Boolean::Boolean(Boolean &&value) noexcept
+    : Value(value.get_line()), value(value.value) {}
 Boolean &Boolean::operator=(Boolean &&value) noexcept {
   this->value = value.value;
   Evaluatable::operator=(value);
@@ -43,6 +47,10 @@ auto Boolean::make_true(const uint_least32_t line) -> Boolean {
 }
 auto Boolean::make_false(const uint_least32_t line) -> Boolean {
   return Boolean{false, line};
+}
+bool Boolean::is_true() const noexcept {
+  contract_assert(value.has_value() && (bool)"value is not set");
+  return value.value();
 }
 
 auto Boolean::to_string_impl(const utils::FormatPolicy &format_policy) const
@@ -75,14 +83,17 @@ auto Nil::to_string_view_impl(const utils::FormatPolicy &format_policy) const
     -> string_view_type {
   return "nil"sv;
 }
-String::String(const string_type &value, const uint_least32_t line) : Evaluatable(line), value(value) {}
-String::String(const string_view_type value, const uint_least32_t line) : Evaluatable(line), value(value) {}
-String::String(string_type &&value, const uint_least32_t line) noexcept : Evaluatable(line), value(std::move(value)) {}
+String::String(const string_type &value, const uint_least32_t line)
+    : Evaluatable(line), value(value) {}
+String::String(const string_view_type value, const uint_least32_t line)
+    : Evaluatable(line), value(value) {}
+String::String(string_type &&value, const uint_least32_t line) noexcept
+    : Evaluatable(line), value(std::move(value)) {}
 String::String(const String &that)
     : Evaluatable(that.get_line()), utils::Viewable(that), value(that.value) {}
 String::String(String &&that) noexcept
-    : Evaluatable(that.get_line()), utils::Viewable(that), value(std::move(that.value)) {
-}
+    : Evaluatable(that.get_line()), utils::Viewable(that),
+      value(std::move(that.value)) {}
 String &String::operator=(const String &that) {
   if (this == &that)
     return *this;
@@ -116,9 +127,12 @@ auto String::to_string_view_impl(const utils::FormatPolicy &format_policy) const
     -> string_view_type {
   return value;
 }
-Number::Number(const long double value, const uint_least32_t line) : Value(line), value(value) {}
-Number::Number(const Number &that) : Value(that.get_line()), value(that.value) {}
-Number::Number(Number &&that) noexcept : Value(that.get_line()), value(that.value) {}
+Number::Number(const long double value, const uint_least32_t line)
+    : Value(line), value(value) {}
+Number::Number(const Number &that)
+    : Value(that.get_line()), value(that.value) {}
+Number::Number(Number &&that) noexcept
+    : Value(that.get_line()), value(that.value) {}
 Number &Number::operator=(const Number &that) {
   if (this == &that)
     return *this;
@@ -171,9 +185,10 @@ auto Number::to_string_impl(const utils::FormatPolicy &format_policy) const
 }
 ErrorSyntax::ErrorSyntax(const string_view_type message_sv,
                          const uint_least32_t line)
-    : Evaluatable(line), message(utils::format("{}\n[line {}]", message_sv, line)) {}
+    : Evaluatable(line),
+      message(utils::format("{}\n[line {}]", message_sv, line)) {}
 ErrorSyntax::ErrorSyntax(string_type &&message, uint_least32_t &&line) noexcept
-    : Evaluatable(line), message(std::move(message)){}
+    : Evaluatable(line), message(std::move(message)) {}
 ErrorSyntax::ErrorSyntax(const ErrorSyntax &that)
     : Evaluatable(that.get_line()), message(that.message) {}
 ErrorSyntax::ErrorSyntax(ErrorSyntax &&that) noexcept
