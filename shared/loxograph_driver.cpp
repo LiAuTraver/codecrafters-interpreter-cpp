@@ -93,14 +93,15 @@ utils::Status parse(ExecutionContext &ctx) {
   ctx.parser = std::make_shared<class parser>();
   ctx.parser->set_views(ctx.lexer->get_tokens());
   auto res = ctx.parser->parse();
+  dbg(info, "Parsing completed.");
   return res;
 }
 utils::Status interpret(ExecutionContext &ctx) {
   dbg(info, "evaluating...");
   ctx.interpreter = std::make_shared<expression::ExprEvaluator>();
-  auto _ = ctx.interpreter->evaluate(*ctx.parser->get_expr());
+  auto res = ctx.interpreter->evaluate(*ctx.parser->get_expr());
   dbg(info, "evaluation completed.");
-  return _.code();
+  return res;
 }
 void writeParseResultToContextStream(ExecutionContext &ctx) {
   expression::ASTPrinter astPrinter;
@@ -174,7 +175,9 @@ int loxo_main(_In_ const int argc,
     } else {
       dbg(error, "Interpretation failed: {}", interpret_result.message());
       ctx.error_stream << interpret_result.message() << std::endl;
-      return 65;
+      // for codecrafter's test
+      std::cerr << interpret_result.message() << std::endl;
+      return 70;
     }
   }
   return onCommandNotFound(ctx).code();

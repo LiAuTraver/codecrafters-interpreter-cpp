@@ -25,7 +25,7 @@ public:
   using ostringstream_t = std::ostringstream;
   using token_t = Token;
   using expr_ptr_t = std::shared_ptr<Expr>;
-  using expr_result_t = ExprVisitor::expr_result_t;
+  using expr_result_t = ExprVisitor::value_t;
 
 public:
   using string_type = std::string;
