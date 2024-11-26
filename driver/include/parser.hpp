@@ -20,20 +20,6 @@
 #include "TokenType.hpp"
 
 namespace net::ancillarycat::loxograph {
-enum class Precedence : uint8_t {
-  kNone = 0,
-  kEquality = 1,
-  kComparison = 2,
-  // from math: a term is a single part of an expression that is separated by
-  // addition or subtraction
-  kTerm = 3,
-  // ditto: a factor is a number or variable that is multiplied within a term
-  kFactor = 4,
-  kUnary = 5,
-  kCall = 6,
-  kPrimary = 7,
-};
-
 class LOXOGRAPH_API parser {
 public:
   using token_t = Token;

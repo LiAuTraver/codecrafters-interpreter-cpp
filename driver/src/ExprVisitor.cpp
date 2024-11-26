@@ -37,15 +37,15 @@ syntax::Boolean ExprEvaluator::is_deep_equal(const expr_result_t &lhs,
   }
   if (lhs.type() == typeid(syntax::Boolean)) {
     return {*utils::get_if<syntax::Boolean>(lhs) ==
-           *utils::get_if<syntax::Boolean>(rhs)};
+            *utils::get_if<syntax::Boolean>(rhs)};
   }
   if (lhs.type() == typeid(syntax::String)) {
     return {*utils::get_if<syntax::String>(lhs) ==
-           *utils::get_if<syntax::String>(rhs)};
+            *utils::get_if<syntax::String>(rhs)};
   }
   if (lhs.type() == typeid(long double)) {
     return {syntax::Boolean{*utils::get_if<long double>(lhs) ==
-           *utils::get_if<long double>(rhs)}};
+                            *utils::get_if<long double>(rhs)}};
   }
   /// TODO: how on earth can i implement this?
   return syntax::False; // TODO: temporary solution
@@ -90,9 +90,11 @@ ExprVisitor::expr_result_t ExprEvaluator::visit_impl(const Unary &expr) const {
   auto inner_expr =
       expr.expr->accept(*this); // fixme: bug here, infinite recursion
   if (expr.op.type == TokenType::kMinus) {
-    if (auto ptr = utils::get_if<long double>(inner_expr)) {
+    if (inner_expr.type() == typeid(long double)) {
+      auto ptr = utils::get_if<long double>(inner_expr);
       return {-(*ptr)};
     }
+    // todo: error handling
     return {};
   }
   if (expr.op.type == TokenType::kBang) {
@@ -110,6 +112,12 @@ ExprVisitor::expr_result_t ExprEvaluator::visit_impl(const Unary &expr) const {
 ExprVisitor::expr_result_t ExprEvaluator::visit_impl(const Binary &expr) const {
   auto lhs = expr.left->accept(*this); // shall get a string or a number
   auto rhs = expr.right->accept(*this);
+  if (expr.op.type == TokenType::kEqualEqual) {
+    return {is_deep_equal(lhs, rhs)};
+  }
+  if (expr.op.type == TokenType::kBangEqual) {
+    return {!is_deep_equal(lhs, rhs)};
+  }
   if (lhs.type() != rhs.type()) {
     dbg(error,
         "type mismatch: lhs: {}, rhs: {}",
@@ -117,12 +125,6 @@ ExprVisitor::expr_result_t ExprEvaluator::visit_impl(const Binary &expr) const {
         rhs.type().name());
     dbg(warn, "current implementation only support same type binary operation");
     return {syntax::False};
-  }
-  if (expr.op.type == TokenType::kEqualEqual) {
-    return {is_deep_equal(lhs, rhs)};
-  }
-  if (expr.op.type == TokenType::kBangEqual) {
-    return {!is_deep_equal(lhs, rhs)};
   }
   if (lhs.type() == typeid(syntax::String)) {
     if (expr.op.type == TokenType::kPlus) {
@@ -179,14 +181,8 @@ auto ExprEvaluator::to_string_impl(
       // print as integer(no decimal point)
       return utils::format("{:.0f}", *ptr);
     }
-// print as-is
-#if AC_CPP_DEBUG
-    return utils::format(
-        "{}",
-        *ptr); // std::format failed to handle `.f` without a number;
-#else
+    // print as-is
     return utils::format("{}", *ptr);
-#endif
   }
   if (res.type() == typeid(syntax::String))
     return utils::get_if<syntax::String>(res)->to_string();

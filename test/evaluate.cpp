@@ -1,5 +1,5 @@
 #include "test_env.hpp"
-#include <gtest/gtest.h>
+
 namespace {
 auto get_result(const auto &filepath) {
   ExecutionContext ec;
