@@ -16,9 +16,7 @@
 #include "status.hpp"
 #include "Token.hpp"
 #include "TokenType.hpp"
-namespace net::ancillarycat::loxograph::expression {
-class Expr;
-}
+
 namespace net::ancillarycat::loxograph {
 class LOXOGRAPH_API parser {
 public:

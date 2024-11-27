@@ -106,7 +106,7 @@ auto parser::primary() -> expr_ptr_t { // NOLINT(misc-no-recursion)
     get();
     auto expr = expression();
     if (!inspect(kRightParen)) {
-      // invalid syntax reached
+      // invalid eval reached
       // is_in_panic = true;
       // TODO vvvvvv
       // auto error_expr = recovery_parse(
@@ -128,7 +128,7 @@ auto parser::primary() -> expr_ptr_t { // NOLINT(misc-no-recursion)
     get();
     return std::make_shared<expression::Grouping>(expr);
   }
-  // invalid syntax reached
+  // invalid eval reached
 
   throw recovery_parse({parse_error::kUnknownError, "Expect expression."});
 }

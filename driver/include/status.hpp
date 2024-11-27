@@ -56,7 +56,7 @@ public:
   std::source_location my_location;
 };
 
-template <typename Ty>
+template <Storable Ty>
 class
 // LOXOGRAPH_API // <- no need, template class
  nodiscard_msg(StatusOr) StatusOr : public Status {

@@ -1,10 +1,10 @@
 #include "config.hpp"
-#include "loxo_fwd.hpp"
 #include "fmt.hpp"
+#include "loxo_fwd.hpp"
 
 #include "Evaluatable.hpp"
 
-namespace net::ancillarycat::loxograph::syntax {
+namespace net::ancillarycat::loxograph::eval {
 auto Keyword::to_string_impl(const utils::FormatPolicy &) const -> string_type {
   return "not implemented"s;
 }
@@ -179,6 +179,23 @@ Number Number::operator/(const Number &that) const {
              ? Number{std::numeric_limits<long double>::signaling_NaN()}
              : Number{value / that.value};
 }
+Number &Number::operator+=(const Number &that) {
+  value += that.value;
+  return *this;
+}
+Number &Number::operator-=(const Number &that) {
+  value -= that.value;
+  return *this;
+}
+Number &Number::operator*=(const Number &that) {
+  value *= that.value;
+  return *this;
+}
+Number &Number::operator/=(const Number &that) {
+  value = that.value == 0L ? std::numeric_limits<long double>::signaling_NaN()
+                           : value / that.value;
+  return *this;
+}
 auto Number::to_string_impl(const utils::FormatPolicy &format_policy) const
     -> string_type {
   return utils::format("{}", value);
@@ -215,4 +232,4 @@ auto ErrorSyntax::to_string_view_impl(const utils::FormatPolicy &) const
     -> string_view_type {
   return message;
 }
-} // namespace net::ancillarycat::loxograph::syntax
+} // namespace net::ancillarycat::loxograph::eval

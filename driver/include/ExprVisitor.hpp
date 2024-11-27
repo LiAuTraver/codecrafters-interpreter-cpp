@@ -12,13 +12,13 @@ namespace net::ancillarycat::loxograph::expression {
 class ExprVisitor : public utils::Printable {
 public:
   using value_t = std::variant<std::monostate,
-                               syntax::Keyword,
-                               syntax::Boolean,
-                               syntax::Nil,
-                               syntax::Number,
-                               syntax::String,
-                               syntax::ErrorSyntax>;
-  using string_view_type = utils::string_view;
+                               eval::Keyword,
+                               eval::Boolean,
+                               eval::Nil,
+                               eval::Number,
+                               eval::String,
+                               eval::ErrorSyntax>;
+  using string_view_type = utils::Viewable::string_view_type;
 
 public:
   virtual ~ExprVisitor() = default;
@@ -51,19 +51,19 @@ private:
 /// @implements ExprVisitor
 class DummyVisitor : public ExprVisitor {
 public:
-  virtual value_t visit_impl(const Literal &expr) const override {
+  virtual value_t visit_impl(const Literal &) const override {
     return {std::monostate{}};
   }
-  virtual value_t visit_impl(const Unary &expr) const override {
+  virtual value_t visit_impl(const Unary &) const override {
     return {std::monostate{}};
   }
-  virtual value_t visit_impl(const Binary &expr) const override {
+  virtual value_t visit_impl(const Binary &) const override {
     return {std::monostate{}};
   }
-  virtual value_t visit_impl(const Grouping &expr) const override {
+  virtual value_t visit_impl(const Grouping &) const override {
     return {std::monostate{}};
   }
-  virtual value_t visit_impl(const IllegalExpr &expr) const override {
+  virtual value_t visit_impl(const IllegalExpr &) const override {
     return {std::monostate{}};
   }
 
@@ -94,7 +94,7 @@ private:
   virtual utils::Status evaluate_impl(const Expr &) const override;
   /// @note in Lisp/Scheme, only `#f` is false, everything else is true; we also
   /// make `nil` as false.
-  syntax::Boolean is_true_value(const value_t &) const;
+  eval::Boolean is_true_value(const value_t &) const;
   value_t is_deep_equal(const value_t &lhs, const value_t &) const;
   virtual value_t get_result_impl() const override;
   auto to_string_impl(const utils::FormatPolicy &) const

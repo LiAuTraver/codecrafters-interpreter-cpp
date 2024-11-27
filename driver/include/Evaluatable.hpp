@@ -11,16 +11,7 @@
 #include "fmt.hpp"
 #include "loxo_fwd.hpp"
 
-namespace net::ancillarycat::loxograph::syntax {
-
-class Evaluatable;
-class Keyword;
-class String;
-class Value;
-class Boolean;
-class Nil;
-class Number;
-class ErrorSyntax;
+namespace net::ancillarycat::loxograph::eval {
 
 /// @brief A class that represents an evaluatable object
 /// @interface Evaluatable
@@ -61,7 +52,7 @@ private:
 class Value : public Evaluatable {
 public:
   constexpr Value() = default;
-  constexpr Value(const uint_least32_t line) : Evaluatable(line) {}
+  constexpr explicit Value(const uint_least32_t line) : Evaluatable(line) {}
   virtual ~Value() override = default;
   explicit operator Boolean() const noexcept;
   Boolean operator!() const noexcept;
@@ -101,7 +92,7 @@ private:
 class Nil : public Value, public utils::Viewable {
 public:
   constexpr Nil() = default;
-  Nil(const uint_least32_t line) : Value(line) {}
+  explicit Nil(const uint_least32_t line) : Value(line) {}
   Nil(const Nil &) = default;
   Nil(Nil &&) noexcept {}
   Nil &operator=(const Nil &);
@@ -124,9 +115,10 @@ public:
   explicit String(
       string_view_type,
       uint_least32_t line = std::numeric_limits<uint_least32_t>::quiet_NaN());
-  String(string_type &&,
-         uint_least32_t line =
-             std::numeric_limits<uint_least32_t>::quiet_NaN()) noexcept;
+  explicit String(
+      string_type &&,
+      uint_least32_t line =
+          std::numeric_limits<uint_least32_t>::quiet_NaN()) noexcept;
   String(const String &);
   String(String &&) noexcept;
   String &operator=(const String &);
@@ -172,6 +164,10 @@ public:
   Number operator+(const Number &) const;
   Number operator*(const Number &) const;
   Number operator/(const Number &) const;
+  Number &operator+=(const Number &);
+  Number &operator-=(const Number &);
+  Number &operator*=(const Number &);
+  Number &operator/=(const Number &);
 
 private:
   long double value = std::numeric_limits<long double>::quiet_NaN();
@@ -205,4 +201,4 @@ private:
   string_type message;
 };
 
-} // namespace net::ancillarycat::loxograph::syntax
+} // namespace net::ancillarycat::loxograph::eval

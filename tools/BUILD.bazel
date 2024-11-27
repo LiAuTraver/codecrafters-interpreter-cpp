@@ -10,7 +10,7 @@ cc_binary(
     ],
     defines = [
         "AC_CPP_DEBUG",
-        "LIBLOXOGRAPH_SHARED",
+        # "LIBLOXOGRAPH_SHARED", # wired build error if build dll
     ],
     includes = [
         "driver/include",

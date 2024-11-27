@@ -54,8 +54,7 @@ endif ()
 ### after testing, build as shared library can reduce the compile time, which is good when debugging.
 ### note: for some wired reasons, the library would not be rebuilt if `.cpp` are changed, and `.hpp` are unchanged;
 ###			so turn off the shared library temporarily.
-#if(LOXOGRAPH_BUILD_SHARED OR AC_CPP_DEBUG)
-if (0)
+if(LOXOGRAPH_BUILD_SHARED)
     add_library(driver SHARED
             ${DRIVER_SOURCE_FILES}
     )

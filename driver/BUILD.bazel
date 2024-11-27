@@ -10,8 +10,8 @@ cc_library(
     ],
     defines = [
         "AC_CPP_DEBUG",
-        "LIBLOCOGRAPH_SHARED",
-        "driver_EXPORTS",
+        # "LIBLOCOGRAPH_SHARED",
+        # "driver_EXPORTS",
     ],
     includes = driver_includes,
     linkstatic = False,
