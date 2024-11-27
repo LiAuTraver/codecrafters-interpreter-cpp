@@ -30,12 +30,6 @@ if (DEFINED ENV{AC_CPP_DEBUG})
     endif ()
 endif ()
 
-#if(AC_CPP_DEBUG)
-#	file(GLOB_RECURSE DRIVER_PRECOMPILED_HEADERS packages/*.hh)
-#else()
-#	file(GLOB_RECURSE DRIVER_PRECOMPILED_HEADERS packages/std.hh)
-#endif()
-
 # `add_compile_options` MUST be placed before `add_library` or `add_executable`;
 # in other words, it has only had effect on the targets that are created after it.
 if (AC_CPP_DEBUG)
@@ -79,10 +73,6 @@ else ()
     set_target_properties(driver PROPERTIES LINKER_LANGUAGE CXX)
     message(STATUS "Building static library")
 endif ()
-
-#target_precompile_headers(driver PUBLIC
-#	${DRIVER_PRECOMPILED_HEADERS}
-#)
 
 add_executable(interpreter
         tools/interpreter.cpp

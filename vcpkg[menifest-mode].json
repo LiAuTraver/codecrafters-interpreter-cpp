@@ -5,7 +5,7 @@
     "benchmark",
     "fmt",
     "gtest",
-    "spdlog",
-    "magic-enum"
+    "magic-enum",
+    "spdlog"
   ]
 }
