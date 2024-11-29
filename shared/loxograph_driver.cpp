@@ -26,6 +26,7 @@
 #include "config.hpp"
 #include "execution_context.hpp"
 #include "ExprVisitor.hpp"
+#include "interpreter.hpp"
 #include "lexer.hpp"
 #include "parser.hpp"
 #include "status.hpp"
@@ -71,14 +72,15 @@ utils::Status tokenize(ExecutionContext &ctx) {
   if (ctx.input_files.size() != 1) {
     return show_msg();
   }
-  ctx.lexer = std::make_shared<class lexer>();
+  // ctx.lexer = std::make_shared<class lexer>();
+  ctx.lexer.reset(new lexer);
   if (const utils::Status load_result =
           ctx.lexer->load(*ctx.input_files.cbegin());
       !load_result.ok()) {
     return onFileOperationFailed(load_result);
   }
   const utils::Status lex_result = ctx.lexer->lex();
-  if ( !lex_result.ok()) {
+  if (!lex_result.ok()) {
     return onLexOperationFailed(lex_result);
   }
   if (!ctx.lexer->ok()) {
@@ -89,22 +91,40 @@ utils::Status tokenize(ExecutionContext &ctx) {
 }
 utils::Status parse(ExecutionContext &ctx) {
   dbg(info, "Parsing...");
-  ctx.parser = std::make_shared<class parser>();
+  // ctx.parser = std::make_shared<class parser>();
+  ctx.parser.reset(new parser);
   ctx.parser->set_views(ctx.lexer->get_tokens());
-  auto res = ctx.parser->parse();
+  // auto res = ctx.parser->parse(parser::kStatement);
+  utils::Status res;
+  if (ctx.commands.front() == ExecutionContext::parse) {
+    res = ctx.parser->parse(parser::kExpression);
+  } else if (ctx.commands.front() & ExecutionContext::needs_evaluate) {
+    res = ctx.parser->parse(parser::kExpression);
+  } else if (ctx.commands.front() & ExecutionContext::needs_interpret) {
+    res = ctx.parser->parse(parser::kStatement);
+  } else {
+    TODO("unimplemented");
+  }
   dbg(info, "Parsing completed.");
   return res;
 }
-utils::Status interpret(ExecutionContext &ctx) {
+utils::Status evaluate(ExecutionContext &ctx) {
   dbg(info, "evaluating...");
-  ctx.interpreter = std::make_shared<expression::ExprEvaluator>();
-  auto res = ctx.interpreter->evaluate(*ctx.parser->get_expr());
+  ctx.interpreter.reset(new interpreter);
+  auto res = ctx.interpreter->evaluate(*ctx.parser->get_expression());
   dbg(info, "evaluation completed.");
+  return res;
+}
+utils::Status interpret(ExecutionContext &ctx) {
+  dbg(info, "interpreting...");
+  ctx.interpreter.reset(new interpreter);
+  auto res = ctx.interpreter->interpret(ctx.parser->get_statements());
+  dbg(info, "interpretation completed.");
   return res;
 }
 void writeParseResultToContextStream(ExecutionContext &ctx) {
   expression::ASTPrinter astPrinter;
-  auto res  = astPrinter.evaluate(*ctx.parser->get_expr());
+  auto res = astPrinter.evaluate(*ctx.parser->get_expression());
   contract_assert(res.ok());
   ctx.output_stream << astPrinter.to_string();
 }
@@ -112,8 +132,12 @@ void writeExprResultToContextStream(ExecutionContext &ctx) {
   // add missing newline character
   ctx.output_stream << ctx.interpreter->to_string() << std::endl;
 }
+void writeInterpResultToContextStream(ExecutionContext & ctx){
+  //DONT add newline character
+  ctx.output_stream << ctx.interpreter->to_string();
+}
 // clang-format off
-nodiscard_msg(loxo_main)
+LOXO_NODISCARD_MSG(loxo_main)
 int loxo_main(_In_ const int argc,
               _In_opt_ char **argv, //! @note argv can be nullptr(debug mode or google test)
               _Inout_ ExecutionContext &ctx)
@@ -163,20 +187,37 @@ int loxo_main(_In_ const int argc,
       return 65;
     }
   }
+  utils::Status evaluate_result;
+  if (ctx.commands.front() & ExecutionContext::needs_evaluate) {
+    evaluate_result = evaluate(ctx);
+  }
+  if (ctx.commands.front() == ExecutionContext::evaluate) {
+    if (evaluate_result.ok()) {
+      writeExprResultToContextStream(ctx);
+      std::cout << ctx.output_stream.view() << std::endl;
+      return 0;
+    } else {
+      dbg(error, "Evaluation failed: {}", evaluate_result.message());
+      ctx.error_stream << evaluate_result.message() << std::endl;
+      // for codecrafter's test
+      std::cerr << evaluate_result.message() << std::endl;
+      return 70;
+    }
+  }
   utils::Status interpret_result;
   if (ctx.commands.front() & ExecutionContext::needs_interpret) {
     interpret_result = interpret(ctx);
   }
   if (ctx.commands.front() == ExecutionContext::interpret) {
     if (interpret_result.ok()) {
-      writeExprResultToContextStream(ctx);
-      std::cout << ctx.output_stream.str() << std::endl;
+      writeInterpResultToContextStream(ctx);
+      std::cout << ctx.output_stream.view() << std::endl;
       return 0;
     } else {
       dbg(error, "Interpretation failed: {}", interpret_result.message());
       ctx.error_stream << interpret_result.message() << std::endl;
       // for codecrafter's test
-      std::cerr << interpret_result.message() << std::endl;
+      std::cerr << interpret_result.message(); // DONT add newline character
       return 70;
     }
   }

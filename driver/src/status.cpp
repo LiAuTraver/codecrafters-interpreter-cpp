@@ -71,22 +71,22 @@ Status PermissionDeniedError(const std::string_view message,
                              const std::source_location &location) {
   return {Status::kPermissionDeniedError, message, location};
 }
-nodiscard_msg(Status) LOXOGRAPH_API Status
+LOXO_NODISCARD_MSG(Status) LOXOGRAPH_API Status
     InvalidArgument(const string_view message,
                     const std::source_location &location) {
   return {Status::kInvalidArgument, message, location};
 }
-nodiscard_msg(Status) LOXOGRAPH_API Status
+LOXO_NODISCARD_MSG(Status) LOXOGRAPH_API Status
     CommandNotFound(const string_view message,
                     const std::source_location &location) {
   return {Status::kCommandNotFound, message, location};
 }
-nodiscard_msg(Status) LOXOGRAPH_API Status
+LOXO_NODISCARD_MSG(Status) LOXOGRAPH_API Status
     EmptyInput(const string_view message,
                const std::source_location &location) {
   return {Status::kEmptyInput, message, location};
 }
-nodiscard_msg(Status) LOXOGRAPH_API Status
+LOXO_NODISCARD_MSG(Status) LOXOGRAPH_API Status
     ParseError(const string_view message,
                const std::source_location &location) {
   return {Status::kParseError, message, location};

@@ -1,17 +1,10 @@
 #include "config.hpp"
-#include "loxo_fwd.hpp"
 #include "fmt.hpp"
+#include "loxo_fwd.hpp"
 
 #include "Evaluatable.hpp"
 
-namespace net::ancillarycat::loxograph::syntax {
-auto Keyword::to_string_impl(const utils::FormatPolicy &) const -> string_type {
-  return "not implemented"s;
-}
-auto Keyword::to_string_view_impl(const utils::FormatPolicy &) const
-    -> string_view_type {
-  return "not implemented"sv;
-}
+namespace net::ancillarycat::loxograph::evaluation {
 Value::operator Boolean() const noexcept {
   if (dynamic_cast<const Nil *>(this)) {
     return Boolean::make_false(get_line());
@@ -179,40 +172,57 @@ Number Number::operator/(const Number &that) const {
              ? Number{std::numeric_limits<long double>::signaling_NaN()}
              : Number{value / that.value};
 }
+Number &Number::operator+=(const Number &that) {
+  value += that.value;
+  return *this;
+}
+Number &Number::operator-=(const Number &that) {
+  value -= that.value;
+  return *this;
+}
+Number &Number::operator*=(const Number &that) {
+  value *= that.value;
+  return *this;
+}
+Number &Number::operator/=(const Number &that) {
+  value = that.value == 0L ? std::numeric_limits<long double>::signaling_NaN()
+                           : value / that.value;
+  return *this;
+}
 auto Number::to_string_impl(const utils::FormatPolicy &format_policy) const
     -> string_type {
   return utils::format("{}", value);
 }
-ErrorSyntax::ErrorSyntax(const string_view_type message_sv,
+Error::Error(const string_view_type message_sv,
                          const uint_least32_t line)
     : Evaluatable(line),
       message(utils::format("{}\n[line {}]", message_sv, line)) {}
-ErrorSyntax::ErrorSyntax(string_type &&message, uint_least32_t &&line) noexcept
+Error::Error(string_type &&message, uint_least32_t &&line) noexcept
     : Evaluatable(line), message(std::move(message)) {}
-ErrorSyntax::ErrorSyntax(const ErrorSyntax &that)
+Error::Error(const Error &that)
     : Evaluatable(that.get_line()), message(that.message) {}
-ErrorSyntax::ErrorSyntax(ErrorSyntax &&that) noexcept
+Error::Error(Error &&that) noexcept
     : Evaluatable(that.get_line()), message(std::move(that.message)) {}
-ErrorSyntax &ErrorSyntax::operator=(const ErrorSyntax &that) {
+Error &Error::operator=(const Error &that) {
   if (this == &that)
     return *this;
   message = that.message;
   Evaluatable::operator=(that);
   return *this;
 }
-ErrorSyntax &ErrorSyntax::operator=(ErrorSyntax &&that) noexcept {
+Error &Error::operator=(Error &&that) noexcept {
   if (this == &that)
     return *this;
   message = std::move(that.message);
   Evaluatable::operator=(that);
   return *this;
 }
-auto ErrorSyntax::to_string_impl(const utils::FormatPolicy &format_policy) const
+auto Error::to_string_impl(const utils::FormatPolicy &format_policy) const
     -> string_type {
   return message;
 }
-auto ErrorSyntax::to_string_view_impl(const utils::FormatPolicy &) const
+auto Error::to_string_view_impl(const utils::FormatPolicy &) const
     -> string_view_type {
   return message;
 }
-} // namespace net::ancillarycat::loxograph::syntax
+} // namespace net::ancillarycat::loxograph::evaluation

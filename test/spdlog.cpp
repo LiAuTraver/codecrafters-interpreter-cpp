@@ -1,6 +1,5 @@
 #include <gtest/gtest.h>
 #include <spdlog/spdlog.h>
-#include <magic_enum.hpp>
 #include <stacktrace>
 
 TEST(spdlog, playground) {

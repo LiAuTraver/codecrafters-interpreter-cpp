@@ -10,9 +10,9 @@
 
 namespace net::ancillarycat::utils {
 
-class LOXOGRAPH_API nodiscard_msg(Status) Status {
+class LOXOGRAPH_API LOXO_NODISCARD_MSG(Status) Status {
 public:
-  enum nodiscard_msg(Code) Code : uint8_t {
+  enum LOXO_NODISCARD_MSG(Code) Code : uint8_t {
     kOkStatus = 0,
     kError = 1, // represents a generic error
     kAlreadyExistsError = 2,
@@ -27,28 +27,28 @@ public:
   };
 
 public:
-  nodiscard_msg(Status) Status()
+  LOXO_NODISCARD_MSG(Status) Status()
       : my_code(kOkStatus), my_message("<default initialized>"),
         my_location(std::source_location::current()) {}
-  nodiscard_msg(Status)
+  LOXO_NODISCARD_MSG(Status)
       Status(Code,
              string_view = "<no message provided>",
              const std::source_location & = std::source_location::current());
-  nodiscard_msg(Status) Status(Status &&) noexcept;
-  nodiscard_msg(Status) Status(const Status &);
+  LOXO_NODISCARD_MSG(Status) Status(Status &&) noexcept;
+  LOXO_NODISCARD_MSG(Status) Status(const Status &);
   Status &operator=(const Status &) = default;
   Status &operator=(Status &&that) noexcept;
   virtual ~Status() = default;
 
-  nodiscard_msg(Status) bool ok() const;
+  LOXO_NODISCARD_MSG(Status) bool ok() const;
   Code code() const;
-  nodiscard_msg(string_view) string_view message() const;
-  nodiscard_msg(source_location) std::source_location location() const;
-  nodiscard_msg(stacktrace) string stacktrace() const;
+  LOXO_NODISCARD_MSG(string_view) string_view message() const;
+  LOXO_NODISCARD_MSG(source_location) std::source_location location() const;
+  LOXO_NODISCARD_MSG(stacktrace) string stacktrace() const;
   /// @note   never do unnecessary `noexcept`;
   /// it'll jeopardize the debugging process and call `std::abort()`.
   virtual void ignore_error() const;
-  nodiscard_msg(string) inline string from_source_location() const;
+  LOXO_NODISCARD_MSG(string) inline string from_source_location() const;
 
 public:
   Code my_code;
@@ -56,10 +56,10 @@ public:
   std::source_location my_location;
 };
 
-template <typename Ty>
+template <Storable Ty>
 class
 // LOXOGRAPH_API // <- no need, template class
- nodiscard_msg(StatusOr) StatusOr : public Status {
+ LOXO_NODISCARD_MSG(StatusOr) StatusOr : public Status {
 public:
   using base_type = Status;
   using value_type = Ty;
@@ -112,31 +112,31 @@ private:
   value_type my_value;
 };
 
-nodiscard_msg(Status) LOXOGRAPH_API Status
+LOXO_NODISCARD_MSG(Status) LOXOGRAPH_API Status
     OkStatus(const std::source_location & = std::source_location::current());
 
-nodiscard_msg(Status) LOXOGRAPH_API Status AlreadyExistsError(
+LOXO_NODISCARD_MSG(Status) LOXOGRAPH_API Status AlreadyExistsError(
     string_view,
     const std::source_location & = std::source_location::current());
-nodiscard_msg(Status) LOXOGRAPH_API Status FileNotFoundError(
+LOXO_NODISCARD_MSG(Status) LOXOGRAPH_API Status FileNotFoundError(
     string_view,
     const std::source_location & = std::source_location::current());
-nodiscard_msg(Status) LOXOGRAPH_API Status UnknownError(
+LOXO_NODISCARD_MSG(Status) LOXOGRAPH_API Status UnknownError(
     string_view,
     const std::source_location & = std::source_location::current());
-nodiscard_msg(Status) LOXOGRAPH_API Status PermissionDeniedError(
+LOXO_NODISCARD_MSG(Status) LOXOGRAPH_API Status PermissionDeniedError(
     string_view,
     const std::source_location & = std::source_location::current());
-nodiscard_msg(Status) LOXOGRAPH_API Status InvalidArgument(
+LOXO_NODISCARD_MSG(Status) LOXOGRAPH_API Status InvalidArgument(
 		string_view,
 		const std::source_location & = std::source_location::current());
-nodiscard_msg(Status) LOXOGRAPH_API Status CommandNotFound(
+LOXO_NODISCARD_MSG(Status) LOXOGRAPH_API Status CommandNotFound(
 		string_view,
 		const std::source_location & = std::source_location::current());
-nodiscard_msg(Status) LOXOGRAPH_API Status EmptyInput(
+LOXO_NODISCARD_MSG(Status) LOXOGRAPH_API Status EmptyInput(
 		string_view,
 		const std::source_location & = std::source_location::current());
-nodiscard_msg(Status) LOXOGRAPH_API Status ParseError(
+LOXO_NODISCARD_MSG(Status) LOXOGRAPH_API Status ParseError(
 		string_view,
 		const std::source_location & = std::source_location::current());
 		

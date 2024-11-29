@@ -4,24 +4,16 @@
 
 #include "config.hpp"
 #include "Evaluatable.hpp"
+#include "fmt.hpp"
 #include "loxo_fwd.hpp"
 #include "status.hpp"
 
 namespace net::ancillarycat::loxograph::expression {
 /// @interface ExprVisitor
-class ExprVisitor : public utils::Printable {
-public:
-  using value_t = std::variant<std::monostate,
-                               syntax::Keyword,
-                               syntax::Boolean,
-                               syntax::Nil,
-                               syntax::Number,
-                               syntax::String,
-                               syntax::ErrorSyntax>;
-  using string_view_type = utils::string_view;
-
+class ExprVisitor : virtual public utils::VisitorBase {
 public:
   virtual ~ExprVisitor() = default;
+public:
   // clang-format off
   /// @brief Visit the expression
   /// @attention tbh i don't really like the idea of making a virtual
@@ -51,19 +43,19 @@ private:
 /// @implements ExprVisitor
 class DummyVisitor : public ExprVisitor {
 public:
-  virtual value_t visit_impl(const Literal &expr) const override {
+  virtual value_t visit_impl(const Literal &) const override {
     return {std::monostate{}};
   }
-  virtual value_t visit_impl(const Unary &expr) const override {
+  virtual value_t visit_impl(const Unary &) const override {
     return {std::monostate{}};
   }
-  virtual value_t visit_impl(const Binary &expr) const override {
+  virtual value_t visit_impl(const Binary &) const override {
     return {std::monostate{}};
   }
-  virtual value_t visit_impl(const Grouping &expr) const override {
+  virtual value_t visit_impl(const Grouping &) const override {
     return {std::monostate{}};
   }
-  virtual value_t visit_impl(const IllegalExpr &expr) const override {
+  virtual value_t visit_impl(const IllegalExpr &) const override {
     return {std::monostate{}};
   }
 
@@ -78,31 +70,7 @@ private:
   value_t get_result_impl() const override {
     return {std::monostate{}};
   }
-} inline static constexpr _dummy_visitor;
-/// @implements ExprVisitor
-class LOXOGRAPH_API ExprEvaluator : public ExprVisitor {
-public:
-  ExprEvaluator() = default;
-  virtual ~ExprEvaluator() override = default;
-
-private:
-  virtual value_t visit_impl(const Literal &) const override;
-  virtual value_t visit_impl(const Unary &) const override;
-  virtual value_t visit_impl(const Binary &) const override;
-  virtual value_t visit_impl(const Grouping &) const override;
-  virtual value_t visit_impl(const IllegalExpr &) const override;
-  virtual utils::Status evaluate_impl(const Expr &) const override;
-  /// @note in Lisp/Scheme, only `#f` is false, everything else is true; we also
-  /// make `nil` as false.
-  syntax::Boolean is_true_value(const value_t &) const;
-  value_t is_deep_equal(const value_t &lhs, const value_t &) const;
-  virtual value_t get_result_impl() const override;
-  auto to_string_impl(const utils::FormatPolicy &) const
-      -> string_type override;
-
-private:
-  const value_t res{std::monostate{}};
-};
+} inline static const _dummy_visitor;
 /// @implements ExprVisitor
 class LOXOGRAPH_API ASTPrinter : public ExprVisitor, public utils::Viewable {
 public:

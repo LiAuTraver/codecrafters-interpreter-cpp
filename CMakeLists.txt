@@ -30,12 +30,6 @@ if (DEFINED ENV{AC_CPP_DEBUG})
     endif ()
 endif ()
 
-#if(AC_CPP_DEBUG)
-#	file(GLOB_RECURSE DRIVER_PRECOMPILED_HEADERS packages/*.hh)
-#else()
-#	file(GLOB_RECURSE DRIVER_PRECOMPILED_HEADERS packages/std.hh)
-#endif()
-
 # `add_compile_options` MUST be placed before `add_library` or `add_executable`;
 # in other words, it has only had effect on the targets that are created after it.
 if (AC_CPP_DEBUG)
@@ -60,8 +54,7 @@ endif ()
 ### after testing, build as shared library can reduce the compile time, which is good when debugging.
 ### note: for some wired reasons, the library would not be rebuilt if `.cpp` are changed, and `.hpp` are unchanged;
 ###			so turn off the shared library temporarily.
-#if(LOXOGRAPH_BUILD_SHARED OR AC_CPP_DEBUG)
-if (0)
+if(LOXOGRAPH_BUILD_SHARED)
     add_library(driver SHARED
             ${DRIVER_SOURCE_FILES}
     )
@@ -80,12 +73,8 @@ else ()
     message(STATUS "Building static library")
 endif ()
 
-#target_precompile_headers(driver PUBLIC
-#	${DRIVER_PRECOMPILED_HEADERS}
-#)
-
 add_executable(interpreter
-        tools/interpreter.cpp
+        tools/lox_interpreter.cpp
         shared/loxograph_driver.cpp
         shared/execution_context.hpp
 )

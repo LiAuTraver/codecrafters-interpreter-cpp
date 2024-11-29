@@ -11,16 +11,7 @@
 #include "fmt.hpp"
 #include "loxo_fwd.hpp"
 
-namespace net::ancillarycat::loxograph::syntax {
-
-class Evaluatable;
-class Keyword;
-class String;
-class Value;
-class Boolean;
-class Nil;
-class Number;
-class ErrorSyntax;
+namespace net::ancillarycat::loxograph::evaluation {
 
 /// @brief A class that represents an evaluatable object
 /// @interface Evaluatable
@@ -37,31 +28,13 @@ private:
   uint_least32_t line = std::numeric_limits<uint_least32_t>::quiet_NaN();
 };
 
-/// @todo
-class Keyword : public Evaluatable, public utils::Viewable {
-public:
-  constexpr Keyword() = default;
-  explicit Keyword(const uint_least32_t line) : Evaluatable(line) {}
-  Keyword(const Keyword &) = default;
-  Keyword(Keyword &&) noexcept = default;
-  Keyword &operator=(const Keyword &) = default;
-  Keyword &operator=(Keyword &&) noexcept = default;
-  virtual ~Keyword() override = default;
-
-private:
-  auto to_string_impl(const utils::FormatPolicy &) const
-      -> string_type override;
-  auto to_string_view_impl(const utils::FormatPolicy &) const
-      -> string_view_type override;
-};
-
 /// @brief A class that represents a value
 /// @interface Value
 /// @implements Evaluatable
 class Value : public Evaluatable {
 public:
   constexpr Value() = default;
-  constexpr Value(const uint_least32_t line) : Evaluatable(line) {}
+  constexpr explicit Value(const uint_least32_t line) : Evaluatable(line) {}
   virtual ~Value() override = default;
   explicit operator Boolean() const noexcept;
   Boolean operator!() const noexcept;
@@ -101,7 +74,7 @@ private:
 class Nil : public Value, public utils::Viewable {
 public:
   constexpr Nil() = default;
-  Nil(const uint_least32_t line) : Value(line) {}
+  explicit Nil(const uint_least32_t line) : Value(line) {}
   Nil(const Nil &) = default;
   Nil(Nil &&) noexcept {}
   Nil &operator=(const Nil &);
@@ -124,9 +97,10 @@ public:
   explicit String(
       string_view_type,
       uint_least32_t line = std::numeric_limits<uint_least32_t>::quiet_NaN());
-  String(string_type &&,
-         uint_least32_t line =
-             std::numeric_limits<uint_least32_t>::quiet_NaN()) noexcept;
+  explicit String(
+      string_type &&,
+      uint_least32_t line =
+          std::numeric_limits<uint_least32_t>::quiet_NaN()) noexcept;
   String(const String &);
   String(String &&) noexcept;
   String &operator=(const String &);
@@ -172,6 +146,10 @@ public:
   Number operator+(const Number &) const;
   Number operator*(const Number &) const;
   Number operator/(const Number &) const;
+  Number &operator+=(const Number &);
+  Number &operator-=(const Number &);
+  Number &operator*=(const Number &);
+  Number &operator/=(const Number &);
 
 private:
   long double value = std::numeric_limits<long double>::quiet_NaN();
@@ -181,19 +159,19 @@ private:
       -> string_type override;
 };
 
-class ErrorSyntax : public Evaluatable, public utils::Viewable {
+class Error : public Evaluatable, public utils::Viewable {
 public:
   using string_view_type = utils::Viewable::string_view_type;
 
 public:
-  ErrorSyntax() = default;
-  ErrorSyntax(string_view_type, uint_least32_t);
-  explicit ErrorSyntax(string_type &&, uint_least32_t &&) noexcept;
-  ErrorSyntax(const ErrorSyntax &);
-  ErrorSyntax(ErrorSyntax &&) noexcept;
-  ErrorSyntax &operator=(const ErrorSyntax &);
-  ErrorSyntax &operator=(ErrorSyntax &&) noexcept;
-  virtual ~ErrorSyntax() = default;
+  Error() = default;
+  Error(string_view_type, uint_least32_t);
+  explicit Error(string_type &&, uint_least32_t &&) noexcept;
+  Error(const Error &);
+  Error(Error &&) noexcept;
+  Error &operator=(const Error &);
+  Error &operator=(Error &&) noexcept;
+  virtual ~Error() = default;
 
 private:
   auto to_string_impl(const utils::FormatPolicy &) const
@@ -205,4 +183,4 @@ private:
   string_type message;
 };
 
-} // namespace net::ancillarycat::loxograph::syntax
+} // namespace net::ancillarycat::loxograph::evaluation

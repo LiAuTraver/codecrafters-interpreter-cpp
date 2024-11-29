@@ -14,10 +14,10 @@
 #include <vector>
 
 #include "config.hpp"
+#include "fmt.hpp"
 #include "lex_error.hpp"
 #include "lexer.hpp"
 #include "Token.hpp"
-#include "fmt.hpp"
 
 /// @namespace net::ancillarycat::loxograph
 namespace net::ancillarycat::loxograph {
@@ -109,8 +109,11 @@ void lexer::add_identifier() {
     case kNil:
       add_token(kNil, nullptr);
       break;
+    case kPrint:
+      add_token(kPrint, nullptr);
+      break;
     default:
-      dbg(warn, "unimplemented keyword: {}", value);
+      dbg(warn, "unimplemented or generalized keyword: {}", value);
       add_token(it->second);
     }
     return;
@@ -221,10 +224,14 @@ bool lexer::is_at_end(const size_t offset) const {
   return cursor + offset >= contents.size();
 }
 void lexer::add_token(token_type_t type, std::any literal) {
-  auto lexeme = string_view_type(contents.data() + head, cursor - head);
-  dbg(trace, "lexeme: {}", lexeme);
-  tokens.emplace_back(type, lexeme, std::move(literal), current_line);
-  lexeme_views.emplace_back(lexeme);
+  if (type == kEndOfFile) { // FIXME: lexeme bug at EOF(not critical)
+    tokens.emplace_back(type, ""sv, std::any{}, current_line);
+  } else {
+    auto lexeme = string_view_type(contents.data() + head, cursor - head);
+    dbg(trace, "lexeme: {}", lexeme);
+    tokens.emplace_back(type, lexeme, std::move(literal), current_line);
+    lexeme_views.emplace_back(lexeme);
+  }
 }
 void lexer::add_lex_error(const error_code_t type) {
   dbg(error, "Lexical error: {}", contents.substr(head, cursor - head));
@@ -297,4 +304,5 @@ lexer::string_view_type lexer::lex_identifier() {
   dbg(trace, "identifier: {}", value);
   return value;
 }
+LOXOGRAPH_API void delete_lexer_fwd(lexer *ptr) { delete ptr; }
 } // namespace net::ancillarycat::loxograph

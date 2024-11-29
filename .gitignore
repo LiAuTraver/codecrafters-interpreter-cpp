@@ -61,6 +61,6 @@ vcpkg_installed
 
 ### Bazel specific files ###
 Testing
-MODULE.bazel.lock
+*.lock
 bazel-*
 .clwb
