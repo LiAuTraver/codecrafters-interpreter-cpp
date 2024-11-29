@@ -132,8 +132,8 @@ void writeExprResultToContextStream(ExecutionContext &ctx) {
   // add missing newline character
   ctx.output_stream << ctx.interpreter->to_string() << std::endl;
 }
-void writeInterpResultToContextStream(ExecutionContext & ctx){
-  //DONT add newline character
+void writeInterpResultToContextStream(ExecutionContext &ctx) {
+  // DONT add newline character
   ctx.output_stream << ctx.interpreter->to_string();
 }
 // clang-format off
@@ -174,19 +174,19 @@ int loxo_main(_In_ const int argc,
   if (ctx.commands.front() & ExecutionContext::needs_parse) {
     parse_result = parse(ctx);
   }
-  if (ctx.commands.front() == ExecutionContext::parse) {
-    if (parse_result.ok()) {
-      writeParseResultToContextStream(ctx);
-      std::cout << ctx.output_stream.str() << std::endl;
-      return 0;
-    } else {
-      dbg(error, "Parsing failed: {}", parse_result.message());
-      ctx.error_stream << parse_result.message() << std::endl;
-      // for codecrafter's test
-      std::cerr << parse_result.message() << std::endl;
-      return 65;
-    }
+  if (!parse_result.ok()) {
+    dbg(error, "Parsing failed: {}", parse_result.message());
+    ctx.error_stream << parse_result.message() << std::endl;
+    // for codecrafter's test
+    std::cerr << parse_result.message() << std::endl;
+    return 65;
   }
+  if (ctx.commands.front() == ExecutionContext::parse) {
+    writeParseResultToContextStream(ctx);
+    std::cout << ctx.output_stream.str() << std::endl;
+    return 0;
+  }
+
   utils::Status evaluate_result;
   if (ctx.commands.front() & ExecutionContext::needs_evaluate) {
     evaluate_result = evaluate(ctx);

@@ -22,15 +22,11 @@ auto parser::get(const size_type offset) -> token_t {
   current += offset;
   return token;
 }
-auto parser::parse(const ParsePolicy &parse_policy) -> utils::Status {
+auto parser::parse(const ParsePolicy &parse_policy) -> utils::Status try {
   // TODO: do not use exceptions
   // TODO("implementing statement parsing, so code here WONT work!");
   if (parse_policy == kExpression) {
-    try {
-      expr_head = next_expression();
-    } catch (const expr_ptr_t &expr) {
-      return utils::Status{utils::Status::kParseError, expr->to_string()};
-    }
+    expr_head = next_expression();
   } else if (parse_policy == kStatement) {
     while (not is_at_end()) {
       stmts.emplace_back(next_statement());
@@ -40,7 +36,10 @@ auto parser::parse(const ParsePolicy &parse_policy) -> utils::Status {
     dbg(critical, "unreachable code reached: {}", LOXOGRAPH_STACKTRACE);
   }
   return utils::OkStatus();
+} catch (const expr_ptr_t &expr) {
+  return utils::Status{utils::Status::kParseError, expr->to_string()};
 }
+
 auto parser::get_statements() const -> stmt_ptrs_t & {
   contract_assert(not stmts.empty(),
                   1,
