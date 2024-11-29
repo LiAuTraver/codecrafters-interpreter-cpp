@@ -19,17 +19,21 @@
 /// @namespace net::ancillarycat::loxograph::expression
 namespace net::ancillarycat::loxograph::expression {
 /// @interface Expr
-class Expr : public utils::Printable {
+class Expr : public utils::Printable,
+             public std::enable_shared_from_this<Expr> {
 public:
+  using base_type = Expr;
+  using string_type = std::string;
   using ostream_t = std::ostream;
   using ostringstream_t = std::ostringstream;
   using token_t = Token;
-  using expr_ptr_t = std::shared_ptr<Expr>;
+  using expr_ptr_t = std::shared_ptr<base_type>;
   using expr_result_t = ExprVisitor::value_t;
 
 public:
-  using string_type = std::string;
   virtual ~Expr() = default;
+
+public:
   template <typename DerivedVisitor>
     requires std::is_base_of_v<ExprVisitor, DerivedVisitor>
   auto accept(const DerivedVisitor &visitor) const {
@@ -37,17 +41,13 @@ public:
   }
 
 private:
-  virtual expr_result_t accept_impl(const ExprVisitor &visitor) const = 0;
-
-  friend inline ostream_t &operator<<(ostream_t &os, const Expr &expr) {
-    return os << expr.to_string();
-  }
+  virtual expr_result_t accept_impl(const ExprVisitor &) const = 0;
 };
 /// @implements Expr
 class Literal : public Expr {
 
 public:
-  Literal(Token literal) // NOLINT(google-explicit-constructor)
+  Literal(token_t literal) // NOLINT(google-explicit-constructor)
       : literal(std::move(literal)) {}
 
 private:
@@ -56,13 +56,14 @@ private:
   to_string_impl(const utils::FormatPolicy &) const override;
 
 public:
-  Token literal;
+  token_t literal;
 };
 /// @implements Expr
 class Unary : public Expr {
 
 public:
-  Unary(Token op, expr_ptr_t expr) : op(std::move(op)), expr(std::move(expr)) {}
+  Unary(token_t op, expr_ptr_t expr)
+      : op(std::move(op)), expr(std::move(expr)) {}
   virtual ~Unary() override = default;
 
 private:
@@ -78,7 +79,7 @@ public:
 class Binary : public Expr {
 
 public:
-  Binary(Token op, expr_ptr_t left, expr_ptr_t right)
+  Binary(token_t op, expr_ptr_t left, expr_ptr_t right)
       : op(std::move(op)), left(std::move(left)), right(std::move(right)) {}
   virtual ~Binary() = default;
 
@@ -88,11 +89,23 @@ private:
   to_string_impl(const utils::FormatPolicy &format_policy) const override;
 
 public:
-  Token op;
+  token_t op;
   expr_ptr_t left;
   expr_ptr_t right;
 };
+class Variable : public Expr {
+public:
+  Variable(token_t name) : name(std::move(name)) {}
+  virtual ~Variable() override = default;
 
+private:
+  token_t name;
+
+private:
+  expr_result_t accept_impl(const ExprVisitor &visitor) const override;
+  auto to_string_impl(const utils::FormatPolicy &format_policy) const
+      -> string_type override;
+};
 class Grouping : public Expr {
 
 public:
@@ -107,12 +120,11 @@ private:
 public:
   expr_ptr_t expr;
 };
-
 /// @implements Expr
 class IllegalExpr : public Expr {
 public:
-  virtual ~IllegalExpr() = default;
-  IllegalExpr(Token token, parse_error error)
+  virtual ~IllegalExpr() override = default;
+  IllegalExpr(token_t token, parse_error error)
       : token(std::move(token)), error(std::move(error)) {}
 
 private:

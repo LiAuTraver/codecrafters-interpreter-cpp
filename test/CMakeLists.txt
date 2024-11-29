@@ -6,7 +6,9 @@ find_package(fmt CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
 find_package(GTest CONFIG REQUIRED)
 find_package(magic_enum CONFIG REQUIRED)
-include_directories(${CMAKE_SOURCE_DIR}/include)
+include_directories(${CMAKE_SOURCE_DIR}/shared)
+
+file(GLOB_RECURSE TEST_SHARED_SOURCES ${CMAKE_SOURCE_DIR}/shared/*.cpp)
 
 enable_testing()
 include(CTest)
@@ -27,60 +29,25 @@ if (AC_CPP_DEBUG)
         )
     endmacro(copy_dlls_for)
 endif ()
-add_executable(spdlog_test
-        spdlog.cpp
-)
-target_link_libraries(spdlog_test PRIVATE
-        spdlog::spdlog
-        fmt::fmt
-        GTest::gtest
-        GTest::gtest_main
-        magic_enum::magic_enum
-        driver
-)
-gtest_discover_tests(spdlog_test)
 
-add_executable(scan_test
-        scan.cpp
-        ../shared/loxograph_driver.cpp
-)
-target_link_libraries(scan_test PRIVATE
+function(create_test_executable test_name)
+    add_executable(${test_name} ${ARGN})
+    target_link_libraries(${test_name} PRIVATE
         spdlog::spdlog
         fmt::fmt
         GTest::gtest
         GTest::gtest_main
         magic_enum::magic_enum
         driver
-)
-copy_dlls_for(scan_test)
-gtest_discover_tests(scan_test)
+    )
+    if (AC_CPP_DEBUG)
+        copy_dlls_for(${test_name})
+    endif ()
+    gtest_discover_tests(${test_name})
+endfunction(create_test_executable)
 
-add_executable(AST_test
-        AST.cpp
-        ../shared/loxograph_driver.cpp
-)
-target_link_libraries(AST_test PRIVATE
-        spdlog::spdlog
-        fmt::fmt
-        GTest::gtest
-        GTest::gtest_main
-        magic_enum::magic_enum
-        driver
-)
-copy_dlls_for(AST_test)
-gtest_discover_tests(AST_test)
-
-add_executable(evaluate_test
-        evaluate.cpp
-        ../shared/loxograph_driver.cpp
-)
-target_link_libraries(evaluate_test PRIVATE
-        spdlog::spdlog
-        fmt::fmt
-        GTest::gtest
-        GTest::gtest_main
-        magic_enum::magic_enum
-        driver
-)
-copy_dlls_for(evaluate_test)
-gtest_discover_tests(evaluate_test)
+create_test_executable(spdlog_test spdlog.cpp)
+create_test_executable(scan_test scan.cpp ${TEST_SHARED_SOURCES})
+create_test_executable(parse_test parse.cpp ${TEST_SHARED_SOURCES})
+create_test_executable(evaluate_test evaluate.cpp ${TEST_SHARED_SOURCES})
+create_test_executable(interpret_test interpret.cpp ${TEST_SHARED_SOURCES})

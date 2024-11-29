@@ -23,3 +23,4 @@ build --incompatible_enable_cc_toolchain_resolution
 build --platforms=//platform:windows_x64
 build --toolchain_resolution_debug
 build --extra_toolchains=//toolchain:Windows_MSVC
+build --verbose_failures

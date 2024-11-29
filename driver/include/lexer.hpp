@@ -8,7 +8,6 @@
 #include <string_view>
 #include <vector>
 
-
 #include "config.hpp"
 #include "file_reader.hpp"
 #include "lex_error.hpp"
@@ -92,7 +91,7 @@ private:
              std::convertible_to<Predicate, bool>;
 
 public:
-  nodiscard_msg(token_views_t) const tokens_t &get_tokens() const {
+  LOXO_NODISCARD_MSG(token_views_t) const tokens_t &get_tokens() const {
     return tokens;
   }
 
@@ -120,5 +119,8 @@ private:
   tokens_t tokens = tokens_t();
   /// @brief errors
   uint_least32_t error_count = 0;
+
+private:
+friend LOXOGRAPH_API void delete_lexer_fwd(lexer *);
 };
 } // namespace net::ancillarycat::loxograph

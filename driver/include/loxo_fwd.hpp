@@ -16,7 +16,8 @@ namespace net::ancillarycat::utils {
 class Status;
 /// @brief represents a value that can be stored in a @link StatusOr object
 /// @tparam Ty the type of the value
-/// @remarks similiar to Microsoft's @link std::_SMF_control class, which was used in @link std::optional
+/// @remarks similiar to Microsoft's @link std::_SMF_control class, which was
+/// used in @link std::optional
 template <typename Ty>
 concept Storable = std::conjunction_v<std::is_trivially_destructible<Ty>,
                                       std::is_move_assignable<Ty>,
@@ -58,18 +59,27 @@ class Grouping;
 class IllegalExpr;
 
 class ExprVisitor;
-class DummyVisitor;
+// class DummyVisitor;
 } // namespace expression
-namespace eval {
+namespace evaluation {
 class Evaluatable;
 class Number;
-class Keyword;
 class String;
 class Value;
 class Boolean;
 class Nil;
-class ErrorSyntax;
-} // namespace eval
+class Error;
+} // namespace evaluation
+namespace statement {
+class Stmt;
+class Variable;
+class Print;
+class Expression;
+
+class StmtVisitor;
+class DummyVisitor;
+} // namespace statement
+class interpreter;
 using utils::operator""s;
 using utils::operator""sv;
 static constexpr auto tolerable_chars = "_`"sv;

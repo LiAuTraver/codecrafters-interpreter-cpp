@@ -1,7 +1,7 @@
 cc_binary(
     name = "interpreter",
     srcs = [
-        "interpreter.cpp",
+        "lox_interpreter.cpp",
 				"//shared:loxograph_driver.cpp",
 				"//shared:execution_context.hpp",
     ] ,

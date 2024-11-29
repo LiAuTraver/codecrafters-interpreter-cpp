@@ -1,4 +1,5 @@
 // ReSharper disable all
+// NOLINTBEGIN
 #include <gtest/gtest.h>
 #include <filesystem>
 
@@ -12,8 +13,7 @@ static inline auto you_should_not_include_this_header_file_twice =
 }();
 namespace net::ancillarycat::loxograph {
 struct ExecutionContext;
-// NOLINTNEXTLINE(readability-redundant-declaration)
-nodiscard_msg(loxo_main) extern int loxo_main(
+LOXO_NODISCARD_MSG(loxo_main) extern int loxo_main(
     int,
     char **,
     ExecutionContext &);
@@ -21,3 +21,4 @@ nodiscard_msg(loxo_main) extern int loxo_main(
 using namespace net::ancillarycat::loxograph;
 using namespace std::string_view_literals;
 using std::filesystem::path;
+// NOLINTEND

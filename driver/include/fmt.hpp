@@ -1,4 +1,5 @@
 #pragma once
+
 #include <any>
 #include <cstdint>
 #include <ostream>
@@ -122,6 +123,20 @@ template <typename Ty>
 bool is_integer(Ty &&value) noexcept {
   return std::trunc(std::forward<Ty>(value)) == value;
 }
+
+template <typename... Ts> struct match : Ts... {
+  using Ts::operator()...;
+};
+class VisitorBase : virtual public Printable {
+public:
+  using value_t = std::variant<std::monostate,
+                               loxograph::evaluation::Boolean,
+                                loxograph::evaluation::Nil,
+                                loxograph::evaluation::Number,
+                                loxograph::evaluation::String,
+                                loxograph::evaluation::Error>;
+  using string_view_type = utils::Viewable::string_view_type;
+};
 } // namespace net::ancillarycat::utils
 #ifdef LOXOGRAPH_USE_FMT_FORMAT
 /// @note no need if we have `format_as` function

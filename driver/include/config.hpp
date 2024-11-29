@@ -176,7 +176,7 @@ struct ::fmt::formatter<::std::stacktrace> : ::fmt::formatter<::std::string> {
                      "           Expect `{4}` equals to `{5}`,\n"              \
                      "             but actually `{4}` appears to be {6},\n"    \
                      "             and `{5}` appears to be {7}.\n"             \
-                     "Stacktrace:\n{8}",                                       \
+                     "Stacktrace:{8}",                                       \
                      LOXOGRAPH_FILENAME,                                       \
                      LOXOGRAPH_FUNCTION_NAME,                                  \
                      LOXOGRAPH_LINE,                                           \
@@ -186,16 +186,37 @@ struct ::fmt::formatter<::std::stacktrace> : ::fmt::formatter<::std::string> {
                      x,                                                        \
                      y,                                                        \
                      LOXOGRAPH_STACKTRACE);
+#  define LOXOGRAPH_PRINT_ERROR_MSG_IMPL_WITH_MSG(x, y, _msg_)                 \
+    spdlog::critical("in file {0}, line {2} column {3},\n"                     \
+                     "           function {1},\n"                              \
+                     "           Constraints not satisfied:\n"                 \
+                     "           Expect `{4}` equals to `{5}`,\n"              \
+                     "             but actually `{4}` appears to be {6},\n"    \
+                     "             and `{5}` appears to be {7}.\n"             \
+                     "Additional message: {8}\n"                               \
+                     "Stacktrace:{9}",                                       \
+                     LOXOGRAPH_FILENAME,                                       \
+                     LOXOGRAPH_FUNCTION_NAME,                                  \
+                     LOXOGRAPH_LINE,                                           \
+                     LOXOGRAPH_COLUMN,                                         \
+                     #x,                                                       \
+                     #y,                                                       \
+                     x,                                                        \
+                     y,                                                        \
+                     _msg_,                                                    \
+                     LOXOGRAPH_STACKTRACE);
 #  define LOXOGRAPH_PRINT_ERROR_MSG_IMPL_1(x)                                  \
     LOXOGRAPH_PRINT_ERROR_MSG_IMPL_SINGLE(x)
 #  define LOXOGRAPH_PRINT_ERROR_MSG_IMPL_2(x, y)                               \
     LOXOGRAPH_PRINT_ERROR_MSG_IMPL_BINARY(x, y)
+#  define LOXOGRAPH_PRINT_ERROR_MSG_IMPL_3(x, y, _msg_)                        \
+    LOXOGRAPH_PRINT_ERROR_MSG_IMPL_WITH_MSG(x, y, _msg_)
 #  define LOXOGRAPH_PRINT_ERROR_MSG(...)                                       \
     do {                                                                       \
-      LOXOGRAPH_PRINT_ERROR_MSG_IMPL(__VA_ARGS__, 2, 1)(__VA_ARGS__);          \
+      LOXOGRAPH_PRINT_ERROR_MSG_IMPL(__VA_ARGS__, 3, 2, 1)(__VA_ARGS__);       \
       LOXOGRAPH_RUNTIME_DEBUG_RAISE                                            \
     } while (false);
-#  define LOXOGRAPH_PRINT_ERROR_MSG_IMPL(_1, _2, N, ...)                       \
+#  define LOXOGRAPH_PRINT_ERROR_MSG_IMPL(_1, _2, _3, N, ...)                   \
     LOXOGRAPH_PRINT_ERROR_MSG_IMPL_##N
 #  define LOXOGRAPH_RUNTIME_REQUIRE_IMPL_EQUAL(x, y)                           \
     LOXOGRAPH_AMBIGUOUS_ELSE_BLOCKER                                           \
@@ -212,6 +233,13 @@ struct ::fmt::formatter<::std::stacktrace> : ::fmt::formatter<::std::string> {
       LOXOGRAPH_PRINT_ERROR_MSG(x)                                             \
     } //! <- do NOT add entraneous semicolon here, it'll confuse the
       //! preprocessor sometimes.
+#  define LOXOGRAPH_RUNTIME_REQUIRE_IMPL_WITH_MSG(x, y, _msg_)                 \
+    LOXOGRAPH_AMBIGUOUS_ELSE_BLOCKER                                           \
+    if (x)                                                                     \
+      ;                                                                        \
+    else {                                                                     \
+      LOXOGRAPH_PRINT_ERROR_MSG(x, y, _msg_)                                   \
+    }
 #  ifdef LOXOGRAPH_USE_BOOST_CONTRACT
 #    include <boost/contract.hpp>
 #    define LOXOGRAPH_PRECONDITION_IMPL_1(x)                                   \
@@ -236,6 +264,8 @@ struct ::fmt::formatter<::std::stacktrace> : ::fmt::formatter<::std::string> {
               [&]() -> bool { return ((x) == (y)); });
 #  endif
 
+#  define LOXOGRAPH_RUNTIME_REQUIRE_IMPL_3(x, y, _msg_)                        \
+    LOXOGRAPH_RUNTIME_REQUIRE_IMPL_WITH_MSG(x, y, _msg_)
 #  define LOXOGRAPH_RUNTIME_REQUIRE_IMPL_2(x, y)                               \
     LOXOGRAPH_RUNTIME_REQUIRE_IMPL_EQUAL(x, y)
 #  define LOXOGRAPH_RUNTIME_REQUIRE_IMPL_1(x)                                  \
@@ -289,14 +319,14 @@ struct ::fmt::formatter<::std::stacktrace> : ::fmt::formatter<::std::string> {
   }();
 
 /// @note export macros for convenience
-#if (!defined(_MSVC_TRADITIONAL) || _MSVC_TRADITIONAL) && !defined(__clang__)
+#if (defined(_MSVC_TRADITIONAL) || _MSVC_TRADITIONAL) && !defined(__clang__)
 /// @brief MSVC traditional preprocessor
 /// @def dbg(_level_, _msg_, ...)
 /// @note MSVC can't get through this:
 ///        error C2563: mismatch in formal parameter list
 ///       thus can't just simply write #dbg(...) to replace this macro.
 /// @see
-/// https://learn.microsoft.com/en-us/cpp/preprocessor/preprocessor-experimental-overview?view=msvc-170
+/// https://learn.microsoft.com/en-us/cpp/preprocessor/preprocessor-experimental-overview
 #  define dbg(_level_, _msg_, ...)                                             \
     LOXOGRAPH_DEBUG_LOGGING(_level_, _msg_, ##__VA_ARGS__)
 #  define contract_assert(...)
@@ -310,7 +340,7 @@ struct ::fmt::formatter<::std::stacktrace> : ::fmt::formatter<::std::string> {
 #  define postcondition(...) LOXOGRAPH_POSTCONDITION(__VA_ARGS__)
 #  define dbg(...) LOXOGRAPH_DEBUG_LOGGING(__VA_ARGS__)
 #endif
-#define nodiscard_msg(...) LOXOGRAPH_NODISCARD_MSG(__VA_ARGS__)
+#define LOXO_NODISCARD_MSG(...) LOXOGRAPH_NODISCARD_MSG(__VA_ARGS__)
 #define dbg_block(...) LOXOGRAPH_DEBUG_BLOCK(__VA_ARGS__)
 #define dbg_only(...) LOXOGRAPH_DEBUG_ONLY(__VA_ARGS__)
 // if exception was disabled, do nothing.

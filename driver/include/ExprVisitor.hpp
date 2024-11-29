@@ -4,24 +4,16 @@
 
 #include "config.hpp"
 #include "Evaluatable.hpp"
+#include "fmt.hpp"
 #include "loxo_fwd.hpp"
 #include "status.hpp"
 
 namespace net::ancillarycat::loxograph::expression {
 /// @interface ExprVisitor
-class ExprVisitor : public utils::Printable {
-public:
-  using value_t = std::variant<std::monostate,
-                               eval::Keyword,
-                               eval::Boolean,
-                               eval::Nil,
-                               eval::Number,
-                               eval::String,
-                               eval::ErrorSyntax>;
-  using string_view_type = utils::Viewable::string_view_type;
-
+class ExprVisitor : virtual public utils::VisitorBase {
 public:
   virtual ~ExprVisitor() = default;
+public:
   // clang-format off
   /// @brief Visit the expression
   /// @attention tbh i don't really like the idea of making a virtual
@@ -78,31 +70,7 @@ private:
   value_t get_result_impl() const override {
     return {std::monostate{}};
   }
-} inline static constexpr _dummy_visitor;
-/// @implements ExprVisitor
-class LOXOGRAPH_API ExprEvaluator : public ExprVisitor {
-public:
-  ExprEvaluator() = default;
-  virtual ~ExprEvaluator() override = default;
-
-private:
-  virtual value_t visit_impl(const Literal &) const override;
-  virtual value_t visit_impl(const Unary &) const override;
-  virtual value_t visit_impl(const Binary &) const override;
-  virtual value_t visit_impl(const Grouping &) const override;
-  virtual value_t visit_impl(const IllegalExpr &) const override;
-  virtual utils::Status evaluate_impl(const Expr &) const override;
-  /// @note in Lisp/Scheme, only `#f` is false, everything else is true; we also
-  /// make `nil` as false.
-  eval::Boolean is_true_value(const value_t &) const;
-  value_t is_deep_equal(const value_t &lhs, const value_t &) const;
-  virtual value_t get_result_impl() const override;
-  auto to_string_impl(const utils::FormatPolicy &) const
-      -> string_type override;
-
-private:
-  const value_t res{std::monostate{}};
-};
+} inline static const _dummy_visitor;
 /// @implements ExprVisitor
 class LOXOGRAPH_API ASTPrinter : public ExprVisitor, public utils::Viewable {
 public:

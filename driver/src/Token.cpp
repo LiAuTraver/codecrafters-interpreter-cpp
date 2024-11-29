@@ -11,11 +11,11 @@
 
 #include "config.hpp"
 #include "loxo_fwd.hpp"
+#include "fmt.hpp"
 
 #include "lex_error.hpp"
 #include "Token.hpp"
 
-#include "fmt.hpp"
 
 namespace net::ancillarycat::loxograph {
 // clang-format off

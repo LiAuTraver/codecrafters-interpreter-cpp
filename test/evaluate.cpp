@@ -3,7 +3,7 @@
 namespace {
 std::pair<int, std::string> get_result(const auto &filepath) {
   ExecutionContext ec;
-  ec.commands.push_back(ExecutionContext::interpret);
+  ec.commands.push_back(ExecutionContext::evaluate);
   ec.input_files.push_back(filepath);
   auto exec = loxo_main(3, nullptr, ec);
   if (exec == 0) {

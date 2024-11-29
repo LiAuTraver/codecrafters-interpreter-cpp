@@ -74,7 +74,7 @@ else ()
 endif ()
 
 add_executable(interpreter
-        tools/interpreter.cpp
+        tools/lox_interpreter.cpp
         shared/loxograph_driver.cpp
         shared/execution_context.hpp
 )
