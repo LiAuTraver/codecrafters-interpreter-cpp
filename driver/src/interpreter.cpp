@@ -1,6 +1,6 @@
 #include <concepts>
 #include <memory>
-
+#include <typeinfo>
 
 #include "config.hpp"
 #include "fmt.hpp"
@@ -10,29 +10,37 @@
 #include "interpreter.hpp"
 
 namespace net::ancillarycat::loxograph {
+using utils::match;
 utils::Status interpreter::interpret(
     const std::span<std::shared_ptr<statement::Stmt>> stmts) const {
   for (const auto &stmt : stmts) {
-    if (auto eval_res = execute(*stmt); !eval_res.ok())
+    if (auto eval_res = execute(*stmt); !eval_res.ok()) {
+      this->expr_res.emplace<utils::Monostate>();
       return eval_res;
+    }
   }
   return utils::OkStatus();
 }
-evaluation::Boolean interpreter::is_true_value(const value_t &value) const {
-  if (std::holds_alternative<evaluation::Nil>(value)) {
-    return evaluation::Boolean::make_false(
-        std::get<evaluation::Nil>(value).get_line());
-  }
-
-  if (std::holds_alternative<evaluation::Boolean>(value)) {
-    return std::get<evaluation::Boolean>(value);
-  }
-
-  // fixme: double 0 is false or not?
-  return evaluation::True;
+evaluation::Boolean
+interpreter::is_true_value(const eval_result_t &value) const {
+  // if (std::holds_alternative<evaluation::Nil>(value)) {
+  //   return evaluation::Boolean::make_false(
+  //       std::get<evaluation::Nil>(value).get_line());
+  // }
+  // // fixme: double 0 is false or not?
+  // return evaluation::True;
+  return std::visit(match{
+                        [](const evaluation::Nil &n) {
+                          return evaluation::Boolean::make_false(n.get_line());
+                        },
+                        [](const evaluation::Boolean &b) { return b; },
+                        [](const auto &) { return evaluation::True; },
+                    },
+                    value);
 }
-interpreter::value_t interpreter::is_deep_equal(const value_t &lhs,
-                                                const value_t &rhs) const {
+interpreter::eval_result_t
+interpreter::is_deep_equal(const eval_result_t &lhs,
+                           const eval_result_t &rhs) const {
   if (lhs.index() != rhs.index()) {
     return evaluation::False;
   }
@@ -61,30 +69,33 @@ utils::Status interpreter::visit_impl(const statement::Print &stmt) const {
   if (auto eval_res = evaluate(*stmt.value); !eval_res.ok())
     return eval_res;
   stmts_res.emplace_back(expr_res);
-  expr_res.emplace<std::monostate>();
+  expr_res.emplace<utils::Monostate>();
   return utils::OkStatus();
 }
 utils::Status interpreter::visit_impl(const statement::Expression &stmt) const {
   return evaluate(*stmt.expr);
 }
 utils::Status interpreter::execute_impl(const statement::Stmt &stmt) const {
-  expr_res = stmt.accept(*this);
-  return utils::OkStatus();
+  return stmt.accept(*this);
 }
-interpreter::value_t interpreter::get_result_impl() const { return expr_res; }
+interpreter::eval_result_t interpreter::get_result_impl() const {
+  return expr_res;
+}
 
 utils::Status interpreter::evaluate_impl(const expression::Expr &expr) const {
   expr_res = expr.accept(*this);
-  if (std::holds_alternative<evaluation::Error>(expr_res)) {
-    return utils::InvalidArgument(
-        std::get<evaluation::Error>(expr_res).to_string());
-  }
-  if (std::holds_alternative<std::monostate>(expr_res)) {
-    return utils::EmptyInput("no expr was evaluated.");
-  }
-  return utils::OkStatus();
+  return std::visit(match{[](const evaluation::Error &e) {
+                            return utils::InvalidArgument(e.to_string_view());
+                          },
+                          [](const utils::Monostate &) {
+                            return utils::EmptyInput("no expr was evaluated.");
+                          },
+                          [](const auto &) { return utils::OkStatus(); }},
+                    expr_res);
+  /// @note ^^^^ you cannot just put the `expr.accept(*this)` here, it'll be
+  ///               called more than once.
 }
-interpreter::value_t
+interpreter::eval_result_t
 interpreter::visit_impl(const expression::Literal &expr) const {
   dbg(info, "literal type: {}", expr.literal.type);
   if (expr.literal.type.type == TokenType::kMonostate) {
@@ -115,7 +126,7 @@ interpreter::visit_impl(const expression::Literal &expr) const {
   return evaluation::Error{"Expected literal value"s, expr.literal.line};
 }
 
-interpreter::value_t
+interpreter::eval_result_t
 interpreter::visit_impl(const expression::Unary &expr) const {
   auto inner_expr = expr.expr->accept(*this);
   if (expr.op.type == TokenType::kMinus) {
@@ -138,7 +149,7 @@ interpreter::visit_impl(const expression::Unary &expr) const {
   return {};
 }
 
-interpreter::value_t
+interpreter::eval_result_t
 interpreter::visit_impl(const expression::Binary &expr) const {
   auto lhs = expr.left->accept(*this);
   auto rhs = expr.right->accept(*this);
@@ -192,11 +203,11 @@ interpreter::visit_impl(const expression::Binary &expr) const {
   contract_assert(false);
   return evaluation::Error{"unimplemented binary operator"s, expr.op.line};
 }
-interpreter::value_t
+interpreter::eval_result_t
 interpreter::visit_impl(const expression::Grouping &expr) const {
   return {expr.expr->accept(*this)};
 }
-interpreter::value_t
+interpreter::eval_result_t
 interpreter::visit_impl(const expression::IllegalExpr &expr) const {
   return evaluation::Error{"Illegal expression"s, expr.token.line};
 }
@@ -206,12 +217,13 @@ auto interpreter::expr_to_string(const utils::FormatPolicy &format_policy) const
   return value_to_string(format_policy, expr_res);
 }
 auto interpreter::value_to_string(const utils::FormatPolicy &format_policy,
-                                  const value_t &value) const -> string_type {
+                                  const eval_result_t &value) const
+    -> string_type {
+  // ReSharper disable once CppUseFamiliarTemplateSyntaxForGenericLambdas
   return std::visit(
-      [=]
-      // [[nodiscard]]
-      (auto &&val) -> string_type {
-        if constexpr (std::is_same_v<std::decay_t<decltype(val)>, std::monostate>) {
+      [=](auto &&val) -> string_type {
+        if constexpr (std::is_same_v<std::decay_t<decltype(val)>,
+                                     utils::Monostate>) {
           dbg(warn, "no result");
           return "<no result>"s;
         } else
@@ -226,6 +238,9 @@ auto interpreter::to_string_impl(const utils::FormatPolicy &format_policy) const
   if (stmts_res.empty()) { // we are parse an expression, not a statement
     return value_to_string(format_policy, expr_res);
   }
+  contract_assert(std::holds_alternative<utils::Monostate>(expr_res),
+                  1,
+                  "expr_res should be empty");
   string_type result_str;
   for (const auto &result : stmts_res) {
     result_str += value_to_string(format_policy, result);

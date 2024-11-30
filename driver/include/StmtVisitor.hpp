@@ -23,7 +23,7 @@ private:
   virtual utils::Status visit_impl(const Print &) const = 0;
   virtual utils::Status visit_impl(const Expression &) const = 0;
   virtual utils::Status execute_impl(const Stmt &) const = 0;
-  // virtual value_t get_result_impl() const = 0;
+  // virtual eval_result_t get_result_impl() const = 0;
 };
 
 class DummyVisitor : public StmtVisitor {

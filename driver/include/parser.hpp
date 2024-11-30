@@ -96,12 +96,14 @@ private:
   auto peek(this auto &&self, const ssize_type offset = 0) -> decltype(auto) {
     if (self.is_at_end(offset))
       return self.tokens.back();
-    return self.tokens[self.current + offset];
+    // return self.tokens[self.current + offset];
+    return *(self.cursor + offset); // ref to the token
   }
 
 private:
   token_views_t tokens = {};
-  size_type current = 0;
+  // size_type current = 0;
+  token_views_t::iterator cursor{};
   expr_ptr_t expr_head = nullptr;
   mutable stmt_ptrs_t stmts = {};
   // bool is_in_panic = false;

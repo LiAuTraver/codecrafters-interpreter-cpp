@@ -209,15 +209,16 @@ int loxo_main(_In_ const int argc,
     interpret_result = interpret(ctx);
   }
   if (ctx.commands.front() == ExecutionContext::interpret) {
-    if (interpret_result.ok()) {
       writeInterpResultToContextStream(ctx);
+    if (interpret_result.ok()) {
       std::cout << ctx.output_stream.view() << std::endl;
       return 0;
     } else {
       dbg(error, "Interpretation failed: {}", interpret_result.message());
       ctx.error_stream << interpret_result.message() << std::endl;
       // for codecrafter's test
-      std::cerr << interpret_result.message(); // DONT add newline character
+      std::cout << ctx.output_stream.view();
+      std::cerr << ctx.error_stream.view(); // DONT add newline character
       return 70;
     }
   }

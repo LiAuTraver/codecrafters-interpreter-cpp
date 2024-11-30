@@ -2,10 +2,10 @@
 
 #include <memory>
 #include "config.hpp"
-#include "loxo_fwd.hpp"
 #include "fmt.hpp"
-#include "Token.hpp"
+#include "loxo_fwd.hpp"
 #include "StmtVisitor.hpp"
+#include "Token.hpp"
 
 namespace net::ancillarycat::loxograph::statement {
 class Stmt : public utils::Printable,
@@ -17,7 +17,7 @@ public:
   using ostringstream_t = std::ostringstream;
   using token_t = Token;
   using stmt_ptr_t = std::shared_ptr<base_type>;
-  using stmt_result_t = StmtVisitor::value_t;
+  using stmt_result_t = utils::Status;
 
 public:
   virtual ~Stmt() = default;
@@ -54,8 +54,8 @@ public:
 
 public:
   std::shared_ptr<expression::Expr> value;
-private:
 
+private:
 private:
   auto to_string_impl(const utils::FormatPolicy &format_policy) const
       -> string_type override;
@@ -68,8 +68,8 @@ public:
 
 public:
   std::shared_ptr<expression::Expr> expr;
-private:
 
+private:
 private:
   auto to_string_impl(const utils::FormatPolicy &format_policy) const
       -> string_type override;

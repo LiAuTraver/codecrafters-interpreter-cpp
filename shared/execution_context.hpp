@@ -33,7 +33,7 @@ struct ExecutionContext {
       : lexer(nullptr, &delete_lexer_fwd), parser(nullptr, &delete_parser_fwd),
         interpreter(nullptr, &delete_interpreter_fwd) {}
   inline ~ExecutionContext() = default;
-  enum commands_t : uint8_t;
+  enum commands_t : uint16_t;
   std::filesystem::path executable_name;
   std::string_view executable_path;
   std::vector<commands_t> commands;
@@ -52,21 +52,44 @@ struct ExecutionContext {
   static ExecutionContext &inspectArgs(int argc, char **&argv, char **&envp);
   static std::string_view command_sv(const commands_t &cmd);
 };
-enum ExecutionContext::commands_t : uint8_t {
-  help = 1 << 0,      // no command
-  lex = 1 << 1,       // command "tokenize"
-  parse = 1 << 2,     // command "parse"
-  evaluate = 1 << 3,  // command "evaluate"
-  interpret = 1 << 4, // command "run"
-  version = 1 << 5,
-  test = 1 << 6,
-  needs_lex = lex | parse | evaluate | interpret,
-  needs_parse = parse | evaluate | interpret,
-  needs_evaluate = evaluate,
-  needs_interpret = interpret, /// <-- interpret contains evaluate, so no need
-                               /// to evaluate ^^^^^^
-  unknown = std::numeric_limits<uint8_t>::max(),
+namespace details {
+static inline constexpr uint16_t _dummy_tag_ = 1 << 15;
+static inline constexpr uint16_t _help_ = 1 << 0;
+static inline constexpr uint16_t _lex_ = 1 << 1;
+static inline constexpr uint16_t _parse_ = 1 << 2;
+static inline constexpr uint16_t _evaluate_ = 1 << 3;
+static inline constexpr uint16_t _interpret_ = 1 << 4;
+static inline constexpr uint16_t _version_ = 1 << 5;
+static inline constexpr uint16_t _test_ = 1 << 6;
+static inline constexpr uint16_t _needs_lex_ =
+    _lex_ | _parse_ | _evaluate_ | _interpret_;
+static inline constexpr uint16_t _needs_parse_ =
+    _parse_ | _evaluate_ | _interpret_;
+
+/// @note MSVC has wired behavior with my enums; also the `|` operator inside enum, so I made a workaround here.
+#if defined(_MSC_VER) && !defined(__clang__)
+static inline constexpr uint16_t _needs_evaluate_ = _evaluate_ | _dummy_tag_;
+static inline constexpr uint16_t _needs_interpret_ = _interpret_ | _dummy_tag_;
+#else
+static inline constexpr uint16_t _needs_evaluate_ = _evaluate_;
+static inline constexpr uint16_t _needs_interpret_ = _interpret_;
+#endif
+} // namespace details
+enum ExecutionContext::commands_t : uint16_t {
+  help = details::_help_,
+  lex = details::_lex_,
+  parse = details::_parse_,
+  evaluate = details::_evaluate_,
+  interpret = details::_interpret_,
+  version = details::_version_,
+  test = details::_test_,
+  needs_lex = details::_needs_lex_,
+  needs_parse = details::_needs_parse_,
+  needs_evaluate = details::_needs_evaluate_,
+  needs_interpret = details::_needs_interpret_,
+  unknown = std::numeric_limits<uint16_t>::max(),
 };
+
 inline void ExecutionContext::addCommands(char **&argv) {
   // // currently only accept one command
   // // ctx.commands.emplace_back(*(argv + 1));

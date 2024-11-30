@@ -133,11 +133,11 @@ struct ::fmt::formatter<::std::stacktrace> : ::fmt::formatter<::std::string> {
 #  define LOXOGRAPH_FORCEINLINE [[clang::always_inline]]
 #  define LOXOGRAPH_DEBUG_BREAK __builtin_debugtrap();
 #  define LOXOGRAPH_DEBUG_FUNCTION_NAME __PRETTY_FUNCTION__
-#elif defined(__GNUC__)
+#elifdef __GNUC__
 #  define LOXOGRAPH_FORCEINLINE [[gnu::always_inline]]
 #  define LOXOGRAPH_DEBUG_BREAK __builtin_trap();
 #  define LOXOGRAPH_DEBUG_FUNCTION_NAME __PRETTY_FUNCTION__
-#elif defined(_MSC_VER)
+#elifdef _MSC_VER
 #  define LOXOGRAPH_FORCEINLINE [[msvc::forceinline]]
 #  define LOXOGRAPH_DEBUG_BREAK __debugbreak();
 #  define LOXOGRAPH_DEBUG_FUNCTION_NAME __FUNCSIG__
@@ -348,4 +348,11 @@ struct ::fmt::formatter<::std::stacktrace> : ::fmt::formatter<::std::string> {
 #  define TODO(...) throw ::std::logic_error("TODO: " #__VA_ARGS__)
 #else
 #  define TODO(...) LOXOGRAPH_DEBUG_LOGGING(critical, "TODO: " #__VA_ARGS__)
+#endif
+
+#if defined(_MSC_VER) && !defined(__clang__)
+/// @remark currenty, MSVC's constexpr was really disgusting.
+#define LOXO_CONSTEXPR_IF_NOT_MSVC const
+#else
+#define LOXO_CONSTEXPR_IF_NOT_MSVC constexpr
 #endif

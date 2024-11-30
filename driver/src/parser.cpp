@@ -9,17 +9,31 @@
 namespace net::ancillarycat::loxograph {
 
 parser &parser::set_views(const token_views_t tokens) {
+  contract_assert(tokens.back().type.type, kEndOfFile, "tokens must end with EOF");
   this->tokens = tokens;
+  this->cursor = tokens.begin();
   return *this;
 }
 bool parser::is_at_end(const size_type offset) const {
-  return (current + offset > tokens.size()) ||
-         tokens[current].type.type == kEndOfFile;
+  // return (current + offset > tokens.size()) ||
+  //        tokens[current].type.type == kEndOfFile;
+
+  // return cursor + offset >= tokens.end();
+  /// @note: ^^^^^^ MSVC has iterator assertion on whether the iterator is past
+  /// the end(that operator `+` just has this assertion), be careful.
+  ///     so we just use `std::ranges::distance` to check if the distance is
+  ///     less than the offset.
+  return std::ranges::distance(cursor, tokens.end()) <= offset ||
+         cursor->type.type == kEndOfFile;
 }
 auto parser::get(const size_type offset) -> token_t {
-  contract_assert(current < tokens.size());
-  auto &token = tokens[current];
-  current += offset;
+  // contract_assert(current < tokens.size());
+  // auto &token = tokens[current];
+  // current += offset;
+  // return token;
+  contract_assert(cursor < tokens.end());
+  auto &token = *cursor;
+  cursor += offset;
   return token;
 }
 auto parser::parse(const ParsePolicy &parse_policy) -> utils::Status try {

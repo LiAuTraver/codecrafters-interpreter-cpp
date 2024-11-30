@@ -23,17 +23,17 @@ public:
   interpret(std::span<std::shared_ptr<statement::Stmt>>) const;
 
 private:
-  virtual value_t visit_impl(const expression::Literal &) const override;
-  virtual value_t visit_impl(const expression::Unary &) const override;
-  virtual value_t visit_impl(const expression::Binary &) const override;
-  virtual value_t visit_impl(const expression::Grouping &) const override;
-  virtual value_t visit_impl(const expression::IllegalExpr &) const override;
+  virtual eval_result_t visit_impl(const expression::Literal &) const override;
+  virtual eval_result_t visit_impl(const expression::Unary &) const override;
+  virtual eval_result_t visit_impl(const expression::Binary &) const override;
+  virtual eval_result_t visit_impl(const expression::Grouping &) const override;
+  virtual eval_result_t visit_impl(const expression::IllegalExpr &) const override;
   virtual utils::Status evaluate_impl(const expression::Expr &) const override;
   /// @note in Lisp/Scheme, only `#f` is false, everything else is true; we also
   /// make `nil` as false.
-  evaluation::Boolean is_true_value(const value_t &) const;
-  virtual value_t get_result_impl() const override;
-  value_t is_deep_equal(const value_t &lhs, const value_t &) const;
+  evaluation::Boolean is_true_value(const eval_result_t &) const;
+  virtual eval_result_t get_result_impl() const override;
+  eval_result_t is_deep_equal(const eval_result_t &lhs, const eval_result_t &) const;
 
 private:
   virtual utils::Status visit_impl(const statement::Variable &) const override;
@@ -45,12 +45,12 @@ private:
 private:
   /// @remark `mutable` wasn't intentional, but my design is flawed and this is
   /// a temporary fix.
-  mutable value_t expr_res{std::monostate{}};
-  mutable std::vector<value_t> stmts_res{};
+  mutable eval_result_t expr_res{utils::Monostate{}};
+  mutable std::vector<eval_result_t> stmts_res{};
 
 private:
   auto expr_to_string(const utils::FormatPolicy &) const -> string_type;
-  auto value_to_string(const utils::FormatPolicy &, const value_t &) const
+  auto value_to_string(const utils::FormatPolicy &, const eval_result_t &) const
       -> string_type;
   virtual auto to_string_impl(const utils::FormatPolicy &) const
       -> string_type override;

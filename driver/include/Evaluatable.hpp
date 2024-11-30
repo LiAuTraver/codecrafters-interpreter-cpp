@@ -69,7 +69,7 @@ private:
 
 private:
   std::optional<bool> value = std::nullopt;
-} static inline constexpr True{true, 0}, False{false, 0};
+} static inline LOXO_CONSTEXPR_IF_NOT_MSVC True{true, 0}, False{false, 0};
 
 class Nil : public Value, public utils::Viewable {
 public:
@@ -86,7 +86,7 @@ private:
       -> string_type override;
   auto to_string_view_impl(const utils::FormatPolicy &) const
       -> string_view_type override;
-} static inline constexpr NilValue{};
+} static inline LOXO_CONSTEXPR_IF_NOT_MSVC NilValue{};
 
 class String : public Evaluatable, public utils::Viewable {
 public:

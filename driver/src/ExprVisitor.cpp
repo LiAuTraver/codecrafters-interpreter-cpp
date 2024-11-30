@@ -15,31 +15,31 @@
 #include "status.hpp"
 
 namespace net::ancillarycat::loxograph::expression {
-ASTPrinter::value_t ASTPrinter::visit_impl(const Grouping &expr) const {
+ASTPrinter::eval_result_t ASTPrinter::visit_impl(const Grouping &expr) const {
   dbg(info, "Grouping: {}", expr.to_string());
   oss << expr << std::endl;
   return {};
 }
-ASTPrinter::value_t ASTPrinter::visit_impl(const IllegalExpr &expr) const {
+ASTPrinter::eval_result_t ASTPrinter::visit_impl(const IllegalExpr &expr) const {
   dbg(info, "IllegalExpr: {}", expr.to_string());
   error_stream << expr << std::endl;
   return {};
 }
 auto ASTPrinter::evaluate_impl(const Expr &expr) const -> utils::Status {
-  const_cast<value_t&>(res) =  expr.accept(*this);
+  const_cast<eval_result_t&>(res) =  expr.accept(*this);
   return utils::Status::kOkStatus;
 }
-ASTPrinter::value_t ASTPrinter::visit_impl(const Literal &expr) const {
+ASTPrinter::eval_result_t ASTPrinter::visit_impl(const Literal &expr) const {
   dbg(info, "Literal: {}", expr.to_string());
   oss << expr << std::endl;
   return {};
 }
-ASTPrinter::value_t ASTPrinter::visit_impl(const Unary &expr) const {
+ASTPrinter::eval_result_t ASTPrinter::visit_impl(const Unary &expr) const {
   dbg(info, "Unary: {}", expr.to_string());
   oss << expr << std::endl;
   return {};
 }
-ASTPrinter::value_t ASTPrinter::visit_impl(const Binary &expr) const {
+ASTPrinter::eval_result_t ASTPrinter::visit_impl(const Binary &expr) const {
   dbg(info, "Binary: {}", expr.to_string());
   oss << expr << std::endl;
   return {};
@@ -52,5 +52,5 @@ auto ASTPrinter::to_string_view_impl(const utils::FormatPolicy &) const
     -> utils::Viewable::string_view_type {
   return oss.view();
 }
-ExprVisitor::value_t ASTPrinter::get_result_impl() const { return res; }
+ExprVisitor::eval_result_t ASTPrinter::get_result_impl() const { return res; }
 } // namespace net::ancillarycat::loxograph::expression

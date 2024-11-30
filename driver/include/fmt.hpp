@@ -127,14 +127,34 @@ bool is_integer(Ty &&value) noexcept {
 template <typename... Ts> struct match : Ts... {
   using Ts::operator()...;
 };
+class Monostate final : public Printable, public Viewable {
+  auto to_string_impl(const FormatPolicy &format_policy) const
+      -> string_type override {
+    return "monostate"s;
+  }
+  auto to_string_view_impl(const FormatPolicy &format_policy) const
+      -> string_view_type override {
+    return "monostate"sv;
+  }
+};
+LOXO_NODISCARD_MSG(Monostate)
+inline consteval bool operator==(const Monostate &,
+                                           const Monostate &) noexcept {
+  return true;
+}
+LOXO_NODISCARD_MSG(Monostate)
+inline consteval std::strong_ordering
+operator<=>(const Monostate &, const Monostate &) noexcept {
+  return std::strong_ordering::equal;
+}
 class VisitorBase : virtual public Printable {
 public:
-  using value_t = std::variant<std::monostate,
-                               loxograph::evaluation::Boolean,
-                                loxograph::evaluation::Nil,
-                                loxograph::evaluation::Number,
-                                loxograph::evaluation::String,
-                                loxograph::evaluation::Error>;
+  using eval_result_t = std::variant<Monostate,
+                                     loxograph::evaluation::Boolean,
+                                     loxograph::evaluation::Nil,
+                                     loxograph::evaluation::Number,
+                                     loxograph::evaluation::String,
+                                     loxograph::evaluation::Error>;
   using string_view_type = utils::Viewable::string_view_type;
 };
 } // namespace net::ancillarycat::utils
