@@ -27,6 +27,7 @@ if (DEFINED ENV{AC_CPP_DEBUG})
     if ($ENV{AC_CPP_DEBUG} STREQUAL "ON")
         message(STATUS "Debug mode is ON. Corresponding macro features will be enabled: DEBUG, _DEBUG, DEBUG_, _DEBUG_, AC_CPP_DEBUG")
         set(AC_CPP_DEBUG ON)
+        set(VCPKG_MANIFEST_MODE OFF)
     endif ()
 endif ()
 

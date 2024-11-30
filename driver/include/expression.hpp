@@ -28,7 +28,7 @@ public:
   using ostringstream_t = std::ostringstream;
   using token_t = Token;
   using expr_ptr_t = std::shared_ptr<base_type>;
-  using expr_result_t = ExprVisitor::value_t;
+  using expr_result_t = ExprVisitor::eval_result_t;
 
 public:
   virtual ~Expr() = default;

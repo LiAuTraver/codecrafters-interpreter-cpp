@@ -14,11 +14,11 @@ std::pair<int, std::string> get_result(const auto &filepath) {
   return {exec, ec.error_stream.str() + ec.output_stream.str()};
 }
 } // namespace
-// TEST(parse,print){
-//   auto [callback, str] = get_result("Z:/loxograph/examples/parse.expr2.lox");
-//   EXPECT_EQ(str, "true\n");
-//   EXPECT_EQ(callback, 0);
-// }
+TEST(parse,print){
+  auto [callback, str] = get_result("Z:/loxograph/examples/parse.expr2.lox");
+  EXPECT_EQ(str, "true\n");
+  EXPECT_EQ(callback, 0);
+}
 
 TEST(parse, error) {
   auto [callback, str] = get_result("Z:/loxograph/examples/parse.expr7.lox");

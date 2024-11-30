@@ -86,9 +86,14 @@ LOXO_NODISCARD_MSG(Status) LOXOGRAPH_API Status
                const std::source_location &location) {
   return {Status::kEmptyInput, message, location};
 }
-LOXO_NODISCARD_MSG(Status) LOXOGRAPH_API Status
-    ParseError(const string_view message,
-               const std::source_location &location) {
+LOXO_NODISCARD_MSG(Status)
+LOXOGRAPH_API Status ParseError(const string_view message,
+                                const std::source_location &location) {
   return {Status::kParseError, message, location};
+}
+LOXO_NODISCARD_MSG(Status)
+LOXOGRAPH_API
+Status NotImplementedError(const string_view message, const std::source_location &location) {
+  return {Status::kNotImplementedError, message, location};
 }
 } // namespace net::ancillarycat::utils

@@ -31,32 +31,32 @@ public:
   }
 
 private:
-  virtual value_t visit_impl(const Literal &) const = 0;
-  virtual value_t visit_impl(const Unary &) const = 0;
-  virtual value_t visit_impl(const Binary &) const = 0;
-  virtual value_t visit_impl(const Grouping &) const = 0;
-  virtual value_t visit_impl(const IllegalExpr &) const = 0;
+  virtual eval_result_t visit_impl(const Literal &) const = 0;
+  virtual eval_result_t visit_impl(const Unary &) const = 0;
+  virtual eval_result_t visit_impl(const Binary &) const = 0;
+  virtual eval_result_t visit_impl(const Grouping &) const = 0;
+  virtual eval_result_t visit_impl(const IllegalExpr &) const = 0;
   virtual utils::Status evaluate_impl(const Expr &) const = 0;
-  virtual value_t get_result_impl() const = 0;
+  virtual eval_result_t get_result_impl() const = 0;
 };
 /// @brief a dummy visitor that does nothing but test compilation
 /// @implements ExprVisitor
 class DummyVisitor : public ExprVisitor {
 public:
-  virtual value_t visit_impl(const Literal &) const override {
-    return {std::monostate{}};
+  virtual eval_result_t visit_impl(const Literal &) const override {
+    return {utils::Monostate{}};
   }
-  virtual value_t visit_impl(const Unary &) const override {
-    return {std::monostate{}};
+  virtual eval_result_t visit_impl(const Unary &) const override {
+    return {utils::Monostate{}};
   }
-  virtual value_t visit_impl(const Binary &) const override {
-    return {std::monostate{}};
+  virtual eval_result_t visit_impl(const Binary &) const override {
+    return {utils::Monostate{}};
   }
-  virtual value_t visit_impl(const Grouping &) const override {
-    return {std::monostate{}};
+  virtual eval_result_t visit_impl(const Grouping &) const override {
+    return {utils::Monostate{}};
   }
-  virtual value_t visit_impl(const IllegalExpr &) const override {
-    return {std::monostate{}};
+  virtual eval_result_t visit_impl(const IllegalExpr &) const override {
+    return {utils::Monostate{}};
   }
 
 private:
@@ -67,8 +67,8 @@ private:
   utils::Status evaluate_impl(const Expr &) const override {
     return utils::InvalidArgument("dummy visitor");
   }
-  value_t get_result_impl() const override {
-    return {std::monostate{}};
+  eval_result_t get_result_impl() const override {
+    return {utils::Monostate{}};
   }
 } inline static const _dummy_visitor;
 /// @implements ExprVisitor
@@ -82,20 +82,20 @@ public:
   virtual ~ASTPrinter() override = default;
 
 private:
-  virtual value_t visit_impl(const Literal &) const override;
-  virtual value_t visit_impl(const Unary &) const override;
-  virtual value_t visit_impl(const Binary &) const override;
-  virtual value_t visit_impl(const Grouping &) const override;
-  virtual value_t visit_impl(const IllegalExpr &) const override;
+  virtual eval_result_t visit_impl(const Literal &) const override;
+  virtual eval_result_t visit_impl(const Unary &) const override;
+  virtual eval_result_t visit_impl(const Binary &) const override;
+  virtual eval_result_t visit_impl(const Grouping &) const override;
+  virtual eval_result_t visit_impl(const IllegalExpr &) const override;
   virtual utils::Status evaluate_impl(const Expr &) const override;
   virtual string_type
   to_string_impl(const utils::FormatPolicy &) const override;
   auto to_string_view_impl(const utils::FormatPolicy &) const
       -> utils::Viewable::string_view_type override;
-  value_t get_result_impl() const override;
+  eval_result_t get_result_impl() const override;
 
 private:
-  value_t res{std::monostate{}};
+  eval_result_t res{utils::Monostate{}};
   mutable ostringstream_t oss;
   mutable ostringstream_t error_stream;
 };
