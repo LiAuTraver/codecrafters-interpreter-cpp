@@ -33,12 +33,12 @@ endif ()
 function(create_test_executable test_name)
     add_executable(${test_name} ${ARGN})
     target_link_libraries(${test_name} PRIVATE
-        spdlog::spdlog
-        fmt::fmt
-        GTest::gtest
-        GTest::gtest_main
-        magic_enum::magic_enum
-        driver
+            spdlog::spdlog
+            fmt::fmt
+            GTest::gtest
+            GTest::gtest_main
+            magic_enum::magic_enum
+            driver
     )
     if (AC_CPP_DEBUG)
         copy_dlls_for(${test_name})

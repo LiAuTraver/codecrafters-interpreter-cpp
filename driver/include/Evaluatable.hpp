@@ -109,7 +109,7 @@ public:
   virtual ~String() override = default;
 
 public:
-  String &operator+(const String &);
+  String operator+(const String &)const;
   Boolean operator==(const String &) const;
   Boolean operator!=(const String &) const;
   explicit operator Boolean() const;

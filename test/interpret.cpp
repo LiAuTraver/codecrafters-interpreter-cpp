@@ -56,3 +56,48 @@ TEST(interpret, variable_print4) {
   EXPECT_EQ(str, "152\n");
   EXPECT_EQ(callback, 0);
 }
+
+TEST(interpret, error1) {
+  const auto path = R"(Z:\loxograph\examples\interp.err1.lox)";
+  auto [callback, str] = get_result(path);
+  EXPECT_EQ(str, "Undefined variable 'a'.\n[line 1]\n");
+  EXPECT_EQ(callback, 70);
+}
+TEST(interpret, error2) {
+  const auto path = R"(Z:\loxograph\examples\interp.err2.lox)";
+  auto [callback, str] = get_result(path);
+  EXPECT_EQ(str, "22\nUndefined variable 'x'.\n[line 2]\n");
+  EXPECT_EQ(callback, 70);
+}
+TEST(interpret, error3) {
+  const auto path = R"(Z:\loxograph\examples\interp.err3.lox)";
+  auto [callback, str] = get_result(path);
+  EXPECT_EQ(str, "Undefined variable 'hello'.\n[line 2]\n");
+  EXPECT_EQ(callback, 70);
+}
+TEST(interpret, error4) {
+  const auto path = R"(Z:\loxograph\examples\interp.err4.lox)";
+  auto [callback, str] = get_result(path);
+  EXPECT_EQ(str, "Undefined variable 'bar'.\n[line 2]\n");
+  EXPECT_EQ(callback, 70);
+}
+TEST(interpret, error5) {
+  const auto path = R"(Z:\loxograph\examples\interp.err5.lox)";
+  auto [callback, str] = get_result(path);
+  EXPECT_EQ(str, "[line 4] Error at '': Expect expression.\n");
+  EXPECT_EQ(callback, 65);
+}
+
+TEST(interpret, nil) {
+  const auto path = R"(Z:\loxograph\examples\interp.nil.lox)";
+  auto [callback, str] = get_result(path);
+  EXPECT_EQ(str, "593\n1113\nnil\n");
+  EXPECT_EQ(callback, 0);
+}
+
+TEST(interpret, redef) {
+  const auto path = R"(Z:\loxograph\examples\interp.redef.lox)";
+  auto [callback, str] = get_result(path);
+  EXPECT_EQ(str, "before\n");
+  EXPECT_EQ(callback, 0);
+}

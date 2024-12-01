@@ -119,6 +119,7 @@ bool parser::inspect(Args &&...args) {
 }
 template <typename... Args>
   requires(std::is_enum_v<std::common_type_t<Args...>>)
+[[deprecated("use inspect() instead and manually call get()")]]
 bool parser::inspect_and_get(Args &&...args) {
   auto value = this->inspect(std::forward<Args...>(args...));
   get();

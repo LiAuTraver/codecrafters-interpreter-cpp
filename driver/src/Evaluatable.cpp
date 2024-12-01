@@ -101,9 +101,8 @@ String &String::operator=(String &&that) noexcept {
   Evaluatable::operator=(that);
   return *this;
 }
-String &String::operator+(const String &rhs) {
-  value += rhs.value;
-  return *this;
+String String::operator+(const String &rhs)const {
+  return String{value + rhs.value};
 }
 Boolean String::operator==(const String &rhs) const {
   return {value == rhs.value};

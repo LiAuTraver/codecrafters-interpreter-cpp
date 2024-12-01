@@ -8,10 +8,13 @@
 #include "fmt.hpp"
 #include "Environment.hpp"
 
+#include "Variant.hpp"
+
 namespace net::ancillarycat::loxograph::evaluation {
 utils::Status Environment::add(const string_type &name,
-                               const eval_result_t &value) {
-  if (associations.contains(name.data())) {
+                               const eval_result_t &value,
+                               const uint_least32_t line) {
+  if (associations.contains(name)) {
     /// Scheme allows redefining variables at the top level; so temporarily we
     /// just follow that.
     dbg(warn,
@@ -19,16 +22,17 @@ utils::Status Environment::add(const string_type &name,
         "it...",
         name);
   }
-  associations.insert_or_assign(name.data(), value);
+  associations.insert_or_assign(name.data(), std::pair{value,line});
   return utils::OkStatus();
 }
 Environment::eval_result_t Environment::get(const string_type &name) const {
-  if (auto it = associations.find({name.begin(),name.end()}); it != associations.end()) {
+  if (auto it = associations.find({name.begin(), name.end()});
+      it != associations.end()) {
     dbg(trace, "Found the variable {} in the environment.", name);
-    return it->second;
+    return it->second.first;
   }
-  return {Error{utils::format(
-      "The variable `{}` is not defined in the environment.", name)}};
+  dbg(error, "The variable {} is not defined in the environment.", name);
+  return {utils::Monostate{}};
 }
 auto Environment::to_string_impl(const utils::FormatPolicy &format_policy) const
     -> string_type {

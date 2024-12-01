@@ -80,4 +80,21 @@ private:
       -> string_type override;
   stmt_result_t accept_impl(const StmtVisitor &) const override;
 };
+
+class IllegalStmt : public Stmt, utils::Viewable {
+public:
+  IllegalStmt(const std::string_view message_sv) : message(message_sv) {}
+  explicit IllegalStmt(std::string&& message) : message(std::move(message)) {}
+  virtual ~IllegalStmt() override = default;
+
+public:
+  std::string message;
+
+private:
+  auto to_string_impl(const utils::FormatPolicy &) const
+      -> string_type override;
+  auto to_string_view_impl(const utils::FormatPolicy &) const
+      -> string_view_type override;
+  stmt_result_t accept_impl(const StmtVisitor &) const override;
+};
 } // namespace net::ancillarycat::loxograph::statement
