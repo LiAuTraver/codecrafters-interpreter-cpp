@@ -2,7 +2,9 @@ cmake_minimum_required(VERSION 3.13)
 project(loxograph VERSION 1.0.0 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
+# disable those additionial targets added by CTest
+#         see https://stackoverflow.com/questions/56089330/cmake-creates-lots-of-targets-i-didnt-specify
+set_property(GLOBAL PROPERTY CTEST_TARGETS_ADDED 1)
 # for codecrafters' test
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux" AND NOT DEFINED ENV{AC_CPP_DEBUG})
     set(CMAKE_CXX_COMPILER "g++")
@@ -28,6 +30,7 @@ if (DEFINED ENV{AC_CPP_DEBUG})
         message(STATUS "Debug mode is ON. Corresponding macro features will be enabled: DEBUG, _DEBUG, DEBUG_, _DEBUG_, AC_CPP_DEBUG")
         set(AC_CPP_DEBUG ON)
         set(VCPKG_MANIFEST_MODE OFF)
+        set(VCPKG_MANIFEST_INSTALL OFF)
     endif ()
 endif ()
 

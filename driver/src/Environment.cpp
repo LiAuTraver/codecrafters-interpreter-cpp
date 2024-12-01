@@ -8,10 +8,12 @@
 #include "fmt.hpp"
 #include "Environment.hpp"
 
+#include "Variant.hpp"
+
 namespace net::ancillarycat::loxograph::evaluation {
 utils::Status Environment::add(const string_type &name,
                                const eval_result_t &value) {
-  if (associations.contains(name.data())) {
+  if (associations.contains(name)) {
     /// Scheme allows redefining variables at the top level; so temporarily we
     /// just follow that.
     dbg(warn,

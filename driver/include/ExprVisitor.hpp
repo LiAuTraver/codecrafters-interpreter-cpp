@@ -8,6 +8,8 @@
 #include "loxo_fwd.hpp"
 #include "status.hpp"
 
+#include "Variant.hpp"
+
 namespace net::ancillarycat::loxograph::expression {
 /// @interface ExprVisitor
 class ExprVisitor : virtual public utils::VisitorBase {
@@ -45,22 +47,22 @@ private:
 class DummyVisitor : public ExprVisitor {
 public:
   virtual eval_result_t visit_impl(const Literal &) const override {
-    return {utils::Monostate{}};
+    return {};
   }
   virtual eval_result_t visit_impl(const Unary &) const override {
-    return {utils::Monostate{}};
+    return {};
   }
   virtual eval_result_t visit_impl(const Binary &) const override {
-    return {utils::Monostate{}};
+    return {};
   }
   virtual eval_result_t visit_impl(const Grouping &) const override {
-    return {utils::Monostate{}};
+    return {};
   }
   virtual eval_result_t visit_impl(const IllegalExpr &) const override {
-    return {utils::Monostate{}};
+    return {};
   }
   virtual eval_result_t visit_impl(const Variable &) const override {
-    return {utils::Monostate{}};
+    return {};
   }
 
 private:
@@ -72,7 +74,7 @@ private:
     return utils::InvalidArgument("dummy visitor");
   }
   eval_result_t get_result_impl() const override {
-    return {utils::Monostate{}};
+    return {};
   }
 } inline static const _dummy_visitor;
 /// @implements ExprVisitor

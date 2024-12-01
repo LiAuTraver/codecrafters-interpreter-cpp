@@ -8,8 +8,12 @@
 #include <string_view>
 
 #include "config.hpp"
-
 namespace net::ancillarycat::utils {
+/// @brief A simple variant wrapper class for convenience when evaluating
+/// expressions, especially when the operation was `to_string` or check the
+/// type's name when debugging.
+/// @note exception-free variant wrapper
+template <typename... Types> class Variant;
 /// @brief A class that represents the status of a function call. it's designed
 /// to be as identical as possible to the `absl::Status` class, for
 /// `absl::Status` seems to fail to compile with clang++ on Windows.
@@ -40,6 +44,7 @@ using ostringstream = ::std::ostringstream;
 using namespace ::std::string_view_literals;
 using namespace ::std::string_literals;
 } // namespace net::ancillarycat::utils
+// NOLINTBEGIN(bugprone-forward-declaration-namespace)
 namespace net::ancillarycat::loxograph {
 
 class lexer;
@@ -61,7 +66,7 @@ class Variable;
 class IllegalExpr;
 
 class ExprVisitor;
-// class DummyVisitor;
+class DummyVisitor;
 } // namespace expression
 namespace statement {
 class Stmt;
@@ -91,3 +96,4 @@ inline static constexpr auto conditional_tolerable_chars = "@$#"sv;
 inline static constexpr auto whitespace_chars = " \t\r"sv;
 inline static constexpr auto newline_chars = "\n\v\f"sv;
 } // namespace net::ancillarycat::loxograph
+// NOLINTEND(bugprone-forward-declaration-namespace)

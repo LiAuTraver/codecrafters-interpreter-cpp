@@ -50,6 +50,7 @@ private:
   /// a temporary fix.
   mutable eval_result_t expr_res{utils::Monostate{}};
   mutable std::vector<eval_result_t> stmts_res{};
+  mutable evaluation::Environment env{};
 
 private:
   auto expr_to_string(const utils::FormatPolicy &) const -> string_type;
@@ -60,8 +61,5 @@ private:
 
 private:
   friend LOXOGRAPH_API void delete_interpreter_fwd(interpreter *);
-
-private:
-  mutable evaluation::Environment env{};
 };
 } // namespace net::ancillarycat::loxograph

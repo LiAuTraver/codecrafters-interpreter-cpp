@@ -18,21 +18,11 @@
 
 
 namespace net::ancillarycat::loxograph {
-// clang-format off
-/*!
-   @brief cast the literal to the specified type and also log the value in debug mode.
-   @note clang-cl.exe does not fully support `try` and `catch` blocks but
-   `any_cast` will throw an exception if the cast fails. For more information, see
-   <a href="https://clang.llvm.org/docs/MSVCCompatibility.html#asynchronous-exceptions">Asynchronous Exceptions</a>,
-   <a href="https://stackoverflow.com/questions/7049502/c-try-and-try-catch-finally">try-catch-finally</a>,
-   and <a href="https://learn.microsoft.com/en-us/cpp/cpp/try-except-statement">try-except-statement</a>.
- */
-// clang-format on
 template <typename Ty>
 inline auto Token::cast_literal() const -> decltype(auto)
   requires std::default_initializable<Ty>
 {
-  return utils::get_if<Ty>(literal);
+  return std::any_cast<Ty>(&this->literal);
 }
 Token::Token(const token_type &type,
              string_type lexeme,
@@ -206,8 +196,6 @@ Token::to_string_impl(const utils::FormatPolicy &policy) const {
       // codecrafter's string lit pase output does not need `"`, so remove them
       lexeme_sv = lexeme_sv.substr(1, lexeme_sv.size() - 2);
     }
-    // ptr = cast_literal<string_view_type>();
-    // literal_sv =
     if (auto ptr = cast_literal<string_view_type>())
       literal_sv = *ptr;
     else
