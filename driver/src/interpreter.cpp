@@ -69,12 +69,17 @@ utils::Status interpreter::visit_impl(const statement::Variable &stmt) const {
         std::any_cast<string_view_type>(stmt.name.literal),
         expr_res.underlying_string());
     // string view fgailed again; not null-terminated
-    env.add(stmt.name.to_string(utils::kTokenOnly), expr_res, stmt.name.line)
-        .ignore_error();
+    auto res = env.add(stmt.name.to_string(utils::kTokenOnly), expr_res, stmt.name.line);
     // TODO: reset expr_res or not???
     expr_res.emplace<utils::Monostate>();
+    return res;
   }
-  return utils::OkStatus();
+  // if no initializer, it's a nil value.
+  auto res = env.add(stmt.name.to_string(utils::kTokenOnly),
+          evaluation::NilValue,
+          stmt.name.line);
+  expr_res.emplace<utils::Monostate>();
+  return res;
 }
 utils::Status interpreter::visit_impl(const statement::Print &stmt) const {
   if (auto eval_res = evaluate(*stmt.value); !eval_res.ok())
@@ -83,7 +88,8 @@ utils::Status interpreter::visit_impl(const statement::Print &stmt) const {
   expr_res.emplace<utils::Monostate>();
   return utils::OkStatus();
 }
-utils::Status interpreter::visit_impl(const statement::IllegalStmt &stmt) const {
+utils::Status
+interpreter::visit_impl(const statement::IllegalStmt &stmt) const {
   return utils::InvalidArgument(stmt.message);
 }
 utils::Status interpreter::visit_impl(const statement::Expression &stmt) const {

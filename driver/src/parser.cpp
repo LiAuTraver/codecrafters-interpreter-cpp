@@ -181,10 +181,12 @@ auto parser::var_decl() -> stmt_ptr_t {
   }
   auto var_tok = get();
   expr_ptr_t initializer = nullptr;
-  if (inspect_and_get(kEqual)) {
+  if (inspect(kEqual)) {
+    get();
     initializer = next_expression();
   }
-  if (inspect_and_get(kSemicolon)) {
+  if (inspect(kSemicolon)) {
+    get();
     return std::make_shared<statement::Variable>(std::move(var_tok),
                                                  initializer);
   }
