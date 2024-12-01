@@ -38,8 +38,6 @@ auto parser::get(const size_type offset) -> token_t {
   return token;
 }
 auto parser::parse(const ParsePolicy &parse_policy) -> utils::Status try {
-  // TODO: do not use exceptions
-  // TODO("implementing statement parsing, so code here WONT work!");
   if (parse_policy == kExpression) {
     expr_head = next_expression();
   } else if (parse_policy == kStatement) {
@@ -69,7 +67,6 @@ auto parser::get_expression() const -> expr_ptr_t {
                   "but not `parse(kExpression)`?");
   return expr_head;
 }
-// TODO: do not use exceptions for control flow
 auto parser::next_expression() -> expr_ptr_t { // NOLINT(misc-no-recursion)
   return equality();
 }
@@ -171,7 +168,7 @@ auto parser::primary() -> expr_ptr_t { // NOLINT(misc-no-recursion)
 }
 auto parser::next_declaration() -> stmt_ptr_t {
   if (inspect(kVar)) {
-  get();
+    get();
     return var_decl();
   }
   return next_statement();
@@ -191,10 +188,7 @@ auto parser::var_decl() -> stmt_ptr_t {
     return std::make_shared<statement::Variable>(std::move(var_tok),
                                                  initializer);
   }
-  TODO("Exception or return error?");
-  // return std::make_shared<parse_error>{
-  //     parse_error::kMissingSemicolon, "Expect ';' after variable
-  //     declaration."};
+  throw synchronize({parse_error::kUnknownError, "Expect expression."});
 }
 auto parser::print_stmt() -> stmt_ptr_t {
   auto value = next_expression();
@@ -202,9 +196,7 @@ auto parser::print_stmt() -> stmt_ptr_t {
     get();
     return std::make_shared<statement::Print>(value);
   }
-  TODO("ditto");
-  // return std::make_shared<parse_error>{parse_error::kMissingSemicolon,
-  //                                      "Expect ';' after value."};
+  throw synchronize({parse_error::kUnknownError, "Expect expression."});
 }
 auto parser::expr_stmt() -> stmt_ptr_t {
   auto expr = next_expression();
@@ -212,9 +204,7 @@ auto parser::expr_stmt() -> stmt_ptr_t {
     get();
     return std::make_shared<statement::Expression>(expr);
   }
-  // return std::make_shared<parse_error>{parse_error::kMissingSemicolon,"Expect
-  // ';' after expression."};
-  TODO("ditto");
+  throw synchronize({parse_error::kUnknownError, "Expect expression."});
 }
 auto parser::next_statement() -> stmt_ptr_t {
   if (inspect(kPrint)) {

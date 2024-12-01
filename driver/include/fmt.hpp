@@ -129,11 +129,11 @@ private:
 };
 class Monostate final : public Printable, public Viewable {
   auto to_string_impl(const FormatPolicy &) const -> string_type override {
-    return "monostate"s;
+    return ""s;
   }
   auto to_string_view_impl(const FormatPolicy &) const
       -> string_view_type override {
-    return "monostate"sv;
+    return ""sv;
   }
 };
 LOXO_NODISCARD_MSG(Monostate)
@@ -148,12 +148,6 @@ inline consteval std::strong_ordering operator<=>(const Monostate &,
 }
 class VisitorBase : virtual public Printable {
 public:
-  // using eval_result_t = std::variant<net::ancillarycat::utils::Monostate,
-  //                                    loxograph::evaluation::Boolean,
-  //                                    loxograph::evaluation::Nil,
-  //                                    loxograph::evaluation::Number,
-  //                                    loxograph::evaluation::String,
-  //                                    loxograph::evaluation::Error>;
   using variant_type = Variant<net::ancillarycat::utils::Monostate,
                                loxograph::evaluation::Boolean,
                                loxograph::evaluation::Nil,
@@ -164,7 +158,7 @@ public:
   using string_view_type = utils::Viewable::string_view_type;
 };
 } // namespace net::ancillarycat::utils
-#ifndef LOXOGRAPH_USE_FMT_FORMAT
+
 template <> struct std::formatter<net::ancillarycat::utils::Printable> {
   constexpr auto parse(::std::format_parse_context &ctx) { return ctx.begin(); }
   template <typename FormatContext>
@@ -176,4 +170,3 @@ template <> struct std::formatter<net::ancillarycat::utils::Printable> {
         p.to_string(net::ancillarycat::utils::FormatPolicy::kDefault));
   }
 };
-#endif

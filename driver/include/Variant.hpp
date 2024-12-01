@@ -32,8 +32,8 @@ public:
 public:
   template <typename Callable>
   auto visit(this auto &&self, Callable &&callable) -> decltype(auto) {
-  using ReturnType = decltype(std::forward<Callable>(callable)(
-      std::declval<variant_type>()));
+    using ReturnType = decltype(std::forward<Callable>(callable)(
+        std::declval<variant_type>()));
     return self.is_valid()
                ? std::visit(std::forward<Callable>(callable), self.my_variant)
                : ReturnType{};
@@ -66,9 +66,10 @@ public:
     my_variant.swap(that.my_variant);
     return *this;
   }
-  string_type underlying_string() const {
-    return this->visit([](const auto &value) -> string_type {
-      return value.to_string(FormatPolicy::kDefault);
+  string_type underlying_string(
+      const FormatPolicy &format_policy = FormatPolicy::kDefault) const {
+    return this->visit([&](const auto &value) -> string_type {
+      return value.to_string(format_policy);
     });
   }
 
@@ -91,17 +92,30 @@ private:
       -> string_view_type override {
     return typeid(decltype(*this)).name();
   }
+
+private:
+  /// @brief get the value of the variant; a wrapper around @link std::get_if
+  /// @endlink
+  template <class Ty, class... MyTypes>
+  friend inline constexpr auto get_if(Variant<MyTypes...> *v) noexcept;
+  /// @brief get the value of the variant; a wrapper around @link std::get
+  /// @endlink
+  template <class Ty, class... MyTypes>
+  friend inline constexpr auto get(const Variant<MyTypes...> &v)
+      -> decltype(auto);
 };
-template <class Ty, class... Types>
-inline constexpr bool holds_alternative(const Variant<Types...> &v) noexcept {
+/// @brief check if the variant holds a specific type; a wrapper around @link
+/// std::holds_alternative @endlink
+template <class Ty, class... MyTypes>
+inline constexpr bool holds_alternative(const Variant<MyTypes...> &v) noexcept {
   return std::holds_alternative<Ty>(v.get());
 }
-template <class Ty, class... Types>
-inline constexpr auto get(const Variant<Types...> &v) -> decltype(auto) {
-  return std::get<Ty>(v.get());
+template <class Ty, class... MyTypes>
+inline constexpr auto get(const Variant<MyTypes...> &v) -> decltype(auto) {
+  return v.is_valid() ? std::get<Ty>(v.get()) : Ty{};
 }
-template <class Ty, class... Types>
-inline constexpr auto get_if(Variant<Types...> *v) noexcept {
-  return std::get_if<Ty>(&v->get());
+template <class Ty, class... MyTypes>
+LOXO_NODISCARD_MSG(get_if) inline constexpr auto get_if(Variant<MyTypes...> *v) noexcept {
+  return v->is_valid() ? std::get_if<Ty>(&v->get()) : nullptr;
 }
 } // namespace net::ancillarycat::utils

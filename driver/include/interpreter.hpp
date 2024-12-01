@@ -41,6 +41,7 @@ private:
 private:
   virtual utils::Status visit_impl(const statement::Variable &) const override;
   virtual utils::Status visit_impl(const statement::Print &) const override;
+  virtual utils::Status visit_impl(const statement::IllegalStmt &) const override;
   virtual utils::Status
   visit_impl(const statement::Expression &) const override;
   utils::Status execute_impl(const statement::Stmt &) const override;

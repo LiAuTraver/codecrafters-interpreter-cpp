@@ -7,6 +7,7 @@
 
 #include "config.hpp"
 #include "loxo_fwd.hpp"
+#include "fmt.hpp"
 #include "TokenType.hpp"
 
 namespace net::ancillarycat::loxograph {

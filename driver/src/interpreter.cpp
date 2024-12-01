@@ -69,7 +69,8 @@ utils::Status interpreter::visit_impl(const statement::Variable &stmt) const {
         std::any_cast<string_view_type>(stmt.name.literal),
         expr_res.underlying_string());
     // string view fgailed again; not null-terminated
-    env.add(stmt.name.to_string(utils::kTokenOnly), expr_res).ignore_error();
+    env.add(stmt.name.to_string(utils::kTokenOnly), expr_res, stmt.name.line)
+        .ignore_error();
     // TODO: reset expr_res or not???
     expr_res.emplace<utils::Monostate>();
   }
@@ -81,6 +82,9 @@ utils::Status interpreter::visit_impl(const statement::Print &stmt) const {
   stmts_res.emplace_back(expr_res);
   expr_res.emplace<utils::Monostate>();
   return utils::OkStatus();
+}
+utils::Status interpreter::visit_impl(const statement::IllegalStmt &stmt) const {
+  return utils::InvalidArgument(stmt.message);
 }
 utils::Status interpreter::visit_impl(const statement::Expression &stmt) const {
   return evaluate(*stmt.expr);
@@ -172,6 +176,12 @@ interpreter::visit_impl(const expression::Binary &expr) const {
     }
     return result;
   }
+  if (auto ptr = utils::get_if<evaluation::Error>(&lhs); ptr != nullptr) {
+    return *ptr;
+  }
+  if (auto ptr = utils::get_if<evaluation::Error>(&rhs); ptr != nullptr) {
+    return *ptr;
+  }
   if (lhs.index() != rhs.index()) {
     dbg(error, "type mismatch: lhs: {}, rhs: {}", lhs.index(), rhs.index());
     dbg(warn, "current implementation only support same type binary operation");
@@ -221,7 +231,16 @@ interpreter::visit_impl(const expression::Variable &expr) const {
   contract_assert(!!std::any_cast<string_view_type>(&expr.name.literal),
                   1,
                   "variable name should be a string");
-  return env.get(expr.name.to_string(utils::FormatPolicy::kTokenOnly));
+  auto res = env.get(expr.name.to_string(utils::FormatPolicy::kTokenOnly));
+  if (utils::holds_alternative<utils::Monostate>(res)) {
+    // TODO temporary solution
+    // add line info
+    return {evaluation::Error{
+        utils::format("Undefined variable '{}'.",
+                      expr.name.to_string(utils::FormatPolicy::kTokenOnly)),
+        expr.name.line}};
+  }
+  return res;
 }
 interpreter::eval_result_t
 interpreter::visit_impl(const expression::IllegalExpr &expr) const {
@@ -235,15 +254,7 @@ auto interpreter::expr_to_string(const utils::FormatPolicy &format_policy) const
 auto interpreter::value_to_string(const utils::FormatPolicy &format_policy,
                                   const eval_result_t &value) const
     -> string_type {
-  // ReSharper disable once CppUseFamiliarTemplateSyntaxForGenericLambdas
-  return value.visit([=](auto &&val) -> string_type {
-    if constexpr (std::is_same_v<std::decay_t<decltype(val)>,
-                                 utils::Monostate>) {
-      dbg(warn, "no result");
-      return "<no result>"s;
-    } else
-      return val.to_string(format_policy);
-  });
+  return value.underlying_string();
 }
 auto interpreter::to_string_impl(const utils::FormatPolicy &format_policy) const
     -> string_type {

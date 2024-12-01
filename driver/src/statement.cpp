@@ -31,4 +31,15 @@ auto Expression::to_string_impl(const utils::FormatPolicy &format_policy) const
 Stmt::stmt_result_t Expression::accept_impl(const StmtVisitor &visitor) const {
   return visitor.visit(*this);
 }
+auto IllegalStmt::to_string_impl(const utils::FormatPolicy &) const
+    -> string_type {
+  return message;
+}
+auto IllegalStmt::to_string_view_impl(const utils::FormatPolicy &) const
+    -> string_view_type {
+  return message;
+}
+Stmt::stmt_result_t IllegalStmt::accept_impl(const StmtVisitor &visitor) const {
+  return visitor.visit(*this);
+}
 } // namespace net::ancillarycat::loxograph::statement

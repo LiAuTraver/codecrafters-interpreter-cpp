@@ -73,6 +73,7 @@ class Stmt;
 class Variable;
 class Print;
 class Expression;
+class IllegalStmt;
 
 class StmtVisitor;
 class DummyVisitor;
