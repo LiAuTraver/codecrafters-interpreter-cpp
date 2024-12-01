@@ -9,7 +9,8 @@
 namespace net::ancillarycat::loxograph {
 
 parser &parser::set_views(const token_views_t tokens) {
-  contract_assert(tokens.back().type.type, kEndOfFile, "tokens must end with EOF");
+  contract_assert(
+      tokens.back().type.type, kEndOfFile, "tokens must end with EOF");
   this->tokens = tokens;
   this->cursor = tokens.begin();
   return *this;
@@ -43,7 +44,7 @@ auto parser::parse(const ParsePolicy &parse_policy) -> utils::Status try {
     expr_head = next_expression();
   } else if (parse_policy == kStatement) {
     while (not is_at_end()) {
-      stmts.emplace_back(next_statement());
+      stmts.emplace_back(next_declaration());
     }
   } else {
     contract_assert(false);
@@ -133,7 +134,8 @@ auto parser::primary() -> expr_ptr_t { // NOLINT(misc-no-recursion)
   if (inspect(kIdentifier)) {
     return std::make_shared<expression::Variable>(get());
   }
-  // TODO: where's keyword??????????????
+  /// TODO: where's keyword??????????????
+  ///     ^^^^^^ solved: shoud not appera here and was already handled in lexer.
   // {
   // // codecafter's test does not need quotes around strings, so remove them
   // auto token = get();
@@ -167,8 +169,9 @@ auto parser::primary() -> expr_ptr_t { // NOLINT(misc-no-recursion)
   // invalid evaluation reached
   throw synchronize({parse_error::kUnknownError, "Expect expression."});
 }
-auto parser::declaration() -> stmt_ptr_t {
+auto parser::next_declaration() -> stmt_ptr_t {
   if (inspect(kVar)) {
+  get();
     return var_decl();
   }
   return next_statement();
@@ -176,6 +179,8 @@ auto parser::declaration() -> stmt_ptr_t {
 auto parser::var_decl() -> stmt_ptr_t {
 
   if (peek().type.type != kIdentifier) {
+    contract_assert(false);
+    TODO("not implemented");
   }
   auto var_tok = get();
   expr_ptr_t initializer = nullptr;

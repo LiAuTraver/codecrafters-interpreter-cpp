@@ -176,7 +176,7 @@ struct ::fmt::formatter<::std::stacktrace> : ::fmt::formatter<::std::string> {
                      "           Expect `{4}` equals to `{5}`,\n"              \
                      "             but actually `{4}` appears to be {6},\n"    \
                      "             and `{5}` appears to be {7}.\n"             \
-                     "Stacktrace:{8}",                                       \
+                     "Stacktrace:{8}",                                         \
                      LOXOGRAPH_FILENAME,                                       \
                      LOXOGRAPH_FUNCTION_NAME,                                  \
                      LOXOGRAPH_LINE,                                           \
@@ -194,7 +194,7 @@ struct ::fmt::formatter<::std::stacktrace> : ::fmt::formatter<::std::string> {
                      "             but actually `{4}` appears to be {6},\n"    \
                      "             and `{5}` appears to be {7}.\n"             \
                      "Additional message: {8}\n"                               \
-                     "Stacktrace:{9}",                                       \
+                     "Stacktrace:{9}",                                         \
                      LOXOGRAPH_FILENAME,                                       \
                      LOXOGRAPH_FUNCTION_NAME,                                  \
                      LOXOGRAPH_LINE,                                           \
@@ -312,6 +312,8 @@ struct ::fmt::formatter<::std::stacktrace> : ::fmt::formatter<::std::string> {
       -> ::std::nullptr_t {                                                    \
     ::std::cout << ::std::unitbuf;                                             \
     ::std::cerr << ::std::unitbuf;                                             \
+    ::std::cout << ::std::flush;                                               \
+    ::std::cerr << ::std::flush;                                               \
     LOXOGRAPH_DEBUG_LOGGING(info,                                              \
                             "\033[36mspdlog framework initialized.\033[0m");   \
     LOXOGRAPH_DEBUG_LOGGING_SETUP(_log_level_, "Debug mode enabled");          \
@@ -352,7 +354,7 @@ struct ::fmt::formatter<::std::stacktrace> : ::fmt::formatter<::std::string> {
 
 #if defined(_MSC_VER) && !defined(__clang__)
 /// @remark currenty, MSVC's constexpr was really disgusting.
-#define LOXO_CONSTEXPR_IF_NOT_MSVC const
+#  define LOXO_CONSTEXPR_IF_NOT_MSVC
 #else
-#define LOXO_CONSTEXPR_IF_NOT_MSVC constexpr
+#  define LOXO_CONSTEXPR_IF_NOT_MSVC constexpr
 #endif

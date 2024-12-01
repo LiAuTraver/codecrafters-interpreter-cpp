@@ -3,6 +3,7 @@
 #include <memory>
 #include <span>
 
+#include "Environment.hpp"
 #include "config.hpp"
 #include "fmt.hpp"
 #include "loxo_fwd.hpp"
@@ -19,21 +20,23 @@ public:
   using ostringstream_t = std::ostringstream;
 
 public:
-  utils::Status
-  interpret(std::span<std::shared_ptr<statement::Stmt>>) const;
+  utils::Status interpret(std::span<std::shared_ptr<statement::Stmt>>) const;
 
 private:
   virtual eval_result_t visit_impl(const expression::Literal &) const override;
   virtual eval_result_t visit_impl(const expression::Unary &) const override;
   virtual eval_result_t visit_impl(const expression::Binary &) const override;
   virtual eval_result_t visit_impl(const expression::Grouping &) const override;
-  virtual eval_result_t visit_impl(const expression::IllegalExpr &) const override;
+  virtual eval_result_t visit_impl(const expression::Variable &) const override;
+  virtual eval_result_t
+  visit_impl(const expression::IllegalExpr &) const override;
   virtual utils::Status evaluate_impl(const expression::Expr &) const override;
   /// @note in Lisp/Scheme, only `#f` is false, everything else is true; we also
   /// make `nil` as false.
   evaluation::Boolean is_true_value(const eval_result_t &) const;
   virtual eval_result_t get_result_impl() const override;
-  eval_result_t is_deep_equal(const eval_result_t &lhs, const eval_result_t &) const;
+  eval_result_t is_deep_equal(const eval_result_t &lhs,
+                              const eval_result_t &) const;
 
 private:
   virtual utils::Status visit_impl(const statement::Variable &) const override;
@@ -57,5 +60,8 @@ private:
 
 private:
   friend LOXOGRAPH_API void delete_interpreter_fwd(interpreter *);
+
+private:
+  mutable evaluation::Environment env{};
 };
 } // namespace net::ancillarycat::loxograph

@@ -15,15 +15,11 @@ public:
     return visit_impl(stmt);
   }
   auto execute(const Stmt &stmt) const { return execute_impl(stmt); }
-  // auto get_result() const {
-  //   return get_result_impl();
-  // }
 private:
   virtual utils::Status visit_impl(const Variable &) const = 0;
   virtual utils::Status visit_impl(const Print &) const = 0;
   virtual utils::Status visit_impl(const Expression &) const = 0;
   virtual utils::Status execute_impl(const Stmt &) const = 0;
-  // virtual eval_result_t get_result_impl() const = 0;
 };
 
 class DummyVisitor : public StmtVisitor {

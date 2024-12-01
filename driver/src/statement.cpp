@@ -10,12 +10,12 @@
 #include "expression.hpp"
 
 namespace net::ancillarycat::loxograph::statement {
-Stmt::stmt_result_t Variable::accept_impl(const StmtVisitor &) const {
-  return utils::NotImplementedError("Variable::accept_impl");
+Stmt::stmt_result_t Variable::accept_impl(const StmtVisitor &visitor) const {
+  return visitor.visit(*this);
 }
 auto Variable::to_string_impl(const utils::FormatPolicy &format_policy) const
     -> string_type {
-  return "not implemented"s;
+  return this->initializer->to_string(format_policy);
 }
 auto Print::to_string_impl(const utils::FormatPolicy &format_policy) const
     -> string_type {

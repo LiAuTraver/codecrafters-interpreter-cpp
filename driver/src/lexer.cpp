@@ -95,7 +95,7 @@ lexer::status_t lexer::lex() {
   add_token(kEndOfFile);
   return utils::OkStatus();
 }
-void lexer::add_identifier() {
+void lexer::add_identifier_and_keyword() {
   auto value = lex_identifier();
   if (auto it = keywords.find(value); it != keywords.end()) {
     // add_token(it->second);
@@ -118,6 +118,7 @@ void lexer::add_identifier() {
     }
     return;
   }
+  dbg(trace, "identifier: {}", value);
   add_token(kIdentifier, value);
 }
 void lexer::add_number() {
@@ -197,7 +198,7 @@ void lexer::next_token() {
     }
     // finally, letters
     if (std::isalpha(c, std::locale()) or c == '_') {
-      return add_identifier();
+      return add_identifier_and_keyword();
     }
     add_lex_error(error_t::kUnexpectedCharacter);
     dbg(error, "unexpected character: {}", c);
@@ -301,7 +302,6 @@ lexer::string_view_type lexer::lex_identifier() {
   // 123_abc
   //       ^ cursor position
   auto value = string_view_type(contents.data() + head, cursor - head);
-  dbg(trace, "identifier: {}", value);
   return value;
 }
 LOXOGRAPH_API void delete_lexer_fwd(lexer *ptr) { delete ptr; }

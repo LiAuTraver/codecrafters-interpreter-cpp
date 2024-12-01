@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cmath>
 #include <compare>
+#include <cstdint>
 #include <limits>
 #include <random>
 #include <utility>
@@ -165,7 +166,7 @@ public:
 
 public:
   Error() = default;
-  Error(string_view_type, uint_least32_t);
+  Error(string_view_type, uint_least32_t = std::numeric_limits<uint_least32_t>::max());
   explicit Error(string_type &&, uint_least32_t &&) noexcept;
   Error(const Error &);
   Error(Error &&) noexcept;

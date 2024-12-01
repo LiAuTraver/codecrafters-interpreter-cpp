@@ -35,6 +35,7 @@ private:
   virtual eval_result_t visit_impl(const Unary &) const = 0;
   virtual eval_result_t visit_impl(const Binary &) const = 0;
   virtual eval_result_t visit_impl(const Grouping &) const = 0;
+  virtual eval_result_t visit_impl(const Variable &) const = 0;
   virtual eval_result_t visit_impl(const IllegalExpr &) const = 0;
   virtual utils::Status evaluate_impl(const Expr &) const = 0;
   virtual eval_result_t get_result_impl() const = 0;
@@ -56,6 +57,9 @@ public:
     return {utils::Monostate{}};
   }
   virtual eval_result_t visit_impl(const IllegalExpr &) const override {
+    return {utils::Monostate{}};
+  }
+  virtual eval_result_t visit_impl(const Variable &) const override {
     return {utils::Monostate{}};
   }
 
@@ -87,6 +91,7 @@ private:
   virtual eval_result_t visit_impl(const Binary &) const override;
   virtual eval_result_t visit_impl(const Grouping &) const override;
   virtual eval_result_t visit_impl(const IllegalExpr &) const override;
+  virtual eval_result_t visit_impl(const Variable &) const override;
   virtual utils::Status evaluate_impl(const Expr &) const override;
   virtual string_type
   to_string_impl(const utils::FormatPolicy &) const override;

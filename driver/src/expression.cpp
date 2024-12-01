@@ -32,7 +32,7 @@ Binary::to_string_impl(const utils::FormatPolicy &format_policy) const {
          left->to_string() + " " + right->to_string() + ")";
 }
 Expr::expr_result_t Variable::accept_impl(const ExprVisitor &visitor) const {
-  return {utils::Monostate{}};
+  return visitor.visit(*this);
 }
 auto Variable::to_string_impl(const utils::FormatPolicy &format_policy) const
     -> string_type {

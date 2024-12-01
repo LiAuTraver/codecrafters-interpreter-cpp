@@ -98,7 +98,7 @@ public:
   Variable(token_t name) : name(std::move(name)) {}
   virtual ~Variable() override = default;
 
-private:
+public:
   token_t name;
 
 private:

@@ -62,8 +62,24 @@ interpreter::is_deep_equal(const eval_result_t &lhs,
   }
   return {evaluation::Error{"unimplemented deep equal"sv, 0}};
 }
-utils::Status interpreter::visit_impl(const statement::Variable &) const {
-  return {};
+utils::Status interpreter::visit_impl(const statement::Variable &stmt) const {
+  if (stmt.has_initilizer()) {
+    if (auto eval_res = evaluate(*stmt.initializer); !eval_res.ok())
+      return eval_res;
+    contract_assert(!!std::any_cast<string_view_type>(&stmt.name.literal),
+                    1,
+                    "variable name should be a string");
+    dbg(info,
+        "variable name: {}, value: {}",
+        std::any_cast<string_view_type>(stmt.name.literal),
+        std::visit([](const auto &e) { return e.to_string(); }, expr_res));
+        // string view fgailed again; not null-terminated
+    env.add(stmt.name.to_string(utils::kTokenOnly), expr_res)
+        .ignore_error();
+    // TODO: reset expr_res or not???
+    expr_res.emplace<utils::Monostate>();
+  }
+  return utils::OkStatus();
 }
 utils::Status interpreter::visit_impl(const statement::Print &stmt) const {
   if (auto eval_res = evaluate(*stmt.value); !eval_res.ok())
@@ -206,6 +222,13 @@ interpreter::visit_impl(const expression::Binary &expr) const {
 interpreter::eval_result_t
 interpreter::visit_impl(const expression::Grouping &expr) const {
   return {expr.expr->accept(*this)};
+}
+interpreter::eval_result_t
+interpreter::visit_impl(const expression::Variable &expr) const {
+  contract_assert(!!std::any_cast<string_view_type>(&expr.name.literal),
+                  1,
+                  "variable name should be a string");
+  return env.get(expr.name.to_string(utils::FormatPolicy::kTokenOnly));
 }
 interpreter::eval_result_t
 interpreter::visit_impl(const expression::IllegalExpr &expr) const {
