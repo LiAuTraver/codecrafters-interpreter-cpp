@@ -87,3 +87,17 @@ TEST(interpret, error5) {
   EXPECT_EQ(str, "[line 4] Error at '': Expect expression.\n");
   EXPECT_EQ(callback, 65);
 }
+
+TEST(interpret, nil) {
+  const auto path = R"(Z:\loxograph\examples\interp.nil.lox)";
+  auto [callback, str] = get_result(path);
+  EXPECT_EQ(str, "593\n1113\nnil\n");
+  EXPECT_EQ(callback, 0);
+}
+
+TEST(interpret, redef) {
+  const auto path = R"(Z:\loxograph\examples\interp.redef.lox)";
+  auto [callback, str] = get_result(path);
+  EXPECT_EQ(str, "before\n");
+  EXPECT_EQ(callback, 0);
+}
