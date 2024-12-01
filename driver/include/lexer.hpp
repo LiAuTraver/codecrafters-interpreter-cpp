@@ -56,7 +56,7 @@ public:
   uint_least32_t error() const noexcept;
 
 private:
-  void add_identifier();
+  void add_identifier_and_keyword();
   void add_number();
   void add_string();
   void add_comment();

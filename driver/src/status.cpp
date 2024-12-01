@@ -32,7 +32,7 @@ Status &Status::operator=(Status &&that) noexcept {
   that.my_location = std::source_location::current();
   return *this;
 }
-bool Status::ok() const { return my_code == kOkStatus; }
+bool Status::ok() const noexcept { return my_code == kOkStatus; }
 Status::Code Status::code() const { return my_code; }
 std::string_view Status::message() const { return my_message; }
 std::source_location Status::location() const { return my_location; }

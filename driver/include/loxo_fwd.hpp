@@ -57,11 +57,21 @@ class Literal;
 class Unary;
 class Binary;
 class Grouping;
+class Variable;
 class IllegalExpr;
 
 class ExprVisitor;
 // class DummyVisitor;
 } // namespace expression
+namespace statement {
+class Stmt;
+class Variable;
+class Print;
+class Expression;
+
+class StmtVisitor;
+class DummyVisitor;
+} // namespace statement
 namespace evaluation {
 class Evaluatable;
 class Number;
@@ -71,22 +81,13 @@ class Boolean;
 class Nil;
 class Error;
 } // namespace evaluation
-namespace statement {
-class Stmt;
-class Variable;
-class Print;
-class Expression;
-class Error;
 
-class StmtVisitor;
-class DummyVisitor;
-} // namespace statement
 class interpreter;
 using utils::operator""s;
 using utils::operator""sv;
-static constexpr auto tolerable_chars = "_`"sv;
+inline static constexpr auto tolerable_chars = "_`"sv;
 /// @note intolarable in codecrafter test
-static constexpr auto conditional_tolerable_chars = "@$#"sv;
-static constexpr auto whitespace_chars = " \t\r"sv;
-static constexpr auto newline_chars = "\n\v\f"sv;
+inline static constexpr auto conditional_tolerable_chars = "@$#"sv;
+inline static constexpr auto whitespace_chars = " \t\r"sv;
+inline static constexpr auto newline_chars = "\n\v\f"sv;
 } // namespace net::ancillarycat::loxograph

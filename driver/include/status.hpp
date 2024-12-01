@@ -3,6 +3,7 @@
 #include <source_location>
 #include <string>
 #include <string_view>
+#include <type_traits>
 #include <utility>
 
 #include "config.hpp"
@@ -24,7 +25,7 @@ public:
     kEmptyInput = 8,
     kParseError = 9,
     kNotImplementedError = 10,
-    kUnknownError = std::numeric_limits<uint8_t>::max()
+    kUnknownError = std::numeric_limits<uint8_t>::max(),
   };
 
 public:
@@ -42,14 +43,14 @@ public:
   Status &operator=(Status &&that) noexcept;
   virtual ~Status() = default;
 
-  LOXO_NODISCARD_MSG(Status) bool ok() const;
+  LOXO_NODISCARD_MSG(Status) bool ok() const noexcept;
   Code code() const;
   LOXO_NODISCARD_MSG(string_view) string_view message() const;
   LOXO_NODISCARD_MSG(source_location) std::source_location location() const;
   LOXO_NODISCARD_MSG(stacktrace) string stacktrace() const;
   /// @note   never do unnecessary `noexcept`;
   /// it'll jeopardize the debugging process and call `std::abort()`.
-  virtual void ignore_error() const;
+  void ignore_error() const;
   LOXO_NODISCARD_MSG(string) inline string from_source_location() const;
 
 public:
@@ -101,13 +102,10 @@ public:
   value_type value_or(this auto &&self, const value_type &default_value) {
     return self.ok() ? self.my_value : default_value;
   }
-
-  explicit operator bool() const { return ok(); }
-
-  value_type operator*(this auto &&self) { return self.my_value; }
-  value_type operator->(this auto &&self) {
-    contract_assert(self.ok());
-    return self.my_value;
+  constexpr explicit operator bool(this auto&& self)noexcept { return self.ok(); }
+  value_type operator*(this auto &&self)noexcept { return self.my_value; }
+  auto operator->(this auto &&self) noexcept -> decltype(auto) {
+    return std::addressof(self.my_value);
   }
 
 private:
@@ -151,7 +149,7 @@ LOXOGRAPH_API Status
 ParseError(string_view,
            const std::source_location & = std::source_location::current());
 LOXO_NODISCARD_MSG(Status)
-LOXOGRAPH_API Status
-NotImplementedError(string_view,
-                    const std::source_location & = std::source_location::current());
+LOXOGRAPH_API Status NotImplementedError(
+    string_view,
+    const std::source_location & = std::source_location::current());
 } // namespace net::ancillarycat::utils

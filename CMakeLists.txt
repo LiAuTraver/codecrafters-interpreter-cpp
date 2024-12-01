@@ -48,7 +48,7 @@ if (AC_CPP_DEBUG)
     elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
         add_compile_options(-D_DEBUG -DDEBUG -D__DEBUG__ -DAC_CPP_DEBUG -Wimplicit-fallthrough -Wno-deprecated-declarations -Wno-deprecated)
     elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "MSVC")
-        add_compile_options(/EHsc /D_DEBUG /DDEBUG /D__DEBUG__ /DAC_CPP_DEBUG)
+        add_compile_options(/EHsc /D_DEBUG /DDEBUG /D__DEBUG__ /DAC_CPP_DEBUG  /DEBUG:FULL)
     endif ()
 endif ()
 

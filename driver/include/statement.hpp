@@ -38,9 +38,14 @@ public:
       : name(std::move(name)), initializer(std::move(initializer)) {}
   virtual ~Variable() override = default;
 
-private:
+public:
+  LOXO_CONSTEXPR_IF_NOT_MSVC auto inline has_initilizer() const noexcept -> bool {
+    return initializer != nullptr;
+  }
+
+public:
   Token name;
-  std::shared_ptr<expression::Expr> initializer;
+  std::shared_ptr<expression::Expr> initializer = nullptr;
 
 private:
   stmt_result_t accept_impl(const StmtVisitor &) const override;

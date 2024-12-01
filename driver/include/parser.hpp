@@ -21,7 +21,7 @@
 namespace net::ancillarycat::loxograph {
 class LOXOGRAPH_API parser {
 public:
-  enum ParsePolicy{
+  enum ParsePolicy {
     kStatement = 0,
     kExpression = 1,
   };
@@ -43,13 +43,13 @@ public:
 
 public:
   parser() = default;
-  parser &set_views(token_views_t  = {});
+  parser &set_views(token_views_t = {});
   /// @brief main entry point for parsing.
   /// @note Expression needs to be shared; especially for variables.
   ///  `(a + b) * (a + b)`. `(a + b)` is shared. `std::unique_ptr` may
   /// bring redundancy.
   auto parse(const ParsePolicy &) -> utils::Status;
-  auto get_statements() const -> stmt_ptrs_t&;
+  auto get_statements() const -> stmt_ptrs_t &;
   auto get_expression() const -> expr_ptr_t;
 
 private:
@@ -65,10 +65,10 @@ private:
   auto primary() -> expr_ptr_t;
 
 private:
+  auto next_declaration() -> stmt_ptr_t;
   auto next_statement() -> stmt_ptr_t;
   auto expr_stmt() -> stmt_ptr_t;
   auto print_stmt() -> stmt_ptr_t;
-  auto declaration() -> stmt_ptr_t;
   auto var_decl() -> stmt_ptr_t;
 
   /// FIXME: 1. do not use exceptions for control flow(possiblly)

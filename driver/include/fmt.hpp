@@ -139,12 +139,12 @@ class Monostate final : public Printable, public Viewable {
 };
 LOXO_NODISCARD_MSG(Monostate)
 inline consteval bool operator==(const Monostate &,
-                                           const Monostate &) noexcept {
+                                 const Monostate &) noexcept {
   return true;
 }
 LOXO_NODISCARD_MSG(Monostate)
-inline consteval std::strong_ordering
-operator<=>(const Monostate &, const Monostate &) noexcept {
+inline consteval std::strong_ordering operator<=>(const Monostate &,
+                                                  const Monostate &) noexcept {
   return std::strong_ordering::equal;
 }
 class VisitorBase : virtual public Printable {
