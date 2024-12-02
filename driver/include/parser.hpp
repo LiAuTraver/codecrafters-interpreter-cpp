@@ -55,6 +55,7 @@ public:
 private:
   /// @brief euqality has the lowest precedence
   auto next_expression() -> expr_ptr_t;
+  auto assignment() -> expr_ptr_t;
   /// @brief equality has the second lowest precedence;
   ///			comparison generates equality.
   auto equality() -> expr_ptr_t;

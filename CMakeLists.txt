@@ -31,6 +31,7 @@ if (DEFINED ENV{AC_CPP_DEBUG})
         set(AC_CPP_DEBUG ON)
         set(VCPKG_MANIFEST_MODE OFF)
         set(VCPKG_MANIFEST_INSTALL OFF)
+        set(LOXOGRAPH_BUILD_SHARED ON)
     endif ()
 endif ()
 

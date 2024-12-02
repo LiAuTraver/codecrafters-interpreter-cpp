@@ -100,7 +100,7 @@ struct ::fmt::formatter<::std::stacktrace> : ::fmt::formatter<::std::string> {
         -> std::nullptr_t {                                                    \
           __VA_ARGS__                                                          \
           return nullptr;                                                      \
-        }()
+        }();
 #  define LOXOGRAPH_DEBUG_ONLY(...) __VA_ARGS__
 #  ifdef GTEST_API_
 // set the pattern with prefix `loxo` in yellow color.
@@ -347,9 +347,13 @@ struct ::fmt::formatter<::std::stacktrace> : ::fmt::formatter<::std::string> {
 #define dbg_only(...) LOXOGRAPH_DEBUG_ONLY(__VA_ARGS__)
 // if exception was disabled, do nothing.
 #if defined(__cpp_exceptions) && __cpp_exceptions
+#include <stdexcept>
 #  define TODO(...) throw ::std::logic_error("TODO: " #__VA_ARGS__)
-#else
+#elif __has_include(<spdlog/spdlog.h>)
 #  define TODO(...) LOXOGRAPH_DEBUG_LOGGING(critical, "TODO: " #__VA_ARGS__)
+#else
+#include <iostream>
+#  define TODO(...) ::std::cerr << "TODO: " #__VA_ARGS__ << ::std::endl
 #endif
 
 #if defined(_MSC_VER) && !defined(__clang__)
