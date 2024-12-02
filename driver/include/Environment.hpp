@@ -1,30 +1,37 @@
 #pragma once
-#include <unordered_map>
+#include <memory>
+#include <optional>
 #include <string>
 #include <string_view>
+#include <unordered_map>
 #include <variant>
 
 #include "config.hpp"
 #include "loxo_fwd.hpp"
-#include "fmt.hpp"
-#include "status.hpp"
-#include "Evaluatable.hpp"
+#include "utils.hpp"
 
-namespace net::ancillarycat::loxograph::evaluation {
-class Environment : utils::Printable {
-public:
-  using eval_result_t = utils::VisitorBase::eval_result_t;
-  using string_view_type = utils::VisitorBase::string_view_type;
-  using association_t =
-      std::pair<string_type, std::pair<eval_result_t, uint_least32_t>>;
-  using associations_t =
-      std::unordered_map<string_type, std::pair<eval_result_t, uint_least32_t>>;
+#include "ScopeEnvironment.hpp"
 
+namespace net::ancillarycat::loxograph {
+
+class Environment : public utils::Printable,
+                    public std::enable_shared_from_this<Environment> {
 public:
-  constexpr Environment() = default;
-  virtual ~Environment() override = default;
+  using eval_result_t = evaluation::ScopeEnvironment::eval_result_t;
+  using string_view_type = evaluation::ScopeEnvironment::string_view_type;
+  using scope_env_t = evaluation::ScopeEnvironment;
+  using scope_env_ptr_t = std::shared_ptr<scope_env_t>;
+  using self_type = Environment;
 
 public:
+  Environment() = default;
+  explicit Environment(const std::shared_ptr<self_type> &enclosing)
+      : parent(enclosing) {};
+  ~Environment() override = default;
+
+public:
+  auto find(this auto &&self, const string_type &name)
+      -> decltype(self.current->find(name));
   auto add(const string_type &, const eval_result_t &, uint_least32_t)
       -> utils::Status;
   auto reassign(const string_type &, const eval_result_t &, uint_least32_t)
@@ -32,15 +39,22 @@ public:
   auto get(const string_type &) const -> eval_result_t;
 
 private:
-  associations_t associations{};
-
-private:
-  auto find(this auto &&self, const string_type &name)
-      -> std::optional<decltype(self.associations.find(name))>;
+  scope_env_ptr_t current = std::make_shared<scope_env_t>();
+  std::weak_ptr<self_type> parent{};
 
 private:
   auto to_string_impl(const utils::FormatPolicy &) const
       -> string_type override;
 };
+auto Environment::find(this auto &&self, const string_type &name)
+    -> decltype(self.current->find(name)) {
+  if (auto it = self.current->find(name))
+    return {it};
 
-} // namespace net::ancillarycat::loxograph::evaluation
+  if (auto enclosing = self.parent.lock())
+    return enclosing->find(name);
+
+  return std::nullopt;
+}
+
+} // namespace net::ancillarycat::loxograph

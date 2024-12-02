@@ -8,6 +8,7 @@
 #include <type_traits>
 #include <utility>
 #include <variant>
+#include <cmath>
 
 #include "config.hpp"
 #include "loxo_fwd.hpp"

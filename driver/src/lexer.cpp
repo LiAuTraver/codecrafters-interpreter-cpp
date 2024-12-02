@@ -14,7 +14,7 @@
 #include <vector>
 
 #include "config.hpp"
-#include "fmt.hpp"
+#include "utils.hpp"
 #include "lex_error.hpp"
 #include "lexer.hpp"
 #include "Token.hpp"

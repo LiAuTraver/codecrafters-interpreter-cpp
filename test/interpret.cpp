@@ -137,3 +137,32 @@ TEST(interpret, reassign5) {
   EXPECT_EQ(str, "130\n130\n130\n");
   EXPECT_EQ(callback, 0);
 }
+
+
+TEST(interpret, scope1) {
+  const auto path = R"(Z:\loxograph\examples\interp.scope1.lox)";
+  auto [callback, str] = get_result(path);
+  EXPECT_EQ(str, "before\nafter\n");
+  EXPECT_EQ(callback, 0);
+}
+
+TEST(interpret, scope2) {
+  const auto path = R"(Z:\loxograph\examples\interp.scope2.lox)";
+  auto [callback, str] = get_result(path);
+  EXPECT_EQ(str, "baz\n");
+  EXPECT_EQ(callback, 0);
+}
+
+TEST(interpret, scope3) {
+  const auto path = R"(Z:\loxograph\examples\interp.scope3.lox)";
+  auto [callback, str] = get_result(path);
+  EXPECT_EQ(str, "88\n88\n");
+  EXPECT_EQ(callback, 0);
+}
+
+TEST(interpret, scope4) {
+  const auto path = R"(Z:\loxograph\examples\interp.scope4.lox)";
+  auto [callback, str] = get_result(path);
+  EXPECT_EQ(str, "[line 6] Error at '': Expect '}'.\n");
+  EXPECT_EQ(callback, 65);
+}

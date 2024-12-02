@@ -148,6 +148,7 @@ struct ::fmt::formatter<::std::stacktrace> : ::fmt::formatter<::std::string> {
 #  define LOXOGRAPH_DEBUG_FUNCTION_NAME __func__
 #endif
 #ifdef LOXOGRAPH_DEBUG_ENABLED
+#include <source_location>
 #  define LOXOGRAPH_AMBIGUOUS_ELSE_BLOCKER                                     \
     switch (0)                                                                 \
     case 0:                                                                    \

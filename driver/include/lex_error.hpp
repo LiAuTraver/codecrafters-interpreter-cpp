@@ -5,7 +5,7 @@
 
 #include "config.hpp"
 #include "loxo_fwd.hpp"
-#include "fmt.hpp"
+#include "utils.hpp"
 
 namespace net::ancillarycat::loxograph {
 class LOXOGRAPH_API lex_error {

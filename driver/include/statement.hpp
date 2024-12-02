@@ -1,8 +1,9 @@
 #pragma once
 
 #include <memory>
+#include <vector>
 #include "config.hpp"
-#include "fmt.hpp"
+#include "utils.hpp"
 #include "loxo_fwd.hpp"
 #include "StmtVisitor.hpp"
 #include "Token.hpp"
@@ -39,7 +40,8 @@ public:
   virtual ~Variable() override = default;
 
 public:
-  LOXO_CONSTEXPR_IF_NOT_MSVC auto inline has_initilizer() const noexcept -> bool {
+  LOXO_CONSTEXPR_IF_NOT_MSVC auto inline has_initilizer() const noexcept
+      -> bool {
     return initializer != nullptr;
   }
 
@@ -80,11 +82,24 @@ private:
       -> string_type override;
   stmt_result_t accept_impl(const StmtVisitor &) const override;
 };
+class Block : public Stmt {
+public:
+  Block(std::vector<std::shared_ptr<Stmt>> statements)
+      : statements(std::move(statements)) {}
+  virtual ~Block() override = default;
 
+public:
+  std::vector<std::shared_ptr<Stmt>> statements{};
+
+private:
+  auto to_string_impl(const utils::FormatPolicy &format_policy) const
+      -> string_type override;
+  stmt_result_t accept_impl(const StmtVisitor &) const override;
+};
 class IllegalStmt : public Stmt, utils::Viewable {
 public:
   IllegalStmt(const std::string_view message_sv) : message(message_sv) {}
-  explicit IllegalStmt(std::string&& message) : message(std::move(message)) {}
+  explicit IllegalStmt(std::string &&message) : message(std::move(message)) {}
   virtual ~IllegalStmt() override = default;
 
 public:

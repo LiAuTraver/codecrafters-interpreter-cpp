@@ -1,61 +1,45 @@
-#include <unordered_map>
+#include <optional>
 #include <string>
 #include <string_view>
-#include <variant>
+#include <unordered_map>
 
 #include "config.hpp"
 #include "loxo_fwd.hpp"
-#include "fmt.hpp"
-#include "Environment.hpp"
-
+#include "utils.hpp"
 #include "Variant.hpp"
 
-namespace net::ancillarycat::loxograph::evaluation {
-utils::Status Environment::add(const string_type &name,
-                               const eval_result_t &value,
-                               const uint_least32_t line) {
-  if (associations.contains(name)) {
-    (void)0; /// suppress the warning when not in debugging
-    /// Scheme allows redefining variables at the top level; so temporarily
-    /// we just follow that.
-        dbg(warn,
-            "The variable {} is already defined in the environment. redefining "
-            "it...",
-            name);
-  }
+#include "Environment.hpp"
 
-  associations.insert_or_assign(name.data(), std::pair{value, line});
-  return utils::OkStatus();
+namespace net::ancillarycat::loxograph {
+
+auto Environment::add(const string_type &name,
+                      const eval_result_t &value,
+                      const uint_least32_t line) -> utils::Status {
+  return current->add(name, value, line);
 }
-utils::Status Environment::reassign(const string_type &name,
-                                    const eval_result_t &value,
-                                    const uint_least32_t line) {
-  if (auto it = this->find(name)) {
+auto Environment::reassign(const string_type &name,
+                           const eval_result_t &value,
+                           const uint_least32_t line) -> utils::Status {
+  if (auto it = find(name)) {
     (*it)->second.first = value;
     (*it)->second.second = line;
-    dbg(info, "Changed the value of the variable {} in the environment.", name);
     return utils::OkStatus();
   }
-  dbg(error, "The variable {} is not defined in the environment.", name);
   return utils::InvalidArgument("variable not defined");
 }
-Environment::eval_result_t Environment::get(const string_type &name) const {
-  if (auto it = this->find(name)) {
-    dbg(trace, "Found the variable {} in the environment.", name);
-    return (*it)->second.first;
-  }
-  dbg(error, "The variable {} is not defined in the environment.", name);
+auto Environment::get(const string_type &name) const -> eval_result_t {
+  if (auto it = find(name))
+    return {(*it)->second.first};
+
   return {utils::Monostate{}};
 }
-auto Environment::find(this auto &&self, const string_type &name)
-    -> std::optional<decltype(self.associations.find(name))> {
-  auto it = self.associations.find(name);
-  if (it == self.associations.end())
-    return std::nullopt;
-  return it;
-}
-auto Environment::to_string_impl(const utils::FormatPolicy &format_policy) const
+auto Environment::to_string_impl(const utils::FormatPolicy &) const
     -> string_type {
-  return {};
+  string_type result;
+  result += current->to_string(utils::FormatPolicy::kTokenOnly);
+  if (auto enclosing = this->parent.lock()) {
+    result += enclosing->to_string(utils::FormatPolicy::kTokenOnly);
+  }
+  return result;
 }
-} // namespace net::ancillarycat::loxograph::evaluation
+} // namespace net::ancillarycat::loxograph

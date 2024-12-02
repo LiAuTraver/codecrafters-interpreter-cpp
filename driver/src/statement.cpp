@@ -1,7 +1,8 @@
 #include <utility>
+#include <cmath>
 
 #include "config.hpp"
-#include "fmt.hpp"
+#include "utils.hpp"
 #include "loxo_fwd.hpp"
 
 #include "Evaluatable.hpp"
@@ -29,6 +30,17 @@ auto Expression::to_string_impl(const utils::FormatPolicy &format_policy) const
   return this->expr->to_string(format_policy);
 }
 Stmt::stmt_result_t Expression::accept_impl(const StmtVisitor &visitor) const {
+  return visitor.visit(*this);
+}
+auto Block::to_string_impl(const utils::FormatPolicy &format_policy) const
+    -> string_type {
+  string_type result;
+  for (const auto &stmt : this->statements) {
+    result += stmt->to_string(format_policy);
+  }
+  return result;
+}
+Stmt::stmt_result_t Block::accept_impl(const StmtVisitor &visitor) const {
   return visitor.visit(*this);
 }
 auto IllegalStmt::to_string_impl(const utils::FormatPolicy &) const

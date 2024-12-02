@@ -1,7 +1,7 @@
 #include <memory>
 
 #include "config.hpp"
-#include "fmt.hpp"
+#include "utils.hpp"
 #include "loxo_fwd.hpp"
 
 #include "StmtVisitor.hpp"

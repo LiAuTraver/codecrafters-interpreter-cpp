@@ -9,9 +9,13 @@
 
 #include "config.hpp"
 #include "loxo_fwd.hpp"
-#include "fmt.hpp"
+#include "utils.hpp"
 
 namespace net::ancillarycat::utils {
+/// @brief A simple variant wrapper class around @link std::variant @endlink for convenience when evaluating
+/// expressions, especially when the operation was `to_string` or check the
+/// type's name when debugging.
+/// @note exception-free variant wrapper
 template <typename... Types> class Variant : public Printable, Viewable {
 public:
   using variant_type = std::variant<Types...>;

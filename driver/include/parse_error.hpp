@@ -11,6 +11,7 @@ public:
     kMissingSemicolon = 1,
     kMissingComma = 2,
     kMissingParenthesis = 3,
+    kMissingBrace = 4,
     kUnknownError = std::numeric_limits<uint8_t>::max(),
   };
   using string_type = std::string;

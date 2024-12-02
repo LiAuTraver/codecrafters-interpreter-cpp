@@ -11,7 +11,7 @@
 
 #include "config.hpp"
 #include "loxo_fwd.hpp"
-#include "fmt.hpp"
+#include "utils.hpp"
 
 #include "lex_error.hpp"
 #include "Token.hpp"
