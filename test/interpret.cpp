@@ -159,3 +159,10 @@ TEST(interpret, scope3) {
   EXPECT_EQ(str, "88\n88\n");
   EXPECT_EQ(callback, 0);
 }
+
+TEST(interpret, scope4) {
+  const auto path = R"(Z:\loxograph\examples\interp.scope4.lox)";
+  auto [callback, str] = get_result(path);
+  EXPECT_EQ(str, "[line 6] Error at '': Expect '}'.\n");
+  EXPECT_EQ(callback, 65);
+}

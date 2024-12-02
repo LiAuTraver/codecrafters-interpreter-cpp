@@ -12,13 +12,6 @@
 
 namespace net::ancillarycat::loxograph {
 
-Environment::Environment()
-    : current{std::make_shared<scope_env_t>()} {}
-
-Environment::Environment(
-    const std::shared_ptr<scope_env_t> &enclosing)
-    : current{std::make_shared<scope_env_t>()},
-      parent{enclosing} {}
 auto Environment::add(const string_type &name,
                       const eval_result_t &value,
                       const uint_least32_t line) -> utils::Status {
@@ -36,7 +29,7 @@ auto Environment::reassign(const string_type &name,
 }
 auto Environment::get(const string_type &name) const -> eval_result_t {
   if (auto it = find(name))
-    return (*it)->second.first;
+    return {(*it)->second.first};
 
   return {utils::Monostate{}};
 }

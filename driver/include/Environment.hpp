@@ -21,10 +21,12 @@ public:
   using string_view_type = evaluation::ScopeEnvironment::string_view_type;
   using scope_env_t = evaluation::ScopeEnvironment;
   using scope_env_ptr_t = std::shared_ptr<scope_env_t>;
+  using self_type = Environment;
 
 public:
-  Environment();
-  explicit Environment(const scope_env_ptr_t &);
+  Environment() = default;
+  explicit Environment(const std::shared_ptr<self_type> &enclosing)
+      : parent(enclosing) {};
   ~Environment() override = default;
 
 public:
@@ -35,12 +37,10 @@ public:
   auto reassign(const string_type &, const eval_result_t &, uint_least32_t)
       -> utils::Status;
   auto get(const string_type &) const -> eval_result_t;
-  /// @brief used to construct sub-envs from current env
-  auto operator*() const -> const scope_env_ptr_t & { return current; }
 
 private:
-  scope_env_ptr_t current{nullptr};
-  std::weak_ptr<scope_env_t> parent{};
+  scope_env_ptr_t current = std::make_shared<scope_env_t>();
+  std::weak_ptr<self_type> parent{};
 
 private:
   auto to_string_impl(const utils::FormatPolicy &) const
@@ -49,12 +49,12 @@ private:
 auto Environment::find(this auto &&self, const string_type &name)
     -> decltype(self.current->find(name)) {
   if (auto it = self.current->find(name))
-    return it;
+    return {it};
 
   if (auto enclosing = self.parent.lock())
     return enclosing->find(name);
 
-  return {};
+  return std::nullopt;
 }
 
 } // namespace net::ancillarycat::loxograph

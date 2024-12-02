@@ -103,7 +103,7 @@ auto interpreter::visit_impl(const statement::Expression &stmt) const
 auto interpreter::visit_impl(const statement::Block &stmt) const
     -> utils::Status {
   auto original_env = env; // save the original environment
-  auto sub_env = std::make_shared<Environment>(**env);
+  auto sub_env = std::make_shared<Environment>(env);
   env = sub_env;
   for (const auto &scoped_stmt : stmt.statements) {
     if (auto eval_res = execute(*scoped_stmt); !eval_res.ok()) {
