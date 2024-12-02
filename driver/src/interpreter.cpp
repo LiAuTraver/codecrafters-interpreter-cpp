@@ -33,9 +33,8 @@ interpreter::is_true_value(const eval_result_t &value) const {
       [](const auto &) { return evaluation::True; },
   });
 }
-interpreter::eval_result_t
-interpreter::is_deep_equal(const eval_result_t &lhs,
-                           const eval_result_t &rhs) const {
+auto interpreter::is_deep_equal(const eval_result_t &lhs,
+                                const eval_result_t &rhs) const -> eval_result_t {
   if (lhs.index() != rhs.index()) {
     return evaluation::False;
   }
@@ -57,7 +56,8 @@ interpreter::is_deep_equal(const eval_result_t &lhs,
   }
   return {evaluation::Error{"unimplemented deep equal"sv, 0}};
 }
-utils::Status interpreter::visit_impl(const statement::Variable &stmt) const {
+auto interpreter::visit_impl(const statement::Variable &stmt) const
+    -> utils::Status {
   if (stmt.has_initilizer()) {
     if (auto eval_res = evaluate(*stmt.initializer); !eval_res.ok())
       return eval_res;
@@ -69,40 +69,42 @@ utils::Status interpreter::visit_impl(const statement::Variable &stmt) const {
         std::any_cast<string_view_type>(stmt.name.literal),
         expr_res.underlying_string());
     // string view fgailed again; not null-terminated
-    auto res = env.add(stmt.name.to_string(utils::kTokenOnly), expr_res, stmt.name.line);
-    // TODO: reset expr_res or not???
+    auto res = env.add(
+        stmt.name.to_string(utils::kTokenOnly), expr_res, stmt.name.line);
     expr_res.emplace<utils::Monostate>();
     return res;
   }
   // if no initializer, it's a nil value.
   auto res = env.add(stmt.name.to_string(utils::kTokenOnly),
-          evaluation::NilValue,
-          stmt.name.line);
+                     evaluation::NilValue,
+                     stmt.name.line);
   expr_res.emplace<utils::Monostate>();
   return res;
 }
-utils::Status interpreter::visit_impl(const statement::Print &stmt) const {
+auto interpreter::visit_impl(const statement::Print &stmt) const
+    -> utils::Status {
   if (auto eval_res = evaluate(*stmt.value); !eval_res.ok())
     return eval_res;
   stmts_res.emplace_back(expr_res);
   expr_res.emplace<utils::Monostate>();
   return utils::OkStatus();
 }
-utils::Status
-interpreter::visit_impl(const statement::IllegalStmt &stmt) const {
+auto interpreter::visit_impl(const statement::IllegalStmt &stmt) const
+    -> utils::Status {
   return utils::InvalidArgument(stmt.message);
 }
-utils::Status interpreter::visit_impl(const statement::Expression &stmt) const {
+auto interpreter::visit_impl(const statement::Expression &stmt) const
+    -> utils::Status {
   return evaluate(*stmt.expr);
 }
-utils::Status interpreter::execute_impl(const statement::Stmt &stmt) const {
+auto interpreter::execute_impl(const statement::Stmt &stmt) const
+    -> utils::Status {
   return stmt.accept(*this);
 }
-interpreter::eval_result_t interpreter::get_result_impl() const {
-  return expr_res;
-}
+auto interpreter::get_result_impl() const -> eval_result_t { return expr_res; }
 
-utils::Status interpreter::evaluate_impl(const expression::Expr &expr) const {
+auto interpreter::evaluate_impl(const expression::Expr &expr) const
+    -> utils::Status {
   expr_res = expr.accept(*this);
   return expr_res.visit(
       match{[](const evaluation::Error &e) {
@@ -115,8 +117,8 @@ utils::Status interpreter::evaluate_impl(const expression::Expr &expr) const {
   /// @note ^^^^ you cannot just put the `expr.accept(*this)` here, it'll be
   ///               called more than once.
 }
-interpreter::eval_result_t
-interpreter::visit_impl(const expression::Literal &expr) const {
+auto interpreter::visit_impl(const expression::Literal &expr) const
+    -> eval_result_t {
   dbg(info, "literal type: {}", expr.literal.type);
   if (expr.literal.type.type == TokenType::kMonostate) {
     dbg(critical, "should not happen.");
@@ -145,8 +147,8 @@ interpreter::visit_impl(const expression::Literal &expr) const {
   return evaluation::Error{"Expected literal value"s, expr.literal.line};
 }
 
-interpreter::eval_result_t
-interpreter::visit_impl(const expression::Unary &expr) const {
+auto interpreter::visit_impl(const expression::Unary &expr) const
+    -> eval_result_t {
   auto inner_expr = expr.expr->accept(*this);
   if (expr.op.type == TokenType::kMinus) {
     if (utils::holds_alternative<evaluation::Number>(inner_expr)) {
@@ -154,7 +156,6 @@ interpreter::visit_impl(const expression::Unary &expr) const {
       dbg(trace, "unary minus: {}", value);
       return evaluation::Number{value * (-1)};
     }
-    // todo: error handling
     return evaluation::Error{"Operand must be a number."s, expr.op.line};
   }
   if (expr.op.type == TokenType::kBang) {
@@ -164,12 +165,11 @@ interpreter::visit_impl(const expression::Unary &expr) const {
   }
   dbg(critical, "unreachable code reached: {}", LOXOGRAPH_STACKTRACE);
   contract_assert(false);
-  // todo
   return {};
 }
 
-interpreter::eval_result_t
-interpreter::visit_impl(const expression::Binary &expr) const {
+auto interpreter::visit_impl(const expression::Binary &expr) const
+    -> eval_result_t {
   auto lhs = expr.left->accept(*this);
   auto rhs = expr.right->accept(*this);
   if (expr.op.type == TokenType::kEqualEqual) {
@@ -182,12 +182,12 @@ interpreter::visit_impl(const expression::Binary &expr) const {
     }
     return result;
   }
-  if (auto ptr = utils::get_if<evaluation::Error>(&lhs); ptr != nullptr) {
-    return *ptr;
-  }
-  if (auto ptr = utils::get_if<evaluation::Error>(&rhs); ptr != nullptr) {
-    return *ptr;
-  }
+  if (auto ptr = utils::get_if<evaluation::Error>(&lhs))
+    return {*ptr};
+
+  if (auto ptr = utils::get_if<evaluation::Error>(&rhs))
+    return {*ptr};
+
   if (lhs.index() != rhs.index()) {
     dbg(error, "type mismatch: lhs: {}, rhs: {}", lhs.index(), rhs.index());
     dbg(warn, "current implementation only support same type binary operation");
@@ -228,28 +228,43 @@ interpreter::visit_impl(const expression::Binary &expr) const {
   contract_assert(false);
   return evaluation::Error{"unimplemented binary operator"s, expr.op.line};
 }
-interpreter::eval_result_t
-interpreter::visit_impl(const expression::Grouping &expr) const {
+auto interpreter::visit_impl(const expression::Grouping &expr) const
+    -> eval_result_t {
   return {expr.expr->accept(*this)};
 }
-interpreter::eval_result_t
-interpreter::visit_impl(const expression::Variable &expr) const {
+auto interpreter::visit_impl(const expression::Variable &expr) const
+    -> eval_result_t {
   contract_assert(!!std::any_cast<string_view_type>(&expr.name.literal),
                   1,
                   "variable name should be a string");
-  auto res = env.get(expr.name.to_string(utils::FormatPolicy::kTokenOnly));
-  if (utils::holds_alternative<utils::Monostate>(res)) {
-    // TODO temporary solution
-    // add line info
+  if (auto res = env.get(expr.name.to_string(utils::FormatPolicy::kTokenOnly));
+      !utils::holds_alternative<utils::Monostate>(res))
+    return res;
+
+  return {evaluation::Error{
+      utils::format("Undefined variable '{}'.",
+                    expr.name.to_string(utils::FormatPolicy::kTokenOnly)),
+      expr.name.line}};
+}
+auto interpreter::visit_impl(const expression::Assignment &expr) const
+    -> eval_result_t {
+  // TODO: here my logic went away. fixme here.
+  if (!this->evaluate(*expr.value_expr).ok())
+    return {evaluation::Error{"Error in assignment"s, expr.name.line}};
+
+  if (!env.reassign(expr.name.to_string(utils::FormatPolicy::kTokenOnly),
+                    expr_res,
+                    expr.name.line)
+           .ok())
     return {evaluation::Error{
         utils::format("Undefined variable '{}'.",
                       expr.name.to_string(utils::FormatPolicy::kTokenOnly)),
         expr.name.line}};
-  }
-  return res;
+
+  return expr_res;
 }
-interpreter::eval_result_t
-interpreter::visit_impl(const expression::IllegalExpr &expr) const {
+auto interpreter::visit_impl(const expression::IllegalExpr &expr) const
+    -> eval_result_t {
   return evaluation::Error{"Illegal expression"s, expr.token.line};
 }
 
@@ -260,7 +275,7 @@ auto interpreter::expr_to_string(const utils::FormatPolicy &format_policy) const
 auto interpreter::value_to_string(const utils::FormatPolicy &format_policy,
                                   const eval_result_t &value) const
     -> string_type {
-  return value.underlying_string();
+  return value.underlying_string(format_policy);
 }
 auto interpreter::to_string_impl(const utils::FormatPolicy &format_policy) const
     -> string_type {

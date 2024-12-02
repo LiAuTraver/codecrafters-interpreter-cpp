@@ -121,8 +121,26 @@ public:
   expr_ptr_t expr;
 };
 /// @implements Expr
+class Assignment : public Expr {
+public:
+  constexpr Assignment() = default;
+  virtual ~Assignment() override = default;
+  Assignment(token_t name, expr_ptr_t value)
+      : name(std::move(name)), value_expr(std::move(value)) {}
+
+public:
+  token_t name;
+  expr_ptr_t value_expr;
+
+private:
+  auto to_string_impl(const utils::FormatPolicy &) const
+      -> string_type override;
+  expr_result_t accept_impl(const ExprVisitor &) const override;
+};
+/// @implements Expr
 class IllegalExpr : public Expr {
 public:
+  constexpr IllegalExpr() = default;
   virtual ~IllegalExpr() override = default;
   IllegalExpr(token_t token, parse_error error)
       : token(std::move(token)), error(std::move(error)) {}

@@ -109,7 +109,7 @@ private:
     return p.to_string(format_policy);
   }
 };
-
+/// @interface Viewable
 class Viewable {
 public:
   using string_view_type = std::string_view;

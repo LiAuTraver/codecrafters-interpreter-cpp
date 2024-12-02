@@ -12,21 +12,20 @@
 
 #include "config.hpp"
 
-// clang-format off
 namespace net::ancillarycat::loxograph {
 class LOXOGRAPH_API lexer;
 class LOXOGRAPH_API parser;
 class LOXOGRAPH_API interpreter;
-/// @remark why? because the forward declaration is not enough for @ref std::unique_ptr, also I don't want to include thoses implementation files.
+/// @remark why? because the forward declaration is not enough for @link
+/// std::unique_ptr @endlink, also I don't want to include thoses implementation
+/// files.
 extern LOXOGRAPH_API void delete_lexer_fwd(lexer *);
 extern LOXOGRAPH_API void delete_parser_fwd(parser *);
 extern LOXOGRAPH_API void delete_interpreter_fwd(interpreter *);
 struct ExecutionContext;
-LOXO_NODISCARD_MSG(loxo_main) extern
-int loxo_main(_In_ int ,
-              _In_ char**,
-              _Inout_ ExecutionContext &);
-// clang-format on
+
+LOXO_NODISCARD_MSG(loxo_main)
+extern int loxo_main(_In_ int, _In_ char **, _Inout_ ExecutionContext &);
 /// mimic the from llvm clang-driver's ToolContext
 struct ExecutionContext {
   inline explicit ExecutionContext()
@@ -48,9 +47,9 @@ struct ExecutionContext {
       interpreter;
   // std::vector<std::filesystem::path> output_files;
   static constexpr auto $null = std::string_view{};
-  void addCommands(char **&argv);
-  static ExecutionContext &inspectArgs(int argc, char **&argv, char **&envp);
-  static std::string_view command_sv(const commands_t &cmd);
+  void addCommands(char **&);
+  static ExecutionContext &inspectArgs(int, char **&, char **&);
+  static std::string_view command_sv(const commands_t &);
 };
 namespace details {
 static inline constexpr uint16_t _dummy_tag_ = 1 << 15;
@@ -66,7 +65,8 @@ static inline constexpr uint16_t _needs_lex_ =
 static inline constexpr uint16_t _needs_parse_ =
     _parse_ | _evaluate_ | _interpret_;
 
-/// @note MSVC has wired behavior with my enums; also the `|` operator inside enum, so I made a workaround here.
+/// @note MSVC has wired behavior with my enums; also the `|` operator inside
+/// enum, so I made a workaround here.
 #if defined(_MSC_VER) && !defined(__clang__)
 static inline constexpr uint16_t _needs_evaluate_ = _evaluate_ | _dummy_tag_;
 static inline constexpr uint16_t _needs_interpret_ = _interpret_ | _dummy_tag_;

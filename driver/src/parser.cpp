@@ -68,7 +68,20 @@ auto parser::get_expression() const -> expr_ptr_t {
   return expr_head;
 }
 auto parser::next_expression() -> expr_ptr_t { // NOLINT(misc-no-recursion)
-  return equality();
+  return assignment();
+}
+auto parser::assignment() -> expr_ptr_t {
+  auto expr = equality();
+  if (inspect(kEqual)) {
+    auto eq_op = get();
+    auto res = assignment();
+    if (auto var_name = std::dynamic_pointer_cast<expression::Variable>(expr)) {
+      return std::make_shared<expression::Assignment>(var_name->name, res);
+    }
+    contract_assert(false,0, "expect a variable in assignment.");
+    throw synchronize({parse_error::kUnknownError, "Expect variable name."});
+  }
+  return expr;
 }
 auto parser::equality() -> expr_ptr_t { // NOLINT(misc-no-recursion)
   auto equalityExpr = comparison();
@@ -117,7 +130,6 @@ auto parser::unary() -> expr_ptr_t { // NOLINT(misc-no-recursion)
   return primary();
 }
 auto parser::primary() -> expr_ptr_t { // NOLINT(misc-no-recursion)
-  // TODO: implement
   if (inspect(kFalse))
     return std::make_shared<expression::Literal>(get());
   if (inspect(kTrue))
@@ -131,7 +143,7 @@ auto parser::primary() -> expr_ptr_t { // NOLINT(misc-no-recursion)
   if (inspect(kIdentifier)) {
     return std::make_shared<expression::Variable>(get());
   }
-  /// TODO: where's keyword??????????????
+  ///  where's keyword??????????????
   ///     ^^^^^^ solved: shoud not appera here and was already handled in lexer.
   // {
   // // codecafter's test does not need quotes around strings, so remove them
@@ -220,10 +232,11 @@ auto parser::synchronize(const parse_error &parse_error) -> expr_ptr_t {
   // cueerntly cursor is at the error token: peek() returns the error token,
   // get() returns the error token and advances the cursor
   auto error_token = get();
-  dbg(warn, "error at {}", error_token);
+  dbg(warn,
+      "error at '{}'",
+      error_token.to_string(utils::FormatPolicy::kTokenOnly));
   auto error_expr =
       std::make_shared<expression::IllegalExpr>(error_token, parse_error);
-  // TODO: temporary disable this
   while (!is_at_end() && !inspect(kSemicolon)) {
     dbg_block(auto discarded_token = peek();
               dbg(warn, "discarding {}", discarded_token););

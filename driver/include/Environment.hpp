@@ -15,17 +15,31 @@ class Environment : utils::Printable {
 public:
   using eval_result_t = utils::VisitorBase::eval_result_t;
   using string_view_type = utils::VisitorBase::string_view_type;
+  using association_t =
+      std::pair<string_type, std::pair<eval_result_t, uint_least32_t>>;
+  using associations_t =
+      std::unordered_map<string_type, std::pair<eval_result_t, uint_least32_t>>;
+
 public:
   constexpr Environment() = default;
   virtual ~Environment() override = default;
+
 public:
-  utils::Status add(const string_type &name, const eval_result_t &value, uint_least32_t line);
-  eval_result_t get(const string_type &name) const;
+  auto add(const string_type &, const eval_result_t &, uint_least32_t)
+      -> utils::Status;
+  auto reassign(const string_type &, const eval_result_t &, uint_least32_t)
+      -> utils::Status;
+  auto get(const string_type &) const -> eval_result_t;
 
 private:
-  std::unordered_map<string_type, std::pair<eval_result_t,uint_least32_t>> associations{};
+  associations_t associations{};
+
 private:
-  auto to_string_impl(const utils::FormatPolicy &format_policy) const
+  auto find(this auto &&self, const string_type &name)
+      -> std::optional<decltype(self.associations.find(name))>;
+
+private:
+  auto to_string_impl(const utils::FormatPolicy &) const
       -> string_type override;
 };
 

@@ -9,7 +9,7 @@
 
 #include "config.hpp"
 namespace net::ancillarycat::utils {
-/// @brief A simple variant wrapper class for convenience when evaluating
+/// @brief A simple variant wrapper class around @link std::variant @endlink for convenience when evaluating
 /// expressions, especially when the operation was `to_string` or check the
 /// type's name when debugging.
 /// @note exception-free variant wrapper
@@ -18,10 +18,10 @@ template <typename... Types> class Variant;
 /// to be as identical as possible to the `absl::Status` class, for
 /// `absl::Status` seems to fail to compile with clang++ on Windows.
 class Status;
-/// @brief represents a value that can be stored in a @link StatusOr object
+/// @brief represents a value that can be stored in a @link StatusOr @endlink object
 /// @tparam Ty the type of the value
-/// @remarks similiar to Microsoft's @link std::_SMF_control class, which was
-/// used in @link std::optional
+/// @remarks similiar to Microsoft's @link std::_SMF_control @endlink class, which was
+/// used in @link std::optional @endlink
 template <typename Ty>
 concept Storable = std::conjunction_v<std::is_default_constructible<Ty>,
                                       std::is_nothrow_destructible<Ty>,
@@ -34,7 +34,7 @@ concept Storable = std::conjunction_v<std::is_default_constructible<Ty>,
 template <Storable Ty> class StatusOr;
 /// @brief a simple file reader that reads the contents of a file
 /// @note the file reader is not thread-safe, and will consume a lot of memory
-/// if the file is too big. @todo here.
+/// if the file is too big.
 class file_reader;
 using string = ::std::string;
 using string_view = ::std::string_view;
@@ -63,6 +63,7 @@ class Unary;
 class Binary;
 class Grouping;
 class Variable;
+class Assignment;
 class IllegalExpr;
 
 class ExprVisitor;

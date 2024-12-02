@@ -1,3 +1,4 @@
+#include <gtest/gtest.h>
 #include "test_env.hpp"
 
 namespace {
@@ -99,5 +100,40 @@ TEST(interpret, redef) {
   const auto path = R"(Z:\loxograph\examples\interp.redef.lox)";
   auto [callback, str] = get_result(path);
   EXPECT_EQ(str, "before\n");
+  EXPECT_EQ(callback, 0);
+}
+
+TEST(interpret, reassign1) {
+  const auto path = R"(Z:\loxograph\examples\interp.reassign1.lox)";
+  auto [callback, str] = get_result(path);
+  EXPECT_EQ(str, "1\n");
+  EXPECT_EQ(callback, 0);
+}
+
+TEST(interpret, reassign2) {
+  const auto path = R"(Z:\loxograph\examples\interp.reassign2.lox)";
+  auto [callback, str] = get_result(path);
+  EXPECT_EQ(str, "1\n2\n2\n");
+  EXPECT_EQ(callback, 0);
+}
+
+TEST(interpret, reassign3) {
+  const auto path = R"(Z:\loxograph\examples\interp.reassign3.lox)";
+  auto [callback, str] = get_result(path);
+  EXPECT_EQ(str, "186\n");
+  EXPECT_EQ(callback, 0);
+}
+
+TEST(interpret, reassign4) {
+  const auto path = R"(Z:\loxograph\examples\interp.reassign4.lox)";
+  auto [callback, str] = get_result(path);
+  EXPECT_EQ(str, "3144\n3144\n");
+  EXPECT_EQ(callback, 0);
+}
+
+TEST(interpret, reassign5) {
+  const auto path = R"(Z:\loxograph\examples\interp.reassign5.lox)";
+  auto [callback, str] = get_result(path);
+  EXPECT_EQ(str, "130\n130\n130\n");
   EXPECT_EQ(callback, 0);
 }

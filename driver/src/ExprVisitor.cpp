@@ -26,9 +26,14 @@ ASTPrinter::visit_impl(const IllegalExpr &expr) const {
   error_stream << expr << std::endl;
   return {};
 }
-ASTPrinter::eval_result_t
-ASTPrinter::visit_impl(const Variable &expr) const {
- dbg(info, "Variable: {}", expr.to_string());
+ASTPrinter::eval_result_t ASTPrinter::visit_impl(const Variable &expr) const {
+  dbg(info, "Variable: {}", expr.to_string());
+  oss << expr << std::endl;
+  return {};
+}
+utils::VisitorBase::eval_result_t
+ASTPrinter::visit_impl(const Assignment &expr) const {
+  dbg(info, "Assignment: {}", expr.to_string());
   oss << expr << std::endl;
   return {};
 }

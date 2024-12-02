@@ -15,6 +15,7 @@ namespace net::ancillarycat::loxograph::expression {
 class ExprVisitor : virtual public utils::VisitorBase {
 public:
   virtual ~ExprVisitor() = default;
+
 public:
   // clang-format off
   /// @brief Visit the expression
@@ -28,9 +29,7 @@ public:
     return visit_impl(expr);
   }
   auto evaluate(const Expr &expr) const { return evaluate_impl(expr); }
-  auto get_result() const {
-    return get_result_impl();
-  }
+  auto get_result() const { return get_result_impl(); }
 
 private:
   virtual eval_result_t visit_impl(const Literal &) const = 0;
@@ -38,6 +37,7 @@ private:
   virtual eval_result_t visit_impl(const Binary &) const = 0;
   virtual eval_result_t visit_impl(const Grouping &) const = 0;
   virtual eval_result_t visit_impl(const Variable &) const = 0;
+  virtual eval_result_t visit_impl(const Assignment &) const = 0;
   virtual eval_result_t visit_impl(const IllegalExpr &) const = 0;
   virtual utils::Status evaluate_impl(const Expr &) const = 0;
   virtual eval_result_t get_result_impl() const = 0;
@@ -45,20 +45,19 @@ private:
 /// @brief a dummy visitor that does nothing but test compilation
 /// @implements ExprVisitor
 class DummyVisitor : public ExprVisitor {
-public:
+private:
   virtual eval_result_t visit_impl(const Literal &) const override {
     return {};
   }
-  virtual eval_result_t visit_impl(const Unary &) const override {
-    return {};
-  }
-  virtual eval_result_t visit_impl(const Binary &) const override {
-    return {};
-  }
+  virtual eval_result_t visit_impl(const Unary &) const override { return {}; }
+  virtual eval_result_t visit_impl(const Binary &) const override { return {}; }
   virtual eval_result_t visit_impl(const Grouping &) const override {
     return {};
   }
   virtual eval_result_t visit_impl(const IllegalExpr &) const override {
+    return {};
+  }
+  virtual eval_result_t visit_impl(const Assignment &) const override {
     return {};
   }
   virtual eval_result_t visit_impl(const Variable &) const override {
@@ -73,9 +72,7 @@ private:
   utils::Status evaluate_impl(const Expr &) const override {
     return utils::InvalidArgument("dummy visitor");
   }
-  eval_result_t get_result_impl() const override {
-    return {};
-  }
+  eval_result_t get_result_impl() const override { return {}; }
 } inline static const _dummy_visitor;
 /// @implements ExprVisitor
 class LOXOGRAPH_API ASTPrinter : public ExprVisitor, public utils::Viewable {
@@ -92,8 +89,9 @@ private:
   virtual eval_result_t visit_impl(const Unary &) const override;
   virtual eval_result_t visit_impl(const Binary &) const override;
   virtual eval_result_t visit_impl(const Grouping &) const override;
-  virtual eval_result_t visit_impl(const IllegalExpr &) const override;
   virtual eval_result_t visit_impl(const Variable &) const override;
+  virtual eval_result_t visit_impl(const Assignment &) const override;
+  virtual eval_result_t visit_impl(const IllegalExpr &) const override;
   virtual utils::Status evaluate_impl(const Expr &) const override;
   virtual string_type
   to_string_impl(const utils::FormatPolicy &) const override;
