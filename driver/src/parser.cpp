@@ -2,7 +2,7 @@
 
 #include "config.hpp"
 #include "expression.hpp"
-#include "fmt.hpp"
+#include "utils.hpp"
 #include "loxo_fwd.hpp"
 
 #include "parser.hpp"
@@ -60,7 +60,7 @@ auto parser::get_statements() const -> stmt_ptrs_t & {
                   "but not `parse(kStatement)`?");
   return stmts;
 }
-auto parser::get_expression() const -> expr_ptr_t {
+auto parser::get_expression() const -> expr_ptr_t & {
   contract_assert(expr_head != nullptr,
                   1,
                   "expression is null; maybe you called `parse(kStatement)` "
@@ -78,7 +78,7 @@ auto parser::assignment() -> expr_ptr_t {
     if (auto var_name = std::dynamic_pointer_cast<expression::Variable>(expr)) {
       return std::make_shared<expression::Assignment>(var_name->name, res);
     }
-    contract_assert(false,0, "expect a variable in assignment.");
+    contract_assert(false, 0, "expect a variable in assignment.");
     throw synchronize({parse_error::kUnknownError, "Expect variable name."});
   }
   return expr;
@@ -224,6 +224,18 @@ auto parser::next_statement() -> stmt_ptr_t {
   if (inspect(kPrint)) {
     get();
     return print_stmt();
+  }
+  if (inspect(kLeftBrace)) {
+    get();
+    stmt_ptrs_t statements;
+    while (!inspect(kRightBrace) && !is_at_end()) {
+      statements.emplace_back(next_declaration());
+    }
+    if (inspect(kRightBrace)) {
+      get();
+      return std::make_shared<statement::Block>(statements);
+    }
+    throw synchronize({parse_error::kMissingBrace, "Expect '}'."});
   }
   return expr_stmt();
 }

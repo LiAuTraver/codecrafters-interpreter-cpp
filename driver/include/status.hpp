@@ -10,7 +10,9 @@
 #include "loxo_fwd.hpp"
 
 namespace net::ancillarycat::utils {
-
+/// @brief A class that represents the status of a function call. it's designed
+/// to be as identical as possible to the `absl::Status` class, for
+/// `absl::Status` seems to fail to compile with clang++ on Windows.
 class LOXOGRAPH_API LOXO_NODISCARD_MSG(Status) Status {
 public:
   enum LOXO_NODISCARD_MSG(Code) Code : uint8_t {
@@ -58,7 +60,11 @@ public:
   string my_message;
   std::source_location my_location;
 };
-
+/// @brief A class that represents the status of a function call, or a
+/// value.
+///         it's designed to be as identical as possible to the
+///         `absl::StatusOr` class.
+/// @tparam Ty the type of the value
 template <Storable Ty>
 class
     // LOXOGRAPH_API // <- no need, template class

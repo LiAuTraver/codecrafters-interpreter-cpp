@@ -11,6 +11,9 @@
 #include "loxo_fwd.hpp"
 
 namespace net::ancillarycat::utils {
+/// @brief a simple file reader that reads the contents of a file
+/// @note the file reader is not thread-safe, and will consume a lot of memory
+/// if the file is too big.
 class file_reader {
 public:
   using path_t = path;

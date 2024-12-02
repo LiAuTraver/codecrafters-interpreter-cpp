@@ -9,7 +9,7 @@
 #include <utility>
 
 #include "config.hpp"
-#include "fmt.hpp"
+#include "utils.hpp"
 #include "loxo_fwd.hpp"
 
 namespace net::ancillarycat::loxograph::evaluation {

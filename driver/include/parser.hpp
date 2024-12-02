@@ -50,14 +50,11 @@ public:
   /// bring redundancy.
   auto parse(const ParsePolicy &) -> utils::Status;
   auto get_statements() const -> stmt_ptrs_t &;
-  auto get_expression() const -> expr_ptr_t;
+  auto get_expression() const -> expr_ptr_t &;
 
 private:
-  /// @brief euqality has the lowest precedence
   auto next_expression() -> expr_ptr_t;
   auto assignment() -> expr_ptr_t;
-  /// @brief equality has the second lowest precedence;
-  ///			comparison generates equality.
   auto equality() -> expr_ptr_t;
   auto comparison() -> expr_ptr_t;
   auto term() -> expr_ptr_t;
@@ -97,15 +94,13 @@ private:
   auto peek(this auto &&self, const ssize_type offset = 0) -> decltype(auto) {
     if (self.is_at_end(offset))
       return self.tokens.back();
-    // return self.tokens[self.current + offset];
     return *(self.cursor + offset); // ref to the token
   }
 
 private:
   token_views_t tokens = {};
-  // size_type current = 0;
   token_views_t::iterator cursor{};
-  expr_ptr_t expr_head = nullptr;
+  mutable expr_ptr_t expr_head = nullptr;
   mutable stmt_ptrs_t stmts = {};
   // bool is_in_panic = false;
 private:

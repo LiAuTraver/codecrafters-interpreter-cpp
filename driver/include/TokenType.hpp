@@ -5,7 +5,7 @@
 #include <unordered_map>
 
 #include "config.hpp"
-#include "fmt.hpp"
+#include "utils.hpp"
 #include "loxo_fwd.hpp"
 
 namespace net::ancillarycat::loxograph {
@@ -40,7 +40,7 @@ public:
   /// @note no-explicit
   TokenType(const enum type_t type = kMonostate)
       : type(type) {} // NOLINT(google-explicit-constructor)
-  /// @brief for @ref fmt::format
+  /// @brief for @link fmt::format @endlink
   friend auto format_as(const TokenType &) noexcept -> string_view_type;
   /// @note member function otherwise `ambiguous call` since the ctor is not explicit
 	auto operator<=>(this auto&& self, const type_t &token_t) {

@@ -1,5 +1,7 @@
+#include <cmath>
+
 #include "config.hpp"
-#include "fmt.hpp"
+#include "utils.hpp"
 #include "loxo_fwd.hpp"
 
 #include "Evaluatable.hpp"

@@ -3,13 +3,15 @@
 #include <memory>
 #include <span>
 
-#include "Environment.hpp"
+#include "ScopeEnvironment.hpp"
 #include "config.hpp"
-#include "fmt.hpp"
+#include "utils.hpp"
 #include "loxo_fwd.hpp"
 
 #include "ExprVisitor.hpp"
 #include "statement.hpp"
+#include "Environment.hpp"
+
 namespace net::ancillarycat::loxograph {
 /// @implements expression::ExprVisitor
 class LOXOGRAPH_API interpreter : virtual public expression::ExprVisitor,
@@ -18,6 +20,8 @@ public:
   interpreter() = default;
   virtual ~interpreter() override = default;
   using ostringstream_t = std::ostringstream;
+  using env_t = Environment;
+  using env_ptr_t = std::shared_ptr<env_t>;
 
 public:
   utils::Status interpret(std::span<std::shared_ptr<statement::Stmt>>) const;
@@ -54,6 +58,8 @@ private:
       -> utils::Status override;
   virtual auto visit_impl(const statement::Expression &) const
       -> utils::Status override;
+  virtual auto visit_impl(const statement::Block &) const
+      -> utils::Status override;
   auto execute_impl(const statement::Stmt &) const -> utils::Status override;
 
 private:
@@ -61,7 +67,7 @@ private:
   /// a temporary fix.
   mutable eval_result_t expr_res{utils::Monostate{}};
   mutable std::vector<eval_result_t> stmts_res{};
-  mutable evaluation::Environment env{};
+  mutable env_ptr_t env{std::make_shared<env_t>()};
 
 private:
   auto expr_to_string(const utils::FormatPolicy &) const -> string_type;

@@ -3,13 +3,15 @@
 #include <typeinfo>
 
 #include "config.hpp"
-#include "fmt.hpp"
+#include "utils.hpp"
 #include "loxo_fwd.hpp"
 
 #include "expression.hpp"
 #include "interpreter.hpp"
 
 #include "Variant.hpp"
+
+#include <map>
 
 namespace net::ancillarycat::loxograph {
 using utils::match;
@@ -34,7 +36,8 @@ interpreter::is_true_value(const eval_result_t &value) const {
   });
 }
 auto interpreter::is_deep_equal(const eval_result_t &lhs,
-                                const eval_result_t &rhs) const -> eval_result_t {
+                                const eval_result_t &rhs) const
+    -> eval_result_t {
   if (lhs.index() != rhs.index()) {
     return evaluation::False;
   }
@@ -69,13 +72,13 @@ auto interpreter::visit_impl(const statement::Variable &stmt) const
         std::any_cast<string_view_type>(stmt.name.literal),
         expr_res.underlying_string());
     // string view fgailed again; not null-terminated
-    auto res = env.add(
+    auto res = env->add(
         stmt.name.to_string(utils::kTokenOnly), expr_res, stmt.name.line);
     expr_res.emplace<utils::Monostate>();
     return res;
   }
   // if no initializer, it's a nil value.
-  auto res = env.add(stmt.name.to_string(utils::kTokenOnly),
+  auto res = env->add(stmt.name.to_string(utils::kTokenOnly),
                      evaluation::NilValue,
                      stmt.name.line);
   expr_res.emplace<utils::Monostate>();
@@ -96,6 +99,20 @@ auto interpreter::visit_impl(const statement::IllegalStmt &stmt) const
 auto interpreter::visit_impl(const statement::Expression &stmt) const
     -> utils::Status {
   return evaluate(*stmt.expr);
+}
+auto interpreter::visit_impl(const statement::Block &stmt) const
+    -> utils::Status {
+  auto original_env = env; // save the original environment
+  auto sub_env = std::make_shared<Environment>(**env);
+  env = sub_env;
+  for (const auto &scoped_stmt : stmt.statements) {
+    if (auto eval_res = execute(*scoped_stmt); !eval_res.ok()) {
+      env = original_env; // restore
+      return eval_res;
+    }
+  }
+  env = original_env; // restore
+  return utils::OkStatus();
 }
 auto interpreter::execute_impl(const statement::Stmt &stmt) const
     -> utils::Status {
@@ -237,7 +254,7 @@ auto interpreter::visit_impl(const expression::Variable &expr) const
   contract_assert(!!std::any_cast<string_view_type>(&expr.name.literal),
                   1,
                   "variable name should be a string");
-  if (auto res = env.get(expr.name.to_string(utils::FormatPolicy::kTokenOnly));
+  if (auto res = env->get(expr.name.to_string(utils::FormatPolicy::kTokenOnly));
       !utils::holds_alternative<utils::Monostate>(res))
     return res;
 
@@ -252,7 +269,7 @@ auto interpreter::visit_impl(const expression::Assignment &expr) const
   if (!this->evaluate(*expr.value_expr).ok())
     return {evaluation::Error{"Error in assignment"s, expr.name.line}};
 
-  if (!env.reassign(expr.name.to_string(utils::FormatPolicy::kTokenOnly),
+  if (!env->reassign(expr.name.to_string(utils::FormatPolicy::kTokenOnly),
                     expr_res,
                     expr.name.line)
            .ok())

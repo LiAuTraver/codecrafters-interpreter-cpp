@@ -1,0 +1,34 @@
+#include <unordered_map>
+#include <string>
+#include <string_view>
+#include <variant>
+
+#include "config.hpp"
+#include "loxo_fwd.hpp"
+#include "utils.hpp"
+#include "ScopeEnvironment.hpp"
+
+#include "Variant.hpp"
+
+namespace net::ancillarycat::loxograph::evaluation {
+utils::Status ScopeEnvironment::add(const string_type &name,
+                               const eval_result_t &value,
+                               const uint_least32_t line) {
+  if (associations.contains(name)) {
+    (void)0; /// suppress the warning when not in debugging
+    /// Scheme allows redefining variables at the top level; so temporarily
+    /// we just follow that.
+    dbg(warn,
+        "The variable {} is already defined in the environment. redefining "
+        "it...",
+        name);
+  }
+
+  associations.insert_or_assign(name.data(), std::pair{value, line});
+  return utils::OkStatus();
+}
+auto ScopeEnvironment::to_string_impl(
+    const utils::FormatPolicy &format_policy) const -> string_type {
+  return {};
+}
+} // namespace net::ancillarycat::loxograph::evaluation
