@@ -2,6 +2,7 @@
 #include <memory>
 #include <typeinfo>
 
+#include "Evaluatable.hpp"
 #include "config.hpp"
 #include "utils.hpp"
 #include "loxo_fwd.hpp"
@@ -66,11 +67,11 @@ auto interpreter::visit_impl(const statement::Variable &stmt) const
       return eval_res;
     contract_assert(!!std::any_cast<string_view_type>(&stmt.name.literal),
                     1,
-                    "variable name should be a string");
+                    "variable name should be a string")
     dbg(info,
         "variable name: {}, value: {}",
         std::any_cast<string_view_type>(stmt.name.literal),
-        expr_res.underlying_string());
+        expr_res.underlying_string())
     // string view fgailed again; not null-terminated
     auto res = env->add(
         stmt.name.to_string(utils::kTokenOnly), expr_res, stmt.name.line);
@@ -79,8 +80,8 @@ auto interpreter::visit_impl(const statement::Variable &stmt) const
   }
   // if no initializer, it's a nil value.
   auto res = env->add(stmt.name.to_string(utils::kTokenOnly),
-                     evaluation::NilValue,
-                     stmt.name.line);
+                      evaluation::NilValue,
+                      stmt.name.line);
   expr_res.emplace<utils::Monostate>();
   return res;
 }
@@ -139,7 +140,7 @@ auto interpreter::visit_impl(const expression::Literal &expr) const
   dbg(info, "literal type: {}", expr.literal.type);
   if (expr.literal.type.type == TokenType::kMonostate) {
     dbg(critical, "should not happen.");
-    contract_assert(false);
+    contract_assert(false)
     return {};
   }
   if (expr.literal.type.type == TokenType::kNil) {
@@ -270,8 +271,8 @@ auto interpreter::visit_impl(const expression::Assignment &expr) const
     return {evaluation::Error{"Error in assignment"s, expr.name.line}};
 
   if (!env->reassign(expr.name.to_string(utils::FormatPolicy::kTokenOnly),
-                    expr_res,
-                    expr.name.line)
+                     expr_res,
+                     expr.name.line)
            .ok())
     return {evaluation::Error{
         utils::format("Undefined variable '{}'.",

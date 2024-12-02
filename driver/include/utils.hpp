@@ -63,7 +63,7 @@ inline auto get_if(const std::any &literal) -> decltype(auto)
           "\033[033mNote: this lexer treat all number as long double; meybe "
           "you "
           "accidentally passed an integer?\033[0m");
-    });
+    })
 
   return ptr;
 }
@@ -128,28 +128,9 @@ private:
   virtual auto to_string_view_impl(const FormatPolicy &) const
       -> string_view_type = 0;
 };
-class Monostate final : public Printable, public Viewable {
-  auto to_string_impl(const FormatPolicy &) const -> string_type override {
-    return ""s;
-  }
-  auto to_string_view_impl(const FormatPolicy &) const
-      -> string_view_type override {
-    return ""sv;
-  }
-};
-LOXO_NODISCARD_MSG(Monostate)
-inline consteval bool operator==(const Monostate &,
-                                 const Monostate &) noexcept {
-  return true;
-}
-LOXO_NODISCARD_MSG(Monostate)
-inline consteval std::strong_ordering operator<=>(const Monostate &,
-                                                  const Monostate &) noexcept {
-  return std::strong_ordering::equal;
-}
 class VisitorBase : virtual public Printable {
 public:
-  using variant_type = Variant<net::ancillarycat::utils::Monostate,
+  using variant_type = Variant<::net::ancillarycat::utils::Monostate,
                                loxograph::evaluation::Boolean,
                                loxograph::evaluation::Nil,
                                loxograph::evaluation::Number,

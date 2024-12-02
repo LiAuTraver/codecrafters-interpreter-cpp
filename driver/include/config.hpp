@@ -63,7 +63,7 @@ struct fmt::formatter<std::filesystem::path> : fmt::formatter<std::string> {
   }
 };
 #    define LOXOGRAPH_STACKTRACE                                               \
-      ::std::format("\n{}", ::std::stacktrace::current())
+      (::std::format("\n{}", ::std::stacktrace::current()))
 #  else
 #    include <fmt/format.h>
 template <>

@@ -48,8 +48,16 @@ private:
 };
 auto Environment::find(this auto &&self, const string_type &name)
     -> decltype(self.current->find(name)) {
-  if (auto it = self.current->find(name))
+  if (auto it = self.current->find(name)) {
+    dbg_block(if (self.parent.expired()) return nullptr;
+              if (auto another_it = self.parent.lock()->find(name)) {
+                dbg(warn,
+                    "variable '{}' is shadowed; previously declared at line {}",
+                    name,
+                    (*another_it)->second.second);
+              })
     return {it};
+  }
 
   if (auto enclosing = self.parent.lock())
     return enclosing->find(name);

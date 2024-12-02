@@ -51,6 +51,9 @@ StatementAttributeLikeMacros:
 StatementMacros:
   - Q_UNUSED
   - QT_REQUIRE_VERSION
+  - dbg_block
+  - dbg
+  - contract_assert
 InsertNewlineAtEOF: true
 InsertTrailingCommas: Wrapped
 IndentPPDirectives: AfterHash
