@@ -13,9 +13,9 @@
 #include "Monostate.hpp"
 
 namespace net::ancillarycat::utils {
-/// @brief A simple variant wrapper class around @link std::variant @endlink for convenience when evaluating
-/// expressions, especially when the operation was `to_string` or check the
-/// type's name when debugging.
+/// @brief A simple variant wrapper class around @link std::variant @endlink for
+/// convenience when evaluating expressions, especially when the operation was
+/// `to_string` or check the type's name when debugging.
 /// @note exception-free variant wrapper
 template <Variantable... Types> class Variant : public Printable, Viewable {
 public:
@@ -40,7 +40,8 @@ public:
     using ReturnType = decltype(std::forward<Callable>(callable)(
         std::declval<variant_type>()));
     return self.is_valid()
-               ? static_cast<ReturnType>(std::visit(std::forward<Callable>(callable), self.my_variant))
+               ? static_cast<ReturnType>(std::visit(
+                     std::forward<Callable>(callable), self.my_variant))
                : ReturnType{};
   }
   string_view_type type_name() const {
@@ -61,7 +62,9 @@ public:
   }
   template <typename Args>
     requires requires { std::declval<variant_type>().template emplace<Args>(); }
-  constexpr auto emplace() -> decltype(auto) {
+  constexpr auto
+  emplace() noexcept(noexcept(my_variant.template emplace<Args>()))
+      -> decltype(auto) {
     return my_variant.template emplace<Args>();
   }
   constexpr auto &get() const { return my_variant; }
@@ -71,8 +74,14 @@ public:
     my_variant.swap(that.my_variant);
     return *this;
   }
-  string_type underlying_string(
-      const FormatPolicy &format_policy = FormatPolicy::kDefault) const {
+  constexpr auto clear(this auto&& self) noexcept(noexcept(self.my_variant.template emplace<Monostate>()))
+      -> decltype(auto) {
+    self.my_variant.template emplace<Monostate>();
+    return self;
+  }
+  constexpr auto empty() const noexcept -> bool { return my_variant.index() == 0; }
+  auto underlying_string(const FormatPolicy &format_policy =
+                             FormatPolicy::kDefault) const -> string_type {
     return this->visit([&](const auto &value) -> string_type {
       return value.to_string(format_policy);
     });
@@ -120,7 +129,8 @@ inline constexpr auto get(const Variant<MyTypes...> &v) -> decltype(auto) {
   return v.is_valid() ? std::get<Ty>(v.get()) : Ty{};
 }
 template <class Ty, class... MyTypes>
-LOXO_NODISCARD_MSG(get_if) inline constexpr auto get_if(Variant<MyTypes...> *v) noexcept {
+LOXO_NODISCARD_MSG(get_if)
+inline constexpr auto get_if(Variant<MyTypes...> *v) noexcept {
   return v->is_valid() ? std::get_if<Ty>(&v->get()) : nullptr;
 }
 } // namespace net::ancillarycat::utils

@@ -34,6 +34,9 @@ public:
 
 public:
   string_type number_to_string(utils::FormatPolicy policy) const;
+  constexpr auto is_type(const token_type &type) const noexcept -> bool {
+    return this->type == type;
+  }
 private:
   auto to_string_impl(const utils::FormatPolicy &) const -> string_type override;
 

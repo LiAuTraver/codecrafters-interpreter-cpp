@@ -42,37 +42,31 @@ public:
       : type(type) {} // NOLINT(google-explicit-constructor)
   /// @brief for @link fmt::format @endlink
   friend auto format_as(const TokenType &) noexcept -> string_view_type;
-  /// @note member function otherwise `ambiguous call` since the ctor is not explicit
-	auto operator<=>(this auto&& self, const type_t &token_t) {
-		return self.type <=> token_t;
-	}
-  friend auto operator==(const TokenType &wrapped_token_t,
-                         const type_t &token_t) {
+  /// @note member function otherwise `ambiguous call` since the ctor is not
+  /// explicit
+  constexpr auto operator<=>(this auto &&self, const type_t &token_t) {
+    return self.type <=> token_t;
+  }
+  friend constexpr auto operator==(const TokenType &wrapped_token_t,
+                                   const type_t &token_t) {
     return wrapped_token_t.type == token_t;
   }
-  friend auto operator!=(const TokenType &wrapped_token_t,
-                         const type_t &token_t) {
-    return wrapped_token_t.type != token_t;
-  }
-  friend auto operator<=>(const type_t &token_t,
-                          const TokenType &wrapped_token_t) {
+  friend constexpr auto operator<=>(const type_t &token_t,
+                                    const TokenType &wrapped_token_t) {
     return token_t <=> wrapped_token_t.type;
   }
-  friend auto operator==(const type_t &token_t,
-                         const TokenType &wrapped_token_t) {
+  friend constexpr auto operator==(const type_t &token_t,
+                                   const TokenType &wrapped_token_t) {
     return token_t == wrapped_token_t.type;
   }
-  friend auto operator!=(const type_t &token_t,
-                         const TokenType &wrapped_token_t) {
-    return token_t != wrapped_token_t.type;
-  }
-  friend auto operator<=>(const TokenType &lhs, const TokenType &rhs) {
+  friend constexpr auto operator<=>(const TokenType &lhs,
+                                    const TokenType &rhs) {
     return lhs.type <=> rhs.type;
   }
-  friend auto operator==(const TokenType &lhs, const TokenType &rhs) {
+  friend constexpr auto operator==(const TokenType &lhs, const TokenType &rhs) {
     return lhs.type == rhs.type;
   }
-  friend auto operator!=(const TokenType &lhs, const TokenType &rhs) {
+  friend constexpr auto operator!=(const TokenType &lhs, const TokenType &rhs) {
     return lhs.type != rhs.type;
   }
 

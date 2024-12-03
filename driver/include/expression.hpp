@@ -138,6 +138,24 @@ private:
   expr_result_t accept_impl(const ExprVisitor &) const override;
 };
 /// @implements Expr
+class Logical : public Expr {
+public:
+  constexpr Logical() = default;
+  explicit Logical(token_t &&op, expr_ptr_t &&left, expr_ptr_t &&right)
+      : op(std::move(op)), left(std::move(left)), right(std::move(right)) {}
+  virtual ~Logical() override = default;
+
+public:
+  token_t op{};
+  expr_ptr_t left{nullptr};
+  expr_ptr_t right{nullptr};
+
+private:
+  auto to_string_impl(const utils::FormatPolicy &) const
+      -> string_type override;
+  expr_result_t accept_impl(const ExprVisitor &) const override;
+};
+/// @implements Expr
 class IllegalExpr : public Expr {
 public:
   constexpr IllegalExpr() = default;
