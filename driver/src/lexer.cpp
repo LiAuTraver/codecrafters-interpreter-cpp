@@ -106,14 +106,8 @@ void lexer::add_identifier_and_keyword() {
     case kFalse:
       add_token(kFalse, false);
       break;
-    case kNil:
-      add_token(kNil, nullptr);
-      break;
-    case kPrint:
-      add_token(kPrint, nullptr);
-      break;
     default:
-      dbg(warn, "unimplemented or generalized keyword: {}", value);
+      dbg(info, "keyword: {}", value);
       add_token(it->second);
     }
     return;
@@ -227,12 +221,12 @@ bool lexer::is_at_end(const size_t offset) const {
 void lexer::add_token(token_type_t type, std::any literal) {
   if (type == kEndOfFile) { // FIXME: lexeme bug at EOF(not critical)
     tokens.emplace_back(type, ""sv, std::any{}, current_line);
-  } else {
-    auto lexeme = string_view_type(contents.data() + head, cursor - head);
-    dbg(trace, "lexeme: {}", lexeme);
-    tokens.emplace_back(type, lexeme, std::move(literal), current_line);
-    lexeme_views.emplace_back(lexeme);
+    return;
   }
+  auto lexeme = string_view_type(contents.data() + head, cursor - head);
+  dbg(trace, "lexeme: {}", lexeme);
+  tokens.emplace_back(type, lexeme, std::move(literal), current_line);
+  lexeme_views.emplace_back(lexeme);
 }
 void lexer::add_lex_error(const error_code_t type) {
   dbg(error, "Lexical error: {}", contents.substr(head, cursor - head));

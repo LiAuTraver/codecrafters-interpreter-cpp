@@ -52,6 +52,14 @@ Stmt::stmt_result_t Block::accept_impl(const StmtVisitor &visitor) const {
 Stmt::stmt_result_t If::accept_impl(const StmtVisitor &visitor) const {
   return visitor.visit(*this);
 }
+auto While::to_string_impl(const utils::FormatPolicy &format_policy) const
+    -> string_type {
+  return "while (" + this->condition->to_string(format_policy) + ") " +
+         this->body->to_string(format_policy);
+}
+auto While::accept_impl(const StmtVisitor &visitor) const -> stmt_result_t {
+  return visitor.visit(*this);
+}
 auto If::to_string_impl(const utils::FormatPolicy &format_policy) const
     -> string_type {
   string_type result = "if (" + this->condition->to_string(format_policy) +
@@ -62,6 +70,27 @@ auto If::to_string_impl(const utils::FormatPolicy &format_policy) const
   return result;
 }
 
+auto For::to_string_impl(const utils::FormatPolicy &format_policy) const
+    -> string_type {
+  string_type result = "for (";
+  if (this->initializer) {
+    result += this->initializer->to_string(format_policy);
+  }
+  result += "; ";
+  if (this->condition) {
+    result += this->condition->to_string(format_policy);
+  }
+  result += "; ";
+  if (this->increment) {
+    result += this->increment->to_string(format_policy);
+  }
+  contract_assert(!!this->body, 1, "for loop body is null; shouldn't happen");
+  result += ") " + this->body->to_string(format_policy);
+  return result;
+}
+Stmt::stmt_result_t For::accept_impl(const StmtVisitor &visitor) const {
+  return visitor.visit(*this);
+}
 auto IllegalStmt::to_string_impl(const utils::FormatPolicy &) const
     -> string_type {
   return message;

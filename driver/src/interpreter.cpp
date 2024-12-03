@@ -22,11 +22,11 @@ using utils::match;
 using enum TokenType::type_t;
 utils::Status interpreter::interpret(
     const std::span<std::shared_ptr<statement::Stmt>> stmts) const {
+  defer { expr_res.clear(); };
+
   for (const auto &stmt : stmts)
-    if (auto eval_res = execute(*stmt); !eval_res.ok()) {
-      this->expr_res.clear();
+    if (auto eval_res = execute(*stmt); !eval_res.ok())
       return eval_res;
-    }
 
   return utils::OkStatus();
 }
@@ -66,6 +66,8 @@ auto interpreter::is_deep_equal(const eval_result_t &lhs,
 }
 auto interpreter::visit_impl(const statement::Variable &stmt) const
     -> utils::Status {
+  defer { expr_res.clear(); };
+
   if (stmt.has_initilizer()) {
     if (auto eval_res = evaluate(*stmt.initializer); !eval_res.ok())
       return eval_res;
@@ -79,41 +81,77 @@ auto interpreter::visit_impl(const statement::Variable &stmt) const
     // string view failed again; not null-terminated
     auto res = env->add(
         stmt.name.to_string(utils::kTokenOnly), expr_res, stmt.name.line);
-    expr_res.clear();
     return res;
   }
   // if no initializer, it's a nil value.
-  expr_res.clear();
   return env->add(stmt.name.to_string(utils::kTokenOnly),
                   evaluation::NilValue,
                   stmt.name.line);
 }
 auto interpreter::visit_impl(const statement::Print &stmt) const
     -> utils::Status {
+  defer { expr_res.clear(); };
+
   if (auto eval_res = evaluate(*stmt.value); !eval_res.ok())
     return eval_res;
   stmts_res.emplace_back(expr_res);
-  expr_res.clear();
   return utils::OkStatus();
 }
 auto interpreter::visit_impl(const statement::If &stmt) const -> utils::Status {
+  defer { expr_res.clear(); };
+
   if (auto eval_res = evaluate(*stmt.condition); !eval_res.ok())
     return eval_res;
   if (is_true_value(expr_res).is_true()) {
     if (auto eval_res = execute(*stmt.then_branch); !eval_res.ok())
       return eval_res;
-    expr_res.clear();
     return utils::OkStatus();
   }
   // else we execute the else branch.
   if (stmt.else_branch) { // maybe we dont have an else branch, so check it.
     if (auto eval_res = execute(*stmt.else_branch); !eval_res.ok())
       return eval_res;
-    expr_res.clear();
     return utils::OkStatus();
   }
   // no else branch do nothing. BUT don't forget to clear the expr_res!
-  expr_res.clear();
+  return utils::OkStatus();
+}
+auto interpreter::visit_impl(const statement::While &stmt) const
+    -> utils::Status {
+  defer { expr_res.clear(); };
+
+  do {
+    if (auto res = evaluate(*stmt.condition); !res.ok())
+      return res;
+    if (not is_true_value(expr_res).is_true())
+      break;
+    if (auto res = execute(*stmt.body); !res.ok())
+      return res;
+  } while (true);
+
+  return utils::OkStatus();
+}
+auto interpreter::visit_impl(const statement::For &stmt) const -> utils::Status {
+  defer { expr_res.clear(); };
+
+  if (stmt.initializer){
+    if (auto res = execute(*stmt.initializer); !res.ok())
+      return res;
+  }
+  while (true) {
+    if (stmt.condition) {
+      if (auto res = evaluate(*stmt.condition); !res.ok())
+        return res;
+      if (not is_true_value(expr_res).is_true())
+        break;
+    }
+    if (auto res = execute(*stmt.body); !res.ok())
+      return res;
+    if (stmt.increment) {
+      if (auto res = evaluate(*stmt.increment); !res.ok())
+        return res;
+    }
+  }
   return utils::OkStatus();
 }
 auto interpreter::visit_impl(const statement::IllegalStmt &stmt) const
@@ -146,17 +184,14 @@ auto interpreter::get_result_impl() const -> eval_result_t { return expr_res; }
 
 auto interpreter::evaluate_impl(const expression::Expr &expr) const
     -> utils::Status {
-  expr_res = expr.accept(*this);
-  return expr_res.visit(
-      match{[](const evaluation::Error &e) {
-              return utils::InvalidArgument(e.to_string_view());
-            },
-            [](const utils::Monostate &) {
-              return utils::EmptyInput("no expr was evaluated.");
-            },
-            [](const auto &) { return utils::OkStatus(); }});
-  /// @note ^^^^ you cannot just put the `expr.accept(*this)` here, it'll be
-  ///               called more than once.
+  return expr_res.set(expr.accept(*this))
+      .visit(match{[](const evaluation::Error &e) {
+                     return utils::InvalidArgument(e.to_string_view());
+                   },
+                   [](const utils::Monostate &) {
+                     return utils::EmptyInput("no expr was evaluated.");
+                   },
+                   [](const auto &) { return utils::OkStatus(); }});
 }
 auto interpreter::visit_impl(const expression::Literal &expr) const
     -> eval_result_t {
@@ -236,7 +271,7 @@ auto interpreter::visit_impl(const expression::Binary &expr) const
                              expr.op.line};
   }
   if (utils::holds_alternative<evaluation::String>(lhs)) {
-    if (expr.op.type == kPlus) {
+    if (expr.op.is_type(kPlus)) {
       return evaluation::String{utils::get<evaluation::String>(lhs) +
                                 utils::get<evaluation::String>(rhs)};
     }

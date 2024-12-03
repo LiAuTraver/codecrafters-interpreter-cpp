@@ -70,6 +70,9 @@ private:
   auto expr_stmt() -> stmt_ptr_t;
   auto print_stmt() -> stmt_ptr_t;
   auto if_stmt() -> stmt_ptr_t;
+  auto block_stmt() -> stmt_ptr_t;
+  auto while_stmt() -> stmt_ptr_t;
+  auto for_stmt() -> stmt_ptr_t;
   auto var_decl() -> stmt_ptr_t;
 
   /// FIXME: 1. do not use exceptions for control flow(possiblly)
@@ -79,12 +82,13 @@ private:
   auto synchronize(const parse_error &) -> expr_ptr_t;
 
 private:
+  /// @remark used in @link while_stmt @endlink and @link if_stmt @endlink
+  auto get_condition() -> expr_ptr_t;
+
+private:
   template <typename... Args>
     requires(std::is_enum_v<std::common_type_t<Args...>>)
   bool inspect(Args &&...);
-  template <typename... Args>
-    requires(std::is_enum_v<std::common_type_t<Args...>>)
-  bool inspect_and_get(Args &&...);
   /// @brief check if the current token is at(or past) the end of the token
   bool is_at_end(size_type = 0) const;
   auto get(size_type = 1) -> token_t;
@@ -108,6 +112,11 @@ private:
   // bool is_in_panic = false;
 private:
   friend LOXOGRAPH_API void delete_parser_fwd(parser *);
+
+private:
+  template <typename... Args>
+    requires(std::is_enum_v<std::common_type_t<Args...>>)
+  bool inspect_and_get(Args &&...);
 };
 template <typename... Args>
   requires(std::is_enum_v<std::common_type_t<Args...>>)

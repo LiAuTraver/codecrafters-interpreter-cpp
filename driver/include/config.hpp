@@ -231,7 +231,7 @@ struct ::fmt::formatter<::std::stacktrace> : ::fmt::formatter<::std::string> {
     }
 #  define LOXOGRAPH_RUNTIME_REQUIRE_IMPL_SATISFY(x)                            \
     LOXOGRAPH_AMBIGUOUS_ELSE_BLOCKER                                           \
-    if (x)                                                                     \
+    if ((x))                                                                     \
       ;                                                                        \
     else {                                                                     \
       LOXOGRAPH_PRINT_ERROR_MSG(x)                                             \
@@ -239,7 +239,7 @@ struct ::fmt::formatter<::std::stacktrace> : ::fmt::formatter<::std::string> {
       //! preprocessor sometimes.
 #  define LOXOGRAPH_RUNTIME_REQUIRE_IMPL_WITH_MSG(x, y, _msg_)                 \
     LOXOGRAPH_AMBIGUOUS_ELSE_BLOCKER                                           \
-    if ((x) == (y))                                                            \
+    if ((x))                                                            \
       ;                                                                        \
     else {                                                                     \
       LOXOGRAPH_PRINT_ERROR_MSG(x, y, _msg_)                                   \
@@ -368,3 +368,26 @@ struct ::fmt::formatter<::std::stacktrace> : ::fmt::formatter<::std::string> {
 #else
 #  define LOXO_CONSTEXPR_IF_NOT_MSVC constexpr
 #endif
+
+#ifndef defer
+/// @see
+/// https://stackoverflow.com/questions/32432450/what-is-standard-defer-finalizer-implementation-in-c
+struct loxograph_defer_helper_struct {};
+template <class Fun_> struct loxograph_deferrer {
+  Fun_ f_;
+  inline constexpr loxograph_deferrer(Fun_ f) : f_(f) {}
+  inline constexpr ~loxograph_deferrer() { f_(); }
+};
+template <class Fun_>
+static inline constexpr auto operator*(loxograph_defer_helper_struct, Fun_ f_)
+    -> loxograph_deferrer<Fun_> {
+  return {f_};
+}
+#  define LOXOGRAPH_DEFER                                                      \
+    const auto LOXOGRAPH_EXPAND_COUNTER(_loxograph_defer_block_at) =           \
+        loxograph_defer_helper_struct{} *[&]()
+#  define defer LOXOGRAPH_DEFER
+#else
+#  pragma message("defer was already defined. please check the code.")
+#  pragma push_macro("defer")
+#endif // defer

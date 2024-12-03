@@ -77,6 +77,8 @@ class Print;
 class Expression;
 class Block;
 class If;
+class While;
+class For;
 class IllegalStmt;
 
 class StmtVisitor;
