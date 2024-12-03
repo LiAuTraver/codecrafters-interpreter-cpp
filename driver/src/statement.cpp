@@ -72,10 +72,21 @@ auto If::to_string_impl(const utils::FormatPolicy &format_policy) const
 
 auto For::to_string_impl(const utils::FormatPolicy &format_policy) const
     -> string_type {
-  return "for (" + this->initializer->to_string(format_policy) + "; " +
-         this->condition->to_string(format_policy) + "; " +
-         this->increment->to_string(format_policy) + ") " +
-         this->body->to_string(format_policy);
+  string_type result = "for (";
+  if (this->initializer) {
+    result += this->initializer->to_string(format_policy);
+  }
+  result += "; ";
+  if (this->condition) {
+    result += this->condition->to_string(format_policy);
+  }
+  result += "; ";
+  if (this->increment) {
+    result += this->increment->to_string(format_policy);
+  }
+  contract_assert(!!this->body, 1, "for loop body is null; shouldn't happen");
+  result += ") " + this->body->to_string(format_policy);
+  return result;
 }
 Stmt::stmt_result_t For::accept_impl(const StmtVisitor &visitor) const {
   return visitor.visit(*this);

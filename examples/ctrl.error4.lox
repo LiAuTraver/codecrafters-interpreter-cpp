@@ -1,0 +1,2 @@
+// Invalid condition for increment, comment here!
+for ({}; a < 2; a = a + 1) {}

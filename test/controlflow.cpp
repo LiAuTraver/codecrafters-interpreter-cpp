@@ -93,3 +93,45 @@ TEST(ctrl, while3) {
   EXPECT_EQ(str, "0\n1\n1\n2\n3\n5\n8\n13\n21\n34\n");
   EXPECT_EQ(callback, 0);
 }
+
+TEST(ctrl, for1) {
+  const auto path = R"(Z:\loxograph\examples\ctrl.for1.lox)";
+  auto [callback, str] = get_result(path);
+  EXPECT_EQ(str, "0\n1\n0\n1\n");
+  EXPECT_EQ(callback, 0);
+}
+
+TEST(ctrl, for2) {
+  const auto path = R"(Z:\loxograph\examples\ctrl.for2.lox)";
+  auto [callback, str] = get_result(path);
+  EXPECT_EQ(str, "0\n-1\nafter\n0\n");
+  EXPECT_EQ(callback, 0);
+}
+
+TEST(ctrl, error1) {
+  const auto path = R"(Z:\loxograph\examples\ctrl.error1.lox)";
+  auto [callback, str] = get_result(path);
+  EXPECT_EQ(str, "[line 1] Error at 'var': Expect expression.\n");
+  EXPECT_EQ(callback, 65);
+}
+
+TEST(ctrl, error2) {
+  const auto path = R"(Z:\loxograph\examples\ctrl.error2.lox)";
+  auto [callback, str] = get_result(path);
+  EXPECT_EQ(str, "[line 1] Error at 'var': Expect expression.\n");
+  EXPECT_EQ(callback, 65);
+}
+
+TEST(ctrl, error3) {
+  const auto path = R"(Z:\loxograph\examples\ctrl.error3.lox)";
+  auto [callback, str] = get_result(path);
+  EXPECT_EQ(str, "[line 2] Error at '{': Expect expression.\n");
+  EXPECT_EQ(callback, 65);
+}
+
+TEST(ctrl, error4) {
+  const auto path = R"(Z:\loxograph\examples\ctrl.error4.lox)";
+  auto [callback, str] = get_result(path);
+  EXPECT_EQ(str, "[line 2] Error at '{': Expect expression.\n");
+  EXPECT_EQ(callback, 65);
+}

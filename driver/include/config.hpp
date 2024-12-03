@@ -231,7 +231,7 @@ struct ::fmt::formatter<::std::stacktrace> : ::fmt::formatter<::std::string> {
     }
 #  define LOXOGRAPH_RUNTIME_REQUIRE_IMPL_SATISFY(x)                            \
     LOXOGRAPH_AMBIGUOUS_ELSE_BLOCKER                                           \
-    if (x)                                                                     \
+    if ((x))                                                                     \
       ;                                                                        \
     else {                                                                     \
       LOXOGRAPH_PRINT_ERROR_MSG(x)                                             \
@@ -239,7 +239,7 @@ struct ::fmt::formatter<::std::stacktrace> : ::fmt::formatter<::std::string> {
       //! preprocessor sometimes.
 #  define LOXOGRAPH_RUNTIME_REQUIRE_IMPL_WITH_MSG(x, y, _msg_)                 \
     LOXOGRAPH_AMBIGUOUS_ELSE_BLOCKER                                           \
-    if ((x) == (y))                                                            \
+    if ((x))                                                            \
       ;                                                                        \
     else {                                                                     \
       LOXOGRAPH_PRINT_ERROR_MSG(x, y, _msg_)                                   \

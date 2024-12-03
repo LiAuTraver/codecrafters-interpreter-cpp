@@ -1,0 +1,2 @@
+// Invalid condition for condition, comment here!
+for (var a = 1; {}; a = a + 1) {}
