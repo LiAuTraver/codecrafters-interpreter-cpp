@@ -4,20 +4,33 @@
 #include <iostream>
 #include <string>
 #include <string_view>
+#include <tuple>
+#include <type_traits>
 
 #include "config.hpp"
 
 namespace net::ancillarycat::utils {
-template <typename... Types> class Variant;
-class Status;
-/// @brief represents a value that can be stored in a @link StatusOr @endlink object
+class Monostate;
+/// @brief a concept that checks if the types are variantable for my custom
+/// @link Variant @endlink class,
+/// where the first type must be @link Monostate @endlink
+/// @tparam Types the types to check
+template <typename... Types>
+concept Variantable = requires {
+  std::is_same_v<std::tuple_element_t<0, std::tuple<Types...>>, Monostate>;
+};
+/// @brief represents a value that can be stored in a
+/// @link StatusOr @endlink object
 /// @tparam Ty the type of the value
-/// @remarks similiar to Microsoft's @link std::_SMF_control @endlink class, which was
-/// used in @link std::optional @endlink
+/// @remarks similiar to Microsoft's @link std::_SMF_control @endlink class,
+/// which was used in @link std::optional @endlink
 template <typename Ty>
 concept Storable = std::conjunction_v<std::is_default_constructible<Ty>,
                                       std::is_nothrow_destructible<Ty>,
                                       std::is_nothrow_constructible<Ty>>;
+
+template <Variantable... Types> class Variant;
+class Status;
 template <Storable Ty> class StatusOr;
 class file_reader;
 using string = ::std::string;
@@ -62,6 +75,7 @@ class Variable;
 class Print;
 class Expression;
 class Block;
+class If;
 class IllegalStmt;
 
 class StmtVisitor;
@@ -76,7 +90,7 @@ class Boolean;
 class Nil;
 class Error;
 
-class ScopeEnvironment;
+class ScopeAssoc;
 } // namespace evaluation
 
 using utils::operator""s;

@@ -10,13 +10,14 @@
 #include "config.hpp"
 #include "loxo_fwd.hpp"
 #include "utils.hpp"
+#include "Monostate.hpp"
 
 namespace net::ancillarycat::utils {
 /// @brief A simple variant wrapper class around @link std::variant @endlink for convenience when evaluating
 /// expressions, especially when the operation was `to_string` or check the
 /// type's name when debugging.
 /// @note exception-free variant wrapper
-template <typename... Types> class Variant : public Printable, Viewable {
+template <Variantable... Types> class Variant : public Printable, Viewable {
 public:
   using variant_type = std::variant<Types...>;
 
@@ -39,7 +40,7 @@ public:
     using ReturnType = decltype(std::forward<Callable>(callable)(
         std::declval<variant_type>()));
     return self.is_valid()
-               ? std::visit(std::forward<Callable>(callable), self.my_variant)
+               ? static_cast<ReturnType>(std::visit(std::forward<Callable>(callable), self.my_variant))
                : ReturnType{};
   }
   string_view_type type_name() const {

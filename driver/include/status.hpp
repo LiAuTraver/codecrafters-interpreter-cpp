@@ -74,7 +74,7 @@ public:
   using value_type = Ty;
 
 public:
-  StatusOr() = default;
+  constexpr StatusOr() = default;
   StatusOr(const Status &status) : base_type(status) {}
   StatusOr(Status &&status) : base_type(std::move(status)) {}
   StatusOr(const value_type &value) : base_type(kOkStatus), my_value(value) {}

@@ -2,7 +2,10 @@
 #include <memory>
 #include <typeinfo>
 
+#include "Evaluatable.hpp"
 #include "config.hpp"
+#include "statement.hpp"
+#include "status.hpp"
 #include "utils.hpp"
 #include "loxo_fwd.hpp"
 
@@ -66,29 +69,48 @@ auto interpreter::visit_impl(const statement::Variable &stmt) const
       return eval_res;
     contract_assert(!!std::any_cast<string_view_type>(&stmt.name.literal),
                     1,
-                    "variable name should be a string");
+                    "variable name should be a string")
     dbg(info,
         "variable name: {}, value: {}",
         std::any_cast<string_view_type>(stmt.name.literal),
-        expr_res.underlying_string());
-    // string view fgailed again; not null-terminated
+        expr_res.underlying_string())
+    // string view failed again; not null-terminated
     auto res = env->add(
         stmt.name.to_string(utils::kTokenOnly), expr_res, stmt.name.line);
     expr_res.emplace<utils::Monostate>();
     return res;
   }
   // if no initializer, it's a nil value.
-  auto res = env->add(stmt.name.to_string(utils::kTokenOnly),
-                     evaluation::NilValue,
-                     stmt.name.line);
   expr_res.emplace<utils::Monostate>();
-  return res;
+  return env->add(stmt.name.to_string(utils::kTokenOnly),
+                  evaluation::NilValue,
+                  stmt.name.line);
 }
 auto interpreter::visit_impl(const statement::Print &stmt) const
     -> utils::Status {
   if (auto eval_res = evaluate(*stmt.value); !eval_res.ok())
     return eval_res;
   stmts_res.emplace_back(expr_res);
+  expr_res.emplace<utils::Monostate>();
+  return utils::OkStatus();
+}
+auto interpreter::visit_impl(const statement::If &stmt) const -> utils::Status {
+  if (auto eval_res = evaluate(*stmt.condition); !eval_res.ok())
+    return eval_res;
+  if (is_true_value(expr_res).is_true()) {
+    if (auto eval_res = execute(*stmt.then_branch); !eval_res.ok())
+      return eval_res;
+    expr_res.emplace<utils::Monostate>();
+    return utils::OkStatus();
+  }
+  // else we execute the else branch.
+  if (stmt.else_branch) { // maybe we dont have an else branch, so check it.
+    if (auto eval_res = execute(*stmt.else_branch); !eval_res.ok())
+      return eval_res;
+    expr_res.emplace<utils::Monostate>();
+    return utils::OkStatus();
+  }
+  // no else branch do nothing. BUT don't forget to clear the expr_res!
   expr_res.emplace<utils::Monostate>();
   return utils::OkStatus();
 }
@@ -139,24 +161,24 @@ auto interpreter::visit_impl(const expression::Literal &expr) const
   dbg(info, "literal type: {}", expr.literal.type);
   if (expr.literal.type.type == TokenType::kMonostate) {
     dbg(critical, "should not happen.");
-    contract_assert(false);
+    contract_assert(false)
     return {};
   }
-  if (expr.literal.type.type == TokenType::kNil) {
+  if (expr.literal.type == TokenType::kNil) {
     return evaluation::Nil{expr.literal.line};
   }
-  if (expr.literal.type.type == TokenType::kTrue) {
+  if (expr.literal.type == TokenType::kTrue) {
     return evaluation::Boolean{true, expr.literal.line};
   }
-  if (expr.literal.type.type == TokenType::kFalse) {
+  if (expr.literal.type == TokenType::kFalse) {
     return evaluation::Boolean{false, expr.literal.line};
   }
-  if (expr.literal.type.type == TokenType::kString) {
+  if (expr.literal.type == TokenType::kString) {
     return evaluation::String{
         std::any_cast<string_view_type>(expr.literal.literal),
         expr.literal.line};
   }
-  if (expr.literal.type.type == TokenType::kNumber) {
+  if (expr.literal.type == TokenType::kNumber) {
     return evaluation::Number{std::any_cast<long double>(expr.literal.literal),
                               expr.literal.line};
   }
@@ -270,8 +292,8 @@ auto interpreter::visit_impl(const expression::Assignment &expr) const
     return {evaluation::Error{"Error in assignment"s, expr.name.line}};
 
   if (!env->reassign(expr.name.to_string(utils::FormatPolicy::kTokenOnly),
-                    expr_res,
-                    expr.name.line)
+                     expr_res,
+                     expr.name.line)
            .ok())
     return {evaluation::Error{
         utils::format("Undefined variable '{}'.",
@@ -303,12 +325,13 @@ auto interpreter::to_string_impl(const utils::FormatPolicy &format_policy) const
   }
   contract_assert(utils::holds_alternative<utils::Monostate>(expr_res),
                   1,
-                  "expr_res should be empty");
+                  "expr_res should be empty")
   string_type result_str;
-  for (const auto &result : stmts_res) {
-    result_str += value_to_string(format_policy, result);
-    result_str += "\n";
-  }
+  for (const auto &result : stmts_res)
+    // TODO: temporary solution: skip newline if the result is empty(Monostate)
+    if (auto str = value_to_string(format_policy, result); !str.empty())
+      result_str = result_str + std::move(str) + "\n";
+
   return result_str;
 }
 LOXOGRAPH_API void delete_interpreter_fwd(interpreter *ptr) { delete ptr; }

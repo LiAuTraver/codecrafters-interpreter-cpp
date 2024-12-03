@@ -6,12 +6,12 @@
 #include "config.hpp"
 #include "loxo_fwd.hpp"
 #include "utils.hpp"
-#include "ScopeEnvironment.hpp"
+#include "ScopeAssoc.hpp"
 
 #include "Variant.hpp"
 
 namespace net::ancillarycat::loxograph::evaluation {
-utils::Status ScopeEnvironment::add(const string_type &name,
+utils::Status ScopeAssoc::add(const string_type &name,
                                const eval_result_t &value,
                                const uint_least32_t line) {
   if (associations.contains(name)) {
@@ -27,7 +27,7 @@ utils::Status ScopeEnvironment::add(const string_type &name,
   associations.insert_or_assign(name.data(), std::pair{value, line});
   return utils::OkStatus();
 }
-auto ScopeEnvironment::to_string_impl(
+auto ScopeAssoc::to_string_impl(
     const utils::FormatPolicy &format_policy) const -> string_type {
   return {};
 }

@@ -1,5 +1,7 @@
 #include <memory>
+#include <utility>
 
+#include "TokenType.hpp"
 #include "config.hpp"
 #include "expression.hpp"
 #include "utils.hpp"
@@ -70,7 +72,7 @@ auto parser::get_expression() const -> expr_ptr_t & {
 auto parser::next_expression() -> expr_ptr_t { // NOLINT(misc-no-recursion)
   return assignment();
 }
-auto parser::assignment() -> expr_ptr_t {
+auto parser::assignment() -> expr_ptr_t { // NOLINT(misc-no-recursion)
   auto expr = equality();
   if (inspect(kEqual)) {
     auto eq_op = get();
@@ -178,7 +180,7 @@ auto parser::primary() -> expr_ptr_t { // NOLINT(misc-no-recursion)
   // invalid evaluation reached
   throw synchronize({parse_error::kUnknownError, "Expect expression."});
 }
-auto parser::next_declaration() -> stmt_ptr_t {
+auto parser::next_declaration() -> stmt_ptr_t { // NOLINT(misc-no-recursion)
   if (inspect(kVar)) {
     get();
     return var_decl();
@@ -204,11 +206,30 @@ auto parser::var_decl() -> stmt_ptr_t {
   }
   throw synchronize({parse_error::kUnknownError, "Expect expression."});
 }
+auto parser::if_stmt() -> stmt_ptr_t { // NOLINT(misc-no-recursion)
+  if (!inspect(kLeftParen)) {
+    throw synchronize({parse_error::kMissingParenthesis, "Expect '('."});
+  }
+  get();
+  auto condition = next_expression();
+  if (!inspect(kRightParen)) {
+    throw synchronize({parse_error::kMissingParenthesis, "Expect ')'."});
+  }
+  get();
+  auto then_branch = next_statement();
+  stmt_ptr_t else_branch = nullptr;
+  if (inspect(kElse)) {
+    get();
+    else_branch = next_statement();
+  }
+  return std::make_shared<statement::If>(
+      std::move(condition), std::move(then_branch), std::move(else_branch));
+}
 auto parser::print_stmt() -> stmt_ptr_t {
   auto value = next_expression();
   if (inspect(kSemicolon)) {
     get();
-    return std::make_shared<statement::Print>(value);
+    return std::make_shared<statement::Print>(std::move(value));
   }
   throw synchronize({parse_error::kUnknownError, "Expect expression."});
 }
@@ -216,11 +237,11 @@ auto parser::expr_stmt() -> stmt_ptr_t {
   auto expr = next_expression();
   if (inspect(kSemicolon)) {
     get();
-    return std::make_shared<statement::Expression>(expr);
+    return std::make_shared<statement::Expression>(std::move(expr));
   }
   throw synchronize({parse_error::kUnknownError, "Expect expression."});
 }
-auto parser::next_statement() -> stmt_ptr_t {
+auto parser::next_statement() -> stmt_ptr_t { // NOLINT(misc-no-recursion)
   if (inspect(kPrint)) {
     get();
     return print_stmt();
@@ -233,9 +254,13 @@ auto parser::next_statement() -> stmt_ptr_t {
     }
     if (inspect(kRightBrace)) {
       get();
-      return std::make_shared<statement::Block>(statements);
+      return std::make_shared<statement::Block>(std::move(statements));
     }
     throw synchronize({parse_error::kMissingBrace, "Expect '}'."});
+  }
+  if (inspect(kIf)) {
+    get();
+    return if_stmt();
   }
   return expr_stmt();
 }

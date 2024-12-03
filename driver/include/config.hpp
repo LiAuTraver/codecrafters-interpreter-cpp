@@ -63,7 +63,7 @@ struct fmt::formatter<std::filesystem::path> : fmt::formatter<std::string> {
   }
 };
 #    define LOXOGRAPH_STACKTRACE                                               \
-      ::std::format("\n{}", ::std::stacktrace::current())
+      (::std::format("\n{}", ::std::stacktrace::current()))
 #  else
 #    include <fmt/format.h>
 template <>
@@ -349,12 +349,12 @@ struct ::fmt::formatter<::std::stacktrace> : ::fmt::formatter<::std::string> {
 // if exception was disabled, do nothing.
 #if defined(__cpp_exceptions) && __cpp_exceptions
 #include <stdexcept>
-#  define TODO(...) throw ::std::logic_error("TODO: " #__VA_ARGS__)
+#  define TODO(...) throw ::std::logic_error(std::format("TODO: " #__VA_ARGS__));
 #elif __has_include(<spdlog/spdlog.h>)
-#  define TODO(...) LOXOGRAPH_DEBUG_LOGGING(critical, "TODO: " #__VA_ARGS__)
+#  define TODO(...) LOXOGRAPH_DEBUG_LOGGING(critical, "TODO: " #__VA_ARGS__);
 #else
 #include <iostream>
-#  define TODO(...) ::std::cerr << "TODO: " #__VA_ARGS__ << ::std::endl
+#  define TODO(...) ::std::cerr << std::format("TODO: " #__VA_ARGS__) << ::std::endl;
 #endif
 
 #if defined(_MSC_VER) && !defined(__clang__)

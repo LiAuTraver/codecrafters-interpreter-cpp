@@ -67,6 +67,7 @@ private:
   auto next_statement() -> stmt_ptr_t;
   auto expr_stmt() -> stmt_ptr_t;
   auto print_stmt() -> stmt_ptr_t;
+  auto if_stmt() -> stmt_ptr_t;
   auto var_decl() -> stmt_ptr_t;
 
   /// FIXME: 1. do not use exceptions for control flow(possiblly)

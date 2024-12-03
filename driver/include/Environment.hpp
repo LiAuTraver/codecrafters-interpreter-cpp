@@ -10,16 +10,16 @@
 #include "loxo_fwd.hpp"
 #include "utils.hpp"
 
-#include "ScopeEnvironment.hpp"
+#include "ScopeAssoc.hpp"
 
 namespace net::ancillarycat::loxograph {
 
 class Environment : public utils::Printable,
                     public std::enable_shared_from_this<Environment> {
 public:
-  using eval_result_t = evaluation::ScopeEnvironment::eval_result_t;
-  using string_view_type = evaluation::ScopeEnvironment::string_view_type;
-  using scope_env_t = evaluation::ScopeEnvironment;
+  using eval_result_t = evaluation::ScopeAssoc::eval_result_t;
+  using string_view_type = evaluation::ScopeAssoc::string_view_type;
+  using scope_env_t = evaluation::ScopeAssoc;
   using scope_env_ptr_t = std::shared_ptr<scope_env_t>;
   using self_type = Environment;
 
@@ -48,8 +48,16 @@ private:
 };
 auto Environment::find(this auto &&self, const string_type &name)
     -> decltype(self.current->find(name)) {
-  if (auto it = self.current->find(name))
+  if (auto it = self.current->find(name)) {
+    dbg_block(if (self.parent.expired()) return nullptr;
+              if (auto another_it = self.parent.lock()->find(name)) {
+                dbg(warn,
+                    "variable '{}' is shadowed; previously declared at line {}",
+                    name,
+                    (*another_it)->second.second);
+              })
     return {it};
+  }
 
   if (auto enclosing = self.parent.lock())
     return enclosing->find(name);

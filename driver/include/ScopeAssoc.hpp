@@ -14,7 +14,7 @@
 #include "Evaluatable.hpp"
 
 namespace net::ancillarycat::loxograph::evaluation {
-class ScopeEnvironment : utils::Printable {
+class ScopeAssoc : utils::Printable {
   friend class ::net::ancillarycat::loxograph::Environment;
 
 public:
@@ -26,8 +26,8 @@ public:
       std::unordered_map<string_type, std::pair<eval_result_t, uint_least32_t>>;
 
 public:
-  constexpr ScopeEnvironment() = default;
-  virtual ~ScopeEnvironment() override = default;
+  constexpr ScopeAssoc() = default;
+  virtual ~ScopeAssoc() override = default;
 
 private:
   auto add(const string_type &, const eval_result_t &, uint_least32_t)
@@ -42,7 +42,7 @@ private:
   auto to_string_impl(const utils::FormatPolicy &) const
       -> string_type override;
 };
-auto ScopeEnvironment::find(this auto &&self, const string_type &name)
+auto ScopeAssoc::find(this auto &&self, const string_type &name)
     -> std::optional<decltype(self.associations.find(name))> {
   if (auto it = self.associations.find(name); it != self.associations.end())
     return it;
