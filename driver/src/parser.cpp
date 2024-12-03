@@ -75,7 +75,7 @@ auto parser::next_expression() -> expr_ptr_t { // NOLINT(misc-no-recursion)
 auto parser::assignment() -> expr_ptr_t { // NOLINT(misc-no-recursion)
   auto expr = logical_or();
   if (inspect(kEqual)) {
-    auto eq_op = get();
+    auto eq_op = this->get();
     auto res = assignment();
     if (auto var_name = std::dynamic_pointer_cast<expression::Variable>(expr)) {
       return std::make_shared<expression::Assignment>(var_name->name, res);
@@ -87,7 +87,7 @@ auto parser::assignment() -> expr_ptr_t { // NOLINT(misc-no-recursion)
 auto parser::logical_or() -> expr_ptr_t { // NOLINT(misc-no-recursion)
   auto expr = logical_and();
   while (inspect(kOr)) {
-    auto or_op = get();
+    auto or_op = this->get();
     auto rhs = logical_or();
     // FIXME: move myself and reassign it??? is it legal?
     expr = std::make_shared<expression::Logical>(
@@ -98,7 +98,7 @@ auto parser::logical_or() -> expr_ptr_t { // NOLINT(misc-no-recursion)
 auto parser::logical_and() -> expr_ptr_t { // NOLINT(misc-no-recursion)
   auto expr = equality();
   while (inspect(kAnd)) {
-    auto eq_op = get();
+    auto eq_op = this->get();
     auto rhs = equality();
     expr = std::make_shared<expression::Logical>(
         std::move(eq_op), std::move(expr), std::move(rhs));
@@ -108,7 +108,7 @@ auto parser::logical_and() -> expr_ptr_t { // NOLINT(misc-no-recursion)
 auto parser::equality() -> expr_ptr_t { // NOLINT(misc-no-recursion)
   auto equalityExpr = comparison();
   while (inspect(kEqualEqual, kBangEqual)) {
-    auto op = get();
+    auto op = this->get();
     auto rhs = comparison();
     equalityExpr = std::make_shared<expression::Binary>(op, equalityExpr, rhs);
   }
@@ -117,7 +117,7 @@ auto parser::equality() -> expr_ptr_t { // NOLINT(misc-no-recursion)
 auto parser::comparison() -> expr_ptr_t { // NOLINT(misc-no-recursion)
   auto comparisonExpr = term();
   while (inspect(kGreater, kGreaterEqual, kLess, kLessEqual)) {
-    auto op = get();
+    auto op = this->get();
     auto rhs = term();
     comparisonExpr =
         std::make_shared<expression::Binary>(op, comparisonExpr, rhs);
@@ -127,7 +127,7 @@ auto parser::comparison() -> expr_ptr_t { // NOLINT(misc-no-recursion)
 auto parser::term() -> expr_ptr_t { // NOLINT(misc-no-recursion)
   auto termExpr = factor();
   while (inspect(kMinus, kPlus)) {
-    auto op = get();
+    auto op = this->get();
     auto rhs = factor();
     termExpr = std::make_shared<expression::Binary>(op, termExpr, rhs);
   }
@@ -136,7 +136,7 @@ auto parser::term() -> expr_ptr_t { // NOLINT(misc-no-recursion)
 auto parser::factor() -> expr_ptr_t { // NOLINT(misc-no-recursion)
   auto factorExpr = unary();
   while (inspect(kSlash, kStar)) {
-    auto op = get();
+    auto op = this->get();
     auto rhs = unary();
     factorExpr = std::make_shared<expression::Binary>(op, factorExpr, rhs);
   }
@@ -144,7 +144,7 @@ auto parser::factor() -> expr_ptr_t { // NOLINT(misc-no-recursion)
 }
 auto parser::unary() -> expr_ptr_t { // NOLINT(misc-no-recursion)
   if (inspect(kBang, kMinus)) {
-    auto op = get();
+    auto op = this->get();
     auto rhs = unary();
     return std::make_shared<expression::Unary>(op, rhs);
   }
@@ -167,7 +167,7 @@ auto parser::primary() -> expr_ptr_t { // NOLINT(misc-no-recursion)
   ///  where's keyword??????????????
   ///     ^^^^^^ solved: shoud not appera here and was already handled in lexer.
   if (inspect(kLeftParen)) {
-    get();
+    this->get();
     auto expr = next_expression();
     if (!inspect(kRightParen)) {
       // invalid evaluation reached
@@ -178,7 +178,7 @@ auto parser::primary() -> expr_ptr_t { // NOLINT(misc-no-recursion)
       // if (is_at_end()) {
       //
       // } else if (inspect(kSemicolon)) {
-      //   get();
+      //   this->get();
       // } else {
       //   dbg(critical, "unreachable code reached: {}", LOXOGRAPH_STACKTRACE);
       //   contract_assert(false);
@@ -186,7 +186,7 @@ auto parser::primary() -> expr_ptr_t { // NOLINT(misc-no-recursion)
       throw synchronize(
           {parse_error::kMissingParenthesis, "Expect expression."});
     }
-    get();
+    this->get();
     return std::make_shared<expression::Grouping>(expr);
   }
   // invalid evaluation reached
@@ -194,85 +194,148 @@ auto parser::primary() -> expr_ptr_t { // NOLINT(misc-no-recursion)
 }
 auto parser::next_declaration() -> stmt_ptr_t { // NOLINT(misc-no-recursion)
   if (inspect(kVar)) {
-    get();
+    this->get();
     return var_decl();
   }
   return next_statement();
 }
 auto parser::var_decl() -> stmt_ptr_t {
 
-  if (peek().type.type != kIdentifier) {
+  if (!peek().is_type(kIdentifier)) {
     contract_assert(false);
     TODO("not implemented");
   }
-  auto var_tok = get();
+  auto var_tok = this->get();
   expr_ptr_t initializer = nullptr;
   if (inspect(kEqual)) {
-    get();
+    this->get();
     initializer = next_expression();
   }
-  if (inspect(kSemicolon)) {
-    get();
-    return std::make_shared<statement::Variable>(std::move(var_tok),
-                                                 initializer);
+  if (!inspect(kSemicolon)) {
+    throw synchronize({parse_error::kUnknownError, "Expect expression."});
   }
-  throw synchronize({parse_error::kUnknownError, "Expect expression."});
+  this->get();
+  return std::make_shared<statement::Variable>(std::move(var_tok),
+                                               std::move(initializer));
 }
-auto parser::if_stmt() -> stmt_ptr_t { // NOLINT(misc-no-recursion)
+auto parser::get_condition() -> expr_ptr_t {
   if (!inspect(kLeftParen)) {
     throw synchronize({parse_error::kMissingParenthesis, "Expect '('."});
   }
-  get();
+  this->get();
   auto condition = next_expression();
   if (!inspect(kRightParen)) {
     throw synchronize({parse_error::kMissingParenthesis, "Expect ')'."});
   }
-  get();
+  this->get();
+  return condition;
+}
+auto parser::if_stmt() -> stmt_ptr_t { // NOLINT(misc-no-recursion)
+  auto condition = get_condition();
   auto then_branch = next_statement();
   stmt_ptr_t else_branch = nullptr;
   if (inspect(kElse)) {
-    get();
+    this->get();
     else_branch = next_statement();
   }
   return std::make_shared<statement::If>(
       std::move(condition), std::move(then_branch), std::move(else_branch));
 }
+auto parser::block_stmt() -> stmt_ptr_t {
+  stmt_ptrs_t statements;
+  while (!inspect(kRightBrace) && !is_at_end()) {
+    statements.emplace_back(next_declaration());
+  }
+  if (!inspect(kRightBrace)) {
+    throw synchronize({parse_error::kMissingBrace, "Expect '}'."});
+  }
+  this->get();
+  return std::make_shared<statement::Block>(std::move(statements));
+}
+auto parser::while_stmt() -> stmt_ptr_t {
+  auto condition = get_condition();
+  auto body = next_statement();
+  return std::make_shared<statement::While>(std::move(condition),
+                                            std::move(body));
+}
+auto parser::for_stmt() -> stmt_ptr_t {
+  if (!inspect(kLeftParen)) {
+    throw synchronize({parse_error::kMissingParenthesis, "Expect '('."});
+  }
+  this->get();
+  stmt_ptr_t initializer = nullptr;
+  if (inspect(kVar)) {
+    this->get();
+    initializer = var_decl();
+  } else if (inspect(kSemicolon)) {
+    // consume the semicolon
+    this->get();
+  } else {
+    initializer = expr_stmt();
+  }
+  /// @note ^^^^^^ actually C's grammar was more relaxed and allows for any
+  ///   declaration or statement in the initializer part of the for loop.
+  ///   here we only allow for variable declaration or expression statement.
+
+  // else, no initializer
+  expr_ptr_t condition = nullptr;
+  if (!inspect(kSemicolon)) {
+    condition = next_expression();
+  }
+  if (!inspect(kSemicolon)) {
+    throw synchronize({parse_error::kUnknownError, "Expect ';'."});
+  }
+  this->get();
+  expr_ptr_t increment = nullptr;
+  if (!inspect(kRightParen)) {
+    increment = next_expression();
+  }
+  if (!inspect(kRightParen)) {
+    throw synchronize({parse_error::kMissingParenthesis, "Expect ')'."});
+  }
+  this->get();
+  auto body = next_statement();
+  return std::make_shared<statement::For>(std::move(initializer),
+                                          std::move(condition),
+                                          std::move(increment),
+                                          std::move(body));
+}
 auto parser::print_stmt() -> stmt_ptr_t {
   auto value = next_expression();
-  if (inspect(kSemicolon)) {
-    get();
-    return std::make_shared<statement::Print>(std::move(value));
+  if (!inspect(kSemicolon)) {
+    throw synchronize({parse_error::kUnknownError, "Expect expression."});
   }
-  throw synchronize({parse_error::kUnknownError, "Expect expression."});
+  this->get();
+  return std::make_shared<statement::Print>(std::move(value));
 }
 auto parser::expr_stmt() -> stmt_ptr_t {
   auto expr = next_expression();
-  if (inspect(kSemicolon)) {
-    get();
-    return std::make_shared<statement::Expression>(std::move(expr));
+  if (!inspect(kSemicolon)) {
+    throw synchronize({parse_error::kUnknownError, "Expect expression."});
   }
-  throw synchronize({parse_error::kUnknownError, "Expect expression."});
+  this->get();
+  return std::make_shared<statement::Expression>(std::move(expr));
 }
 auto parser::next_statement() -> stmt_ptr_t { // NOLINT(misc-no-recursion)
   if (inspect(kPrint)) {
-    get();
+    this->get();
     return print_stmt();
   }
   if (inspect(kLeftBrace)) {
-    get();
-    stmt_ptrs_t statements;
-    while (!inspect(kRightBrace) && !is_at_end()) {
-      statements.emplace_back(next_declaration());
-    }
-    if (inspect(kRightBrace)) {
-      get();
-      return std::make_shared<statement::Block>(std::move(statements));
-    }
-    throw synchronize({parse_error::kMissingBrace, "Expect '}'."});
+    this->get();
+    return block_stmt();
   }
   if (inspect(kIf)) {
-    get();
+    this->get();
     return if_stmt();
+  }
+  if (inspect(kWhile)) {
+    this->get();
+    return while_stmt();
+  }
+  if (inspect(kFor)) {
+    this->get();
+    return for_stmt();
   }
   return expr_stmt();
 }
@@ -280,7 +343,7 @@ auto parser::synchronize(const parse_error &parse_error) -> expr_ptr_t {
   /// advance until we have a semicolon
   // cueerntly cursor is at the error token: peek() returns the error token,
   // get() returns the error token and advances the cursor
-  auto error_token = get();
+  auto error_token = this->get();
   dbg(warn,
       "error at '{}'",
       error_token.to_string(utils::FormatPolicy::kTokenOnly));
@@ -289,7 +352,7 @@ auto parser::synchronize(const parse_error &parse_error) -> expr_ptr_t {
   while (!is_at_end() && !inspect(kSemicolon)) {
     dbg_block(auto discarded_token = peek();
               dbg(warn, "discarding {}", discarded_token););
-    get();
+    this->get();
   }
   return error_expr;
 }

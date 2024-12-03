@@ -35,6 +35,11 @@ public:
   virtual ~Variant() override = default;
 
 public:
+  auto set(Variant &&that = {}) noexcept -> Variant & {
+    my_variant = std::move(that.my_variant);
+    that.my_variant.template emplace<Monostate>();
+    return *this;
+  }
   template <typename Callable>
   auto visit(this auto &&self, Callable &&callable) -> decltype(auto) {
     using ReturnType = decltype(std::forward<Callable>(callable)(
@@ -60,6 +65,15 @@ public:
   auto emplace(Args &&...args) -> decltype(auto) {
     return my_variant.template emplace<Args...>(std::forward<Args>(args)...);
   }
+  template <typename... Args>
+    requires requires {
+      std::declval<variant_type>().template emplace<Args...>(
+          std::declval<Args>()...);
+    }
+  auto emplace_and_then(Args &&...args) -> decltype(auto) {
+    my_variant.template emplace<Args...>(std::forward<Args>(args)...);
+    return *this;
+  }
   template <typename Args>
     requires requires { std::declval<variant_type>().template emplace<Args>(); }
   constexpr auto
@@ -74,12 +88,14 @@ public:
     my_variant.swap(that.my_variant);
     return *this;
   }
-  constexpr auto clear(this auto&& self) noexcept(noexcept(self.my_variant.template emplace<Monostate>()))
-      -> decltype(auto) {
+  constexpr auto clear(this auto &&self) noexcept(noexcept(
+      self.my_variant.template emplace<Monostate>())) -> decltype(auto) {
     self.my_variant.template emplace<Monostate>();
     return self;
   }
-  constexpr auto empty() const noexcept -> bool { return my_variant.index() == 0; }
+  constexpr auto empty() const noexcept -> bool {
+    return my_variant.index() == 0;
+  }
   auto underlying_string(const FormatPolicy &format_policy =
                              FormatPolicy::kDefault) const -> string_type {
     return this->visit([&](const auto &value) -> string_type {
@@ -118,8 +134,8 @@ private:
   friend inline constexpr auto get(const Variant<MyTypes...> &v)
       -> decltype(auto);
 };
-/// @brief check if the variant holds a specific type; a wrapper around @link
-/// std::holds_alternative @endlink
+/// @brief check if the variant holds a specific type;
+///  a wrapper around @link std::holds_alternative @endlink
 template <class Ty, class... MyTypes>
 inline constexpr bool holds_alternative(const Variant<MyTypes...> &v) noexcept {
   return std::holds_alternative<Ty>(v.get());

@@ -48,21 +48,48 @@ TEST(ctrl, if4) {
             "drinking (US): true\n");
   EXPECT_EQ(callback, 0);
 }
-TEST(ctrl, logical1){
+TEST(ctrl, logical1) {
   const auto path = R"(Z:\loxograph\examples\ctrl.logical1.lox)";
   auto [callback, str] = get_result(path);
   EXPECT_EQ(str, "baz\nbaz\nworld\nbar\nbar\n");
   EXPECT_EQ(callback, 0);
 }
-TEST(ctrl, logical2){
+TEST(ctrl, logical2) {
   const auto path = R"(Z:\loxograph\examples\ctrl.logical2.lox)";
   auto [callback, str] = get_result(path);
   EXPECT_EQ(str, "41\n41\ntrue\nfalse\nfalse\ntrue\n");
   EXPECT_EQ(callback, 0);
 }
-TEST(ctrl, logical3){
+TEST(ctrl, logical3) {
   const auto path = R"(Z:\loxograph\examples\ctrl.logical3.lox)";
   auto [callback, str] = get_result(path);
   EXPECT_EQ(str, "false\ntrue\n");
+  EXPECT_EQ(callback, 0);
+}
+TEST(ctrl, logical4) {
+  const auto path = R"(Z:\loxograph\examples\ctrl.logical4.lox)";
+  auto [callback, str] = get_result(path);
+  EXPECT_EQ(str, "hello\nbaz\nbaz\nbar\n");
+  EXPECT_EQ(callback, 0);
+}
+
+TEST(ctrl, while1) {
+  const auto path = R"(Z:\loxograph\examples\ctrl.while1.lox)";
+  auto [callback, str] = get_result(path);
+  EXPECT_EQ(str, "1\n2\n3\n");
+  EXPECT_EQ(callback, 0);
+}
+
+TEST(ctrl, while2) {
+  const auto path = R"(Z:\loxograph\examples\ctrl.while2.lox)";
+  auto [callback, str] = get_result(path);
+  EXPECT_EQ(str, "Product of numbers 1 to 5: \n120\n");
+  EXPECT_EQ(callback, 0);
+}
+
+TEST(ctrl, while3) {
+  const auto path = R"(Z:\loxograph\examples\ctrl.while3.lox)";
+  auto [callback, str] = get_result(path);
+  EXPECT_EQ(str, "0\n1\n1\n2\n3\n5\n8\n13\n21\n34\n");
   EXPECT_EQ(callback, 0);
 }

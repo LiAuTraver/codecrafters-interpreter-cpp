@@ -52,7 +52,7 @@ public:
 
 private:
   stmt_result_t accept_impl(const StmtVisitor &) const override;
-  auto to_string_impl(const utils::FormatPolicy &format_policy) const
+  auto to_string_impl(const utils::FormatPolicy &) const
       -> string_type override;
 };
 class Print : public Stmt {
@@ -67,7 +67,7 @@ public:
 
 private:
 private:
-  auto to_string_impl(const utils::FormatPolicy &format_policy) const
+  auto to_string_impl(const utils::FormatPolicy &) const
       -> string_type override;
   stmt_result_t accept_impl(const StmtVisitor &) const override;
 };
@@ -83,7 +83,7 @@ public:
 
 private:
 private:
-  auto to_string_impl(const utils::FormatPolicy &format_policy) const
+  auto to_string_impl(const utils::FormatPolicy &) const
       -> string_type override;
   stmt_result_t accept_impl(const StmtVisitor &) const override;
 };
@@ -98,7 +98,7 @@ public:
   std::vector<std::shared_ptr<Stmt>> statements{};
 
 private:
-  auto to_string_impl(const utils::FormatPolicy &format_policy) const
+  auto to_string_impl(const utils::FormatPolicy &) const
       -> string_type override;
   stmt_result_t accept_impl(const StmtVisitor &) const override;
 };
@@ -119,9 +119,49 @@ public:
   std::shared_ptr<Stmt> else_branch = nullptr; // needed to set to nullptr
 
 private:
-  auto to_string_impl(const utils::FormatPolicy &format_policy) const
+  auto to_string_impl(const utils::FormatPolicy &) const
       -> string_type override;
   auto accept_impl(const StmtVisitor &) const -> stmt_result_t override;
+};
+
+class While : public Stmt {
+public:
+  constexpr While() = default;
+  explicit While(std::shared_ptr<expression::Expr> &&condition,
+                 std::shared_ptr<Stmt> &&body)
+      : condition(std::move(condition)), body(std::move(body)) {}
+  virtual ~While() = default;
+
+public:
+  std::shared_ptr<expression::Expr> condition = nullptr;
+  std::shared_ptr<Stmt> body = nullptr;
+
+private:
+  auto to_string_impl(const utils::FormatPolicy &) const
+      -> string_type override;
+  auto accept_impl(const StmtVisitor &) const -> stmt_result_t override;
+};
+class For : public Stmt {
+public:
+  constexpr For() = default;
+  explicit For(std::shared_ptr<Stmt> &&initializer,
+               std::shared_ptr<expression::Expr> &&condition,
+               std::shared_ptr<expression::Expr> &&increment,
+               std::shared_ptr<Stmt> &&body)
+      : initializer(std::move(initializer)), condition(std::move(condition)),
+        increment(std::move(increment)), body(std::move(body)) {}
+  virtual ~For() = default;
+
+public:
+  std::shared_ptr<Stmt> initializer = nullptr;
+  std::shared_ptr<expression::Expr> condition = nullptr;
+  std::shared_ptr<expression::Expr> increment = nullptr;
+  std::shared_ptr<Stmt> body = nullptr;
+
+private:
+  auto to_string_impl(const utils::FormatPolicy &) const
+      -> string_type override;
+  stmt_result_t accept_impl(const StmtVisitor &) const override;
 };
 class IllegalStmt : public Stmt, utils::Viewable {
 public:
