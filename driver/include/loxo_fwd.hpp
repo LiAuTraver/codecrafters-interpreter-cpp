@@ -64,6 +64,7 @@ class Binary;
 class Grouping;
 class Variable;
 class Assignment;
+class Logical;
 class IllegalExpr;
 
 class ExprVisitor;

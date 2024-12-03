@@ -81,7 +81,9 @@
 				"CMAKE_TOOLCHAIN_FILE": {
 					"value": "M:/vcpkg/scripts/buildsystems/vcpkg.cmake",
 					"type": "FILEPATH"
-				}
+				},
+        "VCPKG_MANIFEST_MODE": "OFF",
+        "VCPKG_MANIFEST_INSTALL": "OFF"
 			}
 		},
 		{

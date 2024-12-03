@@ -55,6 +55,8 @@ public:
 private:
   auto next_expression() -> expr_ptr_t;
   auto assignment() -> expr_ptr_t;
+  auto logical_or() -> expr_ptr_t;
+  auto logical_and() -> expr_ptr_t;
   auto equality() -> expr_ptr_t;
   auto comparison() -> expr_ptr_t;
   auto term() -> expr_ptr_t;

@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <memory>
 #include <utility>
 
@@ -47,8 +48,7 @@ auto parser::parse(const ParsePolicy &parse_policy) -> utils::Status try {
       stmts.emplace_back(next_declaration());
     }
   } else {
-    contract_assert(false);
-    dbg(critical, "unreachable code reached: {}", LOXOGRAPH_STACKTRACE);
+    contract_assert(false, 0, "unknown parse policy.");
   }
   return utils::OkStatus();
 } catch (const expr_ptr_t &expr) {
@@ -73,15 +73,35 @@ auto parser::next_expression() -> expr_ptr_t { // NOLINT(misc-no-recursion)
   return assignment();
 }
 auto parser::assignment() -> expr_ptr_t { // NOLINT(misc-no-recursion)
-  auto expr = equality();
+  auto expr = logical_or();
   if (inspect(kEqual)) {
     auto eq_op = get();
     auto res = assignment();
     if (auto var_name = std::dynamic_pointer_cast<expression::Variable>(expr)) {
       return std::make_shared<expression::Assignment>(var_name->name, res);
     }
-    contract_assert(false, 0, "expect a variable in assignment.");
     throw synchronize({parse_error::kUnknownError, "Expect variable name."});
+  }
+  return expr;
+}
+auto parser::logical_or() -> expr_ptr_t { // NOLINT(misc-no-recursion)
+  auto expr = logical_and();
+  while (inspect(kOr)) {
+    auto or_op = get();
+    auto rhs = logical_or();
+    // FIXME: move myself and reassign it??? is it legal?
+    expr = std::make_shared<expression::Logical>(
+        std::move(or_op), std::move(expr), std::move(rhs));
+  }
+  return expr;
+}
+auto parser::logical_and() -> expr_ptr_t { // NOLINT(misc-no-recursion)
+  auto expr = equality();
+  while (inspect(kAnd)) {
+    auto eq_op = get();
+    auto rhs = equality();
+    expr = std::make_shared<expression::Logical>(
+        std::move(eq_op), std::move(expr), std::move(rhs));
   }
   return expr;
 }
@@ -89,9 +109,8 @@ auto parser::equality() -> expr_ptr_t { // NOLINT(misc-no-recursion)
   auto equalityExpr = comparison();
   while (inspect(kEqualEqual, kBangEqual)) {
     auto op = get();
-    auto right = comparison();
-    equalityExpr =
-        std::make_shared<expression::Binary>(op, equalityExpr, right);
+    auto rhs = comparison();
+    equalityExpr = std::make_shared<expression::Binary>(op, equalityExpr, rhs);
   }
   return equalityExpr;
 }
@@ -99,9 +118,9 @@ auto parser::comparison() -> expr_ptr_t { // NOLINT(misc-no-recursion)
   auto comparisonExpr = term();
   while (inspect(kGreater, kGreaterEqual, kLess, kLessEqual)) {
     auto op = get();
-    auto right = term();
+    auto rhs = term();
     comparisonExpr =
-        std::make_shared<expression::Binary>(op, comparisonExpr, right);
+        std::make_shared<expression::Binary>(op, comparisonExpr, rhs);
   }
   return comparisonExpr;
 }
@@ -109,8 +128,8 @@ auto parser::term() -> expr_ptr_t { // NOLINT(misc-no-recursion)
   auto termExpr = factor();
   while (inspect(kMinus, kPlus)) {
     auto op = get();
-    auto right = factor();
-    termExpr = std::make_shared<expression::Binary>(op, termExpr, right);
+    auto rhs = factor();
+    termExpr = std::make_shared<expression::Binary>(op, termExpr, rhs);
   }
   return termExpr;
 }
@@ -118,16 +137,16 @@ auto parser::factor() -> expr_ptr_t { // NOLINT(misc-no-recursion)
   auto factorExpr = unary();
   while (inspect(kSlash, kStar)) {
     auto op = get();
-    auto right = unary();
-    factorExpr = std::make_shared<expression::Binary>(op, factorExpr, right);
+    auto rhs = unary();
+    factorExpr = std::make_shared<expression::Binary>(op, factorExpr, rhs);
   }
   return factorExpr;
 }
 auto parser::unary() -> expr_ptr_t { // NOLINT(misc-no-recursion)
   if (inspect(kBang, kMinus)) {
     auto op = get();
-    auto right = unary();
-    return std::make_shared<expression::Unary>(op, right);
+    auto rhs = unary();
+    return std::make_shared<expression::Unary>(op, rhs);
   }
   return primary();
 }
@@ -147,13 +166,6 @@ auto parser::primary() -> expr_ptr_t { // NOLINT(misc-no-recursion)
   }
   ///  where's keyword??????????????
   ///     ^^^^^^ solved: shoud not appera here and was already handled in lexer.
-  // {
-  // // codecafter's test does not need quotes around strings, so remove them
-  // auto token = get();
-  // token.lexeme = token.lexeme.substr(1, token.lexeme.size() - 2);
-  // return std::make_shared<Literal>(token);
-  //
-  // }
   if (inspect(kLeftParen)) {
     get();
     auto expr = next_expression();

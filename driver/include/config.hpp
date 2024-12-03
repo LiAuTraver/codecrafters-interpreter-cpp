@@ -96,11 +96,11 @@ struct ::fmt::formatter<::std::stacktrace> : ::fmt::formatter<::std::string> {
 #  define LOXOGRAPH_DEBUG_LOGGING(_level_, _msg_, ...)                         \
     ::spdlog::_level_(_msg_, ##__VA_ARGS__);
 #  define LOXOGRAPH_DEBUG_BLOCK(...)                                           \
-    const auto LOXOGRAPH_EXPAND_COUNTER(_loxograph_debug_block_at) = [&]()     \
-        -> std::nullptr_t {                                                    \
-          __VA_ARGS__                                                          \
-          return nullptr;                                                      \
-        }();
+    const auto LOXOGRAPH_EXPAND_COUNTER(_loxograph_debug_block_at) =           \
+        [&]() -> std::nullptr_t {                                              \
+      __VA_ARGS__                                                              \
+      return nullptr;                                                          \
+    }();
 #  define LOXOGRAPH_DEBUG_ONLY(...) __VA_ARGS__
 #  ifdef GTEST_API_
 // set the pattern with prefix `loxo` in yellow color.
@@ -126,8 +126,11 @@ struct ::fmt::formatter<::std::stacktrace> : ::fmt::formatter<::std::string> {
 #if defined(__RESHARPER__) || not defined(__PRETTY_FUNCTION__)
 /// @note it seems that resharper languege server can't get through this
 /// __PRETTY_FUNCTION__ macro when compiler was set to clang++.
-// NOLINTNEXTLINE
-#  define __PRETTY_FUNCTION__ __FUNCSIG__
+#  if defined(__FUNCSIG__) // NOLINTNEXTLINE
+#    define __PRETTY_FUNCTION__ __FUNCSIG__
+#  else // NOLINTNEXTLINE
+#    define __PRETTY_FUNCTION__ __func__
+#  endif
 #endif
 #ifdef __clang__
 #  define LOXOGRAPH_FORCEINLINE [[clang::always_inline]]
@@ -148,7 +151,7 @@ struct ::fmt::formatter<::std::stacktrace> : ::fmt::formatter<::std::string> {
 #  define LOXOGRAPH_DEBUG_FUNCTION_NAME __func__
 #endif
 #ifdef LOXOGRAPH_DEBUG_ENABLED
-#include <source_location>
+#  include <source_location>
 #  define LOXOGRAPH_AMBIGUOUS_ELSE_BLOCKER                                     \
     switch (0)                                                                 \
     case 0:                                                                    \
@@ -236,7 +239,7 @@ struct ::fmt::formatter<::std::stacktrace> : ::fmt::formatter<::std::string> {
       //! preprocessor sometimes.
 #  define LOXOGRAPH_RUNTIME_REQUIRE_IMPL_WITH_MSG(x, y, _msg_)                 \
     LOXOGRAPH_AMBIGUOUS_ELSE_BLOCKER                                           \
-    if (x)                                                                     \
+    if ((x) == (y))                                                            \
       ;                                                                        \
     else {                                                                     \
       LOXOGRAPH_PRINT_ERROR_MSG(x, y, _msg_)                                   \
@@ -348,13 +351,15 @@ struct ::fmt::formatter<::std::stacktrace> : ::fmt::formatter<::std::string> {
 #define dbg_only(...) LOXOGRAPH_DEBUG_ONLY(__VA_ARGS__)
 // if exception was disabled, do nothing.
 #if defined(__cpp_exceptions) && __cpp_exceptions
-#include <stdexcept>
-#  define TODO(...) throw ::std::logic_error(std::format("TODO: " #__VA_ARGS__));
+#  include <stdexcept>
+#  define TODO(...)                                                            \
+    throw ::std::logic_error(std::format("TODO: " #__VA_ARGS__));
 #elif __has_include(<spdlog/spdlog.h>)
 #  define TODO(...) LOXOGRAPH_DEBUG_LOGGING(critical, "TODO: " #__VA_ARGS__);
 #else
-#include <iostream>
-#  define TODO(...) ::std::cerr << std::format("TODO: " #__VA_ARGS__) << ::std::endl;
+#  include <iostream>
+#  define TODO(...)                                                            \
+    ::std::cerr << std::format("TODO: " #__VA_ARGS__) << ::std::endl;
 #endif
 
 #if defined(_MSC_VER) && !defined(__clang__)

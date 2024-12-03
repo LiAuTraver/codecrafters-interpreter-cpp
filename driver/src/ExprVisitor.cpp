@@ -37,6 +37,11 @@ ASTPrinter::visit_impl(const Assignment &expr) const {
   oss << expr << std::endl;
   return {};
 }
+ASTPrinter::eval_result_t ASTPrinter::visit_impl(const Logical &expr) const {
+  dbg(info, "Logical: {}", expr.to_string());
+  oss << expr << std::endl;
+  return {};
+}
 auto ASTPrinter::evaluate_impl(const Expr &expr) const -> utils::Status {
   const_cast<eval_result_t&>(res) =  expr.accept(*this);
   return utils::Status::kOkStatus;

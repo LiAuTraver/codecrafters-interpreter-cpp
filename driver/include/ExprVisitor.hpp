@@ -38,6 +38,7 @@ private:
   virtual eval_result_t visit_impl(const Grouping &) const = 0;
   virtual eval_result_t visit_impl(const Variable &) const = 0;
   virtual eval_result_t visit_impl(const Assignment &) const = 0;
+  virtual eval_result_t visit_impl(const Logical &) const = 0;
   virtual eval_result_t visit_impl(const IllegalExpr &) const = 0;
   virtual utils::Status evaluate_impl(const Expr &) const = 0;
   virtual eval_result_t get_result_impl() const = 0;
@@ -63,6 +64,9 @@ private:
   virtual eval_result_t visit_impl(const Variable &) const override {
     return {};
   }
+  virtual eval_result_t visit_impl(const Logical &) const override {
+    return {};
+  }
 
 private:
   auto to_string_impl(const utils::FormatPolicy &format_policy) const
@@ -73,6 +77,7 @@ private:
     return utils::InvalidArgument("dummy visitor");
   }
   eval_result_t get_result_impl() const override { return {}; }
+
 private:
 } inline static const _dummy_visitor;
 /// @implements ExprVisitor
@@ -92,6 +97,7 @@ private:
   virtual eval_result_t visit_impl(const Grouping &) const override;
   virtual eval_result_t visit_impl(const Variable &) const override;
   virtual eval_result_t visit_impl(const Assignment &) const override;
+  virtual eval_result_t visit_impl(const Logical &) const override;
   virtual eval_result_t visit_impl(const IllegalExpr &) const override;
   virtual utils::Status evaluate_impl(const Expr &) const override;
   virtual string_type

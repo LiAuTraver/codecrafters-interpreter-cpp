@@ -1,31 +1,33 @@
 #include <concepts>
+
+#include <map>
+#include <utility>
 #include <memory>
 #include <typeinfo>
 
 #include "Evaluatable.hpp"
+#include "Monostate.hpp"
+#include "TokenType.hpp"
 #include "config.hpp"
 #include "statement.hpp"
 #include "status.hpp"
 #include "utils.hpp"
 #include "loxo_fwd.hpp"
-
 #include "expression.hpp"
 #include "interpreter.hpp"
-
 #include "Variant.hpp"
-
-#include <map>
 
 namespace net::ancillarycat::loxograph {
 using utils::match;
+using enum TokenType::type_t;
 utils::Status interpreter::interpret(
     const std::span<std::shared_ptr<statement::Stmt>> stmts) const {
-  for (const auto &stmt : stmts) {
+  for (const auto &stmt : stmts)
     if (auto eval_res = execute(*stmt); !eval_res.ok()) {
-      this->expr_res.emplace<utils::Monostate>();
+      this->expr_res.clear();
       return eval_res;
     }
-  }
+
   return utils::OkStatus();
 }
 evaluation::Boolean
@@ -77,11 +79,11 @@ auto interpreter::visit_impl(const statement::Variable &stmt) const
     // string view failed again; not null-terminated
     auto res = env->add(
         stmt.name.to_string(utils::kTokenOnly), expr_res, stmt.name.line);
-    expr_res.emplace<utils::Monostate>();
+    expr_res.clear();
     return res;
   }
   // if no initializer, it's a nil value.
-  expr_res.emplace<utils::Monostate>();
+  expr_res.clear();
   return env->add(stmt.name.to_string(utils::kTokenOnly),
                   evaluation::NilValue,
                   stmt.name.line);
@@ -91,7 +93,7 @@ auto interpreter::visit_impl(const statement::Print &stmt) const
   if (auto eval_res = evaluate(*stmt.value); !eval_res.ok())
     return eval_res;
   stmts_res.emplace_back(expr_res);
-  expr_res.emplace<utils::Monostate>();
+  expr_res.clear();
   return utils::OkStatus();
 }
 auto interpreter::visit_impl(const statement::If &stmt) const -> utils::Status {
@@ -100,18 +102,18 @@ auto interpreter::visit_impl(const statement::If &stmt) const -> utils::Status {
   if (is_true_value(expr_res).is_true()) {
     if (auto eval_res = execute(*stmt.then_branch); !eval_res.ok())
       return eval_res;
-    expr_res.emplace<utils::Monostate>();
+    expr_res.clear();
     return utils::OkStatus();
   }
   // else we execute the else branch.
   if (stmt.else_branch) { // maybe we dont have an else branch, so check it.
     if (auto eval_res = execute(*stmt.else_branch); !eval_res.ok())
       return eval_res;
-    expr_res.emplace<utils::Monostate>();
+    expr_res.clear();
     return utils::OkStatus();
   }
   // no else branch do nothing. BUT don't forget to clear the expr_res!
-  expr_res.emplace<utils::Monostate>();
+  expr_res.clear();
   return utils::OkStatus();
 }
 auto interpreter::visit_impl(const statement::IllegalStmt &stmt) const
@@ -159,26 +161,26 @@ auto interpreter::evaluate_impl(const expression::Expr &expr) const
 auto interpreter::visit_impl(const expression::Literal &expr) const
     -> eval_result_t {
   dbg(info, "literal type: {}", expr.literal.type);
-  if (expr.literal.type.type == TokenType::kMonostate) {
+  if (expr.literal.is_type(kMonostate)) {
     dbg(critical, "should not happen.");
     contract_assert(false)
     return {};
   }
-  if (expr.literal.type == TokenType::kNil) {
+  if (expr.literal.is_type(kNil)) {
     return evaluation::Nil{expr.literal.line};
   }
-  if (expr.literal.type == TokenType::kTrue) {
+  if (expr.literal.is_type(kTrue)) {
     return evaluation::Boolean{true, expr.literal.line};
   }
-  if (expr.literal.type == TokenType::kFalse) {
+  if (expr.literal.is_type(kFalse)) {
     return evaluation::Boolean{false, expr.literal.line};
   }
-  if (expr.literal.type == TokenType::kString) {
+  if (expr.literal.is_type(kString)) {
     return evaluation::String{
         std::any_cast<string_view_type>(expr.literal.literal),
         expr.literal.line};
   }
-  if (expr.literal.type == TokenType::kNumber) {
+  if (expr.literal.is_type(kNumber)) {
     return evaluation::Number{std::any_cast<long double>(expr.literal.literal),
                               expr.literal.line};
   }
@@ -189,7 +191,7 @@ auto interpreter::visit_impl(const expression::Literal &expr) const
 auto interpreter::visit_impl(const expression::Unary &expr) const
     -> eval_result_t {
   auto inner_expr = expr.expr->accept(*this);
-  if (expr.op.type == TokenType::kMinus) {
+  if (expr.op.is_type(kMinus)) {
     if (utils::holds_alternative<evaluation::Number>(inner_expr)) {
       auto value = utils::get<evaluation::Number>(inner_expr);
       dbg(trace, "unary minus: {}", value);
@@ -197,7 +199,7 @@ auto interpreter::visit_impl(const expression::Unary &expr) const
     }
     return evaluation::Error{"Operand must be a number."s, expr.op.line};
   }
-  if (expr.op.type == TokenType::kBang) {
+  if (expr.op.is_type(kBang)) {
     auto value = is_true_value(inner_expr);
     dbg(trace, "unary bang: {}", value);
     return evaluation::Boolean{!value};
@@ -211,10 +213,10 @@ auto interpreter::visit_impl(const expression::Binary &expr) const
     -> eval_result_t {
   auto lhs = expr.left->accept(*this);
   auto rhs = expr.right->accept(*this);
-  if (expr.op.type == TokenType::kEqualEqual) {
+  if (expr.op.is_type(kEqualEqual)) {
     return is_deep_equal(lhs, rhs);
   }
-  if (expr.op.type == TokenType::kBangEqual) {
+  if (expr.op.is_type(kBangEqual)) {
     auto result = is_deep_equal(lhs, rhs);
     if (utils::holds_alternative<evaluation::Boolean>(result)) {
       return evaluation::Boolean{!utils::get<evaluation::Boolean>(result)};
@@ -234,7 +236,7 @@ auto interpreter::visit_impl(const expression::Binary &expr) const
                              expr.op.line};
   }
   if (utils::holds_alternative<evaluation::String>(lhs)) {
-    if (expr.op.type == TokenType::kPlus) {
+    if (expr.op.type == kPlus) {
       return evaluation::String{utils::get<evaluation::String>(lhs) +
                                 utils::get<evaluation::String>(rhs)};
     }
@@ -243,21 +245,21 @@ auto interpreter::visit_impl(const expression::Binary &expr) const
     auto real_lhs = utils::get<evaluation::Number>(lhs);
     auto real_rhs = utils::get<evaluation::Number>(rhs);
     switch (expr.op.type.type) {
-    case TokenType::kMinus:
+    case kMinus:
       return {evaluation::Number{real_lhs - real_rhs}};
-    case TokenType::kPlus:
+    case kPlus:
       return {evaluation::Number{real_lhs + real_rhs}};
-    case TokenType::kSlash:
+    case kSlash:
       return {evaluation::Number{real_lhs / real_rhs}};
-    case TokenType::kStar:
+    case kStar:
       return {evaluation::Number{real_lhs * real_rhs}};
-    case TokenType::kGreater:
+    case kGreater:
       return {evaluation::Boolean{real_lhs > real_rhs}};
-    case TokenType::kGreaterEqual:
+    case kGreaterEqual:
       return {evaluation::Boolean{real_lhs >= real_rhs}};
-    case TokenType::kLess:
+    case kLess:
       return {evaluation::Boolean{real_lhs < real_rhs}};
-    case TokenType::kLessEqual:
+    case kLessEqual:
       return {evaluation::Boolean{real_lhs <= real_rhs}};
     default:
       break;
@@ -273,11 +275,8 @@ auto interpreter::visit_impl(const expression::Grouping &expr) const
 }
 auto interpreter::visit_impl(const expression::Variable &expr) const
     -> eval_result_t {
-  contract_assert(!!std::any_cast<string_view_type>(&expr.name.literal),
-                  1,
-                  "variable name should be a string");
   if (auto res = env->get(expr.name.to_string(utils::FormatPolicy::kTokenOnly));
-      !utils::holds_alternative<utils::Monostate>(res))
+      !res.empty())
     return res;
 
   return {evaluation::Error{
@@ -291,17 +290,47 @@ auto interpreter::visit_impl(const expression::Assignment &expr) const
   if (!this->evaluate(*expr.value_expr).ok())
     return {evaluation::Error{"Error in assignment"s, expr.name.line}};
 
-  if (!env->reassign(expr.name.to_string(utils::FormatPolicy::kTokenOnly),
-                     expr_res,
-                     expr.name.line)
-           .ok())
-    return {evaluation::Error{
-        utils::format("Undefined variable '{}'.",
-                      expr.name.to_string(utils::FormatPolicy::kTokenOnly)),
-        expr.name.line}};
+  if (env->reassign(expr.name.to_string(utils::FormatPolicy::kTokenOnly),
+                    expr_res,
+                    expr.name.line)
+          .ok())
+    return expr_res;
 
-  return expr_res;
+  return {evaluation::Error{
+      utils::format("Undefined variable '{}'.",
+                    expr.name.to_string(utils::FormatPolicy::kTokenOnly)),
+      expr.name.line}};
 }
+auto interpreter::visit_impl(const expression::Logical &expr) const
+    -> eval_result_t {
+  return expr.left->accept(*this).visit(
+      match{[](const utils::Monostate &) -> eval_result_t {
+              contract_assert(false, 1, "should not happen");
+              return {evaluation::Error{"Error in logical expression"s, 0}};
+            },
+            [](const evaluation::Error &e) -> eval_result_t {
+              dbg(error, "error in logical expression: {}", e.to_string());
+              return {e};
+            },
+            [this, &expr](const auto &lhs) -> eval_result_t {
+              if (is_true_value(lhs).is_true()) {
+                if (expr.op.is_type(kOr))
+                  return {lhs};
+                if (expr.op.is_type(kAnd))
+                  return {expr.right->accept(*this)};
+                contract_assert(false, 1, "unimplemented logical operator");
+                return {utils::Monostate{}};
+              }
+              // left is false, evaluate right.
+              if (expr.op.is_type(kOr))
+                return {expr.right->accept(*this)};
+              if (expr.op.is_type(kAnd))
+                return {evaluation::Boolean{false, expr.op.line}};
+              contract_assert(false, 1, "unimplemented logical operator");
+              return {utils::Monostate{}};
+            }});
+}
+
 auto interpreter::visit_impl(const expression::IllegalExpr &expr) const
     -> eval_result_t {
   return evaluation::Error{"Illegal expression"s, expr.token.line};
@@ -320,17 +349,16 @@ auto interpreter::to_string_impl(const utils::FormatPolicy &format_policy) const
     -> string_type {
   dbg(info, "expr_res index: {}", expr_res.index());
   dbg(info, "stmts size: {}", stmts_res.size());
-  if (stmts_res.empty()) { // we are parse an expression, not a statement
+  if (stmts_res.empty())
+    // we are parse an expression, not a statement
     return value_to_string(format_policy, expr_res);
-  }
-  contract_assert(utils::holds_alternative<utils::Monostate>(expr_res),
-                  1,
-                  "expr_res should be empty")
+
+  contract_assert(expr_res.empty(), 1, "expr_res should be empty")
   string_type result_str;
   for (const auto &result : stmts_res)
     // TODO: temporary solution: skip newline if the result is empty(Monostate)
     if (auto str = value_to_string(format_policy, result); !str.empty())
-      result_str = result_str + std::move(str) + "\n";
+      result_str += std::move(str) + "\n";
 
   return result_str;
 }

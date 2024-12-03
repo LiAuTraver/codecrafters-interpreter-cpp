@@ -5,6 +5,7 @@
 
 #include "ScopeAssoc.hpp"
 #include "config.hpp"
+#include "expression.hpp"
 #include "utils.hpp"
 #include "loxo_fwd.hpp"
 
@@ -38,6 +39,8 @@ private:
   virtual auto visit_impl(const expression::Variable &) const
       -> eval_result_t override;
   virtual auto visit_impl(const expression::Assignment &) const
+      -> eval_result_t override;
+  virtual auto visit_impl(const expression::Logical &) const
       -> eval_result_t override;
   virtual auto visit_impl(const expression::IllegalExpr &) const
       -> eval_result_t override;

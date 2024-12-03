@@ -46,12 +46,20 @@ Grouping::to_string_impl(const utils::FormatPolicy &format_policy) const {
   /// strange print format, but codecrafter's test needs this.
   return "(group " + expr->to_string() + ")";
 }
+Expr::expr_result_t Assignment::accept_impl(const ExprVisitor &visitor) const {
+  return visitor.visit(*this);
+}
 auto Assignment::to_string_impl(const utils::FormatPolicy &format_policy) const
     -> string_type {
   TODO();
 }
-Expr::expr_result_t Assignment::accept_impl(const ExprVisitor &visitor) const {
+Expr::expr_result_t Logical::accept_impl(const ExprVisitor &visitor) const {
   return visitor.visit(*this);
+}
+auto Logical::to_string_impl(const utils::FormatPolicy &format_policy) const
+    -> string_type {
+  return "(" + left->to_string() + " " + op.to_string() + " " +
+         right->to_string() + ")";
 }
 Expr::expr_result_t IllegalExpr::accept_impl(const ExprVisitor &visitor) const {
   return visitor.visit(*this);
