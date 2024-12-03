@@ -73,6 +73,7 @@ private:
     return utils::InvalidArgument("dummy visitor");
   }
   eval_result_t get_result_impl() const override { return {}; }
+private:
 } inline static const _dummy_visitor;
 /// @implements ExprVisitor
 class LOXOGRAPH_API ASTPrinter : public ExprVisitor, public utils::Viewable {

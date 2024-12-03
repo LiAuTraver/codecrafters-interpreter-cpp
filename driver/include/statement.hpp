@@ -35,6 +35,7 @@ private:
 };
 class Variable : public Stmt {
 public:
+  // TODO: move or copy the token or reference it?
   Variable(Token name, std::shared_ptr<expression::Expr> initializer)
       : name(std::move(name)), initializer(std::move(initializer)) {}
   virtual ~Variable() override = default;
@@ -56,11 +57,13 @@ private:
 };
 class Print : public Stmt {
 public:
-  Print(std::shared_ptr<expression::Expr> value) : value(std::move(value)) {}
+  constexpr Print() = default;
+  explicit Print(std::shared_ptr<expression::Expr> &&value)
+      : value(std::move(value)) {}
   virtual ~Print() override = default;
 
 public:
-  std::shared_ptr<expression::Expr> value;
+  std::shared_ptr<expression::Expr> value = nullptr;
 
 private:
 private:
@@ -70,11 +73,13 @@ private:
 };
 class Expression : public Stmt {
 public:
-  Expression(std::shared_ptr<expression::Expr> expr) : expr(std::move(expr)) {}
+  constexpr Expression() = default;
+  explicit Expression(std::shared_ptr<expression::Expr> &&expr)
+      : expr(std::move(expr)) {}
   virtual ~Expression() override = default;
 
 public:
-  std::shared_ptr<expression::Expr> expr;
+  std::shared_ptr<expression::Expr> expr = nullptr;
 
 private:
 private:
@@ -84,7 +89,8 @@ private:
 };
 class Block : public Stmt {
 public:
-  Block(std::vector<std::shared_ptr<Stmt>> statements)
+  constexpr Block() = default;
+  explicit Block(std::vector<std::shared_ptr<Stmt>> &&statements)
       : statements(std::move(statements)) {}
   virtual ~Block() override = default;
 
@@ -95,6 +101,27 @@ private:
   auto to_string_impl(const utils::FormatPolicy &format_policy) const
       -> string_type override;
   stmt_result_t accept_impl(const StmtVisitor &) const override;
+};
+
+class If : public Stmt {
+public:
+  constexpr If() = default;
+  explicit If(std::shared_ptr<expression::Expr> &&condition,
+              std::shared_ptr<Stmt> &&then_branch,
+              std::shared_ptr<Stmt> &&else_branch)
+      : condition(std::move(condition)), then_branch(std::move(then_branch)),
+        else_branch(std::move(else_branch)) {}
+  virtual ~If() = default;
+
+public:
+  std::shared_ptr<expression::Expr> condition = nullptr;
+  std::shared_ptr<Stmt> then_branch = nullptr;
+  std::shared_ptr<Stmt> else_branch = nullptr; // needed to set to nullptr
+
+private:
+  auto to_string_impl(const utils::FormatPolicy &format_policy) const
+      -> string_type override;
+  auto accept_impl(const StmtVisitor &) const -> stmt_result_t override;
 };
 class IllegalStmt : public Stmt, utils::Viewable {
 public:

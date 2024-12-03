@@ -3,7 +3,7 @@
 #include <memory>
 #include <span>
 
-#include "ScopeEnvironment.hpp"
+#include "ScopeAssoc.hpp"
 #include "config.hpp"
 #include "utils.hpp"
 #include "loxo_fwd.hpp"
@@ -54,11 +54,13 @@ private:
       -> utils::Status override;
   virtual auto visit_impl(const statement::Print &) const
       -> utils::Status override;
-  virtual auto visit_impl(const statement::IllegalStmt &) const
-      -> utils::Status override;
   virtual auto visit_impl(const statement::Expression &) const
       -> utils::Status override;
   virtual auto visit_impl(const statement::Block &) const
+      -> utils::Status override;
+  virtual auto visit_impl(const statement::If &) const
+      -> utils::Status override;
+  virtual auto visit_impl(const statement::IllegalStmt &) const
       -> utils::Status override;
   auto execute_impl(const statement::Stmt &) const -> utils::Status override;
 

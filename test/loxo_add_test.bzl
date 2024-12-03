@@ -18,7 +18,10 @@ def loxo_add_test(name, src):
             "/Iexternal/gtest/googletest",
             "/std:c++latest",
         ],
-        defines = ["AC_CPP_DEBUG"],
+        defines = [
+          "AC_CPP_DEBUG",
+          "LIBLOXOGRAPH_SHARED",
+        ],
         includes = ["driver/include"],
         deps = [
             "//driver",

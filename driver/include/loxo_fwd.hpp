@@ -75,6 +75,7 @@ class Variable;
 class Print;
 class Expression;
 class Block;
+class If;
 class IllegalStmt;
 
 class StmtVisitor;
@@ -89,7 +90,7 @@ class Boolean;
 class Nil;
 class Error;
 
-class ScopeEnvironment;
+class ScopeAssoc;
 } // namespace evaluation
 
 using utils::operator""s;
