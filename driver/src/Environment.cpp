@@ -10,8 +10,27 @@
 
 #include "Environment.hpp"
 
+#include <memory>
+
 namespace net::ancillarycat::loxograph {
 
+auto Environment::getGlobalScopeEnv() -> utils::StatusOr<std::shared_ptr<Environment>> {
+  static auto has_init = false;
+  if (has_init) {
+    return utils::InvalidArgument("init global env twice");
+  }
+  has_init = true;
+  auto env = new Environment();
+  env->add("clock"s,
+          evaluation::Callable::create_native(
+              [](const interpreter &, evaluation::Callable::args_t &) {
+                return std::chrono::duration_cast<std::chrono::milliseconds>(
+                           std::chrono::system_clock::now().time_since_epoch())
+                    .count();
+              }))
+      .ignore_error();
+  return std::make_shared<Environment>(*env);
+}
 auto Environment::add(const string_type &name,
                       const eval_result_t &value,
                       const uint_least32_t line) -> utils::Status {

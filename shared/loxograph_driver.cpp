@@ -15,13 +15,6 @@
 #  define _Inout_
 #  define _In_opt_
 #endif
-#ifdef _WIN32
-#  include <io.h>
-#  define isatty _isatty
-#  define fileno _fileno
-#else
-#  include <unistd.h>
-#endif
 
 #include "config.hpp"
 #include "execution_context.hpp"
@@ -72,7 +65,6 @@ utils::Status tokenize(ExecutionContext &ctx) {
   if (ctx.input_files.size() != 1) {
     return show_msg();
   }
-  // ctx.lexer = std::make_shared<class lexer>();
   ctx.lexer.reset(new lexer);
   if (const utils::Status load_result =
           ctx.lexer->load(*ctx.input_files.cbegin());
@@ -91,12 +83,10 @@ utils::Status tokenize(ExecutionContext &ctx) {
 }
 utils::Status parse(ExecutionContext &ctx) {
   dbg(info, "Parsing...");
-  // ctx.parser = std::make_shared<class parser>();
   ctx.parser.reset(new parser);
   ctx.parser->set_views(ctx.lexer->get_tokens());
-  // auto res = ctx.parser->parse(parser::kStatement);
   utils::Status res;
-  if (ctx.commands.front() == ExecutionContext::parse) {
+  if (ctx.commands.front() == ExecutionContext::parse) { // NOLINT(bugprone-branch-clone)
     res = ctx.parser->parse(parser::kExpression);
   } else if (ctx.commands.front() & ExecutionContext::needs_evaluate) {
     res = ctx.parser->parse(parser::kExpression);

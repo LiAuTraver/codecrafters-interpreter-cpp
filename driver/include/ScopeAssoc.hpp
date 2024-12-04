@@ -1,6 +1,8 @@
 #pragma once
 #include <cstddef>
+#include <cstdint>
 #include <functional>
+#include <limits>
 #include <optional>
 #include <unordered_map>
 #include <string>
@@ -30,7 +32,7 @@ public:
   virtual ~ScopeAssoc() override = default;
 
 private:
-  auto add(const string_type &, const eval_result_t &, uint_least32_t)
+  auto add(const string_type &, const eval_result_t &, uint_least32_t = std::numeric_limits<uint_least32_t>::quiet_NaN())
       -> utils::Status;
   auto find(this auto &&self, const string_type &name)
       -> std::optional<decltype(self.associations.find(name))>;

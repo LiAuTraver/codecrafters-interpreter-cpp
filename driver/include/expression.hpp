@@ -2,6 +2,7 @@
 
 #include <any>
 #include <concepts>
+#include <cstddef>
 #include <iostream>
 #include <memory>
 #include <sstream>
@@ -47,13 +48,12 @@ private:
 class Literal : public Expr {
 
 public:
-  Literal(token_t literal) // NOLINT(google-explicit-constructor)
-      : literal(std::move(literal)) {}
+  explicit Literal(token_t &&);
 
 private:
-  virtual expr_result_t accept_impl(const ExprVisitor &visitor) const override;
-  virtual string_type
-  to_string_impl(const utils::FormatPolicy &) const override;
+  virtual auto accept_impl(const ExprVisitor &) const -> expr_result_t override;
+  virtual auto to_string_impl(const utils::FormatPolicy &) const
+      -> string_type override;
 
 public:
   token_t literal;
@@ -62,14 +62,13 @@ public:
 class Unary : public Expr {
 
 public:
-  Unary(token_t op, expr_ptr_t expr)
-      : op(std::move(op)), expr(std::move(expr)) {}
+  explicit Unary(token_t &&, expr_ptr_t &&);
   virtual ~Unary() override = default;
 
 private:
-  virtual expr_result_t accept_impl(const ExprVisitor &visitor) const override;
-  virtual string_type
-  to_string_impl(const utils::FormatPolicy &format_policy) const override;
+  virtual auto accept_impl(const ExprVisitor &) const -> expr_result_t override;
+  virtual auto to_string_impl(const utils::FormatPolicy &) const
+      -> string_type override;
 
 public:
   token_t op;
@@ -79,43 +78,43 @@ public:
 class Binary : public Expr {
 
 public:
-  Binary(token_t op, expr_ptr_t left, expr_ptr_t right)
-      : op(std::move(op)), left(std::move(left)), right(std::move(right)) {}
+  explicit Binary(token_t &&, expr_ptr_t &&, expr_ptr_t &&);
   virtual ~Binary() = default;
 
 private:
-  virtual expr_result_t accept_impl(const ExprVisitor &visitor) const override;
-  virtual string_type
-  to_string_impl(const utils::FormatPolicy &format_policy) const override;
+  virtual auto accept_impl(const ExprVisitor &) const -> expr_result_t override;
+  virtual auto to_string_impl(const utils::FormatPolicy &) const
+      -> string_type override;
 
 public:
   token_t op;
   expr_ptr_t left;
   expr_ptr_t right;
 };
+
 class Variable : public Expr {
 public:
-  Variable(token_t name) : name(std::move(name)) {}
+  explicit Variable(token_t &&);
   virtual ~Variable() override = default;
 
 public:
   token_t name;
 
 private:
-  expr_result_t accept_impl(const ExprVisitor &visitor) const override;
-  auto to_string_impl(const utils::FormatPolicy &format_policy) const
+  auto accept_impl(const ExprVisitor &) const -> expr_result_t override;
+  auto to_string_impl(const utils::FormatPolicy &) const
       -> string_type override;
 };
-class Grouping : public Expr {
 
+class Grouping : public Expr {
 public:
-  Grouping(expr_ptr_t expr) : expr(std::move(expr)) {} // NOLINT
+  explicit Grouping(expr_ptr_t &&);
   virtual ~Grouping() = default;
 
 private:
-  virtual expr_result_t accept_impl(const ExprVisitor &visitor) const override;
-  virtual string_type
-  to_string_impl(const utils::FormatPolicy &format_policy) const override;
+  virtual auto accept_impl(const ExprVisitor &) const -> expr_result_t override;
+  virtual auto to_string_impl(const utils::FormatPolicy &) const
+      -> string_type override;
 
 public:
   expr_ptr_t expr;
@@ -124,25 +123,23 @@ public:
 class Assignment : public Expr {
 public:
   constexpr Assignment() = default;
+  explicit Assignment(token_t &&, expr_ptr_t &&);
   virtual ~Assignment() override = default;
-  Assignment(token_t name, expr_ptr_t value)
-      : name(std::move(name)), value_expr(std::move(value)) {}
 
 public:
   token_t name;
   expr_ptr_t value_expr;
 
 private:
-  auto to_string_impl(const utils::FormatPolicy &) const
+  virtual auto accept_impl(const ExprVisitor &) const -> expr_result_t override;
+  virtual auto to_string_impl(const utils::FormatPolicy &) const
       -> string_type override;
-  expr_result_t accept_impl(const ExprVisitor &) const override;
 };
 /// @implements Expr
 class Logical : public Expr {
 public:
   constexpr Logical() = default;
-  explicit Logical(token_t &&op, expr_ptr_t &&left, expr_ptr_t &&right)
-      : op(std::move(op)), left(std::move(left)), right(std::move(right)) {}
+  explicit Logical(token_t &&, expr_ptr_t &&, expr_ptr_t &&);
   virtual ~Logical() override = default;
 
 public:
@@ -151,22 +148,38 @@ public:
   expr_ptr_t right{nullptr};
 
 private:
+  virtual auto to_string_impl(const utils::FormatPolicy &) const
+      -> string_type override;
+  virtual auto accept_impl(const ExprVisitor &) const -> expr_result_t override;
+};
+class Call : public Expr {
+public:
+  explicit Call(expr_ptr_t &&, token_t &&, std::vector<expr_ptr_t> &&);
+  virtual ~Call() override = default;
+
+public:
+  expr_ptr_t callee{nullptr};
+  token_t paren{};
+  std::vector<expr_ptr_t> arguments;
+
+private:
   auto to_string_impl(const utils::FormatPolicy &) const
       -> string_type override;
   expr_result_t accept_impl(const ExprVisitor &) const override;
 };
+
 /// @implements Expr
 class IllegalExpr : public Expr {
 public:
   constexpr IllegalExpr() = default;
   virtual ~IllegalExpr() override = default;
-  IllegalExpr(token_t token, parse_error error)
-      : token(std::move(token)), error(std::move(error)) {}
+  explicit IllegalExpr(token_t, parse_error);
 
 private:
-  virtual expr_result_t accept_impl(const ExprVisitor &visitor) const override;
-  virtual std::string
-  to_string_impl(const utils::FormatPolicy &format_policy) const override;
+  virtual auto accept_impl(const ExprVisitor &visitor) const
+      -> expr_result_t override;
+  virtual auto to_string_impl(const utils::FormatPolicy &format_policy) const
+      -> string_type override;
 
 public:
   token_t token;

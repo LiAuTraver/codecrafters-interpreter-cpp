@@ -1,10 +1,15 @@
+#include <algorithm>
 #include <concepts>
-
+#include <iterator>
 #include <map>
+#include <ranges>
+#include <type_traits>
 #include <utility>
 #include <memory>
 #include <typeinfo>
+#include <vector>
 
+#include "Environment.hpp"
 #include "Evaluatable.hpp"
 #include "Monostate.hpp"
 #include "TokenType.hpp"
@@ -23,6 +28,15 @@ using enum TokenType::type_t;
 utils::Status interpreter::interpret(
     const std::span<std::shared_ptr<statement::Stmt>> stmts) const {
   defer { expr_res.clear(); };
+
+  static bool has_init_global_env = false;
+  if (!has_init_global_env) {
+    auto maybe_env = Environment::getGlobalScopeEnv();
+    if(!maybe_env.ok())
+      return maybe_env.as_status();
+    has_init_global_env = true;
+    this->env = maybe_env.value();
+  }
 
   for (const auto &stmt : stmts)
     if (auto eval_res = execute(*stmt); !eval_res.ok())
@@ -43,26 +57,24 @@ interpreter::is_true_value(const eval_result_t &value) const {
 auto interpreter::is_deep_equal(const eval_result_t &lhs,
                                 const eval_result_t &rhs) const
     -> eval_result_t {
-  if (lhs.index() != rhs.index()) {
-    return evaluation::False;
-  }
-  if (utils::holds_alternative<evaluation::Nil>(lhs)) {
-    return evaluation::Boolean::make_true(
-        utils::get<evaluation::Nil>(lhs).get_line());
-  }
-  if (utils::holds_alternative<evaluation::Boolean>(lhs)) {
-    return utils::get<evaluation::Boolean>(lhs) ==
-           utils::get<evaluation::Boolean>(rhs);
-  }
-  if (utils::holds_alternative<evaluation::String>(lhs)) {
-    return utils::get<evaluation::String>(lhs) ==
-           utils::get<evaluation::String>(rhs);
-  }
-  if (utils::holds_alternative<evaluation::Number>(lhs)) {
-    return utils::get<evaluation::Number>(lhs) ==
-           utils::get<evaluation::Number>(rhs);
-  }
-  return {evaluation::Error{"unimplemented deep equal"sv, 0}};
+  return lhs.index() == rhs.index()
+             ? lhs.visit(match{
+                   [](const evaluation::Nil &n) -> eval_result_t {
+                     return evaluation::Boolean::make_true(n.get_line());
+                   },
+                   [&rhs](const evaluation::Boolean &b) -> eval_result_t {
+                     return utils::get<evaluation::Boolean>(rhs) == b;
+                   },
+                   [&rhs](const evaluation::String &s) -> eval_result_t {
+                     return utils::get<evaluation::String>(rhs) == s;
+                   },
+                   [&rhs](const evaluation::Number &n) -> eval_result_t {
+                     return utils::get<evaluation::Number>(rhs) == n;
+                   },
+                   [](const auto &) -> eval_result_t {
+                     return evaluation::Error{"unimplemented deep equal"sv};
+                   }})
+             : evaluation::False;
 }
 auto interpreter::visit_impl(const statement::Variable &stmt) const
     -> utils::Status {
@@ -131,13 +143,14 @@ auto interpreter::visit_impl(const statement::While &stmt) const
 
   return utils::OkStatus();
 }
-auto interpreter::visit_impl(const statement::For &stmt) const -> utils::Status {
+auto interpreter::visit_impl(const statement::For &stmt) const
+    -> utils::Status {
   defer { expr_res.clear(); };
 
-  if (stmt.initializer){
+  if (stmt.initializer)
     if (auto res = execute(*stmt.initializer); !res.ok())
       return res;
-  }
+
   while (true) {
     if (stmt.condition) {
       if (auto res = evaluate(*stmt.condition); !res.ok())
@@ -153,6 +166,12 @@ auto interpreter::visit_impl(const statement::For &stmt) const -> utils::Status 
     }
   }
   return utils::OkStatus();
+}
+auto interpreter::visit_impl(const statement::Function &stmt) const
+    -> utils::Status {
+  defer { expr_res.clear(); };
+
+  TODO(...)
 }
 auto interpreter::visit_impl(const statement::IllegalStmt &stmt) const
     -> utils::Status {
@@ -239,9 +258,8 @@ auto interpreter::visit_impl(const expression::Unary &expr) const
     dbg(trace, "unary bang: {}", value);
     return evaluation::Boolean{!value};
   }
-  dbg(critical, "unreachable code reached: {}", LOXOGRAPH_STACKTRACE);
-  contract_assert(false);
-  return {};
+  contract_assert(false, 1, "unreachable code reached");
+  return {utils::Monostate{}};
 }
 
 auto interpreter::visit_impl(const expression::Binary &expr) const
@@ -253,9 +271,8 @@ auto interpreter::visit_impl(const expression::Binary &expr) const
   }
   if (expr.op.is_type(kBangEqual)) {
     auto result = is_deep_equal(lhs, rhs);
-    if (utils::holds_alternative<evaluation::Boolean>(result)) {
-      return evaluation::Boolean{!utils::get<evaluation::Boolean>(result)};
-    }
+    if (auto ptr = utils::get_if<evaluation::Boolean>(&result))
+      return {!*ptr};
     return result;
   }
   if (auto ptr = utils::get_if<evaluation::Error>(&lhs))
@@ -365,7 +382,38 @@ auto interpreter::visit_impl(const expression::Logical &expr) const
               return {utils::Monostate{}};
             }});
 }
+auto interpreter::visit_impl(const expression::Call &expr) const
+    -> eval_result_t {
+  defer {
+    expr_res.clear();
+  }; // FIXME: should not call `clear` when evaluating an expression.
 
+  if (auto res = evaluate(*expr.callee); !res.ok())
+    return {evaluation::Error{"Error in callee"s, expr.paren.line}};
+
+  auto args = std::vector<eval_result_t>{};
+  args.reserve(expr.arguments.size());
+
+  // we choose to evaluate argument expressions from left to right, adhering to
+  // "Sequenced before" rules in C++11 and later.
+  // https://en.cppreference.com/w/cpp/language/eval_order
+  for (auto it = expr.arguments.begin(); it != expr.arguments.end(); ++it) {
+    if (auto res = evaluate(**it); !res.ok())
+      return {evaluation::Error{
+          utils::format("Error in argument {}",
+                        std::ranges::distance(expr.arguments.begin(), it)),
+          expr.paren.line}};
+    args.emplace_back(std::move(expr_res));
+  }
+  if (auto ptr = std::remove_const_t<evaluation::Callable *>(
+          utils::get_if<evaluation::Callable>(&expr_res))) {
+            dbg_block(
+              dbg(info, "find function {}: {}", expr.callee->to_string(utils::kTokenOnly), ptr->signature());
+            )
+    return (ptr)->call(*this, args);
+  }
+  return {evaluation::Error{"Not a function."s, expr.paren.line}};
+}
 auto interpreter::visit_impl(const expression::IllegalExpr &expr) const
     -> eval_result_t {
   return evaluation::Error{"Illegal expression"s, expr.token.line};
@@ -390,11 +438,20 @@ auto interpreter::to_string_impl(const utils::FormatPolicy &format_policy) const
 
   contract_assert(expr_res.empty(), 1, "expr_res should be empty")
   string_type result_str;
-  for (const auto &result : stmts_res)
-    // TODO: temporary solution: skip newline if the result is empty(Monostate)
-    if (auto str = value_to_string(format_policy, result); !str.empty())
-      result_str += std::move(str) + "\n";
-
+  // clang-format off
+  std::ranges::for_each(
+      stmts_res 
+      | std::ranges::views::transform([&](const auto &res) {
+        return value_to_string(format_policy, res);
+      }) 
+      | std::ranges::views::filter([](const auto &str) {
+        // TODO: temporary solution: skip newline if the result is empty(i.e.,Monostate)
+        return !str.empty();
+      }),
+      [&](const auto &str) { 
+        result_str += std::move(str) + '\n'; 
+  });
+  // clang-format on
   return result_str;
 }
 LOXOGRAPH_API void delete_interpreter_fwd(interpreter *ptr) { delete ptr; }

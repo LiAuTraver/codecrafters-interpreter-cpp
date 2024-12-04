@@ -7,7 +7,9 @@
 #include <limits>
 #include <random>
 #include <utility>
+#include <vector>
 
+#include "Variant.hpp"
 #include "config.hpp"
 #include "utils.hpp"
 #include "loxo_fwd.hpp"
@@ -18,6 +20,9 @@ namespace net::ancillarycat::loxograph::evaluation {
 /// @interface Evaluatable
 /// @implements utils::Printable
 class Evaluatable : public utils::Printable {
+public:
+  using eval_result_t = utils::VisitorBase::eval_result_t;
+
 public:
   constexpr Evaluatable() = default;
   explicit constexpr Evaluatable(const uint_least32_t line) : line(line) {}
@@ -109,7 +114,7 @@ public:
   virtual ~String() override = default;
 
 public:
-  String operator+(const String &)const;
+  String operator+(const String &) const;
   Boolean operator==(const String &) const;
   Boolean operator!=(const String &) const;
   explicit operator Boolean() const;
@@ -166,7 +171,8 @@ public:
 
 public:
   Error() = default;
-  Error(string_view_type, uint_least32_t = std::numeric_limits<uint_least32_t>::max());
+  Error(string_view_type,
+        uint_least32_t = std::numeric_limits<uint_least32_t>::max());
   explicit Error(string_type &&, uint_least32_t &&) noexcept;
   Error(const Error &);
   Error(Error &&) noexcept;
@@ -183,5 +189,71 @@ private:
 private:
   string_type message;
 };
+class Callable : public Evaluatable {
+public:
+  using args_t = std::vector<eval_result_t>;
+  using function_t = std::function<eval_result_t(const interpreter &, args_t &)>;
+  using string_view_type = utils::Viewable::string_view_type;
 
+public:
+  constexpr Callable() = default;
+  virtual ~Callable() = default;
+
+public:
+  Callable(function_t &&function,
+           const uint_least32_t line =
+               std::numeric_limits<uint_least32_t>::quiet_NaN())
+      : Evaluatable(line), my_function(std::move(function)) {}
+
+public:
+  inline static Callable
+  create(function_t &&function,
+         const uint_least32_t line =
+             std::numeric_limits<uint_least32_t>::quiet_NaN()) {
+    return {std::move(function), line};
+  }
+  inline static Callable
+  create_native(function_t &&function,
+                const uint_least32_t line =
+                    std::numeric_limits<uint_least32_t>::quiet_NaN()) {
+    Callable callable{std::move(function), line};
+    callable.native_signature = "<native fn>"sv;
+    return callable;
+  }
+
+public:
+  constexpr auto call(const interpreter &interpreter, args_t &args) {
+    return my_function.operator()(interpreter, args);
+  }
+  constexpr auto operator()(const interpreter &interpreter, args_t &args) {
+    return call(interpreter, args);
+  }
+  auto signature() const -> string_type {
+    dbg(trace, "type: {}", typeid(my_function.target<args_t>()).name());
+    return "( "s.append(typeid(my_function.target<args_t>()).name()).append(" )");
+  }
+  constexpr auto operator==(const Callable &other) const -> Boolean {
+    return {this == &other || (this->my_function.target_type() ==
+                               other.my_function.target_type())};
+  }
+  constexpr auto operator!=(const Callable &other) const -> Boolean {
+    return {this->operator==(other).operator!()};
+  }
+
+private:
+  // dont support static variables in this function
+  function_t my_function;
+  string_view_type native_signature;
+
+private:
+  auto to_string_impl(const utils::FormatPolicy &) const
+      -> string_type override {
+    // function signature
+    if (native_signature.empty()) {
+      return signature();
+    } else {
+      return {native_signature.cbegin(), native_signature.cend()};
+    }
+  }
+};
 } // namespace net::ancillarycat::loxograph::evaluation

@@ -113,6 +113,9 @@ public:
   auto operator->(this auto &&self) noexcept -> decltype(auto) {
     return std::addressof(self.my_value);
   }
+  base_type as_status(this auto &&self) noexcept {
+  return Status{self.my_code, self.my_message, self.my_location};
+  }
 
 private:
   value_type my_value;

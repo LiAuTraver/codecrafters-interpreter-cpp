@@ -69,7 +69,26 @@ auto If::to_string_impl(const utils::FormatPolicy &format_policy) const
   }
   return result;
 }
-
+auto Function::to_string_impl(const utils::FormatPolicy &format_policy) const
+    -> string_type {
+  string_type result = "fun " + this->name.to_string(format_policy) + "(";
+  for (const auto &param : this->parameters) {
+    result += param.to_string(format_policy) + ", ";
+  }
+  if (!this->parameters.empty()) {
+    result.pop_back();
+    result.pop_back();
+  }
+  result += ") {\n";
+  for (const auto &stmt : this->body) {
+    result += stmt->to_string(format_policy);
+  }
+  result += "}\n";
+  return result;
+}
+auto Function::accept_impl(const StmtVisitor &visitor) const -> stmt_result_t {
+  return visitor.visit(*this);
+}
 auto For::to_string_impl(const utils::FormatPolicy &format_policy) const
     -> string_type {
   string_type result = "for (";

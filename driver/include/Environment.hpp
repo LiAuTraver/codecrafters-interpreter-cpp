@@ -1,4 +1,5 @@
 #pragma once
+#include <limits>
 #include <memory>
 #include <optional>
 #include <string>
@@ -7,7 +8,9 @@
 #include <variant>
 
 #include "config.hpp"
+#include "interpreter.hpp"
 #include "loxo_fwd.hpp"
+#include "status.hpp"
 #include "utils.hpp"
 
 #include "ScopeAssoc.hpp"
@@ -26,13 +29,18 @@ public:
 public:
   Environment() = default;
   explicit Environment(const std::shared_ptr<self_type> &enclosing)
-      : parent(enclosing) {};
+      : current(std::make_shared<scope_env_t>()), parent(enclosing) {};
   ~Environment() override = default;
+
+public:
+static auto getGlobalScopeEnv() -> utils::StatusOr<std::shared_ptr<Environment>>;
 
 public:
   auto find(this auto &&self, const string_type &name)
       -> decltype(self.current->find(name));
-  auto add(const string_type &, const eval_result_t &, uint_least32_t)
+  auto add(const string_type &,
+           const eval_result_t &,
+           uint_least32_t = std::numeric_limits<uint_least32_t>::quiet_NaN())
       -> utils::Status;
   auto reassign(const string_type &, const eval_result_t &, uint_least32_t)
       -> utils::Status;

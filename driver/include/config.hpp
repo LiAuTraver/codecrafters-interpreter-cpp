@@ -1,5 +1,6 @@
 #pragma once
 #include "internal/variadic.h"
+#include <version>
 #ifdef LIBLOXOGRAPH_SHARED
 #  ifdef _WIN32
 #    ifdef driver_EXPORTS
@@ -231,7 +232,7 @@ struct ::fmt::formatter<::std::stacktrace> : ::fmt::formatter<::std::string> {
     }
 #  define LOXOGRAPH_RUNTIME_REQUIRE_IMPL_SATISFY(x)                            \
     LOXOGRAPH_AMBIGUOUS_ELSE_BLOCKER                                           \
-    if ((x))                                                                     \
+    if ((x))                                                                   \
       ;                                                                        \
     else {                                                                     \
       LOXOGRAPH_PRINT_ERROR_MSG(x)                                             \
@@ -239,7 +240,7 @@ struct ::fmt::formatter<::std::stacktrace> : ::fmt::formatter<::std::string> {
       //! preprocessor sometimes.
 #  define LOXOGRAPH_RUNTIME_REQUIRE_IMPL_WITH_MSG(x, y, _msg_)                 \
     LOXOGRAPH_AMBIGUOUS_ELSE_BLOCKER                                           \
-    if ((x))                                                            \
+    if ((x))                                                                   \
       ;                                                                        \
     else {                                                                     \
       LOXOGRAPH_PRINT_ERROR_MSG(x, y, _msg_)                                   \
@@ -339,8 +340,7 @@ struct ::fmt::formatter<::std::stacktrace> : ::fmt::formatter<::std::string> {
 #  define precondition(...)
 #  define postcondition(...)
 #else
-/// @note MSVC cross-platform compatible preprocessor or other compilers
-///        (namely GCC and clang)
+/// @note MSVC cross-platform compatible preprocessor acts like clang and gcc.
 #  define contract_assert(...) LOXOGRAPH_RUNTIME_ASSERT(__VA_ARGS__)
 #  define precondition(...) LOXOGRAPH_PRECONDITION(__VA_ARGS__)
 #  define postcondition(...) LOXOGRAPH_POSTCONDITION(__VA_ARGS__)
@@ -352,15 +352,19 @@ struct ::fmt::formatter<::std::stacktrace> : ::fmt::formatter<::std::string> {
 // if exception was disabled, do nothing.
 #if defined(__cpp_exceptions) && __cpp_exceptions
 #  include <stdexcept>
-#  define TODO(...)                                                            \
+#  define LOXO_TODO_(...)                                                      \
     throw ::std::logic_error(std::format("TODO: " #__VA_ARGS__));
 #elif __has_include(<spdlog/spdlog.h>)
-#  define TODO(...) LOXOGRAPH_DEBUG_LOGGING(critical, "TODO: " #__VA_ARGS__);
+#  define LOXO_TODO_(...)                                                      \
+    LOXOGRAPH_DEBUG_LOGGING(critical, "TODO: " #__VA_ARGS__);
 #else
 #  include <iostream>
-#  define TODO(...)                                                            \
+#  define LOXO_TODO_(...)                                                      \
     ::std::cerr << std::format("TODO: " #__VA_ARGS__) << ::std::endl;
 #endif
+/// @def TODO mimic from kotlin's `TODO` function, which throws an exception and
+/// also discoverable by IDE.
+#define TODO(...) LOXO_TODO_(__VA_ARGS__)
 
 #if defined(_MSC_VER) && !defined(__clang__)
 /// @remark currenty, MSVC's constexpr was really disgusting.
@@ -369,25 +373,25 @@ struct ::fmt::formatter<::std::stacktrace> : ::fmt::formatter<::std::string> {
 #  define LOXO_CONSTEXPR_IF_NOT_MSVC constexpr
 #endif
 
-#ifndef defer
 /// @see
 /// https://stackoverflow.com/questions/32432450/what-is-standard-defer-finalizer-implementation-in-c
-struct loxograph_defer_helper_struct {};
-template <class Fun_> struct loxograph_deferrer {
+struct loxograph_defer_helper_struct_ {};
+template <class Fun_> struct loxograph_deferrer_ {
   Fun_ f_;
-  inline constexpr loxograph_deferrer(Fun_ f) : f_(f) {}
-  inline constexpr ~loxograph_deferrer() { f_(); }
+  inline constexpr loxograph_deferrer_(Fun_ f) : f_(f) {}
+  inline constexpr ~loxograph_deferrer_() { f_(); }
 };
 template <class Fun_>
-static inline constexpr auto operator*(loxograph_defer_helper_struct, Fun_ f_)
-    -> loxograph_deferrer<Fun_> {
+static inline constexpr auto operator*(loxograph_defer_helper_struct_, Fun_ f_)
+    -> loxograph_deferrer_<Fun_> {
   return {f_};
 }
-#  define LOXOGRAPH_DEFER                                                      \
-    const auto LOXOGRAPH_EXPAND_COUNTER(_loxograph_defer_block_at) =           \
-        loxograph_defer_helper_struct{} *[&]()
+#define LOXOGRAPH_DEFER                                                        \
+  const auto LOXOGRAPH_EXPAND_COUNTER(_loxograph_defer_block_at) =             \
+      loxograph_defer_helper_struct_{} *[&]()
+
+#ifndef defer
 #  define defer LOXOGRAPH_DEFER
 #else
-#  pragma message("defer was already defined. please check the code.")
-#  pragma push_macro("defer")
+#  error "defer was already defined. please check the code."
 #endif // defer

@@ -24,6 +24,7 @@ private:
   virtual utils::Status visit_impl(const If &) const = 0;
   virtual utils::Status visit_impl(const While &) const = 0;
   virtual utils::Status visit_impl(const For &) const = 0;
+  virtual utils::Status visit_impl(const Function &) const = 0;
   virtual utils::Status visit_impl(const IllegalStmt &) const = 0;
   virtual utils::Status execute_impl(const Stmt &) const = 0;
 };
@@ -42,6 +43,7 @@ private:
   utils::Status visit_impl(const If &) const override { return {}; }
   utils::Status visit_impl(const While &) const override { return {}; }
   utils::Status visit_impl(const For &) const override { return {}; }
+  utils::Status visit_impl(const Function &) const override { return {}; }
   utils::Status visit_impl(const IllegalStmt &) const override { return {}; }
 } inline static const _dummy_visitor;
 } // namespace net::ancillarycat::loxograph::statement

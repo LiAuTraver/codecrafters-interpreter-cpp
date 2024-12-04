@@ -6,6 +6,7 @@
 #include "ScopeAssoc.hpp"
 #include "config.hpp"
 #include "expression.hpp"
+#include "status.hpp"
 #include "utils.hpp"
 #include "loxo_fwd.hpp"
 
@@ -42,9 +43,12 @@ private:
       -> eval_result_t override;
   virtual auto visit_impl(const expression::Logical &) const
       -> eval_result_t override;
+  virtual auto visit_impl(const expression::Call &) const
+      -> eval_result_t override;
   virtual auto visit_impl(const expression::IllegalExpr &) const
       -> eval_result_t override;
-  virtual utils::Status evaluate_impl(const expression::Expr &) const override;
+  virtual auto evaluate_impl(const expression::Expr &) const
+      -> utils::Status override;
   /// @note in Lisp/Scheme, only `#f` is false, everything else is true; we also
   /// make `nil` as false.
   evaluation::Boolean is_true_value(const eval_result_t &) const;
@@ -67,9 +71,12 @@ private:
       -> utils::Status override;
   virtual auto visit_impl(const statement::For &) const
       -> utils::Status override;
+  virtual auto visit_impl(const statement::Function &) const
+      -> utils::Status override;
   virtual auto visit_impl(const statement::IllegalStmt &) const
       -> utils::Status override;
-  auto execute_impl(const statement::Stmt &) const -> utils::Status override;
+  virtual auto execute_impl(const statement::Stmt &) const
+      -> utils::Status override;
 
 private:
   /// @remark `mutable` wasn't intentional, but my design is flawed and this is

@@ -135,6 +135,7 @@ public:
                                loxograph::evaluation::Nil,
                                loxograph::evaluation::Number,
                                loxograph::evaluation::String,
+                               loxograph::evaluation::Callable,
                                loxograph::evaluation::Error>;
   using eval_result_t = variant_type;
   using string_view_type = utils::Viewable::string_view_type;

@@ -39,6 +39,7 @@ private:
   virtual eval_result_t visit_impl(const Variable &) const = 0;
   virtual eval_result_t visit_impl(const Assignment &) const = 0;
   virtual eval_result_t visit_impl(const Logical &) const = 0;
+  virtual eval_result_t visit_impl(const Call &) const = 0;
   virtual eval_result_t visit_impl(const IllegalExpr &) const = 0;
   virtual utils::Status evaluate_impl(const Expr &) const = 0;
   virtual eval_result_t get_result_impl() const = 0;
@@ -47,24 +48,31 @@ private:
 /// @implements ExprVisitor
 class DummyVisitor : public ExprVisitor {
 private:
-  virtual eval_result_t visit_impl(const Literal &) const override {
+  virtual auto visit_impl(const Literal &) const -> eval_result_t override {
     return {};
   }
-  virtual eval_result_t visit_impl(const Unary &) const override { return {}; }
-  virtual eval_result_t visit_impl(const Binary &) const override { return {}; }
-  virtual eval_result_t visit_impl(const Grouping &) const override {
+  virtual auto visit_impl(const Unary &) const -> eval_result_t override {
     return {};
   }
-  virtual eval_result_t visit_impl(const IllegalExpr &) const override {
+  virtual auto visit_impl(const Binary &) const -> eval_result_t override {
     return {};
   }
-  virtual eval_result_t visit_impl(const Assignment &) const override {
+  virtual auto visit_impl(const Grouping &) const -> eval_result_t override {
     return {};
   }
-  virtual eval_result_t visit_impl(const Variable &) const override {
+  virtual auto visit_impl(const IllegalExpr &) const -> eval_result_t override {
     return {};
   }
-  virtual eval_result_t visit_impl(const Logical &) const override {
+  virtual auto visit_impl(const Assignment &) const -> eval_result_t override {
+    return {};
+  }
+  virtual auto visit_impl(const Variable &) const -> eval_result_t override {
+    return {};
+  }
+  virtual auto visit_impl(const Logical &) const -> eval_result_t override {
+    return {};
+  }
+  virtual auto visit_impl(const Call &) const -> eval_result_t override {
     return {};
   }
 
@@ -98,6 +106,7 @@ private:
   virtual eval_result_t visit_impl(const Variable &) const override;
   virtual eval_result_t visit_impl(const Assignment &) const override;
   virtual eval_result_t visit_impl(const Logical &) const override;
+  virtual eval_result_t visit_impl(const Call &) const override;
   virtual eval_result_t visit_impl(const IllegalExpr &) const override;
   virtual utils::Status evaluate_impl(const Expr &) const override;
   virtual string_type

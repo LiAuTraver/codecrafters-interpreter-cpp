@@ -25,9 +25,10 @@ concept Variantable = requires {
 /// @remarks similiar to Microsoft's @link std::_SMF_control @endlink class,
 /// which was used in @link std::optional @endlink
 template <typename Ty>
-concept Storable = std::conjunction_v<std::is_default_constructible<Ty>,
-                                      std::is_nothrow_destructible<Ty>,
-                                      std::is_nothrow_constructible<Ty>>;
+concept Storable = true;
+// std::conjunction_v<std::is_default_constructible<Ty>,
+//                                       std::is_nothrow_destructible<Ty>,
+//                                       std::is_nothrow_constructible<Ty>>;
 
 template <Variantable... Types> class Variant;
 class Status;
@@ -65,6 +66,7 @@ class Grouping;
 class Variable;
 class Assignment;
 class Logical;
+class Call;
 class IllegalExpr;
 
 class ExprVisitor;
@@ -79,6 +81,7 @@ class Block;
 class If;
 class While;
 class For;
+class Function;
 class IllegalStmt;
 
 class StmtVisitor;
@@ -91,6 +94,7 @@ class String;
 class Value;
 class Boolean;
 class Nil;
+class Callable;
 class Error;
 
 class ScopeAssoc;
