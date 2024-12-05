@@ -5,11 +5,11 @@
 #include <utility>
 #include <variant>
 
-#include "loxo_fwd.hpp"
-
-#include "Evaluatable.hpp"
+#include "details/loxo_fwd.hpp"
+#include "details/IVisitor.hpp"
+#include "ASTPrinter.hpp"
 #include "expression.hpp"
-#include "interpreter.hpp"
+#include "net/ancillarycat/utils/Status.hpp"
 
 namespace net::ancillarycat::loxo::expression {
 ASTPrinter::eval_result_t ASTPrinter::visit_impl(const Grouping &expr) const {
@@ -44,9 +44,9 @@ ASTPrinter::eval_result_t ASTPrinter::visit_impl(const Call &expr) const {
   oss << expr << std::endl;
   return {};
 }
-auto ASTPrinter::evaluate_impl(const Expr &expr) const -> utils::Status {
+auto ASTPrinter::evaluate_impl(const Expr &expr) const -> stmt_result_t {
   const_cast<eval_result_t &>(res) = expr.accept(*this);
-  return utils::Status::kOkStatus;
+  return utils::OkStatus();
 }
 ASTPrinter::eval_result_t ASTPrinter::visit_impl(const Literal &expr) const {
   dbg(info, "Literal: {}", expr.to_string());

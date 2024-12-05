@@ -11,11 +11,11 @@
 #include <utility>
 #include <vector>
 
-#include "IVisitor.hpp"
-#include "loxo_fwd.hpp"
+#include "details/loxo_fwd.hpp"
 
-#include "parse_error.hpp"
+#include "details/IVisitor.hpp"
 #include "Token.hpp"
+#include "parse_error.hpp"
 
 /// @namespace net::ancillarycat::loxo::expression
 namespace net::ancillarycat::loxo::expression {

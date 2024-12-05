@@ -11,9 +11,8 @@
 #include <net/ancillarycat/utils/file_reader.hpp>
 #include <net/ancillarycat/utils/Status.hpp>
 
-#include "loxo_fwd.hpp"
-
-#include "lex_error.hpp"
+#include "details/loxo_fwd.hpp"
+#include "details/lex_error.hpp"
 #include "Token.hpp"
 
 /// @namespace net::ancillarycat::loxo

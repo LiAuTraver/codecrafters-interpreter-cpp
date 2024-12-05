@@ -3,9 +3,8 @@
 #include <memory>
 #include <vector>
 
-#include "loxo_fwd.hpp"
+#include "details/loxo_fwd.hpp"
 
-#include "StmtVisitor.hpp"
 #include "Token.hpp"
 
 namespace net::ancillarycat::loxo::statement {

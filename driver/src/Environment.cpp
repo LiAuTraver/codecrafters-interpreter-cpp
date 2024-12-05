@@ -6,8 +6,9 @@
 
 #include <net/ancillarycat/utils/Status.hpp>
 
-#include "loxo_fwd.hpp"
+#include "details/loxo_fwd.hpp"
 #include "Environment.hpp"
+#include "Evaluatable.hpp"
 
 namespace net::ancillarycat::loxo {
 

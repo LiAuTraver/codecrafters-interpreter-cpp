@@ -3,12 +3,12 @@
 #include <string_view>
 #include <variant>
 
-
 #include <net/ancillarycat/utils/Variant.hpp>
 
-#include "loxo_fwd.hpp"
+#include "details/loxo_fwd.hpp"
+#include "details/ScopeAssoc.inl"
 
-#include "ScopeAssoc.hpp"
+#include "Evaluatable.hpp"
 
 
 namespace net::ancillarycat::loxo::evaluation {

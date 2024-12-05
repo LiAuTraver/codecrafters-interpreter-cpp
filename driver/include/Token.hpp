@@ -7,13 +7,13 @@
 #include <numeric>
 #include <string>
 
-#include "loxo_fwd.hpp"
+#include "details/loxo_fwd.hpp"
 
-#ifdef AC_LOXO_TOKENTYPE_HPP
+#ifdef AC_LOXO_DETAILS_TOKENTYPE_HPP
 #  error                                                                       \
       "please do not include TokenType.hpp in other files; include Token.hpp instead"
 #endif
-#include "TokenType.hpp"
+#include "details/TokenType.inl"
 
 namespace net::ancillarycat::loxo {
 class LOXO_API Token : public utils::Printable {

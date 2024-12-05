@@ -9,7 +9,7 @@
 #include <typeinfo>
 #include <vector>
 
-#include "loxo_fwd.hpp"
+#include "details/loxo_fwd.hpp"
 
 #include "Environment.hpp"
 #include "Evaluatable.hpp"
@@ -204,12 +204,13 @@ auto interpreter::visit_impl(const statement::Function &stmt) const
         utils::format("Function '{}' already defined.",
                       stmt.name.to_string(utils::kTokenOnly)));
   }
-  return env->add(
-      stmt.name.to_string(utils::kTokenOnly),
-      evaluation::Callable::create_custom(
-          stmt.parameters.size(),
-          std::move(std::remove_const_t<statement::Function>(stmt))),
-      stmt.name.line);
+  return env->add(stmt.name.to_string(utils::kTokenOnly),
+                  evaluation::Callable::create_custom(
+                      stmt.parameters.size(),
+                      {stmt.name.to_string(utils::kTokenOnly),
+                       stmt.parameters,
+                       stmt.body.statements}),
+                  stmt.name.line);
 }
 auto interpreter::visit_impl(const statement::IllegalStmt &stmt) const
     -> stmt_result_t {
@@ -255,7 +256,7 @@ auto interpreter::visit_impl(const statement::Return &expr) const
   if (!this->prev_env) {
     return utils::InvalidArgument("return statement outside of function.");
   }
-  // TODO()
+  TODO()
 }
 auto interpreter::visit_impl(const expression::Literal &expr) const
     -> eval_result_t {

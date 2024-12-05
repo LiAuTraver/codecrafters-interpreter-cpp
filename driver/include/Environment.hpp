@@ -11,13 +11,8 @@
 
 #include <net/ancillarycat/utils/Status.hpp>
 
-#include "loxo_fwd.hpp"
-
-#ifdef AC_LOXO_SCOPEASSOC_HPP
-#  error "please do not include ScopeAssoc.hpp in other files; "\
-      "include Environment.hpp instead"
-#endif
-#include "ScopeAssoc.hpp"
+#include "details/loxo_fwd.hpp"
+#include "details/ScopeAssoc.inl"
 
 namespace net::ancillarycat::loxo {
 

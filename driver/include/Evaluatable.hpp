@@ -1,4 +1,5 @@
-#pragma once
+#ifndef AC_LOXO_EVALUATABLE_HPP
+#define AC_LOXO_EVALUATABLE_HPP
 
 #include <algorithm>
 #include <cmath>
@@ -11,12 +12,11 @@
 #include <vector>
 #include <functional>
 
-
 #include <net/ancillarycat/utils/Variant.hpp>
 
-#include "loxo_fwd.hpp"
-
-#include "statement.hpp"
+#include "details/loxo_fwd.hpp"
+#include "details/IVisitor.hpp"
+#include "Token.hpp"
 
 namespace net::ancillarycat::loxo::evaluation {
 
@@ -194,12 +194,20 @@ private:
   string_type message;
 };
 class Callable : public Evaluatable {
+  struct Function {
+    using token_t = Token;
+    using stmt_ptr_t = std::shared_ptr<statement::Stmt>;
+    string_type name;
+    std::vector<token_t> parameters;
+    std::vector<stmt_ptr_t> body;
+  };
+
 public:
   using args_t = std::vector<eval_result_t>;
   using string_view_type = utils::Viewable::string_view_type;
   using native_function_t =
       std::function<eval_result_t(const interpreter &, args_t &)>;
-  using custom_function_t = statement::Function;
+  using custom_function_t = Function;
   using function_t =
       utils::Variant<utils::Monostate, native_function_t, custom_function_t>;
 
@@ -235,3 +243,4 @@ private:
 };
 
 } // namespace net::ancillarycat::loxo::evaluation
+#endif // AC_LOXO_EVALUATABLE_HPP

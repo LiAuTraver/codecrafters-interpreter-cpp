@@ -1,6 +1,6 @@
 #include <string>
 
-#include "loxo_fwd.hpp"
+#include "details/loxo_fwd.hpp"
 
 #include "expression.hpp"
 #include "ExprVisitor.hpp"

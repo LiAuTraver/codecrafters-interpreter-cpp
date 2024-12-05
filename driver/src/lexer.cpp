@@ -13,9 +13,9 @@
 #include <utility>
 #include <vector>
 
-#include "loxo_fwd.hpp"
+#include "details/loxo_fwd.hpp"
 
-#include "lex_error.hpp"
+#include "details/lex_error.hpp"
 #include "lexer.hpp"
 #include "Token.hpp"
 

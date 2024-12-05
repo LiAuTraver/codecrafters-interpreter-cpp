@@ -1,13 +1,15 @@
-#pragma once
+#ifndef LOXO_STMTVISITOR_HPP
+#define LOXO_STMTVISITOR_HPP
 #include <variant>
 #include <cmath>
-
-#include "loxo_fwd.hpp"
 
 #include <net/ancillarycat/utils/Status.hpp>
 #include <net/ancillarycat/utils/Variant.hpp>
 
-#include "IVisitor.hpp"
+#include "details/loxo_fwd.hpp"
+#include "details/IVisitor.hpp"
+
+#include "Evaluatable.hpp"
 
 namespace net::ancillarycat::loxo::statement {
 /// @implements utils::Printable
@@ -35,3 +37,4 @@ private:
   virtual stmt_result_t execute_impl(const Stmt &) const = 0;
 };
 } // namespace net::ancillarycat::loxo::statement
+#endif // LOXO_STMTVISITOR_HPP

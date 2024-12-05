@@ -7,12 +7,14 @@
 
 #include <net/ancillarycat/utils/Status.hpp>
 
-#include "loxo_fwd.hpp"
+#include "details/loxo_fwd.hpp"
 
-#include "Environment.hpp"
+
 #include "expression.hpp"
 #include "statement.hpp"
 #include "ExprVisitor.hpp"
+#include "StmtVisitor.hpp"
+#include "Environment.hpp"
 
 namespace net::ancillarycat::loxo {
 /// @implements expression::ExprVisitor

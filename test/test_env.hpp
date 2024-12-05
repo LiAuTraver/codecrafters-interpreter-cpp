@@ -3,7 +3,7 @@
 #include <gtest/gtest.h>
 #include <filesystem>
 
-#include "../include/loxo_fwd.hpp"
+#include "details/loxo_fwd.hpp"
 #include "../shared/execution_context.hpp"
 static inline auto you_should_not_include_this_header_file_twice =
     []() -> std::nullptr_t {

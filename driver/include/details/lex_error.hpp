@@ -3,9 +3,7 @@
 #include <string>
 #include <string_view>
 
-#include "loxo_fwd.hpp"
-
-#include <net/ancillarycat/utils/file_reader.hpp>
+#include "details/loxo_fwd.hpp"
 
 namespace net::ancillarycat::loxo {
 class LOXO_API lex_error {

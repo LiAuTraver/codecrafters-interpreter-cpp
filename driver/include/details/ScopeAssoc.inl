@@ -1,6 +1,8 @@
-#ifndef AC_LOXO_SCOPEASSOC_HPP
-#define AC_LOXO_SCOPEASSOC_HPP
-
+/// @note no include guard.
+#ifdef AC_LOXO_SCOPEASSOC_INL
+#error "please do not include ScopeAssoc.inl in other files; include Environment.hpp instead"
+#endif
+#define AC_LOXO_SCOPEASSOC_INL
 #include <cstddef>
 #include <cstdint>
 #include <functional>
@@ -10,14 +12,13 @@
 #include <string>
 #include <string_view>
 #include <variant>
-
-#include "loxo_fwd.hpp"
-
 #include <net/ancillarycat/utils/Status.hpp>
-#include "Evaluatable.hpp"
+
+#include "details/loxo_fwd.hpp"
+#include "details/IVisitor.hpp"
 
 namespace net::ancillarycat::loxo::evaluation {
-class ScopeAssoc : utils::Printable {
+class ScopeAssoc : public utils::Printable {
   friend class ::net::ancillarycat::loxo::Environment;
 
 public:
@@ -54,5 +55,3 @@ auto ScopeAssoc::find(this auto &&self, const string_type &name)
   return std::nullopt;
 }
 } // namespace net::ancillarycat::loxo::evaluation
-
-#endif // AC_LOXO_SCOPEASSOC_HPP

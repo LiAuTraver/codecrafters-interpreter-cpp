@@ -11,12 +11,10 @@
 #include <variant>
 #include <vector>
 
-#include "loxo_fwd.hpp"
+#include "details/loxo_fwd.hpp"
 
 #include "parse_error.hpp"
-#include "statement.hpp"
 #include "Token.hpp"
-#include "TokenType.hpp"
 
 namespace net::ancillarycat::loxo {
 class LOXO_API parser {

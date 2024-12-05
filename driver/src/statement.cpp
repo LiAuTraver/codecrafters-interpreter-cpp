@@ -1,12 +1,14 @@
 #include <utility>
 #include <cmath>
+#include <net/ancillarycat/utils/Status.hpp>
 
-#include "loxo_fwd.hpp"
+#include "details/loxo_fwd.hpp"
 
 #include "Evaluatable.hpp"
 #include "statement.hpp"
 
 #include "expression.hpp"
+#include "StmtVisitor.hpp"
 
 namespace net::ancillarycat::loxo::statement {
 Stmt::stmt_result_t Variable::accept_impl(const StmtVisitor &visitor) const {

@@ -2,7 +2,7 @@
 #include <cmath>
 #include <net/ancillarycat/utils/Monostate.hpp>
 
-#include "loxo_fwd.hpp"
+#include "details/loxo_fwd.hpp"
 
 #include "Evaluatable.hpp"
 #include "interpreter.hpp"
@@ -266,8 +266,10 @@ auto Callable::call(const interpreter &interpreter, args_t &args)
               return {Error{res.message()}};
           }
 
-          if (auto res = interpreter.execute(custom_function.body); !res.ok())
-            return {Error{res.message()}};
+          for (const auto &stmt : custom_function.body) {
+            if (auto res = interpreter.execute(*stmt); !res.ok())
+              return {Error{res.message()}};
+          }
 
           return interpreter.restore_env().get_result().visit(
               match{[](const utils::Monostate &) -> eval_result_t {
@@ -288,7 +290,7 @@ auto Callable::to_string_impl(const utils::FormatPolicy &) const
   return my_function.visit(match{
       [](const native_function_t &) { return "<native fn>"s; },
       [](const custom_function_t &f) {
-        return utils::format("<fn {}>", f.name.to_string(utils::kTokenOnly));
+        return utils::format("<fn {}>", f.name);
       },
       [](const auto &) { return "<unknown fn>"s; },
   });
