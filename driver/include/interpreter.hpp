@@ -57,7 +57,7 @@ private:
   virtual auto get_result_impl() const -> eval_result_t override;
   auto is_deep_equal(const eval_result_t &, const eval_result_t &) const
       -> eval_result_t;
-  auto get_function_args(const expression::Call &expr) const
+  auto get_call_args(const expression::Call &expr) const
       -> std::expected<std::vector<eval_result_t>, eval_result_t>;
 
 private:

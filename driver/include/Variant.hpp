@@ -29,9 +29,15 @@ public:
   Variant(Ty &&value) : my_variant(std::forward<Ty>(value)) {}
 
   Variant(const Variant &) = default;
-  Variant(Variant &&) noexcept = default;
+  Variant(Variant &&that) noexcept : my_variant(std::move(that.my_variant)) {
+    that.my_variant.template emplace<Monostate>();
+  }
   Variant &operator=(const Variant &) = default;
-  Variant &operator=(Variant &&) noexcept = default;
+  Variant &operator=(Variant &&that) noexcept {
+    my_variant = std::move(that.my_variant);
+    that.my_variant.template emplace<Monostate>();
+    return *this;
+  }
   virtual ~Variant() override = default;
 
 public:

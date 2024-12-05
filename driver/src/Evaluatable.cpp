@@ -6,6 +6,11 @@
 
 #include "Evaluatable.hpp"
 
+#include <Environment.hpp>
+#include <Environment.hpp>
+#include <Environment.hpp>
+#include <Environment.hpp>
+
 namespace net::ancillarycat::loxo::evaluation {
 Value::operator Boolean() const noexcept {
   if (dynamic_cast<const Nil *>(this)) {
@@ -103,7 +108,7 @@ String &String::operator=(String &&that) noexcept {
   Evaluatable::operator=(that);
   return *this;
 }
-String String::operator+(const String &rhs)const {
+String String::operator+(const String &rhs) const {
   return String{value + rhs.value};
 }
 Boolean String::operator==(const String &rhs) const {
@@ -194,8 +199,7 @@ auto Number::to_string_impl(const utils::FormatPolicy &format_policy) const
     -> string_type {
   return utils::format("{}", value);
 }
-Error::Error(const string_view_type message_sv,
-                         const uint_least32_t line)
+Error::Error(const string_view_type message_sv, const uint_least32_t line)
     : Evaluatable(line),
       message(utils::format("{}\n[line {}]", message_sv, line)) {}
 Error::Error(string_type &&message, uint_least32_t &&line) noexcept
@@ -226,14 +230,20 @@ auto Error::to_string_view_impl(const utils::FormatPolicy &) const
     -> string_view_type {
   return message;
 }
-Callable::Callable(function_t &&function, const uint_least32_t line)
-    : Evaluatable(line), my_function(std::move(function)) {}
-Callable Callable::create(function_t &&function, const uint_least32_t line) {
-  return {std::move(function), line};
+Callable::Callable(const unsigned argc,
+                   function_t &&function,
+                   const uint_least32_t line)
+    : Evaluatable(line), my_arity(argc), my_function(std::move(function)),
+      my_line(line) {}
+Callable Callable::create(unsigned argc,
+                          function_t &&function,
+                          const uint_least32_t line) {
+  return {argc, std::move(function), line};
 }
-Callable Callable::create_native(function_t &&function,
+Callable Callable::create_native(unsigned argc,
+                                 function_t &&function,
                                  const uint_least32_t line) {
-  Callable callable{std::move(function), line};
+  Callable callable{argc, std::move(function), line};
   callable.native_signature = "<native fn>"sv;
   return callable;
 }

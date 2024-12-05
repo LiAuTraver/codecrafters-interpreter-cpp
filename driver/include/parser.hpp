@@ -67,6 +67,7 @@ private:
 
 private:
   auto get_args() -> std::vector<expr_ptr_t>;
+  auto get_params() -> std::vector<token_t>;
 
 private:
   auto next_declaration() -> stmt_ptr_t;
@@ -78,6 +79,7 @@ private:
   auto while_stmt() -> stmt_ptr_t;
   auto for_stmt() -> stmt_ptr_t;
   auto var_decl() -> stmt_ptr_t;
+  auto function_decl() -> stmt_ptr_t;
 
   /// FIXME: 1. do not use exceptions for control flow(possiblly)
   /// <br>

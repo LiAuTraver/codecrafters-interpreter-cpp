@@ -202,39 +202,49 @@ public:
   virtual ~Callable() = default;
 
 public:
-  Callable(function_t &&,
+  Callable(unsigned,
+           function_t &&,
            uint_least32_t = std::numeric_limits<uint_least32_t>::quiet_NaN());
 
 public:
   static auto
-  create(function_t &&,
+  create(unsigned,
+         function_t &&,
          uint_least32_t = std::numeric_limits<uint_least32_t>::quiet_NaN())
       -> Callable;
   static auto create_native(
+      unsigned,
       function_t &&,
       uint_least32_t = std::numeric_limits<uint_least32_t>::quiet_NaN())
       -> Callable;
 
 public:
   auto signature() const -> string_type;
+  constexpr inline auto arity() const -> unsigned { return my_arity; }
 
 public:
- LOXO_CONSTEXPR_IF_NOT_MSVC auto call(const interpreter &interpreter, args_t &args)
-      -> decltype(auto) {
+  LOXO_CONSTEXPR_IF_NOT_MSVC auto call(const interpreter &interpreter,
+                                       args_t &args) -> decltype(auto) {
+    contract_assert(this->arity() == args.size(),
+                    1,
+                    "arity mismatch; should check it before calling");
     return my_function.operator()(interpreter, args);
   }
   constexpr auto operator==(const Callable &other) const -> Boolean {
     return {this == &other || (this->my_function.target_type() ==
                                other.my_function.target_type())};
   }
-  LOXO_CONSTEXPR_IF_NOT_MSVC auto operator!=(const Callable &other) const -> Boolean {
+  LOXO_CONSTEXPR_IF_NOT_MSVC auto operator!=(const Callable &other) const
+      -> Boolean {
     return {this->operator==(other).operator!()};
   }
 
 private:
   // dont support static variables in this function
   function_t my_function;
+  unsigned my_arity = std::numeric_limits<unsigned>::quiet_NaN();
   string_view_type native_signature;
+  uint_least32_t my_line = std::numeric_limits<uint_least32_t>::quiet_NaN();
 
 private:
   auto to_string_impl(const utils::FormatPolicy &) const

@@ -205,8 +205,9 @@ auto parser::get_args() -> std::vector<expr_ptr_t> {
     do {
       args.emplace_back(next_expression());
       if (args.size() > 255) {
-        throw synchronize({parse_error::kUnknownError, "Cannot have more than "
-                                                          "255 arguments."});
+        throw synchronize({parse_error::kUnknownError,
+                           "Cannot have more than "
+                           "255 arguments."});
       }
     } while (inspect(kComma) && (this->get(), true)); // FIXME: so ugly
   if (!inspect(kRightParen)) {
@@ -215,18 +216,42 @@ auto parser::get_args() -> std::vector<expr_ptr_t> {
   this->get(); // right paren
   return args;
 }
+auto parser::get_params() -> std::vector<token_t> {
+  std::vector<token_t> params;
+  if (!inspect(kRightParen))
+    do {
+      auto maybe_ident = this->get();
+      if (!maybe_ident.is_type(kIdentifier)) {
+        throw synchronize({parse_error::kUnknownError, "Expect parameter name."});
+      }
+      params.emplace_back(std::move(maybe_ident));
+      if (params.size() > 255) {
+        throw synchronize({parse_error::kUnknownError,
+                           "Cannot have more than "
+                           "255 parameters."});
+      }
+    } while (inspect(kComma) && (this->get(), true));
+  if (!inspect(kRightParen)) {
+    throw synchronize({parse_error::kUnknownError, "Expect ')'."});
+  }
+  this->get(); // right paren
+  return params;
+}
 auto parser::next_declaration() -> stmt_ptr_t {
   if (inspect(kVar)) {
     this->get();
     return var_decl();
+  }
+  if (inspect(kFun)) {
+    this->get();
+    return function_decl();
   }
   return next_statement();
 }
 auto parser::var_decl() -> stmt_ptr_t {
 
   if (!peek().is_type(kIdentifier)) {
-    contract_assert(false);
-    TODO("not implemented");
+    throw synchronize({parse_error::kUnknownError, "Expect variable name."});
   }
   auto var_tok = this->get();
   expr_ptr_t initializer = nullptr;
@@ -240,6 +265,19 @@ auto parser::var_decl() -> stmt_ptr_t {
   this->get();
   return std::make_shared<statement::Variable>(std::move(var_tok),
                                                std::move(initializer));
+}
+auto parser::function_decl() -> stmt_ptr_t {
+  auto name = this->get();
+
+  if (!inspect(kLeftParen)) {
+    throw synchronize({parse_error::kMissingParenthesis, "Expect '('."});
+  }
+  this->get();
+  auto parameters = get_params();
+  TODO(...)
+  // auto body = block_stmt();
+  // return std::make_shared<statement::Function>(
+  //     std::move(name), std::move(parameters), std::move(body));
 }
 auto parser::get_condition() -> expr_ptr_t {
   if (!inspect(kLeftParen)) {
