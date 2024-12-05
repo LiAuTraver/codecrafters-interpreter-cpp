@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "loxo_fwd.hpp"
+#include "statement.hpp"
 #include "utils.hpp"
 #include "TokenType.hpp"
 #include "config.hpp"
@@ -222,7 +223,8 @@ auto parser::get_params() -> std::vector<token_t> {
     do {
       auto maybe_ident = this->get();
       if (!maybe_ident.is_type(kIdentifier)) {
-        throw synchronize({parse_error::kUnknownError, "Expect parameter name."});
+        throw synchronize(
+            {parse_error::kUnknownError, "Expect parameter name."});
       }
       params.emplace_back(std::move(maybe_ident));
       if (params.size() > 255) {
@@ -236,6 +238,17 @@ auto parser::get_params() -> std::vector<token_t> {
   }
   this->get(); // right paren
   return params;
+}
+auto parser::get_stmts() -> stmt_ptrs_t {
+  stmt_ptrs_t statements;
+  while (!inspect(kRightBrace) && !is_at_end()) {
+    statements.emplace_back(next_declaration());
+  }
+  if (!inspect(kRightBrace)) {
+    throw synchronize({parse_error::kMissingBrace, "Expect '}'."});
+  }
+  this->get();
+  return statements;
 }
 auto parser::next_declaration() -> stmt_ptr_t {
   if (inspect(kVar)) {
@@ -274,10 +287,12 @@ auto parser::function_decl() -> stmt_ptr_t {
   }
   this->get();
   auto parameters = get_params();
-  TODO(...)
-  // auto body = block_stmt();
-  // return std::make_shared<statement::Function>(
-  //     std::move(name), std::move(parameters), std::move(body));
+  if (!inspect(kLeftBrace)) {
+    throw synchronize({parse_error::kMissingBrace, "Expect '{'."});
+  }
+  this->get();
+  return std::make_shared<statement::Function>(
+      std::move(name), std::move(parameters), get_stmts());
 }
 auto parser::get_condition() -> expr_ptr_t {
   if (!inspect(kLeftParen)) {
@@ -303,15 +318,7 @@ auto parser::if_stmt() -> stmt_ptr_t {
       std::move(condition), std::move(then_branch), std::move(else_branch));
 }
 auto parser::block_stmt() -> stmt_ptr_t {
-  stmt_ptrs_t statements;
-  while (!inspect(kRightBrace) && !is_at_end()) {
-    statements.emplace_back(next_declaration());
-  }
-  if (!inspect(kRightBrace)) {
-    throw synchronize({parse_error::kMissingBrace, "Expect '}'."});
-  }
-  this->get();
-  return std::make_shared<statement::Block>(std::move(statements));
+  return std::make_shared<statement::Block>(get_stmts());
 }
 auto parser::while_stmt() -> stmt_ptr_t {
   auto condition = get_condition();

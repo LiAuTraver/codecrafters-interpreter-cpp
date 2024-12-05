@@ -50,6 +50,8 @@ public:
   auto visit(this auto &&self, Callable &&callable) -> decltype(auto) {
     using ReturnType = decltype(std::forward<Callable>(callable)(
         std::declval<variant_type>()));
+    static_assert(std::is_default_constructible_v<ReturnType>,
+                  "ReturnType must be default constructible");
     return self.is_valid()
                ? static_cast<ReturnType>(std::visit(
                      std::forward<Callable>(callable), self.my_variant))

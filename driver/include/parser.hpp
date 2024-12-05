@@ -68,6 +68,7 @@ private:
 private:
   auto get_args() -> std::vector<expr_ptr_t>;
   auto get_params() -> std::vector<token_t>;
+  auto get_stmts() -> stmt_ptrs_t;
 
 private:
   auto next_declaration() -> stmt_ptr_t;

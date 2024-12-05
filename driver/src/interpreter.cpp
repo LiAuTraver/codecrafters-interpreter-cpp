@@ -45,6 +45,12 @@ utils::Status interpreter::interpret(
 
   return utils::OkStatus();
 }
+auto interpreter::save_and_renew_env() const
+    -> const interpreter & {
+  prev_env = env;
+  env = std::make_shared<env_t>(prev_env);
+  return *this;
+}
 evaluation::Boolean
 interpreter::is_true_value(const eval_result_t &value) const {
   return value.visit(match{
@@ -198,8 +204,12 @@ auto interpreter::visit_impl(const statement::Function &stmt) const
         utils::format("Function '{}' already defined.",
                       stmt.name.to_string(utils::kTokenOnly)));
   }
-  // auto func = evaluation::Callable::create([]() {}, stmt.name.line);
-  TODO(...)
+  return env->add(
+      stmt.name.to_string(utils::kTokenOnly),
+      evaluation::Callable::create_custom(
+          stmt.parameters.size(),
+          std::move(std::remove_const_t<statement::Function>(stmt))),
+      stmt.name.line);
 }
 auto interpreter::visit_impl(const statement::IllegalStmt &stmt) const
     -> utils::Status {
@@ -227,7 +237,9 @@ auto interpreter::execute_impl(const statement::Stmt &stmt) const
     -> utils::Status {
   return stmt.accept(*this);
 }
-auto interpreter::get_result_impl() const -> eval_result_t { return expr_res; }
+auto interpreter::get_result_impl() const -> eval_result_t { 
+  return expr_res; 
+}
 
 auto interpreter::evaluate_impl(const expression::Expr &expr) const
     -> utils::Status {
@@ -412,44 +424,47 @@ auto interpreter::visit_impl(const expression::Logical &expr) const
 }
 auto interpreter::visit_impl(const expression::Call &expr) const
     -> eval_result_t {
-  defer {
-    expr_res.clear();
-  }; // FIXME: should not call `clear` when evaluating an expression.
+  // defer {
+  //   expr_res.clear();
+  // }; // FIXME: should not call `clear` when evaluating an expression.
 
   if (auto res = evaluate(*expr.callee); !res.ok())
     return {evaluation::Error{res.message()}};
 
   // `expr_res` would change in `get_call_args`, so we need to save it.
   const auto callee = expr.callee;
-  auto ptr = utils::get_if<evaluation::Callable>(&expr_res);
-  if (!ptr)
-    return {evaluation::Error{utils::format("Not a function: {}", *callee),
+  if (!utils::holds_alternative<evaluation::Callable>(expr_res)) {
+    return {evaluation::Error{utils::format("Not a function: {}", callee->to_string()),
                               expr.paren.line}};
+  }
+  auto callable = utils::get<evaluation::Callable>(expr_res);
 
   auto maybe_args = get_call_args(expr);
   if (!maybe_args.has_value())
     return {maybe_args.error()};
-  if (maybe_args->size() == ptr->arity())
-    return std::remove_const_t<evaluation::Callable *>(ptr)->call(*this,
-                                                                  *maybe_args);
+  if (maybe_args->size() == callable.arity())
+    return (callable).call(*this, *maybe_args);
 
   return evaluation::Error{
-      maybe_args->size() > ptr->arity()
+      maybe_args->size() > callable.arity()
           ? utils::format("Too many arguments to call function '{}': "
                           "expected {} but got {}",
-                          *callee,
-                          ptr->arity(),
+                          callee->to_string(),
+                          callable.arity(),
                           maybe_args->size())
           : utils::format("Too few arguments to call function '{}': "
                           "expected {} but got {}",
-                          *callee,
-                          ptr->arity(),
+                          callee->to_string(),
+                          callable.arity(),
                           maybe_args->size()),
       expr.paren.line};
 }
 auto interpreter::visit_impl(const expression::IllegalExpr &expr) const
     -> eval_result_t {
-  return evaluation::Error{"Illegal expression"s, expr.token.line};
+  return {
+      evaluation::Error{utils::format("Illegal expression: {}",
+                                      expr.token.to_string(utils::kTokenOnly)),
+                        expr.token.line}};
 }
 
 auto interpreter::expr_to_string(const utils::FormatPolicy &format_policy) const
