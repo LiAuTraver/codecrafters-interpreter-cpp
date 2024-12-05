@@ -11,9 +11,9 @@
 #include <utility>
 #include <vector>
 
+#include "IVisitor.hpp"
 #include "loxo_fwd.hpp"
 
-#include "ExprVisitor.hpp"
 #include "parse_error.hpp"
 #include "Token.hpp"
 
@@ -29,7 +29,7 @@ public:
   using ostringstream_t = std::ostringstream;
   using token_t = Token;
   using expr_ptr_t = std::shared_ptr<base_type>;
-  using expr_result_t = ExprVisitor::eval_result_t;
+  using expr_result_t = utils::IVisitor::eval_result_t;
 
 public:
   virtual ~Expr() = default;

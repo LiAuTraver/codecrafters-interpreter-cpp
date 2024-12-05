@@ -25,7 +25,7 @@ namespace net::ancillarycat::loxo::evaluation {
 /// @implements utils::Printable
 class Evaluatable : public utils::Printable {
 public:
-  using eval_result_t = utils::VisitorBase::eval_result_t;
+  using eval_result_t = utils::IVisitor::eval_result_t;
 
 public:
   constexpr Evaluatable() = default;

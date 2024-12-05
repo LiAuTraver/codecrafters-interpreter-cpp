@@ -8,10 +8,11 @@
 #include "loxo_fwd.hpp"
 
 #include "IVisitor.hpp"
+#include "expression.hpp"
 #include "Evaluatable.hpp"
 namespace net::ancillarycat::loxo::expression {
 /// @interface ExprVisitor
-class ExprVisitor : virtual public utils::VisitorBase {
+class ExprVisitor : virtual public utils::IVisitor {
 public:
   virtual ~ExprVisitor() = default;
 
@@ -46,6 +47,7 @@ private:
   virtual stmt_result_t evaluate_impl(const Expr &) const = 0;
   virtual eval_result_t get_result_impl() const = 0;
 };
+
 /// @implements ExprVisitor
 class LOXO_API ASTPrinter : public ExprVisitor, public utils::Viewable {
 public:

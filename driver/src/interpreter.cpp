@@ -13,7 +13,6 @@
 
 #include "Environment.hpp"
 #include "Evaluatable.hpp"
-#include "TokenType.hpp"
 #include "statement.hpp"
 #include "expression.hpp"
 #include "interpreter.hpp"

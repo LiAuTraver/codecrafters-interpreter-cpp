@@ -2,7 +2,7 @@
 
 #include "loxo_fwd.hpp"
 namespace net::ancillarycat::utils {
-class VisitorBase : virtual public Printable {
+class IVisitor : virtual public Printable {
 public:
   using variant_type = Variant<::net::ancillarycat::utils::Monostate,
                                loxo::evaluation::Boolean,

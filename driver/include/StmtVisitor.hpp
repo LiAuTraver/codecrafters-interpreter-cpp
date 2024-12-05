@@ -12,7 +12,7 @@
 namespace net::ancillarycat::loxo::statement {
 /// @implements utils::Printable
 /// @interface StmtVisitor
-class StmtVisitor : virtual public utils::VisitorBase {
+class StmtVisitor : virtual public utils::IVisitor {
 public:
   template <typename DerivedStmt>
     requires std::is_base_of_v<Stmt, DerivedStmt>

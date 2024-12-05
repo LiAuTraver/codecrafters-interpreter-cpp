@@ -1,7 +1,6 @@
 #pragma once
 
 #include <memory>
-
 #include <expected>
 #include <utility>
 #include <span>
@@ -10,11 +9,10 @@
 
 #include "loxo_fwd.hpp"
 
-#include "expression.hpp"
-#include "ScopeAssoc.hpp"
-#include "ExprVisitor.hpp"
-#include "statement.hpp"
 #include "Environment.hpp"
+#include "expression.hpp"
+#include "statement.hpp"
+#include "ExprVisitor.hpp"
 
 namespace net::ancillarycat::loxo {
 /// @implements expression::ExprVisitor

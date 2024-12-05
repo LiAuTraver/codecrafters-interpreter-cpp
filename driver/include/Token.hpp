@@ -1,4 +1,5 @@
-#pragma once
+#ifndef AC_LOXO_TOKEN_HPP
+#define AC_LOXO_TOKEN_HPP
 #include <any>
 #include <concepts>
 #include <cstdint>
@@ -8,6 +9,10 @@
 
 #include "loxo_fwd.hpp"
 
+#ifdef AC_LOXO_TOKENTYPE_HPP
+#  error                                                                       \
+      "please do not include TokenType.hpp in other files; include Token.hpp instead"
+#endif
 #include "TokenType.hpp"
 
 namespace net::ancillarycat::loxo {
@@ -71,3 +76,5 @@ template <> struct std::formatter<net::ancillarycat::loxo::Token> {
     return format_to(ctx.out(), "{}", token.to_string());
   }
 };
+
+#endif // AC_LOXO_TOKEN_HPP

@@ -6,7 +6,6 @@
 #include "loxo_fwd.hpp"
 
 #include "statement.hpp"
-#include "TokenType.hpp"
 #include "expression.hpp"
 
 #include "parser.hpp"

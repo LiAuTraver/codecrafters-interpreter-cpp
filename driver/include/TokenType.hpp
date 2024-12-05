@@ -1,4 +1,6 @@
-#pragma once
+#ifndef AC_LOXO_TOKENTYPE_HPP
+#define AC_LOXO_TOKENTYPE_HPP
+
 #include <cstdint>
 #include <string>
 #include <string_view>
@@ -96,3 +98,5 @@ inline static const auto keywords =
         {"while"sv, {TokenType::kWhile}},
     };
 } // namespace net::ancillarycat::loxo
+
+#endif // AC_LOXO_TOKENTYPE_HPP

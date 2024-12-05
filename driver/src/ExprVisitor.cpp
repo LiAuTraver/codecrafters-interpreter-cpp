@@ -28,7 +28,7 @@ ASTPrinter::eval_result_t ASTPrinter::visit_impl(const Variable &expr) const {
   oss << expr << std::endl;
   return {};
 }
-utils::VisitorBase::eval_result_t
+utils::IVisitor::eval_result_t
 ASTPrinter::visit_impl(const Assignment &expr) const {
   dbg(info, "Assignment: {}", expr.to_string());
   oss << expr << std::endl;
