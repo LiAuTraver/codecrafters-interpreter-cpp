@@ -288,7 +288,7 @@ auto Callable::to_string_impl(const utils::FormatPolicy &) const
     -> string_type {
   return my_function.visit(match{
       [](const native_function_t &) { return "<native fn>"s; },
-      [](const custom_function_t &) { return "<custom fn>"s; },
+      [](const custom_function_t &f) { return utils::format("<fn {}>", f.name.to_string(utils::kTokenOnly)); },
       [](const auto &) { return "<unknown fn>"s; },
   });
 }

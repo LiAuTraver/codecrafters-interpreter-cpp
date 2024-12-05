@@ -11,3 +11,4 @@ fun cumulative_sum() {
 }
 
 cumulative_sum();
+print cumulative_sum;

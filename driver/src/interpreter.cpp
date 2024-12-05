@@ -424,9 +424,9 @@ auto interpreter::visit_impl(const expression::Logical &expr) const
 }
 auto interpreter::visit_impl(const expression::Call &expr) const
     -> eval_result_t {
-  // defer {
-  //   expr_res.clear();
-  // }; // FIXME: should not call `clear` when evaluating an expression.
+  defer {
+    expr_res.clear();
+  }; // FIXME: should not call `clear` when evaluating an expression.
 
   if (auto res = evaluate(*expr.callee); !res.ok())
     return {evaluation::Error{res.message()}};
