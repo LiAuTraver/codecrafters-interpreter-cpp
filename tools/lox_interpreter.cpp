@@ -21,7 +21,7 @@
 #endif
 #include "../shared/execution_context.hpp"
 
-LOXO_INITIALIZATION(trace);
+LOXO_INITIALIZATION(info);
 using namespace net::ancillarycat;
 
 void alterToolContext(loxo::ExecutionContext &execution_context) {
