@@ -64,4 +64,5 @@ Testing
 *.lock
 bazel-*
 .clwb
+.aswb
 *.in
