@@ -198,7 +198,7 @@ public:
   using string_view_type = utils::Viewable::string_view_type;
 
 public:
-  constexpr Callable() = default;
+  Callable() = default;
   virtual ~Callable() = default;
 
 public:
