@@ -29,7 +29,7 @@ auto Environment::createGlobalEnvironment()
            evaluation::Callable::create_native(
                [](const interpreter &, evaluation::Callable::args_t &) {
                  dbg(trace, "clock() called");
-                 return std::chrono::duration_cast<std::chrono::milliseconds>(
+                 return std::chrono::duration_cast<std::chrono::seconds>(
                             std::chrono::system_clock::now().time_since_epoch())
                      .count();
                }))
