@@ -9,7 +9,7 @@
 #include <vector>
 
 #include <net/ancillarycat/utils/file_reader.hpp>
-#include <net/ancillarycat/utils/status.hpp>
+#include <net/ancillarycat/utils/Status.hpp>
 
 #include "loxo_fwd.hpp"
 

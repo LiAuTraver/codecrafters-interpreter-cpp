@@ -11,7 +11,7 @@
 
 #include "loxo_fwd.hpp"
 
-#include <net/ancillarycat/utils/status.hpp>
+#include <net/ancillarycat/utils/Status.hpp>
 #include "Evaluatable.hpp"
 
 namespace net::ancillarycat::loxo::evaluation {

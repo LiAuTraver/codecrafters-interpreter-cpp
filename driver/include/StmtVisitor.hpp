@@ -4,7 +4,7 @@
 
 #include "loxo_fwd.hpp"
 
-#include <net/ancillarycat/utils/status.hpp>
+#include <net/ancillarycat/utils/Status.hpp>
 #include <net/ancillarycat/utils/Variant.hpp>
 
 #include "IVisitor.hpp"

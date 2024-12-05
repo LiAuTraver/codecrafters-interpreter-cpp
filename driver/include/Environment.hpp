@@ -7,8 +7,9 @@
 #include <unordered_map>
 #include <variant>
 
+#include <net/ancillarycat/utils/Status.hpp>
+
 #include "loxo_fwd.hpp"
-#include <net/ancillarycat/utils/status.hpp>
 
 #include "ScopeAssoc.hpp"
 

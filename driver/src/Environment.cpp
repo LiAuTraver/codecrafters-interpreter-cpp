@@ -4,7 +4,7 @@
 #include <unordered_map>
 #include <memory>
 
-#include <net/ancillarycat/utils/status.hpp>
+#include <net/ancillarycat/utils/Status.hpp>
 
 #include "loxo_fwd.hpp"
 #include "Environment.hpp"

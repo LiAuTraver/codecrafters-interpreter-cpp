@@ -3,7 +3,7 @@
 #include <variant>
 
 #include <net/ancillarycat/utils/Variant.hpp>
-#include <net/ancillarycat/utils/status.hpp>
+#include <net/ancillarycat/utils/Status.hpp>
 
 #include "loxo_fwd.hpp"
 

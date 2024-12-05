@@ -17,7 +17,7 @@
 #endif
 
 #include <net/ancillarycat/utils/config.hpp>
-#include <net/ancillarycat/utils/status.hpp>
+#include <net/ancillarycat/utils/Status.hpp>
 
 #include "execution_context.hpp"
 #include "ExprVisitor.hpp"

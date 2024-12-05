@@ -6,7 +6,7 @@
 #include <utility>
 #include <span>
 
-#include <net/ancillarycat/utils/status.hpp>
+#include <net/ancillarycat/utils/Status.hpp>
 
 #include "loxo_fwd.hpp"
 
