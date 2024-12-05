@@ -1,21 +1,20 @@
 #pragma once
 
 #include <memory>
+
+#include <expected>
+#include <utility>
 #include <span>
 
-#include "config.hpp"
-#include "status.hpp"
-#include "utils.hpp"
+#include <net/ancillarycat/utils/status.hpp>
 
 #include "loxo_fwd.hpp"
+
 #include "expression.hpp"
 #include "ScopeAssoc.hpp"
 #include "ExprVisitor.hpp"
 #include "statement.hpp"
 #include "Environment.hpp"
-
-#include <expected>
-#include <utility>
 
 namespace net::ancillarycat::loxo {
 /// @implements expression::ExprVisitor
@@ -29,12 +28,9 @@ public:
   using env_ptr_t = std::shared_ptr<env_t>;
 
 public:
-  utils::Status interpret(std::span<std::shared_ptr<statement::Stmt>>) const;
+  stmt_result_t interpret(std::span<std::shared_ptr<statement::Stmt>>) const;
   auto save_and_renew_env() const -> const interpreter &;
-  auto restore_env() const -> const interpreter & {
-    env = prev_env;
-    return *this;
-  }
+  auto restore_env() const -> const interpreter &;
   auto get_current_env() const -> std::weak_ptr<env_t> { return env; }
 
 private:
@@ -56,8 +52,10 @@ private:
       -> eval_result_t override;
   virtual auto visit_impl(const expression::IllegalExpr &) const
       -> eval_result_t override;
+
+private:
   virtual auto evaluate_impl(const expression::Expr &) const
-      -> utils::Status override;
+      -> stmt_result_t override;
   virtual auto get_result_impl() const -> eval_result_t override;
 
 private:
@@ -71,25 +69,27 @@ private:
 
 private:
   virtual auto visit_impl(const statement::Variable &) const
-      -> utils::Status override;
+      -> stmt_result_t override;
   virtual auto visit_impl(const statement::Print &) const
-      -> utils::Status override;
+      -> stmt_result_t override;
   virtual auto visit_impl(const statement::Expression &) const
-      -> utils::Status override;
+      -> stmt_result_t override;
   virtual auto visit_impl(const statement::Block &) const
-      -> utils::Status override;
+      -> stmt_result_t override;
   virtual auto visit_impl(const statement::If &) const
-      -> utils::Status override;
+      -> stmt_result_t override;
   virtual auto visit_impl(const statement::While &) const
-      -> utils::Status override;
+      -> stmt_result_t override;
   virtual auto visit_impl(const statement::For &) const
-      -> utils::Status override;
+      -> stmt_result_t override;
   virtual auto visit_impl(const statement::Function &) const
-      -> utils::Status override;
+      -> stmt_result_t override;
+  virtual auto visit_impl(const statement::Return &) const
+      -> stmt_result_t override;
   virtual auto visit_impl(const statement::IllegalStmt &) const
-      -> utils::Status override;
+      -> stmt_result_t override;
   virtual auto execute_impl(const statement::Stmt &) const
-      -> utils::Status override;
+      -> stmt_result_t override;
 
 private:
   /// @remark `mutable` wasn't intentional, but my design is flawed and this is

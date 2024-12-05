@@ -11,12 +11,12 @@
 #include <vector>
 #include <functional>
 
-#include "Monostate.hpp"
-#include "Variant.hpp"
-#include "config.hpp"
-#include "statement.hpp"
-#include "utils.hpp"
+
+#include <net/ancillarycat/utils/Variant.hpp>
+
 #include "loxo_fwd.hpp"
+
+#include "statement.hpp"
 
 namespace net::ancillarycat::loxo::evaluation {
 
@@ -200,8 +200,8 @@ public:
   using native_function_t =
       std::function<eval_result_t(const interpreter &, args_t &)>;
   using custom_function_t = statement::Function;
-  using function_t = utils::
-      Variant<utils::Monostate, native_function_t, custom_function_t>;
+  using function_t =
+      utils::Variant<utils::Monostate, native_function_t, custom_function_t>;
 
 public:
   Callable() = default;
@@ -212,10 +212,8 @@ private:
   Callable(unsigned, custom_function_t &&);
 
 public:
-  static auto create_custom(unsigned,
-                            custom_function_t &&) -> Callable;
-  static auto create_native(unsigned, native_function_t &&)
-      -> Callable;
+  static auto create_custom(unsigned, custom_function_t &&) -> Callable;
+  static auto create_native(unsigned, native_function_t &&) -> Callable;
 
 public:
   constexpr inline auto arity() const -> unsigned { return my_arity; }

@@ -1,15 +1,17 @@
 #include <string>
 #include <string_view>
 
-#include "config.hpp"
 #include "loxo_fwd.hpp"
+
 #include "TokenType.hpp"
 
 namespace net::ancillarycat::loxo {
-TokenType::string_view_type TokenType::to_string_view_impl(const utils::FormatPolicy &) const {
+TokenType::string_view_type
+TokenType::to_string_view_impl(const utils::FormatPolicy &) const {
   return string_view_type{format_as(*this)};
 }
-TokenType::string_type TokenType::to_string_impl(const utils::FormatPolicy &) const  {
+TokenType::string_type
+TokenType::to_string_impl(const utils::FormatPolicy &) const {
   return string_type{format_as(*this)};
 }
 auto format_as(const TokenType &t) noexcept -> TokenType::string_view_type {

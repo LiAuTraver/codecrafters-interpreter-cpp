@@ -4,10 +4,9 @@
 #include <vector>
 
 #include "loxo_fwd.hpp"
+
 #include "statement.hpp"
-#include "utils.hpp"
 #include "TokenType.hpp"
-#include "config.hpp"
 #include "expression.hpp"
 
 #include "parser.hpp"
@@ -368,6 +367,17 @@ auto parser::for_stmt() -> stmt_ptr_t {
                                           std::move(increment),
                                           std::move(body));
 }
+auto parser::return_stmt() -> stmt_ptr_t {
+  expr_ptr_t value = nullptr;
+  if (!inspect(kSemicolon)) {
+    value = next_expression();
+  }
+  if (!inspect(kSemicolon)) {
+    throw synchronize({parse_error::kUnknownError, "Expect ';'."});
+  }
+  this->get();
+  return std::make_shared<statement::Return>(std::move(value));
+}
 auto parser::print_stmt() -> stmt_ptr_t {
   auto value = next_expression();
   if (!inspect(kSemicolon)) {
@@ -404,6 +414,10 @@ auto parser::next_statement() -> stmt_ptr_t {
   if (inspect(kFor)) {
     this->get();
     return for_stmt();
+  }
+  if (inspect(kReturn)) {
+    this->get();
+    return return_stmt();
   }
   return expr_stmt();
 }

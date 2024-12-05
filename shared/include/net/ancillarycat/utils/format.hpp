@@ -11,7 +11,6 @@
 #include <cmath>
 
 #include "config.hpp"
-#include "loxo_fwd.hpp"
 
 #ifdef LOXO_USE_FMT_FORMAT
 #  include <fmt/core.h>
@@ -22,6 +21,7 @@
 #endif
 
 namespace net::ancillarycat::utils {
+template <Variantable... Ts> class Variant;
 #ifndef LOXO_USE_FMT_FORMAT
 #  include <format>
 #  include <print>
@@ -127,18 +127,6 @@ public:
 private:
   virtual auto to_string_view_impl(const FormatPolicy &) const
       -> string_view_type = 0;
-};
-class VisitorBase : virtual public Printable {
-public:
-  using variant_type = Variant<::net::ancillarycat::utils::Monostate,
-                               loxo::evaluation::Boolean,
-                               loxo::evaluation::Nil,
-                               loxo::evaluation::Number,
-                               loxo::evaluation::String,
-                               loxo::evaluation::Callable,
-                               loxo::evaluation::Error>;
-  using eval_result_t = variant_type;
-  using string_view_type = utils::Viewable::string_view_type;
 };
 } // namespace net::ancillarycat::utils
 

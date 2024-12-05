@@ -7,40 +7,26 @@
 #include <tuple>
 #include <type_traits>
 
-#include "config.hpp"
+#include <net/ancillarycat/utils/config.hpp>
+#include <net/ancillarycat/utils/format.hpp>
 
-namespace net::ancillarycat::utils {
-class Monostate;
-/// @brief a concept that checks if the types are variantable for my custom
-/// @link Variant @endlink class,
-/// where the first type must be @link Monostate @endlink
-/// @tparam Types the types to check
-template <typename... Types>
-concept Variantable = requires {
-  std::is_same_v<std::tuple_element_t<0, std::tuple<Types...>>, Monostate>;
-};
-/// @brief represents a value that can be stored in a
-/// @link StatusOr @endlink object
-/// @tparam Ty the type of the value
-/// @remarks similiar to Microsoft's @link std::_SMF_control @endlink class,
-/// which was used in @link std::optional @endlink
-template <typename Ty>
-concept Storable = std::conjunction_v<std::is_default_constructible<Ty>,
-                                      std::is_nothrow_destructible<Ty>,
-                                      std::is_nothrow_constructible<Ty>>;
+#ifdef LIBLOXO_SHARED
+#  ifdef _WIN32
+#    ifdef driver_EXPORTS
+#      define LOXO_API __declspec(dllexport)
+#    else
+#      define LOXO_API __declspec(dllimport)
+#    endif
+#  else
+#    define LOXO_API __attribute__((visibility("default")))
+#  endif
+#  define LOXO_INLINE
+#else
+#  define LOXO_API
+#  define LOXO_INLINE inline
+#endif
 
-template <Variantable... Types> class Variant;
-class Status;
-template <Storable Ty> class StatusOr;
-class file_reader;
-using string = ::std::string;
-using string_view = ::std::string_view;
-using path = ::std::filesystem::path;
-using ifstream = ::std::ifstream;
-using ostringstream = ::std::ostringstream;
-using namespace ::std::string_view_literals;
-using namespace ::std::string_literals;
-} // namespace net::ancillarycat::utils
+
 // NOLINTBEGIN(bugprone-forward-declaration-namespace)
 namespace net::ancillarycat::loxo {
 
@@ -81,6 +67,7 @@ class If;
 class While;
 class For;
 class Function;
+class Return;
 class IllegalStmt;
 
 class StmtVisitor;

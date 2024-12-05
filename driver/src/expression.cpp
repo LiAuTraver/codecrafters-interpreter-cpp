@@ -1,8 +1,6 @@
 #include <string>
 
-#include "config.hpp"
 #include "loxo_fwd.hpp"
-#include "utils.hpp"
 
 #include "expression.hpp"
 #include "ExprVisitor.hpp"

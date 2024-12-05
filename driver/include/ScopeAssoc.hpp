@@ -9,10 +9,9 @@
 #include <string_view>
 #include <variant>
 
-#include "config.hpp"
 #include "loxo_fwd.hpp"
-#include "utils.hpp"
-#include "status.hpp"
+
+#include <net/ancillarycat/utils/status.hpp>
 #include "Evaluatable.hpp"
 
 namespace net::ancillarycat::loxo::evaluation {
@@ -32,7 +31,9 @@ public:
   virtual ~ScopeAssoc() override = default;
 
 private:
-  auto add(const string_type &, const eval_result_t &, uint_least32_t = std::numeric_limits<uint_least32_t>::quiet_NaN())
+  auto add(const string_type &,
+           const eval_result_t &,
+           uint_least32_t = std::numeric_limits<uint_least32_t>::quiet_NaN())
       -> utils::Status;
   auto find(this auto &&self, const string_type &name)
       -> std::optional<associations_t::iterator>;

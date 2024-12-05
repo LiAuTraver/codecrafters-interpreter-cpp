@@ -2,14 +2,13 @@
 #include <type_traits>
 #include <variant>
 
-#include "config.hpp"
-#include "Evaluatable.hpp"
-#include "utils.hpp"
+#include <net/ancillarycat/utils/Variant.hpp>
+#include <net/ancillarycat/utils/status.hpp>
+
 #include "loxo_fwd.hpp"
-#include "status.hpp"
 
-#include "Variant.hpp"
-
+#include "IVisitor.hpp"
+#include "Evaluatable.hpp"
 namespace net::ancillarycat::loxo::expression {
 /// @interface ExprVisitor
 class ExprVisitor : virtual public utils::VisitorBase {
@@ -44,7 +43,7 @@ private:
   virtual eval_result_t visit_impl(const IllegalExpr &) const = 0;
 
 private:
-  virtual utils::Status evaluate_impl(const Expr &) const = 0;
+  virtual stmt_result_t evaluate_impl(const Expr &) const = 0;
   virtual eval_result_t get_result_impl() const = 0;
 };
 /// @implements ExprVisitor
@@ -67,7 +66,7 @@ private:
   virtual eval_result_t visit_impl(const Logical &) const override;
   virtual eval_result_t visit_impl(const Call &) const override;
   virtual eval_result_t visit_impl(const IllegalExpr &) const override;
-  virtual utils::Status evaluate_impl(const Expr &) const override;
+  virtual stmt_result_t evaluate_impl(const Expr &) const override;
   virtual string_type
   to_string_impl(const utils::FormatPolicy &) const override;
   auto to_string_view_impl(const utils::FormatPolicy &) const

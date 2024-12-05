@@ -8,12 +8,12 @@
 #include <string_view>
 #include <vector>
 
-#include "config.hpp"
+#include <net/ancillarycat/utils/file_reader.hpp>
+#include <net/ancillarycat/utils/status.hpp>
+
 #include "loxo_fwd.hpp"
 
-#include "file_reader.hpp"
 #include "lex_error.hpp"
-#include "status.hpp"
 #include "Token.hpp"
 
 /// @namespace net::ancillarycat::loxo
@@ -62,7 +62,7 @@ private:
   void add_string();
   void add_comment();
   void next_token();
-  void add_token(const token_type_t&, std::any = std::any());
+  void add_token(const token_type_t &, std::any = std::any());
   void add_lex_error(lex_error::type_t = error_t::kMonostate);
   bool is_at_end(size_t = 0) const;
   auto lex_string() -> lexer::status_t::Code;

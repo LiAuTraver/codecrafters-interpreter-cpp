@@ -13,8 +13,8 @@
 #include <utility>
 #include <vector>
 
-#include "config.hpp"
-#include "utils.hpp"
+#include "loxo_fwd.hpp"
+
 #include "lex_error.hpp"
 #include "lexer.hpp"
 #include "Token.hpp"

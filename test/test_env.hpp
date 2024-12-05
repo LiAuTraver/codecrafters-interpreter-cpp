@@ -3,7 +3,7 @@
 #include <gtest/gtest.h>
 #include <filesystem>
 
-#include "../include/config.hpp"
+#include "../include/loxo_fwd.hpp"
 #include "../shared/execution_context.hpp"
 static inline auto you_should_not_include_this_header_file_twice =
     []() -> std::nullptr_t {
@@ -13,10 +13,8 @@ static inline auto you_should_not_include_this_header_file_twice =
 }();
 namespace net::ancillarycat::loxo {
 struct ExecutionContext;
-NODISCARD_LOXO(loxo_main) extern int loxo_main(
-    int,
-    char **,
-    ExecutionContext &);
+NODISCARD_LOXO(loxo_main)
+extern int loxo_main(int, char **, ExecutionContext &);
 } // namespace net::ancillarycat::loxo
 using namespace net::ancillarycat::loxo;
 using namespace std::string_view_literals;

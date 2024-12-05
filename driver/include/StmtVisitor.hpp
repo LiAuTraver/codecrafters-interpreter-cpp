@@ -2,10 +2,12 @@
 #include <variant>
 #include <cmath>
 
-#include "config.hpp"
-#include "utils.hpp"
 #include "loxo_fwd.hpp"
-#include "status.hpp"
+
+#include <net/ancillarycat/utils/status.hpp>
+#include <net/ancillarycat/utils/Variant.hpp>
+
+#include "IVisitor.hpp"
 
 namespace net::ancillarycat::loxo::statement {
 /// @implements utils::Printable
@@ -20,15 +22,16 @@ public:
   auto execute(const Stmt &stmt) const { return execute_impl(stmt); }
 
 private:
-  virtual utils::Status visit_impl(const Variable &) const = 0;
-  virtual utils::Status visit_impl(const Print &) const = 0;
-  virtual utils::Status visit_impl(const Expression &) const = 0;
-  virtual utils::Status visit_impl(const Block &) const = 0;
-  virtual utils::Status visit_impl(const If &) const = 0;
-  virtual utils::Status visit_impl(const While &) const = 0;
-  virtual utils::Status visit_impl(const For &) const = 0;
-  virtual utils::Status visit_impl(const Function &) const = 0;
-  virtual utils::Status visit_impl(const IllegalStmt &) const = 0;
-  virtual utils::Status execute_impl(const Stmt &) const = 0;
+  virtual stmt_result_t visit_impl(const Variable &) const = 0;
+  virtual stmt_result_t visit_impl(const Print &) const = 0;
+  virtual stmt_result_t visit_impl(const Expression &) const = 0;
+  virtual stmt_result_t visit_impl(const Block &) const = 0;
+  virtual stmt_result_t visit_impl(const If &) const = 0;
+  virtual stmt_result_t visit_impl(const While &) const = 0;
+  virtual stmt_result_t visit_impl(const For &) const = 0;
+  virtual stmt_result_t visit_impl(const Function &) const = 0;
+  virtual stmt_result_t visit_impl(const Return &) const = 0;
+  virtual stmt_result_t visit_impl(const IllegalStmt &) const = 0;
+  virtual stmt_result_t execute_impl(const Stmt &) const = 0;
 };
 } // namespace net::ancillarycat::loxo::statement

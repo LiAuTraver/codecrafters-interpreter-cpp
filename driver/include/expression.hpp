@@ -11,9 +11,9 @@
 #include <utility>
 #include <vector>
 
-#include "config.hpp"
-#include "ExprVisitor.hpp"
 #include "loxo_fwd.hpp"
+
+#include "ExprVisitor.hpp"
 #include "parse_error.hpp"
 #include "Token.hpp"
 

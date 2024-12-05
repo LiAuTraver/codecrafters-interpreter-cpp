@@ -4,10 +4,10 @@
 #include <cstdint>
 #include <limits>
 #include <numeric>
+#include <string>
 
-#include "config.hpp"
 #include "loxo_fwd.hpp"
-#include "utils.hpp"
+
 #include "TokenType.hpp"
 
 namespace net::ancillarycat::loxo {
@@ -37,8 +37,10 @@ public:
   constexpr auto is_type(const token_type &type) const noexcept -> bool {
     return this->type == type;
   }
+
 private:
-  auto to_string_impl(const utils::FormatPolicy &) const -> string_type override;
+  auto to_string_impl(const utils::FormatPolicy &) const
+      -> string_type override;
 
 public:
   /// @brief the type of the token
@@ -46,7 +48,8 @@ public:
   /// @brief the lexeme. (the actual string)
   string_type lexeme = string_type();
   /// @brief the literal value of the token
-  dbg_only(mutable) std::any literal = std::any();
+  dbg_only(mutable)
+  std::any literal = std::any();
   /// @brief the line number where the token is found
   uint_least32_t line = std::numeric_limits<
       std::underlying_type_t<enum token_type::type_t>>::signaling_NaN();
@@ -64,8 +67,7 @@ private:
 template <> struct std::formatter<net::ancillarycat::loxo::Token> {
   constexpr auto parse(std::format_parse_context &ctx) { return ctx.begin(); }
   template <typename FormatContext>
-  auto format(const net::ancillarycat::loxo::Token &token,
-              FormatContext &ctx) {
+  auto format(const net::ancillarycat::loxo::Token &token, FormatContext &ctx) {
     return format_to(ctx.out(), "{}", token.to_string());
   }
 };

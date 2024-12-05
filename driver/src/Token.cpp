@@ -9,9 +9,7 @@
 #include <cmath>
 #include <source_location>
 
-#include "config.hpp"
 #include "loxo_fwd.hpp"
-#include "utils.hpp"
 
 #include "lex_error.hpp"
 #include "Token.hpp"

@@ -10,7 +10,8 @@
 #include <unordered_set>
 #include <vector>
 
-#include "config.hpp"
+#include <net/ancillarycat/utils/config.hpp>
+#include "loxo_fwd.hpp"
 
 namespace net::ancillarycat::loxo {
 class LOXO_API lexer;

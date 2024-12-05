@@ -11,10 +11,10 @@
 #include <variant>
 #include <vector>
 
-#include "config.hpp"
+#include "loxo_fwd.hpp"
+
 #include "parse_error.hpp"
 #include "statement.hpp"
-#include "status.hpp"
 #include "Token.hpp"
 #include "TokenType.hpp"
 
@@ -79,6 +79,7 @@ private:
   auto block_stmt() -> stmt_ptr_t;
   auto while_stmt() -> stmt_ptr_t;
   auto for_stmt() -> stmt_ptr_t;
+  auto return_stmt() -> stmt_ptr_t;
   auto var_decl() -> stmt_ptr_t;
   auto function_decl() -> stmt_ptr_t;
 

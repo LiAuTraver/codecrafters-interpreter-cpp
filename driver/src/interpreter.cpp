@@ -9,25 +9,22 @@
 #include <typeinfo>
 #include <vector>
 
-#include "config.hpp"
-#include "utils.hpp"
 #include "loxo_fwd.hpp"
+
 #include "Environment.hpp"
 #include "Evaluatable.hpp"
-#include "Monostate.hpp"
 #include "TokenType.hpp"
 #include "statement.hpp"
-#include "status.hpp"
 #include "expression.hpp"
 #include "interpreter.hpp"
-#include "Variant.hpp"
 
 namespace net::ancillarycat::loxo {
 using utils::match;
 using enum TokenType::type_t;
 interpreter::interpreter() : env(std::make_shared<Environment>()) {}
-utils::Status interpreter::interpret(
-    const std::span<std::shared_ptr<statement::Stmt>> stmts) const {
+auto interpreter::interpret(
+    const std::span<std::shared_ptr<statement::Stmt>> stmts) const
+    -> stmt_result_t {
   defer { expr_res.clear(); };
 
   static bool has_init_global_env = false;
@@ -45,10 +42,14 @@ utils::Status interpreter::interpret(
 
   return utils::OkStatus();
 }
-auto interpreter::save_and_renew_env() const
-    -> const interpreter & {
+auto interpreter::save_and_renew_env() const -> const interpreter & {
   prev_env = env;
   env = std::make_shared<env_t>(prev_env);
+  return *this;
+}
+auto interpreter::restore_env() const -> const interpreter & {
+  env = prev_env;
+  prev_env.reset(); // cvt to nullptr
   return *this;
 }
 evaluation::Boolean
@@ -103,7 +104,7 @@ auto interpreter::get_call_args(const expression::Call &expr) const
   return {args};
 }
 auto interpreter::visit_impl(const statement::Variable &stmt) const
-    -> utils::Status {
+    -> stmt_result_t {
   defer { expr_res.clear(); };
 
   if (stmt.has_initilizer()) {
@@ -127,7 +128,7 @@ auto interpreter::visit_impl(const statement::Variable &stmt) const
                   stmt.name.line);
 }
 auto interpreter::visit_impl(const statement::Print &stmt) const
-    -> utils::Status {
+    -> stmt_result_t {
   defer { expr_res.clear(); };
 
   if (auto eval_res = evaluate(*stmt.value); !eval_res.ok())
@@ -135,7 +136,7 @@ auto interpreter::visit_impl(const statement::Print &stmt) const
   stmts_res.emplace_back(expr_res);
   return utils::OkStatus();
 }
-auto interpreter::visit_impl(const statement::If &stmt) const -> utils::Status {
+auto interpreter::visit_impl(const statement::If &stmt) const -> stmt_result_t {
   defer { expr_res.clear(); };
 
   if (auto eval_res = evaluate(*stmt.condition); !eval_res.ok())
@@ -155,7 +156,7 @@ auto interpreter::visit_impl(const statement::If &stmt) const -> utils::Status {
   return utils::OkStatus();
 }
 auto interpreter::visit_impl(const statement::While &stmt) const
-    -> utils::Status {
+    -> stmt_result_t {
   defer { expr_res.clear(); };
 
   do {
@@ -170,7 +171,7 @@ auto interpreter::visit_impl(const statement::While &stmt) const
   return utils::OkStatus();
 }
 auto interpreter::visit_impl(const statement::For &stmt) const
-    -> utils::Status {
+    -> stmt_result_t {
   defer { expr_res.clear(); };
 
   if (stmt.initializer)
@@ -194,7 +195,7 @@ auto interpreter::visit_impl(const statement::For &stmt) const
   return utils::OkStatus();
 }
 auto interpreter::visit_impl(const statement::Function &stmt) const
-    -> utils::Status {
+    -> stmt_result_t {
   defer { expr_res.clear(); };
   // TODO: function overloading
   if (auto res = env->get(stmt.name.to_string(utils::kTokenOnly));
@@ -212,15 +213,15 @@ auto interpreter::visit_impl(const statement::Function &stmt) const
       stmt.name.line);
 }
 auto interpreter::visit_impl(const statement::IllegalStmt &stmt) const
-    -> utils::Status {
+    -> stmt_result_t {
   return utils::InvalidArgument(stmt.message);
 }
 auto interpreter::visit_impl(const statement::Expression &stmt) const
-    -> utils::Status {
+    -> stmt_result_t {
   return evaluate(*stmt.expr);
 }
 auto interpreter::visit_impl(const statement::Block &stmt) const
-    -> utils::Status {
+    -> stmt_result_t {
   auto original_env = env; // save the original environment
   auto sub_env = std::make_shared<Environment>(env);
   env = sub_env;
@@ -234,15 +235,13 @@ auto interpreter::visit_impl(const statement::Block &stmt) const
   return utils::OkStatus();
 }
 auto interpreter::execute_impl(const statement::Stmt &stmt) const
-    -> utils::Status {
+    -> stmt_result_t {
   return stmt.accept(*this);
 }
-auto interpreter::get_result_impl() const -> eval_result_t { 
-  return expr_res; 
-}
+auto interpreter::get_result_impl() const -> eval_result_t { return expr_res; }
 
 auto interpreter::evaluate_impl(const expression::Expr &expr) const
-    -> utils::Status {
+    -> stmt_result_t {
   return expr_res.set(expr.accept(*this))
       .visit(match{[](const evaluation::Error &e) {
                      return utils::InvalidArgument(e.to_string_view());
@@ -251,6 +250,13 @@ auto interpreter::evaluate_impl(const expression::Expr &expr) const
                      return utils::EmptyInput("no expr was evaluated.");
                    },
                    [](const auto &) { return utils::OkStatus(); }});
+}
+auto interpreter::visit_impl(const statement::Return &expr) const
+    -> stmt_result_t {
+  if (!this->prev_env) {
+    return utils::InvalidArgument("return statement outside of function.");
+  }
+  // TODO()
 }
 auto interpreter::visit_impl(const expression::Literal &expr) const
     -> eval_result_t {
@@ -434,8 +440,9 @@ auto interpreter::visit_impl(const expression::Call &expr) const
   // `expr_res` would change in `get_call_args`, so we need to save it.
   const auto callee = expr.callee;
   if (!utils::holds_alternative<evaluation::Callable>(expr_res)) {
-    return {evaluation::Error{utils::format("Not a function: {}", callee->to_string()),
-                              expr.paren.line}};
+    return {evaluation::Error{
+        utils::format("Not a function: {}", callee->to_string()),
+        expr.paren.line}};
   }
   auto callable = utils::get<evaluation::Callable>(expr_res);
 

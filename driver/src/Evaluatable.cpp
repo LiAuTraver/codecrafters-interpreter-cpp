@@ -1,9 +1,7 @@
 #include <algorithm>
 #include <cmath>
+#include <net/ancillarycat/utils/Monostate.hpp>
 
-#include "Monostate.hpp"
-#include "config.hpp"
-#include "utils.hpp"
 #include "loxo_fwd.hpp"
 
 #include "Evaluatable.hpp"
@@ -270,7 +268,7 @@ auto Callable::call(const interpreter &interpreter, args_t &args)
 
           if (auto res = interpreter.execute(custom_function.body); !res.ok())
             return {Error{res.message()}};
-          
+
           return interpreter.restore_env().get_result().visit(
               match{[](const utils::Monostate &) -> eval_result_t {
                       return {NilValue};

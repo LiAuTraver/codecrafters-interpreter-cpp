@@ -3,9 +3,9 @@
 #include <string>
 #include <string_view>
 
-#include "config.hpp"
 #include "loxo_fwd.hpp"
-#include "utils.hpp"
+
+#include <net/ancillarycat/utils/file_reader.hpp>
 
 namespace net::ancillarycat::loxo {
 class LOXO_API lex_error {
@@ -61,8 +61,9 @@ lex_error::to_string(const string_view_t lexeme_sv,
   return str;
 }
 
-inline auto format_to(const lex_error &lex_error,
-               const utils::FormatPolicy format_policy = utils::kDefault) {
+inline auto
+format_to(const lex_error &lex_error,
+          const utils::FormatPolicy format_policy = utils::kDefault) {
   return lex_error.to_string();
 }
 } // namespace net::ancillarycat::loxo
