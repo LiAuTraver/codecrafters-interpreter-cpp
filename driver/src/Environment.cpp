@@ -2,6 +2,7 @@
 #include <string>
 #include <string_view>
 #include <unordered_map>
+#include <memory>
 
 #include "config.hpp"
 #include "loxo_fwd.hpp"
@@ -10,7 +11,6 @@
 
 #include "Environment.hpp"
 
-#include <memory>
 
 namespace net::ancillarycat::loxo {
 
