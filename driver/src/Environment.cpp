@@ -11,7 +11,6 @@
 
 #include "Environment.hpp"
 
-
 namespace net::ancillarycat::loxo {
 
 Environment::Environment() : current(std::make_shared<scope_env_t>()) {}
@@ -27,9 +26,10 @@ auto Environment::createGlobalEnvironment()
   auto env = new Environment();
   env->add("clock"s,
            evaluation::Callable::create_native(
+               0,
                [](const interpreter &, evaluation::Callable::args_t &) {
                  dbg(trace, "clock() called");
-                 return std::chrono::duration_cast<std::chrono::milliseconds>(
+                 return std::chrono::duration_cast<std::chrono::seconds>(
                             std::chrono::system_clock::now().time_since_epoch())
                      .count();
                }))

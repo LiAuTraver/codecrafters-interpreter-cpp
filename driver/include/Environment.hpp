@@ -8,7 +8,6 @@
 #include <variant>
 
 #include "config.hpp"
-#include "interpreter.hpp"
 #include "loxo_fwd.hpp"
 #include "status.hpp"
 #include "utils.hpp"

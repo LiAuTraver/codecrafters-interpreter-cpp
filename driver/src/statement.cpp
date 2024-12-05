@@ -79,11 +79,12 @@ auto Function::to_string_impl(const utils::FormatPolicy &format_policy) const
     result.pop_back();
     result.pop_back();
   }
-  result += ") {\n";
-  for (const auto &stmt : this->body) {
-    result += stmt->to_string(format_policy);
-  }
-  result += "}\n";
+  // result += ") {\n";
+  // for (const auto &stmt : this->body) {
+  //   result += stmt->to_string(format_policy);
+  // }
+  // result += "}\n";
+  result.append(") { ... }");
   return result;
 }
 auto Function::accept_impl(const StmtVisitor &visitor) const -> stmt_result_t {

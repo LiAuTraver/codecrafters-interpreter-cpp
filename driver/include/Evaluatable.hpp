@@ -5,13 +5,16 @@
 #include <compare>
 #include <cstdint>
 #include <limits>
+#include <memory>
 #include <random>
 #include <utility>
 #include <vector>
 #include <functional>
 
+#include "Monostate.hpp"
 #include "Variant.hpp"
 #include "config.hpp"
+#include "statement.hpp"
 #include "utils.hpp"
 #include "loxo_fwd.hpp"
 
@@ -193,51 +196,44 @@ private:
 class Callable : public Evaluatable {
 public:
   using args_t = std::vector<eval_result_t>;
-  using function_t =
-      std::function<eval_result_t(const interpreter &, args_t &)>;
   using string_view_type = utils::Viewable::string_view_type;
+  using native_function_t =
+      std::function<eval_result_t(const interpreter &, args_t &)>;
+  using custom_function_t = statement::Function;
+  using function_t = utils::
+      Variant<utils::Monostate, native_function_t, custom_function_t>;
 
 public:
-  constexpr Callable() = default;
+  Callable() = default;
   virtual ~Callable() = default;
 
-public:
-  Callable(function_t &&,
-           uint_least32_t = std::numeric_limits<uint_least32_t>::quiet_NaN());
+private:
+  Callable(unsigned, native_function_t &&);
+  Callable(unsigned, custom_function_t &&);
 
 public:
-  static auto
-  create(function_t &&,
-         uint_least32_t = std::numeric_limits<uint_least32_t>::quiet_NaN())
-      -> Callable;
-  static auto create_native(
-      function_t &&,
-      uint_least32_t = std::numeric_limits<uint_least32_t>::quiet_NaN())
+  static auto create_custom(unsigned,
+                            custom_function_t &&) -> Callable;
+  static auto create_native(unsigned, native_function_t &&)
       -> Callable;
 
 public:
-  auto signature() const -> string_type;
+  constexpr inline auto arity() const -> unsigned { return my_arity; }
 
 public:
- LOXO_CONSTEXPR_IF_NOT_MSVC auto call(const interpreter &interpreter, args_t &args)
-      -> decltype(auto) {
-    return my_function.operator()(interpreter, args);
-  }
-  constexpr auto operator==(const Callable &other) const -> Boolean {
-    return {this == &other || (this->my_function.target_type() ==
-                               other.my_function.target_type())};
-  }
-  LOXO_CONSTEXPR_IF_NOT_MSVC auto operator!=(const Callable &other) const -> Boolean {
-    return {this->operator==(other).operator!()};
-  }
+  auto call(const interpreter &, args_t &) -> eval_result_t;
 
 private:
   // dont support static variables in this function
-  function_t my_function;
-  string_view_type native_signature;
+  unsigned my_arity = std::numeric_limits<unsigned>::quiet_NaN();
+  function_t my_function{utils::Monostate{}};
+
+private:
+  static constexpr auto native_signature = "<native fn>"sv;
 
 private:
   auto to_string_impl(const utils::FormatPolicy &) const
       -> string_type override;
 };
+
 } // namespace net::ancillarycat::loxo::evaluation

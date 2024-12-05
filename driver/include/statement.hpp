@@ -48,7 +48,7 @@ public:
   }
 
 public:
-  Token name;
+  token_t name;
   expr_ptr_t initializer{nullptr};
 
 private:
@@ -94,7 +94,7 @@ public:
   virtual ~Block() override = default;
 
 public:
-  std::vector<stmt_ptr_t> statements{};
+  std::vector<stmt_ptr_t> statements;
 
 private:
   auto to_string_impl(const utils::FormatPolicy &) const
@@ -172,9 +172,9 @@ public:
   virtual ~Function() = default;
 
 public:
-  Token name{};
-  std::vector<Token> parameters;
-  std::vector<stmt_ptr_t> body;
+  token_t name;
+  std::vector<token_t> parameters;
+  Block body;
 
 private:
   auto to_string_impl(const utils::FormatPolicy &) const

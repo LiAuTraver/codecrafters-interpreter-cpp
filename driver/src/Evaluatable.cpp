@@ -1,12 +1,17 @@
+#include <algorithm>
 #include <cmath>
 
+#include "Monostate.hpp"
 #include "config.hpp"
 #include "utils.hpp"
 #include "loxo_fwd.hpp"
 
 #include "Evaluatable.hpp"
+#include "interpreter.hpp"
 
 namespace net::ancillarycat::loxo::evaluation {
+using utils::match;
+
 Value::operator Boolean() const noexcept {
   if (dynamic_cast<const Nil *>(this)) {
     return Boolean::make_false(get_line());
@@ -103,7 +108,7 @@ String &String::operator=(String &&that) noexcept {
   Evaluatable::operator=(that);
   return *this;
 }
-String String::operator+(const String &rhs)const {
+String String::operator+(const String &rhs) const {
   return String{value + rhs.value};
 }
 Boolean String::operator==(const String &rhs) const {
@@ -194,8 +199,7 @@ auto Number::to_string_impl(const utils::FormatPolicy &format_policy) const
     -> string_type {
   return utils::format("{}", value);
 }
-Error::Error(const string_view_type message_sv,
-                         const uint_least32_t line)
+Error::Error(const string_view_type message_sv, const uint_least32_t line)
     : Evaluatable(line),
       message(utils::format("{}\n[line {}]", message_sv, line)) {}
 Error::Error(string_type &&message, uint_least32_t &&line) noexcept
@@ -226,27 +230,66 @@ auto Error::to_string_view_impl(const utils::FormatPolicy &) const
     -> string_view_type {
   return message;
 }
-Callable::Callable(function_t &&function, const uint_least32_t line)
-    : Evaluatable(line), my_function(std::move(function)) {}
-Callable Callable::create(function_t &&function, const uint_least32_t line) {
-  return {std::move(function), line};
+Callable::Callable(unsigned argc, native_function_t &&func) {
+  my_arity = argc;
+  my_function.emplace(std::move(func));
 }
-Callable Callable::create_native(function_t &&function,
-                                 const uint_least32_t line) {
-  Callable callable{std::move(function), line};
-  callable.native_signature = "<native fn>"sv;
-  return callable;
+Callable::Callable(unsigned argc, custom_function_t &&block) {
+  my_arity = argc;
+  my_function.emplace(std::move(block));
 }
-auto Callable::signature() const -> string_type {
-  dbg(trace, "type: {}", typeid(my_function.target<args_t>()).name());
-  return typeid(my_function.target<args_t>()).name();
+auto Callable::create_custom(unsigned argc, custom_function_t &&func)
+    -> Callable {
+  return {argc, std::move(func)};
+}
+auto Callable::create_native(unsigned argc, native_function_t &&func)
+    -> Callable {
+  return {argc, std::move(func)};
+}
+auto Callable::call(const interpreter &interpreter, args_t &args)
+    -> eval_result_t {
+  contract_assert(this->arity() == args.size(),
+                  1,
+                  "arity mismatch; should check it before calling");
+
+  return my_function.visit(match{
+      [&](const native_function_t &native_function) -> eval_result_t {
+        return native_function.operator()(interpreter, args);
+      },
+      [&](const custom_function_t &custom_function) -> eval_result_t {
+        if (auto scoped_env =
+                interpreter.save_and_renew_env().get_current_env().lock()) {
+          for (size_t i = 0; i < custom_function.parameters.size(); ++i) {
+            if (auto res = scoped_env->add(
+                    custom_function.parameters[i].to_string(utils::kTokenOnly),
+                    args[i],
+                    custom_function.parameters[i].line);
+                !res.ok())
+              return {Error{res.message()}};
+          }
+          auto res = interpreter.execute(custom_function.body);
+          if (!res.ok())
+            return {Error{res.message()}};
+          return interpreter.restore_env().get_result().visit(
+              match{[](const utils::Monostate &) -> eval_result_t {
+                      return {NilValue};
+                    },
+                    [](const auto &res) -> eval_result_t { return {res}; }});
+        }
+        contract_assert(false, 1, "should not happen");
+        return {Error{"no function to call"}};
+      },
+      [](const auto &) -> eval_result_t {
+        contract_assert(false, 1, "should not happen");
+        return {Error{"no function to call"}};
+      }});
 }
 auto Callable::to_string_impl(const utils::FormatPolicy &) const
     -> string_type {
-  // function signature
-  if (native_signature.empty()) {
-    return signature();
-  }
-  return {native_signature.cbegin(), native_signature.cend()};
+  return my_function.visit(match{
+      [](const native_function_t &) { return "<native fn>"s; },
+      [](const custom_function_t &f) { return utils::format("<fn {}>", f.name.to_string(utils::kTokenOnly)); },
+      [](const auto &) { return "<unknown fn>"s; },
+  });
 }
 } // namespace net::ancillarycat::loxo::evaluation

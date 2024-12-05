@@ -1,19 +1,24 @@
 > from [Crafting Interpreters](http://www.craftinginterpreters.com/appendix-i.html)
 
+> note: the `cpp` was just for syntax highlighting in vscode to make it look prettier than plain text
+
 Syntax Grammar
-```shell
+```cpp
 program        → declaration* EOF ;
 ```
 
 Declaration Grammar
-```shell
-declaration    -> varDecl | statement ;
+```cpp
+declaration    -> varDecl 
+                | statement 
+                | funcDecl ;
 
 varDecl        -> "var" IDENTIFIER ( "=" expression )? ";" ;
+funcDecl   -> "fun" function ;  
 ```
 
 Statement Grammar
-```shell
+```cpp
 statement      -> exprStmt 
                 | printStmt 
                 | block 
@@ -32,7 +37,7 @@ forStmt        -> "for" "(" ( varDecl | exprStmt | ";" )
 ```
 
 Expression Grammar
-```shell
+```cpp
 expression     -> assignment ;
 
 assignment     -> IDENTIFIER "=" assignment
@@ -49,4 +54,11 @@ unary          -> ( "!" | "-" ) unary
 call           -> primary ( "(" arguments? ")" )* ;
 primary        -> NUMBER | STRING | "true" | "false" | "nil"
                | "(" expression ")" | IDENTIFIER ;
+```
+
+miscellaneous
+```cpp
+arguments     -> expression ( "," expression )* ;
+function      -> IDENTIFIER "(" parameters? ")" block ;
+parameters    -> IDENTIFIER ( "," IDENTIFIER )* ;
 ```

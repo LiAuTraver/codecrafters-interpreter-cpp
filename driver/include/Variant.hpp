@@ -29,9 +29,15 @@ public:
   Variant(Ty &&value) : my_variant(std::forward<Ty>(value)) {}
 
   Variant(const Variant &) = default;
-  Variant(Variant &&) noexcept = default;
+  Variant(Variant &&that) noexcept : my_variant(std::move(that.my_variant)) {
+    that.my_variant.template emplace<Monostate>();
+  }
   Variant &operator=(const Variant &) = default;
-  Variant &operator=(Variant &&) noexcept = default;
+  Variant &operator=(Variant &&that) noexcept {
+    my_variant = std::move(that.my_variant);
+    that.my_variant.template emplace<Monostate>();
+    return *this;
+  }
   virtual ~Variant() override = default;
 
 public:
@@ -44,6 +50,8 @@ public:
   auto visit(this auto &&self, Callable &&callable) -> decltype(auto) {
     using ReturnType = decltype(std::forward<Callable>(callable)(
         std::declval<variant_type>()));
+    static_assert(std::is_default_constructible_v<ReturnType>,
+                  "ReturnType must be default constructible");
     return self.is_valid()
                ? static_cast<ReturnType>(std::visit(
                      std::forward<Callable>(callable), self.my_variant))

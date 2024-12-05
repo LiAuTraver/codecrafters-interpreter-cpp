@@ -46,7 +46,6 @@ struct ExecutionContext {
   std::unique_ptr<class interpreter, decltype(&delete_interpreter_fwd)>
       interpreter;
   // std::vector<std::filesystem::path> output_files;
-  static constexpr auto $null = std::string_view{};
   void addCommands(char **&);
   static ExecutionContext &inspectArgs(int, char **&, char **&);
   static std::string_view command_sv(const commands_t &);

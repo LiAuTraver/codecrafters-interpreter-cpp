@@ -29,7 +29,7 @@ public:
   ~parse_error() = default;
 
 public:
-  utils::string_view message() const noexcept { return my_message.data(); }
+  utils::string_view message() const noexcept { return my_message; }
   error_type_t error() const noexcept { return my_error; }
 
 private:

@@ -3,23 +3,24 @@
 #include <memory>
 #include <span>
 
-#include "ScopeAssoc.hpp"
 #include "config.hpp"
-#include "expression.hpp"
 #include "status.hpp"
 #include "utils.hpp"
-#include "loxo_fwd.hpp"
 
+#include "loxo_fwd.hpp"
+#include "expression.hpp"
+#include "ScopeAssoc.hpp"
 #include "ExprVisitor.hpp"
 #include "statement.hpp"
 #include "Environment.hpp"
 
 #include <expected>
+#include <utility>
 
 namespace net::ancillarycat::loxo {
 /// @implements expression::ExprVisitor
 class LOXO_API interpreter : virtual public expression::ExprVisitor,
-                                  virtual public statement::StmtVisitor {
+                             virtual public statement::StmtVisitor {
 public:
   interpreter();
   virtual ~interpreter() override = default;
@@ -29,6 +30,12 @@ public:
 
 public:
   utils::Status interpret(std::span<std::shared_ptr<statement::Stmt>>) const;
+  auto save_and_renew_env() const -> const interpreter &;
+  auto restore_env() const -> const interpreter & {
+    env = prev_env;
+    return *this;
+  }
+  auto get_current_env() const -> std::weak_ptr<env_t> { return env; }
 
 private:
   virtual auto visit_impl(const expression::Literal &) const
@@ -57,7 +64,7 @@ private:
   virtual auto get_result_impl() const -> eval_result_t override;
   auto is_deep_equal(const eval_result_t &, const eval_result_t &) const
       -> eval_result_t;
-  auto get_function_args(const expression::Call &expr) const
+  auto get_call_args(const expression::Call &expr) const
       -> std::expected<std::vector<eval_result_t>, eval_result_t>;
 
 private:
@@ -88,6 +95,7 @@ private:
   mutable eval_result_t expr_res{utils::Monostate{}};
   mutable std::vector<eval_result_t> stmts_res{};
   mutable env_ptr_t env{};
+  mutable env_ptr_t prev_env{};
 
 private:
   auto expr_to_string(const utils::FormatPolicy &) const -> string_type;

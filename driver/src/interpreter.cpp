@@ -9,7 +9,6 @@
 #include <typeinfo>
 #include <vector>
 
-
 #include "config.hpp"
 #include "utils.hpp"
 #include "loxo_fwd.hpp"
@@ -46,6 +45,12 @@ utils::Status interpreter::interpret(
 
   return utils::OkStatus();
 }
+auto interpreter::save_and_renew_env() const
+    -> const interpreter & {
+  prev_env = env;
+  env = std::make_shared<env_t>(prev_env);
+  return *this;
+}
 evaluation::Boolean
 interpreter::is_true_value(const eval_result_t &value) const {
   return value.visit(match{
@@ -62,23 +67,23 @@ auto interpreter::is_deep_equal(const eval_result_t &lhs,
   return lhs.index() == rhs.index()
              ? lhs.visit(match{
                    [](const evaluation::Nil &n) -> eval_result_t {
-                     return evaluation::Boolean::make_true(n.get_line());
+                     return {evaluation::Boolean::make_true(n.get_line())};
                    },
                    [&rhs](const evaluation::Boolean &b) -> eval_result_t {
-                     return utils::get<evaluation::Boolean>(rhs) == b;
+                     return {utils::get<evaluation::Boolean>(rhs) == b};
                    },
                    [&rhs](const evaluation::String &s) -> eval_result_t {
-                     return utils::get<evaluation::String>(rhs) == s;
+                     return {utils::get<evaluation::String>(rhs) == s};
                    },
                    [&rhs](const evaluation::Number &n) -> eval_result_t {
-                     return utils::get<evaluation::Number>(rhs) == n;
+                     return {utils::get<evaluation::Number>(rhs) == n};
                    },
                    [](const auto &) -> eval_result_t {
-                     return evaluation::Error{"unimplemented deep equal"sv};
+                     return {evaluation::Error{"unimplemented deep equal"sv}};
                    }})
-             : evaluation::False;
+             : evaluation::Boolean{evaluation::False};
 }
-auto interpreter::get_function_args(const expression::Call &expr) const
+auto interpreter::get_call_args(const expression::Call &expr) const
     -> std::expected<std::vector<eval_result_t>, eval_result_t> {
 
   auto args = std::vector<eval_result_t>{};
@@ -191,8 +196,20 @@ auto interpreter::visit_impl(const statement::For &stmt) const
 auto interpreter::visit_impl(const statement::Function &stmt) const
     -> utils::Status {
   defer { expr_res.clear(); };
-
-  TODO(...)
+  // TODO: function overloading
+  if (auto res = env->get(stmt.name.to_string(utils::kTokenOnly));
+      !res.empty()) {
+    dbg(warn, "function overloading is not supported yet.");
+    return utils::InvalidArgument(
+        utils::format("Function '{}' already defined.",
+                      stmt.name.to_string(utils::kTokenOnly)));
+  }
+  return env->add(
+      stmt.name.to_string(utils::kTokenOnly),
+      evaluation::Callable::create_custom(
+          stmt.parameters.size(),
+          std::move(std::remove_const_t<statement::Function>(stmt))),
+      stmt.name.line);
 }
 auto interpreter::visit_impl(const statement::IllegalStmt &stmt) const
     -> utils::Status {
@@ -220,7 +237,9 @@ auto interpreter::execute_impl(const statement::Stmt &stmt) const
     -> utils::Status {
   return stmt.accept(*this);
 }
-auto interpreter::get_result_impl() const -> eval_result_t { return expr_res; }
+auto interpreter::get_result_impl() const -> eval_result_t { 
+  return expr_res; 
+}
 
 auto interpreter::evaluate_impl(const expression::Expr &expr) const
     -> utils::Status {
@@ -359,7 +378,7 @@ auto interpreter::visit_impl(const expression::Variable &expr) const
 }
 auto interpreter::visit_impl(const expression::Assignment &expr) const
     -> eval_result_t {
-  // TODO: here my logic went away. fixme here.
+  // FIXME: here my logic went away. fixme here.
   if (!this->evaluate(*expr.value_expr).ok())
     return {evaluation::Error{"Error in assignment"s, expr.name.line}};
 
@@ -410,21 +429,42 @@ auto interpreter::visit_impl(const expression::Call &expr) const
   }; // FIXME: should not call `clear` when evaluating an expression.
 
   if (auto res = evaluate(*expr.callee); !res.ok())
-    return {evaluation::Error{"Error in callee"s, expr.paren.line}};
+    return {evaluation::Error{res.message()}};
 
-  auto maybe_args = get_function_args(expr);
+  // `expr_res` would change in `get_call_args`, so we need to save it.
+  const auto callee = expr.callee;
+  if (!utils::holds_alternative<evaluation::Callable>(expr_res)) {
+    return {evaluation::Error{utils::format("Not a function: {}", callee->to_string()),
+                              expr.paren.line}};
+  }
+  auto callable = utils::get<evaluation::Callable>(expr_res);
+
+  auto maybe_args = get_call_args(expr);
   if (!maybe_args.has_value())
     return {maybe_args.error()};
+  if (maybe_args->size() == callable.arity())
+    return (callable).call(*this, *maybe_args);
 
-  if (auto ptr = const_cast<std::remove_const_t<evaluation::Callable *>>(
-          utils::get_if<evaluation::Callable>(&expr_res)))
-    return ptr->call(*this, *maybe_args);
-
-  return {evaluation::Error{"Not a function."s, expr.paren.line}};
+  return evaluation::Error{
+      maybe_args->size() > callable.arity()
+          ? utils::format("Too many arguments to call function '{}': "
+                          "expected {} but got {}",
+                          callee->to_string(),
+                          callable.arity(),
+                          maybe_args->size())
+          : utils::format("Too few arguments to call function '{}': "
+                          "expected {} but got {}",
+                          callee->to_string(),
+                          callable.arity(),
+                          maybe_args->size()),
+      expr.paren.line};
 }
 auto interpreter::visit_impl(const expression::IllegalExpr &expr) const
     -> eval_result_t {
-  return evaluation::Error{"Illegal expression"s, expr.token.line};
+  return {
+      evaluation::Error{utils::format("Illegal expression: {}",
+                                      expr.token.to_string(utils::kTokenOnly)),
+                        expr.token.line}};
 }
 
 auto interpreter::expr_to_string(const utils::FormatPolicy &format_policy) const
@@ -453,7 +493,7 @@ auto interpreter::to_string_impl(const utils::FormatPolicy &format_policy) const
         return value_to_string(format_policy, res);
       }) 
       | std::ranges::views::filter([](const auto &str) {
-        // TODO: temporary solution: skip newline if the result is empty(i.e.,Monostate)
+        // FIXME: temporary solution: skip newline if the result is empty(i.e.,Monostate)
         return !str.empty();
       }),
       [&](const auto &str) { 

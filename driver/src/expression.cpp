@@ -42,7 +42,7 @@ Expr::expr_result_t Variable::accept_impl(const ExprVisitor &visitor) const {
 }
 auto Variable::to_string_impl(const utils::FormatPolicy &format_policy) const
     -> string_type {
-  return {};
+  return name.to_string(utils::kTokenOnly);
 }
 Grouping::Grouping(expr_ptr_t &&expr) : expr(std::move(expr)) {}
 Expr::expr_result_t Grouping::accept_impl(const ExprVisitor &visitor) const {
