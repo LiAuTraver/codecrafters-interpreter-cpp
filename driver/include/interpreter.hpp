@@ -58,10 +58,12 @@ private:
       -> eval_result_t override;
   virtual auto evaluate_impl(const expression::Expr &) const
       -> utils::Status override;
+  virtual auto get_result_impl() const -> eval_result_t override;
+
+private:
   /// @note in Lisp/Scheme, only `#f` is false, everything else is true; we also
   /// make `nil` as false.
   evaluation::Boolean is_true_value(const eval_result_t &) const;
-  virtual auto get_result_impl() const -> eval_result_t override;
   auto is_deep_equal(const eval_result_t &, const eval_result_t &) const
       -> eval_result_t;
   auto get_call_args(const expression::Call &expr) const

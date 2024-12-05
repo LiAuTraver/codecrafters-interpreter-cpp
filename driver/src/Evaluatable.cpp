@@ -40,7 +40,7 @@ Boolean &Boolean::operator=(Boolean &&value) noexcept {
   return *this;
 }
 auto Boolean::operator==(const Boolean &rhs) const -> Boolean {
-  return Boolean{value == rhs.value};
+  return Boolean{value == rhs.value, this->get_line()};
 }
 auto Boolean::make_true(const uint_least32_t line) -> Boolean {
   return Boolean{true, line};
@@ -267,9 +267,10 @@ auto Callable::call(const interpreter &interpreter, args_t &args)
                 !res.ok())
               return {Error{res.message()}};
           }
-          auto res = interpreter.execute(custom_function.body);
-          if (!res.ok())
+
+          if (auto res = interpreter.execute(custom_function.body); !res.ok())
             return {Error{res.message()}};
+          
           return interpreter.restore_env().get_result().visit(
               match{[](const utils::Monostate &) -> eval_result_t {
                       return {NilValue};
@@ -288,7 +289,9 @@ auto Callable::to_string_impl(const utils::FormatPolicy &) const
     -> string_type {
   return my_function.visit(match{
       [](const native_function_t &) { return "<native fn>"s; },
-      [](const custom_function_t &f) { return utils::format("<fn {}>", f.name.to_string(utils::kTokenOnly)); },
+      [](const custom_function_t &f) {
+        return utils::format("<fn {}>", f.name.to_string(utils::kTokenOnly));
+      },
       [](const auto &) { return "<unknown fn>"s; },
   });
 }

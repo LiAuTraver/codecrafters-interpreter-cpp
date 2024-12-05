@@ -35,15 +35,14 @@ template <typename Num>
   requires std::is_arithmetic_v<Num>
 std::any lexer::to_number(string_view_type value) {
   Num number;
-  if (const auto &[p, ec] =
-          std::from_chars(value.data(), value.data() + value.size(), number);
-      ec != std::errc()) {
-    dbg(error, "Unable to convert string to number: {}", value);
-    dbg(error, "Error code: {}", std::to_underlying(ec));
-    dbg(error, "Error position: {}", p);
-    return {};
-  }
-  return {number};
+  const auto &[p, ec] =
+      std::from_chars(value.data(), value.data() + value.size(), number);
+  if (ec == std::errc())
+    return {number};
+  dbg(error, "Unable to convert string to number: {}", value);
+  dbg(error, "Error code: {}", std::to_underlying(ec));
+  dbg(error, "Error position: {}", p);
+  return {};
 }
 lexer::lexer(lexer &&other) noexcept
     : head(std::exchange(other.head, 0)),
@@ -54,16 +53,17 @@ lexer::lexer(lexer &&other) noexcept
       tokens(std::move(other.tokens)),
       error_count(std::exchange(other.error_count, 0)) {}
 lexer &lexer::operator=(lexer &&other) noexcept {
-  if (this != &other) {
-    head = std::exchange(other.head, 0);
-    cursor = std::exchange(other.cursor, 0);
-    const_cast<string_type &>(contents) =
-        std::move(const_cast<string_type &>(other.contents));
-    lexeme_views = std::move(other.lexeme_views);
-    current_line = std::exchange(other.current_line, 1);
-    tokens = std::move(other.tokens);
-    error_count = std::exchange(other.error_count, 0);
-  }
+  if (this == &other)
+    return *this;
+  head = std::exchange(other.head, 0);
+  cursor = std::exchange(other.cursor, 0);
+  const_cast<string_type &>(contents) =
+      std::move(const_cast<string_type &>(other.contents));
+  lexeme_views = std::move(other.lexeme_views);
+  current_line = std::exchange(other.current_line, 1);
+  tokens = std::move(other.tokens);
+  error_count = std::exchange(other.error_count, 0);
+
   return *this;
 }
 lexer::status_t lexer::load(const path_type &filepath) const {
@@ -97,31 +97,31 @@ lexer::status_t lexer::lex() {
 }
 void lexer::add_identifier_and_keyword() {
   auto value = lex_identifier();
-  if (auto it = keywords.find(value); it != keywords.end()) {
-    // add_token(it->second);
-    switch (it->second.type) {
-    case kTrue:
-      add_token(kTrue, true);
-      break;
-    case kFalse:
-      add_token(kFalse, false);
-      break;
-    default:
-      dbg(info, "keyword: {}", value);
-      add_token(it->second);
-    }
+  auto it = keywords.find(value);
+  if (it == keywords.end()) {
+    dbg(trace, "identifier: {}", value);
+    add_token(kIdentifier, value);
     return;
   }
-  dbg(trace, "identifier: {}", value);
-  add_token(kIdentifier, value);
+  // add_token(it->second);
+  switch (it->second.type) {
+  case kTrue:
+    add_token(kTrue, true);
+    break;
+  case kFalse:
+    add_token(kFalse, false);
+    break;
+  default:
+    dbg(info, "keyword: {}", value);
+    add_token(it->second);
+  }
 }
 void lexer::add_number() {
-  auto value = lex_number(false);
-  if (!value.has_value()) {
-    dbg(error, "invalid number.");
+  if (auto value = lex_number(false); value.has_value()) {
+    add_token(kNumber, value);
     return;
   }
-  add_token(kNumber, value);
+  dbg(error, "invalid number.");
 }
 void lexer::add_string() {
   // hard to do...
@@ -158,7 +158,6 @@ void lexer::next_token() {
   case '.':
     return add_token(kDot);
   case '-':
-    // TODO: negative number
     return add_token(kMinus);
   case '+':
     return add_token(kPlus);
@@ -218,7 +217,7 @@ bool lexer::advance_if_is(const char_t expected) {
 bool lexer::is_at_end(const size_t offset) const {
   return cursor + offset >= contents.size();
 }
-void lexer::add_token(token_type_t type, std::any literal) {
+void lexer::add_token(const token_type_t &type, std::any literal) {
   if (type == kEndOfFile) { // FIXME: lexeme bug at EOF(not critical)
     tokens.emplace_back(type, ""sv, std::any{}, current_line);
     return;
@@ -235,14 +234,12 @@ void lexer::add_lex_error(const error_code_t type) {
 }
 lexer::status_t::Code lexer::lex_string() {
   while (peek() != '"' && !is_at_end()) {
-    if (peek() == '\n') {
+    if (peek() == '\n')
       current_line++; // multiline string, of course we dont want act like C/C++
                       // which will result in a compile error if the string is
                       // not closed at the same current_line.
-    }
     get();
   }
-  // peek() == '"' || is_at_end()
   if (is_at_end() && peek() != '"') {
     dbg(error, "Unterminated string.");
     return status_t::kError;

@@ -21,11 +21,11 @@ public:
   using string_view_t = utils::string_view;
 
 public:
-  lex_error() = default;
-  lex_error(const lex_error &) = default;
-  lex_error(lex_error &&that) = default;
-  lex_error &operator=(const lex_error &) = default;
-  lex_error &operator=(lex_error &&that) = default;
+  constexpr lex_error() = default;
+  constexpr lex_error(const lex_error &) = default;
+  constexpr lex_error(lex_error &&that) = default;
+  constexpr lex_error &operator=(const lex_error &) = default;
+  constexpr lex_error &operator=(lex_error &&that) = default;
   explicit lex_error(const type_t type) : type(type) {}
 
 public:
@@ -60,25 +60,9 @@ lex_error::to_string(const string_view_t lexeme_sv,
   dbg(error, "{}", str);
   return str;
 }
-} // namespace net::ancillarycat::loxo
 
-template <>
-struct std::formatter<net::ancillarycat::loxo::lex_error>
-    : std::formatter<net::ancillarycat::loxo::lex_error::string_t> {
-  auto format(const net::ancillarycat::loxo::lex_error &error,
-              std::format_context &ctx) const -> decltype(ctx.out()) {
-    return std::formatter<net::ancillarycat::loxo::lex_error::string_t>::
-        format(error.to_string(), ctx);
-  }
-};
-#ifdef LOXO_USE_FMT_FORMAT
-template <>
-struct fmt::formatter<net::ancillarycat::loxo::lex_error>
-    : fmt::formatter<net::ancillarycat::loxo::lex_error::string_t> {
-  auto format(const net::ancillarycat::loxo::lex_error &error,
-              fmt::format_context &ctx) const -> decltype(ctx.out()) {
-    return fmt::formatter<net::ancillarycat::loxo::lex_error::string_t>::
-        format(error.to_string(), ctx);
-  }
-};
-#endif
+inline auto format_to(const lex_error &lex_error,
+               const utils::FormatPolicy format_policy = utils::kDefault) {
+  return lex_error.to_string();
+}
+} // namespace net::ancillarycat::loxo

@@ -41,13 +41,14 @@ public:
            const eval_result_t &,
            uint_least32_t = std::numeric_limits<uint_least32_t>::quiet_NaN())
       -> utils::Status;
-  auto reassign(const string_type &, const eval_result_t &, uint_least32_t) const
-      -> utils::Status;
+  auto reassign(const string_type &,
+                const eval_result_t &,
+                uint_least32_t) const -> utils::Status;
   auto get(const string_type &) const -> eval_result_t;
 
 private:
-  scope_env_ptr_t current{};
-  std::weak_ptr<self_type> parent{};
+  scope_env_ptr_t current;
+  std::weak_ptr<self_type> parent;
 
 private:
   auto to_string_impl(const utils::FormatPolicy &) const

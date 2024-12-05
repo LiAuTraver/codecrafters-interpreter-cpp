@@ -8,6 +8,8 @@
 #include "status.hpp"
 
 namespace net::ancillarycat::loxo::statement {
+/// @implements utils::Printable
+/// @interface StmtVisitor
 class StmtVisitor : virtual public utils::VisitorBase {
 public:
   template <typename DerivedStmt>
@@ -16,6 +18,7 @@ public:
     return visit_impl(stmt);
   }
   auto execute(const Stmt &stmt) const { return execute_impl(stmt); }
+
 private:
   virtual utils::Status visit_impl(const Variable &) const = 0;
   virtual utils::Status visit_impl(const Print &) const = 0;
@@ -28,22 +31,4 @@ private:
   virtual utils::Status visit_impl(const IllegalStmt &) const = 0;
   virtual utils::Status execute_impl(const Stmt &) const = 0;
 };
-
-class DummyVisitor : public StmtVisitor {
-private:
-  auto to_string_impl(const utils::FormatPolicy &format_policy) const
-      -> string_type override {
-    return "dummy visitor";
-  }
-  utils::Status visit_impl(const Variable &) const override { return {}; }
-  utils::Status visit_impl(const Print &) const override { return {}; }
-  utils::Status visit_impl(const Expression &) const override { return {}; }
-  utils::Status execute_impl(const Stmt &) const override { return {}; }
-  utils::Status visit_impl(const Block &) const override { return {}; }
-  utils::Status visit_impl(const If &) const override { return {}; }
-  utils::Status visit_impl(const While &) const override { return {}; }
-  utils::Status visit_impl(const For &) const override { return {}; }
-  utils::Status visit_impl(const Function &) const override { return {}; }
-  utils::Status visit_impl(const IllegalStmt &) const override { return {}; }
-} inline static const _dummy_visitor;
 } // namespace net::ancillarycat::loxo::statement

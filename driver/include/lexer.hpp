@@ -9,9 +9,10 @@
 #include <vector>
 
 #include "config.hpp"
+#include "loxo_fwd.hpp"
+
 #include "file_reader.hpp"
 #include "lex_error.hpp"
-#include "loxo_fwd.hpp"
 #include "status.hpp"
 #include "Token.hpp"
 
@@ -61,7 +62,7 @@ private:
   void add_string();
   void add_comment();
   void next_token();
-  void add_token(token_type_t, std::any = std::any());
+  void add_token(const token_type_t&, std::any = std::any());
   void add_lex_error(lex_error::type_t = error_t::kMonostate);
   bool is_at_end(size_t = 0) const;
   auto lex_string() -> lexer::status_t::Code;
@@ -121,6 +122,6 @@ private:
   uint_least32_t error_count = 0;
 
 private:
-friend LOXO_API void delete_lexer_fwd(lexer *);
+  friend LOXO_API void delete_lexer_fwd(lexer *);
 };
 } // namespace net::ancillarycat::loxo

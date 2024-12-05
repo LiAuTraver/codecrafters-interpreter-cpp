@@ -19,9 +19,9 @@ Environment::Environment(const std::shared_ptr<self_type> &enclosing)
 auto Environment::createGlobalEnvironment()
     -> utils::StatusOr<std::shared_ptr<Environment>> {
   static auto has_init = false;
-  if (has_init) {
+  if (has_init)
     return utils::InvalidArgument("init global env twice");
-  }
+
   has_init = true;
   auto env = new Environment();
   env->add("clock"s,

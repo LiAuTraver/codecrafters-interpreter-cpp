@@ -21,7 +21,8 @@ public:
   /// @brief Visit the expression
   /// @attention tbh i don't really like the idea of making a virtual
   ///      function private, but coreguidelines says it's a good practice.
-  /// @note  why make virtual function private? see <a href="https://stackoverflow.com/questions/2170688/private-virtual-method-in-c">here</a>
+  /// @note  why make virtual function private? see <a href="https://stackoverflow.com/questions/2170688/private-virtual-method-in-c">
+  ///      here</a>
   // clang-format on
   template <typename DerivedExpr>
     requires std::is_base_of_v<Expr, DerivedExpr>
@@ -41,53 +42,11 @@ private:
   virtual eval_result_t visit_impl(const Logical &) const = 0;
   virtual eval_result_t visit_impl(const Call &) const = 0;
   virtual eval_result_t visit_impl(const IllegalExpr &) const = 0;
+
+private:
   virtual utils::Status evaluate_impl(const Expr &) const = 0;
   virtual eval_result_t get_result_impl() const = 0;
 };
-/// @brief a dummy visitor that does nothing but test compilation
-/// @implements ExprVisitor
-class DummyVisitor : public ExprVisitor {
-private:
-  virtual auto visit_impl(const Literal &) const -> eval_result_t override {
-    return {};
-  }
-  virtual auto visit_impl(const Unary &) const -> eval_result_t override {
-    return {};
-  }
-  virtual auto visit_impl(const Binary &) const -> eval_result_t override {
-    return {};
-  }
-  virtual auto visit_impl(const Grouping &) const -> eval_result_t override {
-    return {};
-  }
-  virtual auto visit_impl(const IllegalExpr &) const -> eval_result_t override {
-    return {};
-  }
-  virtual auto visit_impl(const Assignment &) const -> eval_result_t override {
-    return {};
-  }
-  virtual auto visit_impl(const Variable &) const -> eval_result_t override {
-    return {};
-  }
-  virtual auto visit_impl(const Logical &) const -> eval_result_t override {
-    return {};
-  }
-  virtual auto visit_impl(const Call &) const -> eval_result_t override {
-    return {};
-  }
-
-private:
-  auto to_string_impl(const utils::FormatPolicy &format_policy) const
-      -> string_type override {
-    return "dummy visitor"s;
-  }
-  utils::Status evaluate_impl(const Expr &) const override {
-    return utils::InvalidArgument("dummy visitor");
-  }
-  eval_result_t get_result_impl() const override { return {}; }
-
-private:
-} inline static const _dummy_visitor;
 /// @implements ExprVisitor
 class LOXO_API ASTPrinter : public ExprVisitor, public utils::Viewable {
 public:

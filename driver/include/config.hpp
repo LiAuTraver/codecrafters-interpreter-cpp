@@ -251,22 +251,22 @@ struct ::fmt::formatter<::std::stacktrace> : ::fmt::formatter<::std::string> {
 #    include <boost/contract.hpp>
 #    define LOXO_PRECONDITION_IMPL_1(x)                                   \
       boost::contract::check LOXO_EXPAND_COUNTER(                         \
-          waver_boost_check_precondition_should_be_true) =                     \
+          loxo_boost_check_precondition_should_be_true) =                     \
           boost::contract::function().precondition(                            \
               [&]() -> bool { return (!!(x)); });
 #    define LOXO_PRECONDITION_IMPL_2(x, y)                                \
       boost::contract::check LOXO_EXPAND_COUNTER(                         \
-          waver_boost_check_precondition_should_equal) =                       \
+          loxo_boost_check_precondition_should_equal) =                       \
           boost::contract::function().precondition(                            \
               [&]() -> bool { return ((x) == (y)); });
 #    define LOXO_POSTCONDITION_IMPL_1(x)                                  \
       boost::contract::check LOXO_EXPAND_COUNTER(                         \
-          waver_boost_check_postcondition_should_be_true) =                    \
+          loxo_boost_check_postcondition_should_be_true) =                    \
           boost::contract::function().postcondition(                           \
               [&]() -> bool { return (!!(x)); });
 #    define LOXO_POSTCONDITION_IMPL_2(x, y)                               \
       boost::contract::check LOXO_EXPAND_COUNTER(                         \
-          waver_boost_check_postcondition_should_equal) =                      \
+          loxo_boost_check_postcondition_should_equal) =                      \
           boost::contract::function().postcondition(                           \
               [&]() -> bool { return ((x) == (y)); });
 #  endif
