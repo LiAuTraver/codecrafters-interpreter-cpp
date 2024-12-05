@@ -7,17 +7,23 @@
 #include <limits>
 #include <random>
 #include <utility>
+#include <vector>
+#include <functional>
 
+#include "Variant.hpp"
 #include "config.hpp"
 #include "utils.hpp"
 #include "loxo_fwd.hpp"
 
-namespace net::ancillarycat::loxograph::evaluation {
+namespace net::ancillarycat::loxo::evaluation {
 
 /// @brief A class that represents an evaluatable object
 /// @interface Evaluatable
 /// @implements utils::Printable
 class Evaluatable : public utils::Printable {
+public:
+  using eval_result_t = utils::VisitorBase::eval_result_t;
+
 public:
   constexpr Evaluatable() = default;
   explicit constexpr Evaluatable(const uint_least32_t line) : line(line) {}
@@ -41,7 +47,7 @@ public:
   Boolean operator!() const noexcept;
 };
 
-class Boolean : public Value, public utils::Viewable {
+class LOXO_API Boolean : public Value, public utils::Viewable {
 public:
   constexpr Boolean() = default;
   constexpr Boolean(bool value,
@@ -72,7 +78,7 @@ private:
   std::optional<bool> value = std::nullopt;
 } static inline LOXO_CONSTEXPR_IF_NOT_MSVC True{true, 0}, False{false, 0};
 
-class Nil : public Value, public utils::Viewable {
+class LOXO_API Nil : public Value, public utils::Viewable {
 public:
   constexpr Nil() = default;
   explicit Nil(const uint_least32_t line) : Value(line) {}
@@ -109,7 +115,7 @@ public:
   virtual ~String() override = default;
 
 public:
-  String operator+(const String &)const;
+  String operator+(const String &) const;
   Boolean operator==(const String &) const;
   Boolean operator!=(const String &) const;
   explicit operator Boolean() const;
@@ -166,7 +172,8 @@ public:
 
 public:
   Error() = default;
-  Error(string_view_type, uint_least32_t = std::numeric_limits<uint_least32_t>::max());
+  Error(string_view_type,
+        uint_least32_t = std::numeric_limits<uint_least32_t>::max());
   explicit Error(string_type &&, uint_least32_t &&) noexcept;
   Error(const Error &);
   Error(Error &&) noexcept;
@@ -183,5 +190,54 @@ private:
 private:
   string_type message;
 };
+class Callable : public Evaluatable {
+public:
+  using args_t = std::vector<eval_result_t>;
+  using function_t =
+      std::function<eval_result_t(const interpreter &, args_t &)>;
+  using string_view_type = utils::Viewable::string_view_type;
 
-} // namespace net::ancillarycat::loxograph::evaluation
+public:
+  constexpr Callable() = default;
+  virtual ~Callable() = default;
+
+public:
+  Callable(function_t &&,
+           uint_least32_t = std::numeric_limits<uint_least32_t>::quiet_NaN());
+
+public:
+  static auto
+  create(function_t &&,
+         uint_least32_t = std::numeric_limits<uint_least32_t>::quiet_NaN())
+      -> Callable;
+  static auto create_native(
+      function_t &&,
+      uint_least32_t = std::numeric_limits<uint_least32_t>::quiet_NaN())
+      -> Callable;
+
+public:
+  auto signature() const -> string_type;
+
+public:
+ LOXO_CONSTEXPR_IF_NOT_MSVC auto call(const interpreter &interpreter, args_t &args)
+      -> decltype(auto) {
+    return my_function.operator()(interpreter, args);
+  }
+  constexpr auto operator==(const Callable &other) const -> Boolean {
+    return {this == &other || (this->my_function.target_type() ==
+                               other.my_function.target_type())};
+  }
+  LOXO_CONSTEXPR_IF_NOT_MSVC auto operator!=(const Callable &other) const -> Boolean {
+    return {this->operator==(other).operator!()};
+  }
+
+private:
+  // dont support static variables in this function
+  function_t my_function;
+  string_view_type native_signature;
+
+private:
+  auto to_string_impl(const utils::FormatPolicy &) const
+      -> string_type override;
+};
+} // namespace net::ancillarycat::loxo::evaluation

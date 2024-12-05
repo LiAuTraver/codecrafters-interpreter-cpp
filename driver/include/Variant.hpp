@@ -145,7 +145,7 @@ inline constexpr auto get(const Variant<MyTypes...> &v) -> decltype(auto) {
   return v.is_valid() ? std::get<Ty>(v.get()) : Ty{};
 }
 template <class Ty, class... MyTypes>
-LOXO_NODISCARD_MSG(get_if)
+NODISCARD_LOXO(get_if)
 inline constexpr auto get_if(Variant<MyTypes...> *v) noexcept {
   return v->is_valid() ? std::get_if<Ty>(&v->get()) : nullptr;
 }

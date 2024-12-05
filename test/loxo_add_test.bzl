@@ -1,5 +1,5 @@
 """
-This file contains helper functions for creating tests for the Loxograph library.
+This file contains helper functions for creating tests for the LOXO library.
 """
 
 load("@rules_cc//cc:defs.bzl", "cc_test")
@@ -10,7 +10,7 @@ def loxo_add_test(name, src):
         srcs = [
             src,
             "test_env.hpp",
-            "//shared:loxograph_driver.cpp",
+            "//shared:loxo_driver.cpp",
             "//shared:execution_context.hpp",
         ],
         copts = [
@@ -20,7 +20,7 @@ def loxo_add_test(name, src):
         ],
         defines = [
           "AC_CPP_DEBUG",
-          "LIBLOXOGRAPH_SHARED",
+          "LIBLOXO_SHARED",
         ],
         includes = ["driver/include"],
         deps = [

@@ -3,7 +3,7 @@
 #include "config.hpp"
 #include "loxo_fwd.hpp"
 
-namespace net::ancillarycat::loxograph {
+namespace net::ancillarycat::loxo {
 class parse_error {
 public:
   enum error_type_t : uint8_t {
@@ -36,4 +36,4 @@ private:
   error_type_t my_error = kMonostate;
   string_type my_message = "<no message provided>";
 };
-} // namespace net::ancillarycat::loxograph
+} // namespace net::ancillarycat::loxo

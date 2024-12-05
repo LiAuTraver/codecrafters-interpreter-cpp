@@ -10,8 +10,8 @@
 #include "utils.hpp"
 #include "TokenType.hpp"
 
-namespace net::ancillarycat::loxograph {
-class LOXOGRAPH_API Token : public utils::Printable {
+namespace net::ancillarycat::loxo {
+class LOXO_API Token : public utils::Printable {
 public:
   using token_type = TokenType;
   using error_t = lex_error;
@@ -59,12 +59,12 @@ private:
                         // compile error
     requires std::default_initializable<Ty>;
 };
-} // namespace net::ancillarycat::loxograph
+} // namespace net::ancillarycat::loxo
 
-template <> struct std::formatter<net::ancillarycat::loxograph::Token> {
+template <> struct std::formatter<net::ancillarycat::loxo::Token> {
   constexpr auto parse(std::format_parse_context &ctx) { return ctx.begin(); }
   template <typename FormatContext>
-  auto format(const net::ancillarycat::loxograph::Token &token,
+  auto format(const net::ancillarycat::loxo::Token &token,
               FormatContext &ctx) {
     return format_to(ctx.out(), "{}", token.to_string());
   }

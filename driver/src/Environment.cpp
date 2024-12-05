@@ -2,6 +2,7 @@
 #include <string>
 #include <string_view>
 #include <unordered_map>
+#include <memory>
 
 #include "config.hpp"
 #include "loxo_fwd.hpp"
@@ -10,8 +11,31 @@
 
 #include "Environment.hpp"
 
-namespace net::ancillarycat::loxograph {
 
+namespace net::ancillarycat::loxo {
+
+Environment::Environment() : current(std::make_shared<scope_env_t>()) {}
+Environment::Environment(const std::shared_ptr<self_type> &enclosing)
+    : current(std::make_shared<scope_env_t>()), parent(enclosing) {}
+auto Environment::createGlobalEnvironment()
+    -> utils::StatusOr<std::shared_ptr<Environment>> {
+  static auto has_init = false;
+  if (has_init) {
+    return utils::InvalidArgument("init global env twice");
+  }
+  has_init = true;
+  auto env = new Environment();
+  env->add("clock"s,
+           evaluation::Callable::create_native(
+               [](const interpreter &, evaluation::Callable::args_t &) {
+                 dbg(trace, "clock() called");
+                 return std::chrono::duration_cast<std::chrono::milliseconds>(
+                            std::chrono::system_clock::now().time_since_epoch())
+                     .count();
+               }))
+      .ignore_error();
+  return std::make_shared<Environment>(*env);
+}
 auto Environment::add(const string_type &name,
                       const eval_result_t &value,
                       const uint_least32_t line) -> utils::Status {
@@ -19,7 +43,7 @@ auto Environment::add(const string_type &name,
 }
 auto Environment::reassign(const string_type &name,
                            const eval_result_t &value,
-                           const uint_least32_t line) -> utils::Status {
+                           const uint_least32_t line) const -> utils::Status {
   if (auto it = find(name)) {
     (*it)->second.first = value;
     (*it)->second.second = line;
@@ -33,6 +57,26 @@ auto Environment::get(const string_type &name) const -> eval_result_t {
 
   return {utils::Monostate{}};
 }
+// NOLINTNEXTLINE
+auto Environment::find(const string_type &name) const
+    -> std::optional<self_type::scope_env_t::associations_t::iterator> {
+  if (auto maybe_it = current->find(name)) {
+    // NOLINTNEXTLINE
+    dbg_block(if (parent.expired()) return nullptr;
+              if (auto another_it = parent.lock()->find(name)) {
+                dbg(warn,
+                    "variable '{}' is shadowed; previously declared at line {}",
+                    name,
+                    (*another_it)->second.second);
+              })
+    return maybe_it;
+  }
+
+  if (auto enclosing = parent.lock())
+    return enclosing->find(name);
+
+  return std::nullopt;
+}
 auto Environment::to_string_impl(const utils::FormatPolicy &) const
     -> string_type {
   string_type result;
@@ -42,4 +86,4 @@ auto Environment::to_string_impl(const utils::FormatPolicy &) const
   }
   return result;
 }
-} // namespace net::ancillarycat::loxograph
+} // namespace net::ancillarycat::loxo

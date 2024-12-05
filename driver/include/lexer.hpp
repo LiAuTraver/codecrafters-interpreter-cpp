@@ -15,9 +15,9 @@
 #include "status.hpp"
 #include "Token.hpp"
 
-/// @namespace net::ancillarycat::loxograph
-namespace net::ancillarycat::loxograph {
-class LOXOGRAPH_API lexer {
+/// @namespace net::ancillarycat::loxo
+namespace net::ancillarycat::loxo {
+class LOXO_API lexer {
 public:
   using size_type = typename utils::string::size_type;
   using string_type = utils::string;
@@ -91,7 +91,7 @@ private:
              std::convertible_to<Predicate, bool>;
 
 public:
-  LOXO_NODISCARD_MSG(token_views_t) const tokens_t &get_tokens() const {
+  NODISCARD_LOXO(token_views_t) const tokens_t &get_tokens() const {
     return tokens;
   }
 
@@ -121,6 +121,6 @@ private:
   uint_least32_t error_count = 0;
 
 private:
-friend LOXOGRAPH_API void delete_lexer_fwd(lexer *);
+friend LOXO_API void delete_lexer_fwd(lexer *);
 };
-} // namespace net::ancillarycat::loxograph
+} // namespace net::ancillarycat::loxo

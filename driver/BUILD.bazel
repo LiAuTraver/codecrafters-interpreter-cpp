@@ -10,7 +10,7 @@ cc_library(
     ],
     defines = [
         "AC_CPP_DEBUG",
-        "LIBLOXOGRAPH_SHARED",
+        "LIBLOXO_SHARED",
         "driver_EXPORTS",
     ],
     includes = driver_includes,

@@ -18,8 +18,8 @@
 #include "Token.hpp"
 #include "TokenType.hpp"
 
-namespace net::ancillarycat::loxograph {
-class LOXOGRAPH_API parser {
+namespace net::ancillarycat::loxo {
+class LOXO_API parser {
 public:
   enum ParsePolicy {
     kStatement = 0,
@@ -62,7 +62,11 @@ private:
   auto term() -> expr_ptr_t;
   auto factor() -> expr_ptr_t;
   auto unary() -> expr_ptr_t;
+  auto call() -> expr_ptr_t;
   auto primary() -> expr_ptr_t;
+
+private:
+  auto get_args() -> std::vector<expr_ptr_t>;
 
 private:
   auto next_declaration() -> stmt_ptr_t;
@@ -111,12 +115,7 @@ private:
   mutable stmt_ptrs_t stmts = {};
   // bool is_in_panic = false;
 private:
-  friend LOXOGRAPH_API void delete_parser_fwd(parser *);
-
-private:
-  template <typename... Args>
-    requires(std::is_enum_v<std::common_type_t<Args...>>)
-  bool inspect_and_get(Args &&...);
+  friend LOXO_API void delete_parser_fwd(parser *);
 };
 template <typename... Args>
   requires(std::is_enum_v<std::common_type_t<Args...>>)
@@ -125,12 +124,4 @@ bool parser::inspect(Args &&...args) {
     return false;
   return (... || (peek().type.type == args));
 }
-template <typename... Args>
-  requires(std::is_enum_v<std::common_type_t<Args...>>)
-[[deprecated("use inspect() instead and manually call get()")]]
-bool parser::inspect_and_get(Args &&...args) {
-  auto value = this->inspect(std::forward<Args...>(args...));
-  get();
-  return value;
-}
-} // namespace net::ancillarycat::loxograph
+} // namespace net::ancillarycat::loxo

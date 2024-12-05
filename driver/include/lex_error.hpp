@@ -7,8 +7,8 @@
 #include "loxo_fwd.hpp"
 #include "utils.hpp"
 
-namespace net::ancillarycat::loxograph {
-class LOXOGRAPH_API lex_error {
+namespace net::ancillarycat::loxo {
+class LOXO_API lex_error {
 public:
   enum type_t : uint8_t {
     kMonostate = 0,
@@ -60,24 +60,24 @@ lex_error::to_string(const string_view_t lexeme_sv,
   dbg(error, "{}", str);
   return str;
 }
-} // namespace net::ancillarycat::loxograph
+} // namespace net::ancillarycat::loxo
 
 template <>
-struct std::formatter<net::ancillarycat::loxograph::lex_error>
-    : std::formatter<net::ancillarycat::loxograph::lex_error::string_t> {
-  auto format(const net::ancillarycat::loxograph::lex_error &error,
+struct std::formatter<net::ancillarycat::loxo::lex_error>
+    : std::formatter<net::ancillarycat::loxo::lex_error::string_t> {
+  auto format(const net::ancillarycat::loxo::lex_error &error,
               std::format_context &ctx) const -> decltype(ctx.out()) {
-    return std::formatter<net::ancillarycat::loxograph::lex_error::string_t>::
+    return std::formatter<net::ancillarycat::loxo::lex_error::string_t>::
         format(error.to_string(), ctx);
   }
 };
-#ifdef LOXOGRAPH_USE_FMT_FORMAT
+#ifdef LOXO_USE_FMT_FORMAT
 template <>
-struct fmt::formatter<net::ancillarycat::loxograph::lex_error>
-    : fmt::formatter<net::ancillarycat::loxograph::lex_error::string_t> {
-  auto format(const net::ancillarycat::loxograph::lex_error &error,
+struct fmt::formatter<net::ancillarycat::loxo::lex_error>
+    : fmt::formatter<net::ancillarycat::loxo::lex_error::string_t> {
+  auto format(const net::ancillarycat::loxo::lex_error &error,
               fmt::format_context &ctx) const -> decltype(ctx.out()) {
-    return fmt::formatter<net::ancillarycat::loxograph::lex_error::string_t>::
+    return fmt::formatter<net::ancillarycat::loxo::lex_error::string_t>::
         format(error.to_string(), ctx);
   }
 };

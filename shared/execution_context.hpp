@@ -12,19 +12,19 @@
 
 #include "config.hpp"
 
-namespace net::ancillarycat::loxograph {
-class LOXOGRAPH_API lexer;
-class LOXOGRAPH_API parser;
-class LOXOGRAPH_API interpreter;
+namespace net::ancillarycat::loxo {
+class LOXO_API lexer;
+class LOXO_API parser;
+class LOXO_API interpreter;
 /// @remark why? because the forward declaration is not enough for @link
-/// std::unique_ptr @endlink, also I don't want to include thoses implementation
+/// std::unique_ptr @endlink, also I don't want to include those implementation
 /// files.
-extern LOXOGRAPH_API void delete_lexer_fwd(lexer *);
-extern LOXOGRAPH_API void delete_parser_fwd(parser *);
-extern LOXOGRAPH_API void delete_interpreter_fwd(interpreter *);
+extern LOXO_API void delete_lexer_fwd(lexer *);
+extern LOXO_API void delete_parser_fwd(parser *);
+extern LOXO_API void delete_interpreter_fwd(interpreter *);
 struct ExecutionContext;
 
-LOXO_NODISCARD_MSG(loxo_main)
+NODISCARD_LOXO(loxo_main)
 extern int loxo_main(_In_ int, _In_ char **, _Inout_ ExecutionContext &);
 /// mimic the from llvm clang-driver's ToolContext
 struct ExecutionContext {
@@ -159,4 +159,4 @@ inline std::string_view ExecutionContext::command_sv(const commands_t &cmd) {
     return "unknown"sv;
   }
 }
-} // namespace net::ancillarycat::loxograph
+} // namespace net::ancillarycat::loxo

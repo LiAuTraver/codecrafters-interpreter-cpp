@@ -19,8 +19,8 @@
 #include "lexer.hpp"
 #include "Token.hpp"
 
-/// @namespace net::ancillarycat::loxograph
-namespace net::ancillarycat::loxograph {
+/// @namespace net::ancillarycat::loxo
+namespace net::ancillarycat::loxo {
 template <typename Predicate>
 bool lexer::advance_if(Predicate &&predicate)
   requires std::invocable<Predicate, char_t> &&
@@ -298,5 +298,5 @@ lexer::string_view_type lexer::lex_identifier() {
   auto value = string_view_type(contents.data() + head, cursor - head);
   return value;
 }
-LOXOGRAPH_API void delete_lexer_fwd(lexer *ptr) { delete ptr; }
-} // namespace net::ancillarycat::loxograph
+LOXO_API void delete_lexer_fwd(lexer *ptr) { delete ptr; }
+} // namespace net::ancillarycat::loxo

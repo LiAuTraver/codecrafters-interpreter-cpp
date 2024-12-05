@@ -14,7 +14,7 @@
 #include "interpreter.hpp"
 #include "status.hpp"
 
-namespace net::ancillarycat::loxograph::expression {
+namespace net::ancillarycat::loxo::expression {
 ASTPrinter::eval_result_t ASTPrinter::visit_impl(const Grouping &expr) const {
   dbg(info, "Grouping: {}", expr.to_string());
   oss << expr << std::endl;
@@ -39,6 +39,11 @@ ASTPrinter::visit_impl(const Assignment &expr) const {
 }
 ASTPrinter::eval_result_t ASTPrinter::visit_impl(const Logical &expr) const {
   dbg(info, "Logical: {}", expr.to_string());
+  oss << expr << std::endl;
+  return {};
+}
+ASTPrinter::eval_result_t ASTPrinter::visit_impl(const Call &expr) const {
+  dbg(info, "Call: {}", expr.to_string());
   oss << expr << std::endl;
   return {};
 }
@@ -70,4 +75,4 @@ auto ASTPrinter::to_string_view_impl(const utils::FormatPolicy &) const
   return oss.view();
 }
 ExprVisitor::eval_result_t ASTPrinter::get_result_impl() const { return res; }
-} // namespace net::ancillarycat::loxograph::expression
+} // namespace net::ancillarycat::loxo::expression
