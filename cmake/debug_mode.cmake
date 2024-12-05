@@ -22,10 +22,10 @@ target_link_libraries(interpreter PUBLIC
 
 if (USE_BOOST_CONTRACT)
     find_package(boost COMPONENTS contract REQUIRED)
-    message(STATUS "Boost contract is ON. Corresponding macro features will be enabled: LOXOGRAPH_USE_BOOST_CONTRACT")
+    message(STATUS "Boost contract is ON. Corresponding macro features will be enabled: LOXO_USE_BOOST_CONTRACT")
     target_compile_options(driver
             PRIVATE
-            $<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>>: -DLOXOGRAPH_USE_BOOST_CONTRACT>
-            $<$<CXX_COMPILER_ID:MSVC>: /DLOXOGRAPH_USE_BOOST_CONTRACT>
+            $<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>>: -DLOXO_USE_BOOST_CONTRACT>
+            $<$<CXX_COMPILER_ID:MSVC>: /DLOXO_USE_BOOST_CONTRACT>
     )
 endif (USE_BOOST_CONTRACT)

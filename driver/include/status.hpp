@@ -13,9 +13,9 @@ namespace net::ancillarycat::utils {
 /// @brief A class that represents the status of a function call. it's designed
 /// to be as identical as possible to the `absl::Status` class, for
 /// `absl::Status` seems to fail to compile with clang++ on Windows.
-class LOXOGRAPH_API LOXO_NODISCARD_MSG(Status) Status {
+class LOXO_API NODISCARD_LOXO(Status) Status {
 public:
-  enum LOXO_NODISCARD_MSG(Code) Code : uint8_t {
+  enum NODISCARD_LOXO(Code) Code : uint8_t {
     kOkStatus = 0,
     kError = 1, // represents a generic error
     kAlreadyExistsError = 2,
@@ -31,29 +31,29 @@ public:
   };
 
 public:
-  LOXO_NODISCARD_MSG(Status)
+  NODISCARD_LOXO(Status)
   Status()
       : my_code(kOkStatus), my_message("<default initialized>"),
         my_location(std::source_location::current()) {}
-  LOXO_NODISCARD_MSG(Status)
+  NODISCARD_LOXO(Status)
   Status(Code,
          string_view = "<no message provided>",
          const std::source_location & = std::source_location::current());
-  LOXO_NODISCARD_MSG(Status) Status(Status &&) noexcept;
-  LOXO_NODISCARD_MSG(Status) Status(const Status &);
+  NODISCARD_LOXO(Status) Status(Status &&) noexcept;
+  NODISCARD_LOXO(Status) Status(const Status &);
   Status &operator=(const Status &) = default;
   Status &operator=(Status &&that) noexcept;
   virtual ~Status() = default;
 
-  LOXO_NODISCARD_MSG(Status) bool ok() const noexcept;
+  NODISCARD_LOXO(Status) bool ok() const noexcept;
   Code code() const;
-  LOXO_NODISCARD_MSG(string_view) string_view message() const;
-  LOXO_NODISCARD_MSG(source_location) std::source_location location() const;
-  LOXO_NODISCARD_MSG(stacktrace) string stacktrace() const;
+  NODISCARD_LOXO(string_view) string_view message() const;
+  NODISCARD_LOXO(source_location) std::source_location location() const;
+  NODISCARD_LOXO(stacktrace) string stacktrace() const;
   /// @note   never do unnecessary `noexcept`;
   /// it'll jeopardize the debugging process and call `std::abort()`.
   void ignore_error() const;
-  LOXO_NODISCARD_MSG(string) inline string from_source_location() const;
+  NODISCARD_LOXO(string) inline string from_source_location() const;
 
 public:
   Code my_code;
@@ -67,8 +67,8 @@ public:
 /// @tparam Ty the type of the value
 template <Storable Ty>
 class
-    // LOXOGRAPH_API // <- no need, template class
-    LOXO_NODISCARD_MSG(StatusOr) StatusOr : public Status {
+    // LOXO_API // <- no need, template class
+    NODISCARD_LOXO(StatusOr) StatusOr : public Status {
 public:
   using base_type = Status;
   using value_type = Ty;
@@ -121,44 +121,44 @@ private:
   value_type my_value;
 };
 
-LOXO_NODISCARD_MSG(Status)
-LOXOGRAPH_API Status
+NODISCARD_LOXO(Status)
+LOXO_API Status
 OkStatus(const std::source_location & = std::source_location::current());
 
-LOXO_NODISCARD_MSG(Status)
-LOXOGRAPH_API Status AlreadyExistsError(
+NODISCARD_LOXO(Status)
+LOXO_API Status AlreadyExistsError(
     string_view,
     const std::source_location & = std::source_location::current());
-LOXO_NODISCARD_MSG(Status)
-LOXOGRAPH_API Status FileNotFoundError(
+NODISCARD_LOXO(Status)
+LOXO_API Status FileNotFoundError(
     string_view,
     const std::source_location & = std::source_location::current());
-LOXO_NODISCARD_MSG(Status)
-LOXOGRAPH_API Status
+NODISCARD_LOXO(Status)
+LOXO_API Status
 UnknownError(string_view,
              const std::source_location & = std::source_location::current());
-LOXO_NODISCARD_MSG(Status)
-LOXOGRAPH_API Status PermissionDeniedError(
+NODISCARD_LOXO(Status)
+LOXO_API Status PermissionDeniedError(
     string_view,
     const std::source_location & = std::source_location::current());
-LOXO_NODISCARD_MSG(Status)
-LOXOGRAPH_API Status
+NODISCARD_LOXO(Status)
+LOXO_API Status
 InvalidArgument(string_view,
                 const std::source_location & = std::source_location::current());
-LOXO_NODISCARD_MSG(Status)
-LOXOGRAPH_API Status
+NODISCARD_LOXO(Status)
+LOXO_API Status
 CommandNotFound(string_view,
                 const std::source_location & = std::source_location::current());
-LOXO_NODISCARD_MSG(Status)
-LOXOGRAPH_API Status
+NODISCARD_LOXO(Status)
+LOXO_API Status
 EmptyInput(string_view,
            const std::source_location & = std::source_location::current());
-LOXO_NODISCARD_MSG(Status)
-LOXOGRAPH_API Status
+NODISCARD_LOXO(Status)
+LOXO_API Status
 ParseError(string_view,
            const std::source_location & = std::source_location::current());
-LOXO_NODISCARD_MSG(Status)
-LOXOGRAPH_API Status NotImplementedError(
+NODISCARD_LOXO(Status)
+LOXO_API Status NotImplementedError(
     string_view,
     const std::source_location & = std::source_location::current());
 } // namespace net::ancillarycat::utils

@@ -15,7 +15,7 @@
 
 #include "ScopeAssoc.hpp"
 
-namespace net::ancillarycat::loxograph {
+namespace net::ancillarycat::loxo {
 
 class Environment : public utils::Printable,
                     public std::enable_shared_from_this<Environment> {
@@ -29,20 +29,20 @@ public:
 public:
   Environment();
   explicit Environment(const std::shared_ptr<self_type> &);
-  ~Environment() override = default;
+  virtual ~Environment() override = default;
 
 public:
   static auto createGlobalEnvironment()
-      -> utils::StatusOr<std::shared_ptr<Environment>>;
+      -> utils::StatusOr<std::shared_ptr<self_type>>;
 
 public:
-  auto find(this auto &&self, const string_type &name)
-      -> decltype(self.current->find(name));
+  auto find(const string_type &name) const
+      -> std::optional<self_type::scope_env_t::associations_t::iterator>;
   auto add(const string_type &,
            const eval_result_t &,
            uint_least32_t = std::numeric_limits<uint_least32_t>::quiet_NaN())
       -> utils::Status;
-  auto reassign(const string_type &, const eval_result_t &, uint_least32_t)
+  auto reassign(const string_type &, const eval_result_t &, uint_least32_t) const
       -> utils::Status;
   auto get(const string_type &) const -> eval_result_t;
 
@@ -54,23 +54,4 @@ private:
   auto to_string_impl(const utils::FormatPolicy &) const
       -> string_type override;
 };
-auto Environment::find(this auto &&self, const string_type &name)
-    -> decltype(self.current->find(name)) {
-  if (auto it = self.current->find(name)) {
-    dbg_block(if (self.parent.expired()) return nullptr;
-              if (auto another_it = self.parent.lock()->find(name)) {
-                dbg(warn,
-                    "variable '{}' is shadowed; previously declared at line {}",
-                    name,
-                    (*another_it)->second.second);
-              })
-    return {it};
-  }
-
-  if (auto enclosing = self.parent.lock())
-    return enclosing->find(name);
-
-  return std::nullopt;
-}
-
-} // namespace net::ancillarycat::loxograph
+} // namespace net::ancillarycat::loxo

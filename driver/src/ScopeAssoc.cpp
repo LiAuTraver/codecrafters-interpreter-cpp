@@ -10,7 +10,7 @@
 
 #include "Variant.hpp"
 
-namespace net::ancillarycat::loxograph::evaluation {
+namespace net::ancillarycat::loxo::evaluation {
 utils::Status ScopeAssoc::add(const string_type &name,
                                const eval_result_t &value,
                                const uint_least32_t line) {
@@ -31,4 +31,4 @@ auto ScopeAssoc::to_string_impl(
     const utils::FormatPolicy &format_policy) const -> string_type {
   return {};
 }
-} // namespace net::ancillarycat::loxograph::evaluation
+} // namespace net::ancillarycat::loxo::evaluation

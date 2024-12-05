@@ -10,7 +10,7 @@
 #include "expression.hpp"
 
 #include "parser.hpp"
-namespace net::ancillarycat::loxograph {
+namespace net::ancillarycat::loxo {
 // NOLINTBEGIN(misc-no-recursion)
 parser &parser::set_views(const token_views_t tokens) {
   contract_assert(tokens.size() && tokens.back().is_type(kEndOfFile),
@@ -187,7 +187,7 @@ auto parser::primary() -> expr_ptr_t {
       // } else if (inspect(kSemicolon)) {
       //   this->get();
       // } else {
-      //   dbg(critical, "unreachable code reached: {}", LOXOGRAPH_STACKTRACE);
+      //   dbg(critical, "unreachable code reached: {}", LOXO_STACKTRACE);
       //   contract_assert(false);
       // }
       throw synchronize(
@@ -379,7 +379,7 @@ auto parser::synchronize(const parse_error &parse_error) -> expr_ptr_t {
   }
   return error_expr;
 }
-LOXOGRAPH_API void delete_parser_fwd(parser *ptr) { delete ptr; }
+LOXO_API void delete_parser_fwd(parser *ptr) { delete ptr; }
 
 // NOLINTEND(misc-no-recursion)
-} // namespace net::ancillarycat::loxograph
+} // namespace net::ancillarycat::loxo

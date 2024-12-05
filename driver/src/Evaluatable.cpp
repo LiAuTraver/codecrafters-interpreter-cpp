@@ -6,7 +6,7 @@
 
 #include "Evaluatable.hpp"
 
-namespace net::ancillarycat::loxograph::evaluation {
+namespace net::ancillarycat::loxo::evaluation {
 Value::operator Boolean() const noexcept {
   if (dynamic_cast<const Nil *>(this)) {
     return Boolean::make_false(get_line());
@@ -249,4 +249,4 @@ auto Callable::to_string_impl(const utils::FormatPolicy &) const
   }
   return {native_signature.cbegin(), native_signature.cend()};
 }
-} // namespace net::ancillarycat::loxograph::evaluation
+} // namespace net::ancillarycat::loxo::evaluation

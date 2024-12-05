@@ -24,7 +24,7 @@
 #include "parser.hpp"
 #include "status.hpp"
 
-namespace net::ancillarycat::loxograph {
+namespace net::ancillarycat::loxo {
 utils::Status show_msg() {
   dbg(critical, "please provide a command.");
   contract_assert(false);
@@ -127,7 +127,7 @@ void writeInterpResultToContextStream(ExecutionContext &ctx) {
   ctx.output_stream << ctx.interpreter->to_string();
 }
 // clang-format off
-LOXO_NODISCARD_MSG(loxo_main)
+NODISCARD_LOXO(loxo_main)
 int loxo_main(_In_ const int argc,
               _In_opt_ char **argv, //! @note argv can be nullptr(debug mode or google test)
               _Inout_ ExecutionContext &ctx)
@@ -214,4 +214,4 @@ int loxo_main(_In_ const int argc,
   }
   return onCommandNotFound(ctx).code();
 }
-} // namespace net::ancillarycat::loxograph
+} // namespace net::ancillarycat::loxo

@@ -36,7 +36,7 @@ bool Status::ok() const noexcept { return my_code == kOkStatus; }
 Status::Code Status::code() const { return my_code; }
 std::string_view Status::message() const { return my_message; }
 std::source_location Status::location() const { return my_location; }
-std::string Status::stacktrace() const { return LOXOGRAPH_STACKTRACE; }
+std::string Status::stacktrace() const { return LOXO_STACKTRACE; }
 void Status::ignore_error() const { contract_assert(ok()); }
 std::string Status::from_source_location() const {
   return utils::format("file {0}\n"
@@ -47,52 +47,52 @@ std::string Status::from_source_location() const {
                      my_location.line(),
                      my_location.column());
 }
-LOXOGRAPH_API
+LOXO_API
 Status OkStatus(const std::source_location &location) {
   return {Status::kOkStatus, "OkStatus", location};
 }
-LOXOGRAPH_API
+LOXO_API
 Status AlreadyExistsError(const std::string_view message,
                           const std::source_location &location) {
   return {Status::kAlreadyExistsError, message, location};
 }
-LOXOGRAPH_API
+LOXO_API
 Status FileNotFoundError(const std::string_view message,
                          const std::source_location &location) {
   return {Status::kNotFoundError, message, location};
 }
-LOXOGRAPH_API
+LOXO_API
 Status UnknownError(const std::string_view message,
                     const std::source_location &location) {
   return {Status::kUnknownError, message, location};
 }
-LOXOGRAPH_API
+LOXO_API
 Status PermissionDeniedError(const std::string_view message,
                              const std::source_location &location) {
   return {Status::kPermissionDeniedError, message, location};
 }
-LOXO_NODISCARD_MSG(Status) LOXOGRAPH_API Status
+NODISCARD_LOXO(Status) LOXO_API Status
     InvalidArgument(const string_view message,
                     const std::source_location &location) {
   return {Status::kInvalidArgument, message, location};
 }
-LOXO_NODISCARD_MSG(Status) LOXOGRAPH_API Status
+NODISCARD_LOXO(Status) LOXO_API Status
     CommandNotFound(const string_view message,
                     const std::source_location &location) {
   return {Status::kCommandNotFound, message, location};
 }
-LOXO_NODISCARD_MSG(Status) LOXOGRAPH_API Status
+NODISCARD_LOXO(Status) LOXO_API Status
     EmptyInput(const string_view message,
                const std::source_location &location) {
   return {Status::kEmptyInput, message, location};
 }
-LOXO_NODISCARD_MSG(Status)
-LOXOGRAPH_API Status ParseError(const string_view message,
+NODISCARD_LOXO(Status)
+LOXO_API Status ParseError(const string_view message,
                                 const std::source_location &location) {
   return {Status::kParseError, message, location};
 }
-LOXO_NODISCARD_MSG(Status)
-LOXOGRAPH_API
+NODISCARD_LOXO(Status)
+LOXO_API
 Status NotImplementedError(const string_view message, const std::source_location &location) {
   return {Status::kNotImplementedError, message, location};
 }

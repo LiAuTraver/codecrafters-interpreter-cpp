@@ -15,9 +15,9 @@
 #include "status.hpp"
 #include "Evaluatable.hpp"
 
-namespace net::ancillarycat::loxograph::evaluation {
+namespace net::ancillarycat::loxo::evaluation {
 class ScopeAssoc : utils::Printable {
-  friend class ::net::ancillarycat::loxograph::Environment;
+  friend class ::net::ancillarycat::loxo::Environment;
 
 public:
   using eval_result_t = utils::VisitorBase::eval_result_t;
@@ -35,7 +35,7 @@ private:
   auto add(const string_type &, const eval_result_t &, uint_least32_t = std::numeric_limits<uint_least32_t>::quiet_NaN())
       -> utils::Status;
   auto find(this auto &&self, const string_type &name)
-      -> std::optional<decltype(self.associations.find(name))>;
+      -> std::optional<associations_t::iterator>;
 
 private:
   associations_t associations{};
@@ -45,9 +45,9 @@ private:
       -> string_type override;
 };
 auto ScopeAssoc::find(this auto &&self, const string_type &name)
-    -> std::optional<decltype(self.associations.find(name))> {
+    -> std::optional<associations_t::iterator> {
   if (auto it = self.associations.find(name); it != self.associations.end())
     return it;
   return std::nullopt;
 }
-} // namespace net::ancillarycat::loxograph::evaluation
+} // namespace net::ancillarycat::loxo::evaluation

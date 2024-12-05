@@ -8,7 +8,7 @@
 #include "ExprVisitor.hpp"
 #include "Evaluatable.hpp"
 
-namespace net::ancillarycat::loxograph::expression {
+namespace net::ancillarycat::loxo::expression {
 Literal::Literal(token_t &&literal) : literal(std::move(literal)) {}
 Expr::expr_result_t Literal::accept_impl(const ExprVisitor &visitor) const {
   return visitor.visit(*this);
@@ -96,4 +96,4 @@ IllegalExpr::to_string_impl(const utils::FormatPolicy &format_policy) const {
                        token.to_string(utils::FormatPolicy::kTokenOnly),
                        error.message());
 }
-} // namespace net::ancillarycat::loxograph::expression
+} // namespace net::ancillarycat::loxo::expression

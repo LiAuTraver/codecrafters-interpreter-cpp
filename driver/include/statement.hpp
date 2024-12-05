@@ -8,7 +8,7 @@
 #include "StmtVisitor.hpp"
 #include "Token.hpp"
 
-namespace net::ancillarycat::loxograph::statement {
+namespace net::ancillarycat::loxo::statement {
 class Stmt : public utils::Printable,
              public std::enable_shared_from_this<Stmt> {
 public:
@@ -197,4 +197,4 @@ private:
       -> string_view_type override;
   auto accept_impl(const StmtVisitor &) const -> stmt_result_t override;
 };
-} // namespace net::ancillarycat::loxograph::statement
+} // namespace net::ancillarycat::loxo::statement

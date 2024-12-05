@@ -10,7 +10,7 @@
 
 #include "expression.hpp"
 
-namespace net::ancillarycat::loxograph::statement {
+namespace net::ancillarycat::loxo::statement {
 Stmt::stmt_result_t Variable::accept_impl(const StmtVisitor &visitor) const {
   return visitor.visit(*this);
 }
@@ -121,4 +121,4 @@ auto IllegalStmt::to_string_view_impl(const utils::FormatPolicy &) const
 Stmt::stmt_result_t IllegalStmt::accept_impl(const StmtVisitor &visitor) const {
   return visitor.visit(*this);
 }
-} // namespace net::ancillarycat::loxograph::statement
+} // namespace net::ancillarycat::loxo::statement

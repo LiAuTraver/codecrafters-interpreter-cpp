@@ -5,7 +5,7 @@
 #include "loxo_fwd.hpp"
 #include "TokenType.hpp"
 
-namespace net::ancillarycat::loxograph {
+namespace net::ancillarycat::loxo {
 TokenType::string_view_type TokenType::to_string_view_impl(const utils::FormatPolicy &) const {
   return string_view_type{format_as(*this)};
 }
@@ -102,4 +102,4 @@ auto format_as(const TokenType &t) noexcept -> TokenType::string_view_type {
     return "UNKNOWN"sv;
   }
 }
-} // namespace net::ancillarycat::loxograph
+} // namespace net::ancillarycat::loxo

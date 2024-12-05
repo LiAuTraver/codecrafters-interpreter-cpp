@@ -1,9 +1,9 @@
 """
-Module definition for loxograph project.
+Module definition for loxo project.
 """
 
 module(
-    name = "loxograph",
+    name = "loxo",
     version = "1.0.0",
 )
 

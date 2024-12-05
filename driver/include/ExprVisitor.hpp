@@ -10,7 +10,7 @@
 
 #include "Variant.hpp"
 
-namespace net::ancillarycat::loxograph::expression {
+namespace net::ancillarycat::loxo::expression {
 /// @interface ExprVisitor
 class ExprVisitor : virtual public utils::VisitorBase {
 public:
@@ -89,7 +89,7 @@ private:
 private:
 } inline static const _dummy_visitor;
 /// @implements ExprVisitor
-class LOXOGRAPH_API ASTPrinter : public ExprVisitor, public utils::Viewable {
+class LOXO_API ASTPrinter : public ExprVisitor, public utils::Viewable {
 public:
   using ostream_t = std::ostream;
   using ostringstream_t = std::ostringstream;
@@ -120,4 +120,4 @@ private:
   mutable ostringstream_t oss;
   mutable ostringstream_t error_stream;
 };
-} // namespace net::ancillarycat::loxograph::expression
+} // namespace net::ancillarycat::loxo::expression

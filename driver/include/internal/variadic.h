@@ -14,7 +14,7 @@
 //!
 //! @code
 //! // Example usage:
-//! #define foo(...) LOXOGRAPH__VFUNC(foo, ##__VA_ARGS__)
+//! #define foo(...) LOXO__VFUNC(foo, ##__VA_ARGS__)
 //! // the `##` is used to remove the comma if no arguments are passed;
 //! //                       modern preprocessor will handle this automatically.
 //!
@@ -33,9 +33,9 @@ extern "C" {
 #endif
 #pragma region variadic macros
 // clang-format off
-/// @def LOXOGRAPH_VFUNC_ARG_COUNT_IMPL
+/// @def LOXO_VFUNC_ARG_COUNT_IMPL
 /// @brief macros to count the number of arguments up to 63
-#define LOXOGRAPH_VFUNC_ARG_COUNT_IMPL( \
+#define LOXO_VFUNC_ARG_COUNT_IMPL( \
 		_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, \
 		_10, _11, _12, _13, _14, _15, _16, _17, _18, \
 		_19, _20, _21, _22, _23, _24, _25, _26, _27, \
@@ -46,9 +46,9 @@ extern "C" {
 		N, ... \
 ) N
 
-/// @def LOXOGRAPH_VFUNC_ARG_COUNT
+/// @def LOXO_VFUNC_ARG_COUNT
 /// @brief macro to count the number of arguments
-#define LOXOGRAPH_VFUNC_ARG_COUNT(...) LOXOGRAPH_VFUNC_ARG_COUNT_IMPL(_, ## __VA_ARGS__, \
+#define LOXO_VFUNC_ARG_COUNT(...) LOXO_VFUNC_ARG_COUNT_IMPL(_, ## __VA_ARGS__, \
 		63, 62, 61, 60, 59, 58, 57, 56, 55, 54, \
 		53, 52, 51, 50, 49, 48, 47, 46, 45, 44, \
 		43, 42, 41, 40, 39, 38, 37, 36, 35, 34, \
@@ -58,29 +58,29 @@ extern "C" {
 		0 \
 )
 // clang-format on
-/// @def LOXOGRAPH_VFUNC_CONCAT_IMPL
+/// @def LOXO_VFUNC_CONCAT_IMPL
 /// @brief Helper macros to concatenate function name and argument count
-#define LOXOGRAPH_VFUNC_CONCAT_IMPL(func, underscore, count)                   \
+#define LOXO_VFUNC_CONCAT_IMPL(func, underscore, count)                   \
   func##underscore##count
-/// @def LOXOGRAPH_VFUNC_CONCAT
-/// @copydoc LOXOGRAPH_VFUNC_CONCAT_IMPL
-#define LOXOGRAPH_VFUNC_CONCAT(func, count)                                    \
-  LOXOGRAPH_VFUNC_CONCAT_IMPL(func, _, count)
+/// @def LOXO_VFUNC_CONCAT
+/// @copydoc LOXO_VFUNC_CONCAT_IMPL
+#define LOXO_VFUNC_CONCAT(func, count)                                    \
+  LOXO_VFUNC_CONCAT_IMPL(func, _, count)
 
-/// @def LOXOGRAPH_VFUNC(func, ...)
+/// @def LOXO_VFUNC(func, ...)
 /// @brief Main macro to select the appropriate function
-#define LOXOGRAPH__VFUNC(func, ...)                                            \
-  LOXOGRAPH_VFUNC_CONCAT(func, LOXOGRAPH_VFUNC_ARG_COUNT(__VA_ARGS__))         \
+#define LOXO__VFUNC(func, ...)                                            \
+  LOXO_VFUNC_CONCAT(func, LOXO_VFUNC_ARG_COUNT(__VA_ARGS__))         \
   (__VA_ARGS__) // NOLINT(bugprone-reserved-identifier)
 
-/// @def LOXOGRAPH_COUNTER
+/// @def LOXO_COUNTER
 /// @brief Helper macro to expand __COUNTER__; currently has no usage in this
 /// project.
 #ifndef __COUNTER__
 #define __COUNTER__ __LINE__
-#define LOXOGRAPH_COUNTER __COUNTER__
+#define LOXO_COUNTER __COUNTER__
 #else
-#define LOXOGRAPH_COUNTER __COUNTER__
+#define LOXO_COUNTER __COUNTER__
 #endif
 
 /// @def EXPAND_COUNTER_HELPER
@@ -89,9 +89,9 @@ extern "C" {
   prefix##underscore##counter
 #define EXPAND_COUNTER(name, counter) EXPAND_COUNTER_HELPER(name, _, counter)
 
-/// @def LOXOGRAPH_EXPAND_COUNTER
+/// @def LOXO_EXPAND_COUNTER
 /// @copydoc EXPAND_COUNTER
-#define LOXOGRAPH_EXPAND_COUNTER(name) EXPAND_COUNTER(name, LOXOGRAPH_COUNTER)
+#define LOXO_EXPAND_COUNTER(name) EXPAND_COUNTER(name, LOXO_COUNTER)
 
 #pragma endregion
 #ifdef __cplusplus

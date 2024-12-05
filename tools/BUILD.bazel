@@ -2,7 +2,7 @@ cc_binary(
     name = "interpreter",
     srcs = [
         "lox_interpreter.cpp",
-				"//shared:loxograph_driver.cpp",
+				"//shared:loxo_driver.cpp",
 				"//shared:execution_context.hpp",
     ] ,
     copts = [
@@ -10,7 +10,7 @@ cc_binary(
     ],
     defines = [
         "AC_CPP_DEBUG",
-        "LIBLOXOGRAPH_SHARED", # wired build error if build dll
+        "LIBLOXO_SHARED", # wired build error if build dll
     ],
     includes = [
         "driver/include",

@@ -8,11 +8,11 @@
 #include "utils.hpp"
 #include "loxo_fwd.hpp"
 
-namespace net::ancillarycat::loxograph {
+namespace net::ancillarycat::loxo {
 /// @brief enhanced token type, more like rust's enum
 /// @implements utils::Printable
 /// @implements utils::Viewable
-class LOXOGRAPH_API TokenType : public utils::Printable,
+class LOXO_API TokenType : public utils::Printable,
                                 public utils::Viewable {
 public:
   enum type_t : uint16_t;
@@ -98,4 +98,4 @@ inline static const auto keywords =
         {"var"sv, {TokenType::kVar}},
         {"while"sv, {TokenType::kWhile}},
     };
-} // namespace net::ancillarycat::loxograph
+} // namespace net::ancillarycat::loxo

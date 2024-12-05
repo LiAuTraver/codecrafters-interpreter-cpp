@@ -7,7 +7,7 @@
 #include "loxo_fwd.hpp"
 #include "status.hpp"
 
-namespace net::ancillarycat::loxograph::statement {
+namespace net::ancillarycat::loxo::statement {
 class StmtVisitor : virtual public utils::VisitorBase {
 public:
   template <typename DerivedStmt>
@@ -46,4 +46,4 @@ private:
   utils::Status visit_impl(const Function &) const override { return {}; }
   utils::Status visit_impl(const IllegalStmt &) const override { return {}; }
 } inline static const _dummy_visitor;
-} // namespace net::ancillarycat::loxograph::statement
+} // namespace net::ancillarycat::loxo::statement

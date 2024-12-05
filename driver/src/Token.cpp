@@ -17,7 +17,7 @@
 #include "Token.hpp"
 
 
-namespace net::ancillarycat::loxograph {
+namespace net::ancillarycat::loxo {
 template <typename Ty>
 inline auto Token::cast_literal() const -> decltype(auto)
   requires std::default_initializable<Ty>
@@ -45,7 +45,7 @@ Token::number_to_string(const utils::FormatPolicy policy) const {
       else if (policy == utils::kTokenOnly)
         return utils::format("{:.1f}", *ptr);
       else {
-        dbg(critical, "unreachable code reached: {}", LOXOGRAPH_STACKTRACE);
+        dbg(critical, "unreachable code reached: {}", LOXO_STACKTRACE);
         contract_assert(false);
         std::unreachable();
       }
@@ -56,7 +56,7 @@ Token::number_to_string(const utils::FormatPolicy policy) const {
     else if (policy == utils::kTokenOnly)
       return utils::format("{}", *ptr);
     else {
-      dbg(critical, "unreachable code reached: {}", LOXOGRAPH_STACKTRACE);
+      dbg(critical, "unreachable code reached: {}", LOXO_STACKTRACE);
       contract_assert(false);
       std::unreachable();
     }
@@ -67,7 +67,7 @@ Token::number_to_string(const utils::FormatPolicy policy) const {
     else if (policy == utils::kTokenOnly)
       return utils::format("{}", "<failed to access data>");
     else {
-      dbg(critical, "unreachable code reached: {}", LOXOGRAPH_STACKTRACE);
+      dbg(critical, "unreachable code reached: {}", LOXO_STACKTRACE);
       contract_assert(false);
       std::unreachable();
     }
@@ -303,7 +303,7 @@ Token::to_string_impl(const utils::FormatPolicy &policy) const {
       return ""s;
     }
   default:
-    dbg(critical, "unreachable code reached: {}", LOXOGRAPH_STACKTRACE);
+    dbg(critical, "unreachable code reached: {}", LOXO_STACKTRACE);
     contract_assert(false);
     break;
   }
@@ -315,7 +315,7 @@ Token::to_string_impl(const utils::FormatPolicy &policy) const {
     // for ast print.
     return utils::format("{}", lexeme_sv);
   } else {
-    dbg(critical, "unreachable code reached: {}", LOXOGRAPH_STACKTRACE);
+    dbg(critical, "unreachable code reached: {}", LOXO_STACKTRACE);
     contract_assert(false);
     std::unreachable();
   }
@@ -324,4 +324,4 @@ Token::to_string_impl(const utils::FormatPolicy &policy) const {
 auto format_as(const Token &token) -> Token::string_type {
   return token.to_string(utils::FormatPolicy::kDefault);
 }
-} // namespace net::ancillarycat::loxograph
+} // namespace net::ancillarycat::loxo

@@ -16,9 +16,9 @@
 
 #include <expected>
 
-namespace net::ancillarycat::loxograph {
+namespace net::ancillarycat::loxo {
 /// @implements expression::ExprVisitor
-class LOXOGRAPH_API interpreter : virtual public expression::ExprVisitor,
+class LOXO_API interpreter : virtual public expression::ExprVisitor,
                                   virtual public statement::StmtVisitor {
 public:
   interpreter();
@@ -97,6 +97,6 @@ private:
       -> string_type override;
 
 private:
-  friend LOXOGRAPH_API void delete_interpreter_fwd(interpreter *);
+  friend LOXO_API void delete_interpreter_fwd(interpreter *);
 };
-} // namespace net::ancillarycat::loxograph
+} // namespace net::ancillarycat::loxo

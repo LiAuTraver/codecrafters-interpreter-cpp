@@ -43,7 +43,7 @@ using namespace ::std::string_view_literals;
 using namespace ::std::string_literals;
 } // namespace net::ancillarycat::utils
 // NOLINTBEGIN(bugprone-forward-declaration-namespace)
-namespace net::ancillarycat::loxograph {
+namespace net::ancillarycat::loxo {
 
 class Token;
 class TokenType;
@@ -107,5 +107,5 @@ inline static constexpr auto tolerable_chars = "_`"sv;
 // inline static constexpr auto conditional_tolerable_chars = "@$#"sv;
 inline static constexpr auto whitespace_chars = " \t\r"sv;
 inline static constexpr auto newline_chars = "\n\v\f"sv;
-} // namespace net::ancillarycat::loxograph
+} // namespace net::ancillarycat::loxo
 // NOLINTEND(bugprone-forward-declaration-namespace)

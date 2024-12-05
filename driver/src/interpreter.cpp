@@ -9,20 +9,21 @@
 #include <typeinfo>
 #include <vector>
 
+
+#include "config.hpp"
+#include "utils.hpp"
+#include "loxo_fwd.hpp"
 #include "Environment.hpp"
 #include "Evaluatable.hpp"
 #include "Monostate.hpp"
 #include "TokenType.hpp"
-#include "config.hpp"
 #include "statement.hpp"
 #include "status.hpp"
-#include "utils.hpp"
-#include "loxo_fwd.hpp"
 #include "expression.hpp"
 #include "interpreter.hpp"
 #include "Variant.hpp"
 
-namespace net::ancillarycat::loxograph {
+namespace net::ancillarycat::loxo {
 using utils::match;
 using enum TokenType::type_t;
 interpreter::interpreter() : env(std::make_shared<Environment>()) {}
@@ -461,5 +462,5 @@ auto interpreter::to_string_impl(const utils::FormatPolicy &format_policy) const
   // clang-format on
   return result_str;
 }
-LOXOGRAPH_API void delete_interpreter_fwd(interpreter *ptr) { delete ptr; }
-} // namespace net::ancillarycat::loxograph
+LOXO_API void delete_interpreter_fwd(interpreter *ptr) { delete ptr; }
+} // namespace net::ancillarycat::loxo

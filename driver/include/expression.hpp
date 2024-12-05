@@ -17,8 +17,8 @@
 #include "parse_error.hpp"
 #include "Token.hpp"
 
-/// @namespace net::ancillarycat::loxograph::expression
-namespace net::ancillarycat::loxograph::expression {
+/// @namespace net::ancillarycat::loxo::expression
+namespace net::ancillarycat::loxo::expression {
 /// @interface Expr
 class Expr : public utils::Printable,
              public std::enable_shared_from_this<Expr> {
@@ -186,4 +186,4 @@ public:
   parse_error error;
   // std::shared_ptr<IllegalExpr> next = nullptr;
 };
-} // namespace net::ancillarycat::loxograph::expression
+} // namespace net::ancillarycat::loxo::expression

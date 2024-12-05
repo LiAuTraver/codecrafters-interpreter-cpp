@@ -29,7 +29,7 @@ public:
   inline constexpr ~file_reader() = default;
 
 public:
-  LOXO_NODISCARD_MSG(path_t) inline string_t get_contents() const {
+  NODISCARD_LOXO(path_t) inline string_t get_contents() const {
     ifstream_t file(filePath);
     if (not file) {
       return string_t();
@@ -38,7 +38,7 @@ public:
     buffer << file.rdbuf();
     return buffer.str();
   }
-  LOXO_NODISCARD_MSG(path_t) inline path_t filepath() const { return filePath; }
+  NODISCARD_LOXO(path_t) inline path_t filepath() const { return filePath; }
 
 private:
   const path_t filePath;

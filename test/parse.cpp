@@ -15,13 +15,13 @@ std::pair<int, std::string> get_result(const auto &filepath) {
 }
 } // namespace
 TEST(parse,print){
-  auto [callback, str] = get_result("Z:/loxograph/examples/parse.expr2.lox");
+  auto [callback, str] = get_result("Z:/loxo/examples/parse.expr2.lox");
   EXPECT_EQ(str, "true\n");
   EXPECT_EQ(callback, 0);
 }
 
 TEST(parse, error) {
-  auto [callback, str] = get_result("Z:/loxograph/examples/parse.expr7.lox");
+  auto [callback, str] = get_result("Z:/loxo/examples/parse.expr7.lox");
   EXPECT_EQ(str, "[line 1] Error at ')': Expect expression.\n");
   EXPECT_EQ(callback, 65);
 }

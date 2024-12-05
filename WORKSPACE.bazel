@@ -1,7 +1,7 @@
 """
 		main workspace file.
 """
-workspace(name = "loxograph")
+workspace(name = "loxo")
 
 load("//third_party:third_party.bzl", "load_third_party_libraries")
 

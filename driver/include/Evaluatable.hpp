@@ -8,13 +8,14 @@
 #include <random>
 #include <utility>
 #include <vector>
+#include <functional>
 
 #include "Variant.hpp"
 #include "config.hpp"
 #include "utils.hpp"
 #include "loxo_fwd.hpp"
 
-namespace net::ancillarycat::loxograph::evaluation {
+namespace net::ancillarycat::loxo::evaluation {
 
 /// @brief A class that represents an evaluatable object
 /// @interface Evaluatable
@@ -46,7 +47,7 @@ public:
   Boolean operator!() const noexcept;
 };
 
-class Boolean : public Value, public utils::Viewable {
+class LOXO_API Boolean : public Value, public utils::Viewable {
 public:
   constexpr Boolean() = default;
   constexpr Boolean(bool value,
@@ -77,7 +78,7 @@ private:
   std::optional<bool> value = std::nullopt;
 } static inline LOXO_CONSTEXPR_IF_NOT_MSVC True{true, 0}, False{false, 0};
 
-class Nil : public Value, public utils::Viewable {
+class LOXO_API Nil : public Value, public utils::Viewable {
 public:
   constexpr Nil() = default;
   explicit Nil(const uint_least32_t line) : Value(line) {}
@@ -218,7 +219,7 @@ public:
   auto signature() const -> string_type;
 
 public:
-  constexpr auto call(const interpreter &interpreter, args_t &args)
+ LOXO_CONSTEXPR_IF_NOT_MSVC auto call(const interpreter &interpreter, args_t &args)
       -> decltype(auto) {
     return my_function.operator()(interpreter, args);
   }
@@ -226,7 +227,7 @@ public:
     return {this == &other || (this->my_function.target_type() ==
                                other.my_function.target_type())};
   }
-  constexpr auto operator!=(const Callable &other) const -> Boolean {
+  LOXO_CONSTEXPR_IF_NOT_MSVC auto operator!=(const Callable &other) const -> Boolean {
     return {this->operator==(other).operator!()};
   }
 
@@ -239,4 +240,4 @@ private:
   auto to_string_impl(const utils::FormatPolicy &) const
       -> string_type override;
 };
-} // namespace net::ancillarycat::loxograph::evaluation
+} // namespace net::ancillarycat::loxo::evaluation

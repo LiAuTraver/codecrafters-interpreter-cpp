@@ -6,4 +6,4 @@
 
 #include "StmtVisitor.hpp"
 
-namespace net::ancillarycat::loxograph::statement {}
+namespace net::ancillarycat::loxo::statement {}

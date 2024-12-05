@@ -18,8 +18,8 @@
 #include "Token.hpp"
 #include "TokenType.hpp"
 
-namespace net::ancillarycat::loxograph {
-class LOXOGRAPH_API parser {
+namespace net::ancillarycat::loxo {
+class LOXO_API parser {
 public:
   enum ParsePolicy {
     kStatement = 0,
@@ -115,7 +115,7 @@ private:
   mutable stmt_ptrs_t stmts = {};
   // bool is_in_panic = false;
 private:
-  friend LOXOGRAPH_API void delete_parser_fwd(parser *);
+  friend LOXO_API void delete_parser_fwd(parser *);
 };
 template <typename... Args>
   requires(std::is_enum_v<std::common_type_t<Args...>>)
@@ -124,4 +124,4 @@ bool parser::inspect(Args &&...args) {
     return false;
   return (... || (peek().type.type == args));
 }
-} // namespace net::ancillarycat::loxograph
+} // namespace net::ancillarycat::loxo

@@ -21,20 +21,20 @@
 #endif
 #include "../shared/execution_context.hpp"
 
-LOXOGRAPH_INITIALIZATION(trace);
+LOXO_INITIALIZATION(trace);
 using namespace net::ancillarycat;
 
-void alterToolContext(loxograph::ExecutionContext &execution_context) {
+void alterToolContext(loxo::ExecutionContext &execution_context) {
   static auto debugInputFilePath =
-      std::filesystem::path{"Z:/loxograph/examples/dynamic.lox"};
+      std::filesystem::path{"Z:/loxo/examples/dynamic.lox"};
   if (execution_context.commands.empty())
-    execution_context.commands.emplace_back(loxograph::ExecutionContext::interpret);
+    execution_context.commands.emplace_back(loxo::ExecutionContext::interpret);
   if (execution_context.input_files.empty()) {
     if (exists(debugInputFilePath))
       execution_context.input_files.emplace_back(debugInputFilePath);
     else {
       dbg(critical, "file not found: {}", debugInputFilePath);
-      LOXOGRAPH_DEBUG_BREAK
+      LOXO_DEBUG_BREAK
     }
   }
 }
@@ -42,7 +42,7 @@ void alterToolContext(loxograph::ExecutionContext &execution_context) {
 int main(int argc, char **argv, char **envp) {
 
   auto &tool_context =
-      loxograph::ExecutionContext::inspectArgs(argc, argv, envp);
+      loxo::ExecutionContext::inspectArgs(argc, argv, envp);
 
   dbg_block(alterToolContext(tool_context);
 
@@ -52,7 +52,7 @@ int main(int argc, char **argv, char **envp) {
                 "Command: {}",
                 tool_context.commands.empty()
                     ? "<no command provided>"
-                    : loxograph::ExecutionContext::command_sv(
+                    : loxo::ExecutionContext::command_sv(
                           tool_context.commands.front()));
             // dbg(info, "Input files: {}", tool_context.input_files);
 						// MSVC failed 										^^^^^^^^(a vec of path)
@@ -62,5 +62,5 @@ int main(int argc, char **argv, char **envp) {
             dbg(info, "Execution directory: {}", tool_context.execution_dir);
             dbg(info, "Temp directory: {}", tool_context.tempdir));
 
-  return loxograph::loxo_main(argc, argv, tool_context);
+  return loxo::loxo_main(argc, argv, tool_context);
 }
