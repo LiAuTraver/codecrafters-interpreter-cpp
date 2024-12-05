@@ -14,12 +14,14 @@
 #include "statement.hpp"
 #include "Environment.hpp"
 
+#include <expected>
+
 namespace net::ancillarycat::loxograph {
 /// @implements expression::ExprVisitor
 class LOXOGRAPH_API interpreter : virtual public expression::ExprVisitor,
                                   virtual public statement::StmtVisitor {
 public:
-  interpreter() = default;
+  interpreter();
   virtual ~interpreter() override = default;
   using ostringstream_t = std::ostringstream;
   using env_t = Environment;
@@ -53,8 +55,10 @@ private:
   /// make `nil` as false.
   evaluation::Boolean is_true_value(const eval_result_t &) const;
   virtual auto get_result_impl() const -> eval_result_t override;
-  eval_result_t is_deep_equal(const eval_result_t &,
-                              const eval_result_t &) const;
+  auto is_deep_equal(const eval_result_t &, const eval_result_t &) const
+      -> eval_result_t;
+  auto get_function_args(const expression::Call &expr) const
+      -> std::expected<std::vector<eval_result_t>, eval_result_t>;
 
 private:
   virtual auto visit_impl(const statement::Variable &) const
@@ -83,7 +87,7 @@ private:
   /// a temporary fix.
   mutable eval_result_t expr_res{utils::Monostate{}};
   mutable std::vector<eval_result_t> stmts_res{};
-  mutable env_ptr_t env{std::make_shared<env_t>()};
+  mutable env_ptr_t env{};
 
 private:
   auto expr_to_string(const utils::FormatPolicy &) const -> string_type;

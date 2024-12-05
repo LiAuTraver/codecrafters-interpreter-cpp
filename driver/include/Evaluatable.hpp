@@ -192,7 +192,8 @@ private:
 class Callable : public Evaluatable {
 public:
   using args_t = std::vector<eval_result_t>;
-  using function_t = std::function<eval_result_t(const interpreter &, args_t &)>;
+  using function_t =
+      std::function<eval_result_t(const interpreter &, args_t &)>;
   using string_view_type = utils::Viewable::string_view_type;
 
 public:
@@ -200,37 +201,26 @@ public:
   virtual ~Callable() = default;
 
 public:
-  Callable(function_t &&function,
-           const uint_least32_t line =
-               std::numeric_limits<uint_least32_t>::quiet_NaN())
-      : Evaluatable(line), my_function(std::move(function)) {}
+  Callable(function_t &&,
+           uint_least32_t = std::numeric_limits<uint_least32_t>::quiet_NaN());
 
 public:
-  inline static Callable
-  create(function_t &&function,
-         const uint_least32_t line =
-             std::numeric_limits<uint_least32_t>::quiet_NaN()) {
-    return {std::move(function), line};
-  }
-  inline static Callable
-  create_native(function_t &&function,
-                const uint_least32_t line =
-                    std::numeric_limits<uint_least32_t>::quiet_NaN()) {
-    Callable callable{std::move(function), line};
-    callable.native_signature = "<native fn>"sv;
-    return callable;
-  }
+  static auto
+  create(function_t &&,
+         uint_least32_t = std::numeric_limits<uint_least32_t>::quiet_NaN())
+      -> Callable;
+  static auto create_native(
+      function_t &&,
+      uint_least32_t = std::numeric_limits<uint_least32_t>::quiet_NaN())
+      -> Callable;
 
 public:
-  constexpr auto call(const interpreter &interpreter, args_t &args) {
+  auto signature() const -> string_type;
+
+public:
+  constexpr auto call(const interpreter &interpreter, args_t &args)
+      -> decltype(auto) {
     return my_function.operator()(interpreter, args);
-  }
-  constexpr auto operator()(const interpreter &interpreter, args_t &args) {
-    return call(interpreter, args);
-  }
-  auto signature() const -> string_type {
-    dbg(trace, "type: {}", typeid(my_function.target<args_t>()).name());
-    return "( "s.append(typeid(my_function.target<args_t>()).name()).append(" )");
   }
   constexpr auto operator==(const Callable &other) const -> Boolean {
     return {this == &other || (this->my_function.target_type() ==
@@ -247,13 +237,6 @@ private:
 
 private:
   auto to_string_impl(const utils::FormatPolicy &) const
-      -> string_type override {
-    // function signature
-    if (native_signature.empty()) {
-      return signature();
-    } else {
-      return {native_signature.cbegin(), native_signature.cend()};
-    }
-  }
+      -> string_type override;
 };
 } // namespace net::ancillarycat::loxograph::evaluation

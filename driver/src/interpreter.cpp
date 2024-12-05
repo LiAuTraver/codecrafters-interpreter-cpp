@@ -25,14 +25,15 @@
 namespace net::ancillarycat::loxograph {
 using utils::match;
 using enum TokenType::type_t;
+interpreter::interpreter() : env(std::make_shared<Environment>()) {}
 utils::Status interpreter::interpret(
     const std::span<std::shared_ptr<statement::Stmt>> stmts) const {
   defer { expr_res.clear(); };
 
   static bool has_init_global_env = false;
   if (!has_init_global_env) {
-    auto maybe_env = Environment::getGlobalScopeEnv();
-    if(!maybe_env.ok())
+    auto maybe_env = Environment::createGlobalEnvironment();
+    if (!maybe_env.ok())
       return maybe_env.as_status();
     has_init_global_env = true;
     this->env = maybe_env.value();
@@ -75,6 +76,25 @@ auto interpreter::is_deep_equal(const eval_result_t &lhs,
                      return evaluation::Error{"unimplemented deep equal"sv};
                    }})
              : evaluation::False;
+}
+auto interpreter::get_function_args(const expression::Call &expr) const
+    -> std::expected<std::vector<eval_result_t>, eval_result_t> {
+
+  auto args = std::vector<eval_result_t>{};
+  args.reserve(expr.args.size());
+
+  // we choose to evaluate argument expressions from left to right, adhering
+  // to "Sequenced before" rules in C++11 and later.
+  // https://en.cppreference.com/w/cpp/language/eval_order
+  for (auto it = expr.args.begin(); it != expr.args.end(); ++it) {
+    if (auto res = evaluate(**it); !res.ok())
+      return std::unexpected{evaluation::Error{
+          utils::format("Error in argument {}",
+                        std::ranges::distance(expr.args.begin(), it)),
+          expr.paren.line}};
+    args.emplace_back(std::move(expr_res));
+  }
+  return {args};
 }
 auto interpreter::visit_impl(const statement::Variable &stmt) const
     -> utils::Status {
@@ -391,27 +411,14 @@ auto interpreter::visit_impl(const expression::Call &expr) const
   if (auto res = evaluate(*expr.callee); !res.ok())
     return {evaluation::Error{"Error in callee"s, expr.paren.line}};
 
-  auto args = std::vector<eval_result_t>{};
-  args.reserve(expr.arguments.size());
+  auto maybe_args = get_function_args(expr);
+  if (!maybe_args.has_value())
+    return {maybe_args.error()};
 
-  // we choose to evaluate argument expressions from left to right, adhering to
-  // "Sequenced before" rules in C++11 and later.
-  // https://en.cppreference.com/w/cpp/language/eval_order
-  for (auto it = expr.arguments.begin(); it != expr.arguments.end(); ++it) {
-    if (auto res = evaluate(**it); !res.ok())
-      return {evaluation::Error{
-          utils::format("Error in argument {}",
-                        std::ranges::distance(expr.arguments.begin(), it)),
-          expr.paren.line}};
-    args.emplace_back(std::move(expr_res));
-  }
-  if (auto ptr = std::remove_const_t<evaluation::Callable *>(
-          utils::get_if<evaluation::Callable>(&expr_res))) {
-            dbg_block(
-              dbg(info, "find function {}: {}", expr.callee->to_string(utils::kTokenOnly), ptr->signature());
-            )
-    return (ptr)->call(*this, args);
-  }
+  if (auto ptr = const_cast<std::remove_const_t<evaluation::Callable *>>(
+          utils::get_if<evaluation::Callable>(&expr_res)))
+    return ptr->call(*this, *maybe_args);
+
   return {evaluation::Error{"Not a function."s, expr.paren.line}};
 }
 auto interpreter::visit_impl(const expression::IllegalExpr &expr) const

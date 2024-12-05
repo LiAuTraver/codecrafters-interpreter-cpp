@@ -71,7 +71,7 @@ auto If::to_string_impl(const utils::FormatPolicy &format_policy) const
 }
 auto Function::to_string_impl(const utils::FormatPolicy &format_policy) const
     -> string_type {
-  string_type result = "fun " + this->name.to_string(format_policy) + "(";
+  string_type result = "function " + this->name.to_string(format_policy) + "(";
   for (const auto &param : this->parameters) {
     result += param.to_string(format_policy) + ", ";
   }

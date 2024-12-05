@@ -160,7 +160,7 @@ public:
 public:
   expr_ptr_t callee{nullptr};
   token_t paren{};
-  std::vector<expr_ptr_t> arguments;
+  std::vector<expr_ptr_t> args;
 
 private:
   auto to_string_impl(const utils::FormatPolicy &) const

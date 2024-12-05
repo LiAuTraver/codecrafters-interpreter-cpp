@@ -226,4 +226,27 @@ auto Error::to_string_view_impl(const utils::FormatPolicy &) const
     -> string_view_type {
   return message;
 }
+Callable::Callable(function_t &&function, const uint_least32_t line)
+    : Evaluatable(line), my_function(std::move(function)) {}
+Callable Callable::create(function_t &&function, const uint_least32_t line) {
+  return {std::move(function), line};
+}
+Callable Callable::create_native(function_t &&function,
+                                 const uint_least32_t line) {
+  Callable callable{std::move(function), line};
+  callable.native_signature = "<native fn>"sv;
+  return callable;
+}
+auto Callable::signature() const -> string_type {
+  dbg(trace, "type: {}", typeid(my_function.target<args_t>()).name());
+  return typeid(my_function.target<args_t>()).name();
+}
+auto Callable::to_string_impl(const utils::FormatPolicy &) const
+    -> string_type {
+  // function signature
+  if (native_signature.empty()) {
+    return signature();
+  }
+  return {native_signature.cbegin(), native_signature.cend()};
+}
 } // namespace net::ancillarycat::loxograph::evaluation

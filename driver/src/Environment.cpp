@@ -14,7 +14,10 @@
 
 namespace net::ancillarycat::loxograph {
 
-auto Environment::getGlobalScopeEnv() -> utils::StatusOr<std::shared_ptr<Environment>> {
+Environment::Environment() : current(std::make_shared<scope_env_t>()) {}
+Environment::Environment(const std::shared_ptr<self_type> &enclosing)
+    : current(std::make_shared<scope_env_t>()), parent(enclosing) {}
+auto Environment::createGlobalEnvironment() -> utils::StatusOr<std::shared_ptr<Environment>> {
   static auto has_init = false;
   if (has_init) {
     return utils::InvalidArgument("init global env twice");

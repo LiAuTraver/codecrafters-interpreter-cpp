@@ -71,7 +71,7 @@ Call::Call(expr_ptr_t &&callee,
            token_t &&paren,
            std::vector<expr_ptr_t> &&arguments)
     : callee(std::move(callee)), paren(std::move(paren)),
-      arguments(std::move(arguments)) {}
+      args(std::move(arguments)) {}
 auto Logical::to_string_impl(const utils::FormatPolicy &format_policy) const
     -> string_type {
   return "(" + left->to_string() + " " + op.to_string() + " " +

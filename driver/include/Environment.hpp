@@ -27,13 +27,13 @@ public:
   using self_type = Environment;
 
 public:
-  Environment() = default;
-  explicit Environment(const std::shared_ptr<self_type> &enclosing)
-      : current(std::make_shared<scope_env_t>()), parent(enclosing) {};
+  Environment();
+  explicit Environment(const std::shared_ptr<self_type> &);
   ~Environment() override = default;
 
 public:
-static auto getGlobalScopeEnv() -> utils::StatusOr<std::shared_ptr<Environment>>;
+  static auto createGlobalEnvironment()
+      -> utils::StatusOr<std::shared_ptr<Environment>>;
 
 public:
   auto find(this auto &&self, const string_type &name)
@@ -47,7 +47,7 @@ public:
   auto get(const string_type &) const -> eval_result_t;
 
 private:
-  scope_env_ptr_t current = std::make_shared<scope_env_t>();
+  scope_env_ptr_t current{};
   std::weak_ptr<self_type> parent{};
 
 private:
