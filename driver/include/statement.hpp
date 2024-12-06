@@ -195,20 +195,4 @@ private:
       -> string_type override;
   auto accept_impl(const StmtVisitor &) const -> stmt_result_t override;
 };
-class IllegalStmt : public Stmt, utils::Viewable {
-public:
-  IllegalStmt(const string_view_type message_sv) : message(message_sv) {}
-  explicit IllegalStmt(string_type &&message) : message(std::move(message)) {}
-  virtual ~IllegalStmt() override = default;
-
-public:
-  string_type message;
-
-private:
-  auto to_string_impl(const utils::FormatPolicy &) const
-      -> string_type override;
-  auto to_string_view_impl(const utils::FormatPolicy &) const
-      -> string_view_type override;
-  auto accept_impl(const StmtVisitor &) const -> stmt_result_t override;
-};
 } // namespace net::ancillarycat::loxo::statement

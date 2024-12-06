@@ -33,7 +33,6 @@ private:
   virtual stmt_result_t visit_impl(const For &) const = 0;
   virtual stmt_result_t visit_impl(const Function &) const = 0;
   virtual stmt_result_t visit_impl(const Return &) const = 0;
-  virtual stmt_result_t visit_impl(const IllegalStmt &) const = 0;
   virtual stmt_result_t execute_impl(const Stmt &) const = 0;
 };
 } // namespace net::ancillarycat::loxo::statement

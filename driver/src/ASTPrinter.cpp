@@ -17,12 +17,6 @@ ASTPrinter::eval_result_t ASTPrinter::visit_impl(const Grouping &expr) const {
   oss << expr << std::endl;
   return {};
 }
-ASTPrinter::eval_result_t
-ASTPrinter::visit_impl(const IllegalExpr &expr) const {
-  dbg(info, "IllegalExpr: {}", expr.to_string());
-  error_stream << expr << std::endl;
-  return {};
-}
 ASTPrinter::eval_result_t ASTPrinter::visit_impl(const Variable &expr) const {
   dbg(info, "Variable: {}", expr.to_string());
   oss << expr << std::endl;

@@ -75,6 +75,9 @@ bool is_integer(Ty &&value) noexcept {
 template <typename... Ts> struct match : Ts... {
   using Ts::operator()...;
 };
+template <typename ReturnType, typename... Ts> struct match2 : Ts... {
+  using Ts::operator()...;
+};
 enum FormatPolicy : uint8_t;
 enum FormatPolicy : uint8_t {
   kDefault = 0,

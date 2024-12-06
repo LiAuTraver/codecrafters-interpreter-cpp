@@ -41,7 +41,6 @@ private:
   virtual eval_result_t visit_impl(const Assignment &) const = 0;
   virtual eval_result_t visit_impl(const Logical &) const = 0;
   virtual eval_result_t visit_impl(const Call &) const = 0;
-  virtual eval_result_t visit_impl(const IllegalExpr &) const = 0;
 
 private:
   virtual stmt_result_t evaluate_impl(const Expr &) const = 0;

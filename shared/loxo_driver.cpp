@@ -101,10 +101,10 @@ utils::Status parse(ExecutionContext &ctx) {
   return res;
 }
 utils::Status evaluate(ExecutionContext &ctx) {
-  dbg(info, "evaluating...");
+  dbg(info, "evaluating...")
   ctx.interpreter.reset(new interpreter);
   auto res = ctx.interpreter->evaluate(*ctx.parser->get_expression());
-  dbg(info, "evaluation completed.");
+  dbg(info, "evaluation completed.")
   return res;
 }
 utils::Status interpret(ExecutionContext &ctx) {

@@ -81,7 +81,6 @@ class Value;
 class Boolean;
 class Nil;
 class Callable;
-class Error;
 
 class ScopeAssoc;
 } // namespace evaluation

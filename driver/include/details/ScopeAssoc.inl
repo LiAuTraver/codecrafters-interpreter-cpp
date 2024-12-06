@@ -22,12 +22,12 @@ class ScopeAssoc : public utils::Printable {
   friend class ::net::ancillarycat::loxo::Environment;
 
 public:
-  using eval_result_t = utils::IVisitor::eval_result_t;
+  using variant_type = utils::IVisitor::variant_type;
   using string_view_type = utils::IVisitor::string_view_type;
   using association_t =
-      std::pair<string_type, std::pair<eval_result_t, uint_least32_t>>;
+      std::pair<string_type, std::pair<variant_type, uint_least32_t>>;
   using associations_t =
-      std::unordered_map<string_type, std::pair<eval_result_t, uint_least32_t>>;
+      std::unordered_map<string_type, std::pair<variant_type, uint_least32_t>>;
 
 public:
   constexpr ScopeAssoc() = default;
@@ -35,7 +35,7 @@ public:
 
 private:
   auto add(const string_type &,
-           const eval_result_t &,
+           const variant_type &,
            uint_least32_t = std::numeric_limits<uint_least32_t>::quiet_NaN())
       -> utils::Status;
   auto find(this auto &&self, const string_type &name)

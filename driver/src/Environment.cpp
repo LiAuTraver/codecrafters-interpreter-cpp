@@ -6,10 +6,10 @@
 
 #include <net/ancillarycat/utils/Status.hpp>
 
+#include "details/IVisitor.hpp"
 #include "details/loxo_fwd.hpp"
 #include "Environment.hpp"
 #include "Evaluatable.hpp"
-
 namespace net::ancillarycat::loxo {
 
 Environment::Environment() : current(std::make_shared<scope_env_t>()) {}
@@ -33,15 +33,22 @@ auto Environment::createGlobalEnvironment()
                      .count();
                }))
       .ignore_error();
+  env->add("about",
+           evaluation::Callable::create_native(
+               0,
+               [](const interpreter &, evaluation::Callable::args_t &) {
+                 return "loxo";
+               }))
+      .ignore_error();
   return std::make_shared<Environment>(*env);
 }
 auto Environment::add(const string_type &name,
-                      const eval_result_t &value,
+                      const utils::IVisitor::variant_type &value,
                       const uint_least32_t line) -> utils::Status {
   return current->add(name, value, line);
 }
 auto Environment::reassign(const string_type &name,
-                           const eval_result_t &value,
+                           const utils::IVisitor::variant_type &value,
                            const uint_least32_t line) const -> utils::Status {
   if (auto it = find(name)) {
     (*it)->second.first = value;
@@ -50,7 +57,7 @@ auto Environment::reassign(const string_type &name,
   }
   return utils::InvalidArgument("variable not defined");
 }
-auto Environment::get(const string_type &name) const -> eval_result_t {
+auto Environment::get(const string_type &name) const -> utils::IVisitor::variant_type {
   if (auto it = find(name))
     return {(*it)->second.first};
 

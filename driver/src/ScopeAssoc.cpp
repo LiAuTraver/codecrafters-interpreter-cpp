@@ -13,7 +13,7 @@
 
 namespace net::ancillarycat::loxo::evaluation {
 utils::Status ScopeAssoc::add(const string_type &name,
-                              const eval_result_t &value,
+                              const variant_type &value,
                               const uint_least32_t line) {
   if (associations.contains(name)) {
     (void)0; /// suppress the warning when not in debugging

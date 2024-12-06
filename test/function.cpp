@@ -28,3 +28,10 @@ TEST(function, custom1) {
   EXPECT_EQ(str, "2601\n");
   EXPECT_EQ(callback, 0);
 }
+
+TEST(function, return1) {
+  const auto path = R"(Z:\loxo\examples\fn\return1.lox)";
+  auto [callback, str] = get_result(path);
+  EXPECT_EQ(str, "can see me\n3\ndivide by 0 is not allowed. will show 'nan'.\nnan\n");
+  EXPECT_EQ(callback, 0);
+}

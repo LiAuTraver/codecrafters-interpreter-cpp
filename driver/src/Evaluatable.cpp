@@ -6,6 +6,8 @@
 
 #include "Evaluatable.hpp"
 #include "interpreter.hpp"
+#include "net/ancillarycat/utils/Status.hpp"
+#include "net/ancillarycat/utils/config.hpp"
 
 namespace net::ancillarycat::loxo::evaluation {
 using utils::match;
@@ -197,37 +199,6 @@ auto Number::to_string_impl(const utils::FormatPolicy &format_policy) const
     -> string_type {
   return utils::format("{}", value);
 }
-Error::Error(const string_view_type message_sv, const uint_least32_t line)
-    : Evaluatable(line),
-      message(utils::format("{}\n[line {}]", message_sv, line)) {}
-Error::Error(string_type &&message, uint_least32_t &&line) noexcept
-    : Evaluatable(line), message(std::move(message)) {}
-Error::Error(const Error &that)
-    : Evaluatable(that.get_line()), message(that.message) {}
-Error::Error(Error &&that) noexcept
-    : Evaluatable(that.get_line()), message(std::move(that.message)) {}
-Error &Error::operator=(const Error &that) {
-  if (this == &that)
-    return *this;
-  message = that.message;
-  Evaluatable::operator=(that);
-  return *this;
-}
-Error &Error::operator=(Error &&that) noexcept {
-  if (this == &that)
-    return *this;
-  message = std::move(that.message);
-  Evaluatable::operator=(that);
-  return *this;
-}
-auto Error::to_string_impl(const utils::FormatPolicy &format_policy) const
-    -> string_type {
-  return message;
-}
-auto Error::to_string_view_impl(const utils::FormatPolicy &) const
-    -> string_view_type {
-  return message;
-}
 Callable::Callable(unsigned argc, native_function_t &&func) {
   my_arity = argc;
   my_function.emplace(std::move(func));
@@ -236,54 +207,69 @@ Callable::Callable(unsigned argc, custom_function_t &&block) {
   my_arity = argc;
   my_function.emplace(std::move(block));
 }
-auto Callable::create_custom(unsigned argc, custom_function_t &&func)
-    -> Callable {
+auto Callable::create_custom(unsigned argc,
+                             custom_function_t &&func) -> Callable {
   return {argc, std::move(func)};
 }
-auto Callable::create_native(unsigned argc, native_function_t &&func)
-    -> Callable {
+auto Callable::create_native(unsigned argc,
+                             native_function_t &&func) -> Callable {
   return {argc, std::move(func)};
 }
-auto Callable::call(const interpreter &interpreter, args_t &args)
-    -> eval_result_t {
+auto Callable::call(const interpreter &interpreter,
+                    args_t &&args) const -> eval_result_t {
   contract_assert(this->arity() == args.size(),
                   1,
                   "arity mismatch; should check it before calling");
+  return my_function.visit(
+      match{[&](const native_function_t &native_function) -> eval_result_t {
+              return {native_function.operator()(interpreter, args)};
+            },
+            [&](const custom_function_t &custom_function) -> eval_result_t {
+              interpreter.save_and_renew_env();
+              auto scoped_env = interpreter.get_current_env().lock();
+              if (!scoped_env) {
+                contract_assert(false, 1, "should not happen");
+                return {utils::NotFoundError("no function to call")};
+              }
 
-  return my_function.visit(match{
-      [&](const native_function_t &native_function) -> eval_result_t {
-        return native_function.operator()(interpreter, args);
-      },
-      [&](const custom_function_t &custom_function) -> eval_result_t {
-        if (auto scoped_env =
-                interpreter.save_and_renew_env().get_current_env().lock()) {
-          for (size_t i = 0; i < custom_function.parameters.size(); ++i) {
-            if (auto res = scoped_env->add(
-                    custom_function.parameters[i].to_string(utils::kTokenOnly),
-                    args[i],
-                    custom_function.parameters[i].line);
-                !res.ok())
-              return {Error{res.message()}};
-          }
+              dbg(info, "entering a function...")
 
-          for (const auto &stmt : custom_function.body) {
-            if (auto res = interpreter.execute(*stmt); !res.ok())
-              return {Error{res.message()}};
-          }
+              for (size_t i = 0; i < custom_function.parameters.size(); ++i) {
+                if (auto res =
+                        scoped_env->add(custom_function.parameters[i], args[i]);
+                    !res.ok()) {
+                  interpreter.restore_env();
+                  return res;
+                }
+              }
 
-          return interpreter.restore_env().get_result().visit(
-              match{[](const utils::Monostate &) -> eval_result_t {
-                      return {NilValue};
-                    },
-                    [](const auto &res) -> eval_result_t { return {res}; }});
-        }
-        contract_assert(false, 1, "should not happen");
-        return {Error{"no function to call"}};
-      },
-      [](const auto &) -> eval_result_t {
-        contract_assert(false, 1, "should not happen");
-        return {Error{"no function to call"}};
-      }});
+              eval_result_t my_result{NilValue};
+
+              for (const auto &stmt : custom_function.body) {
+                auto res = interpreter.execute(*stmt);
+                if (!res.ok()) {
+                  if (res.code() == utils::Status::kReturning) {
+                    my_result = interpreter.get_result();
+                    dbg(info, "returning: {}", my_result->underlying_string());
+                    dbg(info,
+                        "current interpreter's last expr: {}",
+                        interpreter.get_result()->underlying_string());
+                    interpreter.restore_env();
+                    return my_result;
+                  }
+                  interpreter.restore_env();
+                  // else, error, return as is
+                  return res;
+                }
+              }
+              dbg(info, "void function, returning nil")
+              return {NilValue};
+            },
+            [](const auto &) -> eval_result_t {
+              contract_assert(false, 1, "should not happen");
+              return {utils::NotFoundError("no function to call")};
+            }});
+  TODO(...)
 }
 auto Callable::to_string_impl(const utils::FormatPolicy &) const
     -> string_type {

@@ -47,8 +47,8 @@ auto parser::parse(const ParsePolicy &parse_policy) -> utils::Status try {
     contract_assert(false, 0, "unknown parse policy.");
   }
   return utils::OkStatus();
-} catch (const expr_ptr_t &expr) {
-  return utils::Status{utils::Status::kParseError, expr->to_string()};
+} catch (const utils::Status &status) {
+  return status;
 }
 
 auto parser::get_statements() const -> stmt_ptrs_t & {
@@ -422,7 +422,7 @@ auto parser::next_statement() -> stmt_ptr_t {
   }
   return expr_stmt();
 }
-auto parser::synchronize(const parse_error &parse_error) -> expr_ptr_t {
+auto parser::synchronize(const parse_error &parse_error) -> utils::Status {
   /// advance until we have a semicolon
   // cueerntly cursor is at the error token: peek() returns the error token,
   // get() returns the error token and advances the cursor
@@ -430,14 +430,18 @@ auto parser::synchronize(const parse_error &parse_error) -> expr_ptr_t {
   dbg(warn,
       "error at '{}'",
       error_token.to_string(utils::FormatPolicy::kTokenOnly));
-  auto error_expr = std::make_shared<expression::IllegalExpr>(
-      std::move(error_token), parse_error);
+
   while (!is_at_end() && !inspect(kSemicolon)) {
     dbg_block(auto discarded_token = peek();
               dbg(warn, "discarding {}", discarded_token););
     this->get();
   }
-  return error_expr;
+  return utils::Status{
+      utils::Status::kParseError,
+      utils::format("[line {}] Error at '{}': {}",
+                    error_token.line,
+                    error_token.to_string(utils::FormatPolicy::kTokenOnly),
+                    parse_error.message())};
 }
 LOXO_API void delete_parser_fwd(parser *ptr) { delete ptr; }
 

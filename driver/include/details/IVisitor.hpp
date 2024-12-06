@@ -10,10 +10,9 @@ public:
                                loxo::evaluation::Nil,
                                loxo::evaluation::Number,
                                loxo::evaluation::String,
-                               loxo::evaluation::Callable,
-                               loxo::evaluation::Error>;
-  using eval_result_t = variant_type;
-  using stmt_result_t = StatusOr<eval_result_t>;
+                               loxo::evaluation::Callable>;
+  using eval_result_t = StatusOr<variant_type>;
+  using stmt_result_t = StatusOr<variant_type>;
   using string_view_type = utils::Viewable::string_view_type;
 };
 } // namespace net::ancillarycat::utils

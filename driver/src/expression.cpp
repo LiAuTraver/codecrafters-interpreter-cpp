@@ -82,16 +82,4 @@ auto Call::to_string_impl(const utils::FormatPolicy &format_policy) const
     -> string_type {
   TODO(...)
 }
-IllegalExpr::IllegalExpr(token_t token, parse_error error)
-    : token(std::move(token)), error(std::move(error)) {}
-Expr::expr_result_t IllegalExpr::accept_impl(const ExprVisitor &visitor) const {
-  return visitor.visit(*this);
-}
-std::string
-IllegalExpr::to_string_impl(const utils::FormatPolicy &format_policy) const {
-  return utils::format("[line {}] Error at '{}': {}",
-                       token.line,
-                       token.to_string(utils::FormatPolicy::kTokenOnly),
-                       error.message());
-}
 } // namespace net::ancillarycat::loxo::expression

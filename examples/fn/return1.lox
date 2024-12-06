@@ -1,0 +1,16 @@
+fun add(a,b){
+  print "can see me";
+  return a + b;
+  print "cannot see me";
+  return a - b;
+}
+
+print add(1,2);
+
+
+fun divide(a,b){
+  return a / b;
+}
+
+print "divide by 0 is not allowed. will show 'nan'.";
+print divide(1,0);

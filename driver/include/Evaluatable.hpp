@@ -168,45 +168,20 @@ private:
   auto to_string_impl(const utils::FormatPolicy &) const
       -> string_type override;
 };
-
-class Error : public Evaluatable, public utils::Viewable {
-public:
-  using string_view_type = utils::Viewable::string_view_type;
-
-public:
-  Error() = default;
-  Error(string_view_type,
-        uint_least32_t = std::numeric_limits<uint_least32_t>::max());
-  explicit Error(string_type &&, uint_least32_t &&) noexcept;
-  Error(const Error &);
-  Error(Error &&) noexcept;
-  Error &operator=(const Error &);
-  Error &operator=(Error &&) noexcept;
-  virtual ~Error() = default;
-
-private:
-  auto to_string_impl(const utils::FormatPolicy &) const
-      -> string_type override;
-  auto to_string_view_impl(const utils::FormatPolicy &) const
-      -> string_view_type override;
-
-private:
-  string_type message;
-};
 class Callable : public Evaluatable {
   struct Function {
     using token_t = Token;
     using stmt_ptr_t = std::shared_ptr<statement::Stmt>;
     string_type name;
-    std::vector<token_t> parameters;
+    std::vector<string_type> parameters;
     std::vector<stmt_ptr_t> body;
   };
 
 public:
-  using args_t = std::vector<eval_result_t>;
+  using args_t = std::vector<utils::IVisitor::variant_type>;
   using string_view_type = utils::Viewable::string_view_type;
-  using native_function_t =
-      std::function<eval_result_t(const interpreter &, args_t &)>;
+  using native_function_t = std::function<utils::IVisitor::variant_type(
+      const interpreter &, args_t &)>;
   using custom_function_t = Function;
   using function_t =
       utils::Variant<utils::Monostate, native_function_t, custom_function_t>;
@@ -227,7 +202,7 @@ public:
   constexpr inline auto arity() const -> unsigned { return my_arity; }
 
 public:
-  auto call(const interpreter &, args_t &) -> eval_result_t;
+  auto call(const interpreter &, args_t &&) const -> eval_result_t;
 
 private:
   // dont support static variables in this function

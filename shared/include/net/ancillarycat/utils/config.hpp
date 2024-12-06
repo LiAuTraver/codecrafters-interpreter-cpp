@@ -286,6 +286,7 @@ struct ::fmt::formatter<::std::stacktrace> : ::fmt::formatter<::std::string> {
 #  define LOXO_DEBUG_ONLY(...)
 #  define LOXO_NOEXCEPT_IF(...) noexcept(__VA_ARGS__)
 #  define LOXO_NOEXCEPT noexcept
+#  define dbg_break
 #endif
 /// @def LOXO_INITIALIZATION(_log_level_) initializes the spdlog framework
 /// @note only call it once in the whole exec; never call it twice.
@@ -328,6 +329,8 @@ struct ::fmt::formatter<::std::stacktrace> : ::fmt::formatter<::std::string> {
 #define NODISCARD_LOXO(...) LOXO_NODISCARD_MSG(__VA_ARGS__)
 #define dbg_block(...) LOXO_DEBUG_BLOCK(__VA_ARGS__)
 #define dbg_only(...) LOXO_DEBUG_ONLY(__VA_ARGS__)
+#define dbg_break LOXO_DEBUG_BREAK
+
 // if exception was disabled, do nothing.
 #if defined(__cpp_exceptions) && __cpp_exceptions
 #  include <stdexcept>

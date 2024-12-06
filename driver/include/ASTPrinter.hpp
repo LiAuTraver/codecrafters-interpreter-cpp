@@ -5,7 +5,7 @@
 #include "ExprVisitor.hpp"
 
 namespace net::ancillarycat::loxo::expression {
-  /// @implements ExprVisitor
+/// @implements ExprVisitor
 class LOXO_API ASTPrinter : public ExprVisitor, public utils::Viewable {
 public:
   using ostream_t = std::ostream;
@@ -24,7 +24,6 @@ private:
   virtual eval_result_t visit_impl(const Assignment &) const override;
   virtual eval_result_t visit_impl(const Logical &) const override;
   virtual eval_result_t visit_impl(const Call &) const override;
-  virtual eval_result_t visit_impl(const IllegalExpr &) const override;
   virtual stmt_result_t evaluate_impl(const Expr &) const override;
   virtual string_type
   to_string_impl(const utils::FormatPolicy &) const override;
@@ -37,4 +36,4 @@ private:
   mutable ostringstream_t oss;
   mutable ostringstream_t error_stream;
 };
-}
+} // namespace net::ancillarycat::loxo::expression

@@ -85,7 +85,7 @@ private:
   /// <br>
   /// FIXME: 2. add a field to the parser to track the error, not returns a
   ///         shared_ptr
-  auto synchronize(const parse_error &) -> expr_ptr_t;
+  auto synchronize(const parse_error &) -> utils::Status;
 
 private:
   /// @remark used in @link while_stmt @endlink and @link if_stmt @endlink

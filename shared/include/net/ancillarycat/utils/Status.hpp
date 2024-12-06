@@ -26,7 +26,11 @@ public:
     kCommandNotFound = 7,
     kEmptyInput = 8,
     kParseError = 9,
-    kNotImplementedError = 10,
+    kNotImplementedError = 11,
+
+    // values specific for interpreter, not an `error` but a `status`
+    kReturning = 12,
+
     kUnknownError = std::numeric_limits<uint8_t>::max(),
   };
 
@@ -42,7 +46,8 @@ public:
          const std::source_location &location = std::source_location::current())
       : my_code(code), my_message(message), my_location(location) {}
 
-  NODISCARD_LOXO(Status) Status(Status &&that) noexcept
+  NODISCARD_LOXO(Status)
+  Status(Status &&that) noexcept
       : my_code(that.my_code), my_message(std::move(that.my_message)),
         my_location(that.my_location) {
     that.my_code = kMovedFrom;
@@ -50,7 +55,8 @@ public:
     that.my_location = std::source_location::current();
   }
 
-  NODISCARD_LOXO(Status) Status(const Status &that)
+  NODISCARD_LOXO(Status)
+  Status(const Status &that)
       : my_code(that.my_code), my_message(that.my_message),
         my_location(that.my_location) {}
 
@@ -63,12 +69,21 @@ public:
     that.my_location = std::source_location::current();
     return *this;
   }
+  inline constexpr explicit operator bool(this auto &&self) noexcept {
+    return self.ok();
+  }
 
-  NODISCARD_LOXO(Status) bool ok() const noexcept { return my_code == kOkStatus; }
+  NODISCARD_LOXO(Status) bool ok() const noexcept {
+    return my_code == kOkStatus;
+  }
   Code code() const { return my_code; }
   NODISCARD_LOXO(string_view) string_view message() const { return my_message; }
-  NODISCARD_LOXO(source_location) std::source_location location() const { return my_location; }
-  NODISCARD_LOXO(stacktrace) string stacktrace() const { return LOXO_STACKTRACE; }
+  NODISCARD_LOXO(source_location) std::source_location location() const {
+    return my_location;
+  }
+  NODISCARD_LOXO(stacktrace) string stacktrace() const {
+    return LOXO_STACKTRACE;
+  }
   void ignore_error() const { contract_assert(ok()); }
   NODISCARD_LOXO(string) inline string from_source_location() const {
     return utils::format("file {0}\n"
@@ -126,22 +141,30 @@ public:
   }
 
   value_type value(this auto &&self) {
-    contract_assert(self.ok());
+    contract_assert(self.ok() or self.code() == Status::kReturning);
     return self.my_value;
   }
 
   value_type value_or(this auto &&self, const value_type &default_value) {
     return self.ok() ? self.my_value : default_value;
   }
-  constexpr explicit operator bool(this auto &&self) noexcept {
-    return self.ok();
+  inline constexpr value_type operator*(this auto &&self) noexcept {
+    return self.my_value;
   }
-  value_type operator*(this auto &&self) noexcept { return self.my_value; }
-  auto operator->(this auto &&self) noexcept -> decltype(auto) {
+  inline constexpr auto operator->(this auto &&self) noexcept
+      -> decltype(auto) {
     return std::addressof(self.my_value);
   }
   base_type as_status(this auto &&self) noexcept {
     return Status{self.my_code, self.my_message, self.my_location};
+  }
+
+  auto reset(Ty &&value) noexcept {
+    my_value = std::move(value);
+    my_code = kOkStatus;
+    my_message = "OkStatus";
+    my_location = std::source_location::current();
+    return *this;
   }
 
 private:
@@ -149,62 +172,78 @@ private:
 };
 
 NODISCARD_LOXO(Status)
-inline Status OkStatus(const std::source_location &location = std::source_location::current()) {
+inline Status OkStatus(
+    const std::source_location &location = std::source_location::current()) {
   return {Status::kOkStatus, "OkStatus", location};
 }
 
 NODISCARD_LOXO(Status)
-inline Status AlreadyExistsError(const std::string_view message,
-                                 const std::source_location &location = std::source_location::current()) {
+inline Status AlreadyExistsError(
+    const std::string_view message,
+    const std::source_location &location = std::source_location::current()) {
   return {Status::kAlreadyExistsError, message, location};
 }
 
 NODISCARD_LOXO(Status)
-inline Status FileNotFoundError(const std::string_view message,
-                                const std::source_location &location = std::source_location::current()) {
+inline Status FileNotFoundError(
+    const std::string_view message,
+    const std::source_location &location = std::source_location::current()) {
   return {Status::kNotFoundError, message, location};
 }
 
 NODISCARD_LOXO(Status)
-inline Status UnknownError(const std::string_view message,
-                           const std::source_location &location = std::source_location::current()) {
+inline Status NotFoundError(
+    const std::string_view message,
+    const std::source_location &location = std::source_location::current()) {
+  return {Status::kNotFoundError, message, location};
+}
+
+NODISCARD_LOXO(Status)
+inline Status UnknownError(
+    const std::string_view message,
+    const std::source_location &location = std::source_location::current()) {
   return {Status::kUnknownError, message, location};
 }
 
 NODISCARD_LOXO(Status)
-inline Status PermissionDeniedError(const std::string_view message,
-                                    const std::source_location &location = std::source_location::current()) {
+inline Status PermissionDeniedError(
+    const std::string_view message,
+    const std::source_location &location = std::source_location::current()) {
   return {Status::kPermissionDeniedError, message, location};
 }
 
 NODISCARD_LOXO(Status)
-inline Status InvalidArgument(const string_view message,
-                              const std::source_location &location = std::source_location::current()) {
+inline Status InvalidArgument(
+    const string_view message,
+    const std::source_location &location = std::source_location::current()) {
   return {Status::kInvalidArgument, message, location};
 }
 
 NODISCARD_LOXO(Status)
-inline Status CommandNotFound(const string_view message,
-                              const std::source_location &location = std::source_location::current()) {
+inline Status CommandNotFound(
+    const string_view message,
+    const std::source_location &location = std::source_location::current()) {
   return {Status::kCommandNotFound, message, location};
 }
 
 NODISCARD_LOXO(Status)
-inline Status EmptyInput(const string_view message,
-                         const std::source_location &location = std::source_location::current()) {
+inline Status EmptyInput(
+    const string_view message,
+    const std::source_location &location = std::source_location::current()) {
   return {Status::kEmptyInput, message, location};
 }
 
 NODISCARD_LOXO(Status)
-inline Status ParseError(const string_view message,
-                         const std::source_location &location = std::source_location::current()) {
+inline Status ParseError(
+    const string_view message,
+    const std::source_location &location = std::source_location::current()) {
   return {Status::kParseError, message, location};
 }
 
 NODISCARD_LOXO(Status)
-inline Status NotImplementedError(const string_view message,
-                                  const std::source_location &location = std::source_location::current()) {
+inline Status NotImplementedError(
+    const string_view message,
+    const std::source_location &location = std::source_location::current()) {
   return {Status::kNotImplementedError, message, location};
 }
-
 } // namespace net::ancillarycat::utils
