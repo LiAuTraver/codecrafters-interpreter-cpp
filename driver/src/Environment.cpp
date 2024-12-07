@@ -34,7 +34,7 @@ auto Environment::operator=(Environment &&that) noexcept -> Environment & {
   return *this;
 }
 
-auto Environment::createGlobalEnvironment()
+auto Environment::getGlobalEnvironment()
   -> utils::StatusOr<std::shared_ptr<Environment>> {
   static auto has_init = false;
   if (has_init)

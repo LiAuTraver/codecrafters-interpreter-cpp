@@ -31,11 +31,12 @@ auto interpreter::interpret(
 
   static bool has_init_global_env = false;
   if (!has_init_global_env) {
-    auto maybe_env = Environment::createGlobalEnvironment();
+    auto maybe_env = Environment::getGlobalEnvironment();
     if (!maybe_env)
       return maybe_env.as_status();
     has_init_global_env = true;
     this->env = maybe_env.value();
+    this->global_env = env;
   }
 
   for (const auto &stmt : stmts)
@@ -46,17 +47,12 @@ auto interpreter::interpret(
 
   return utils::OkStatus();
 }
-auto interpreter::save_and_renew_env() const -> const interpreter & {
-  prev_env = env;
-  env = std::make_shared<env_t>(prev_env);
+
+auto interpreter::set_env(env_ptr_t new_env) const -> const interpreter & {
+  env = new_env;
   return *this;
 }
-auto interpreter::restore_env() const -> const interpreter & {
-  env = prev_env;
-  // TODO
-  prev_env = prev_env->parent;
-  return *this;
-}
+
 evaluation::Boolean
 interpreter::is_true_value(const eval_result_t &value) const {
   return value->visit(match{
@@ -217,7 +213,8 @@ auto interpreter::visit_impl(const statement::Function &stmt) const
                return param.to_string(utils::kTokenOnly);
              })
            | std::ranges::to<std::vector<string_type>>(),
-           stmt.body.statements}),
+           stmt.body.statements},
+           this->env == this->global_env? evaluation::Callable::kOrdinary : evaluation::Callable::kClosure),
       stmt.name.line);
   // clang-format on
 }
@@ -258,9 +255,9 @@ auto interpreter::evaluate_impl(const expression::Expr &expr) const
 }
 auto interpreter::visit_impl(const statement::Return &expr) const
     -> stmt_result_t {
-  if (!this->prev_env) {
-    return {utils::InvalidArgument("return statement outside of function.")};
-  }
+  // if (!this->prev_env) {
+  //   return {utils::InvalidArgument("return statement outside of function.")};
+  // }
   auto res = evaluate(*expr.value);
   dbg(info, "return value: {}", res->underlying_string())
   if (!res) {

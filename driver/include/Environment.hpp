@@ -41,7 +41,7 @@ public:
   virtual ~Environment() override = default;
 
 public:
-  static auto createGlobalEnvironment()
+  static auto getGlobalEnvironment()
     -> utils::StatusOr<std::shared_ptr<self_type>>;
   static auto createScopeEnvironment(const std::shared_ptr<self_type> &)
     -> std::shared_ptr<self_type>;

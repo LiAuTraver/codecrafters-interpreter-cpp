@@ -178,6 +178,12 @@ class Callable : public Evaluatable {
   };
 
 public:
+  enum type_t : uint8_t {
+    kOrdinary = 0,
+    kClosure = 1,
+  };
+
+public:
   using args_t = std::vector<utils::IVisitor::variant_type>;
   using string_view_type = utils::Viewable::string_view_type;
   using native_function_t = std::function<utils::IVisitor::variant_type(
@@ -192,10 +198,10 @@ public:
 
 private:
   Callable(unsigned, native_function_t &&);
-  Callable(unsigned, custom_function_t &&);
+  Callable(unsigned, custom_function_t &&, type_t);
 
 public:
-  static auto create_custom(unsigned, custom_function_t &&) -> Callable;
+  static auto create_custom(unsigned, custom_function_t &&, type_t) -> Callable;
   static auto create_native(unsigned, native_function_t &&) -> Callable;
 
 public:
@@ -208,6 +214,7 @@ private:
   // dont support static variables in this function
   unsigned my_arity = std::numeric_limits<unsigned>::quiet_NaN();
   function_t my_function{utils::Monostate{}};
+  type_t my_type = kOrdinary;
 
 private:
   static constexpr auto native_signature = "<native fn>"sv;

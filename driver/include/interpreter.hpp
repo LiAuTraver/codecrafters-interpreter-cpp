@@ -30,9 +30,11 @@ public:
 
 public:
   stmt_result_t interpret(std::span<std::shared_ptr<statement::Stmt>>) const;
-  auto save_and_renew_env() const -> const interpreter &;
-  auto restore_env() const -> const interpreter &;
-  auto get_current_env() const -> std::weak_ptr<env_t> { return env; }
+  // auto save_env() const -> const interpreter &;
+  auto set_env(env_ptr_t) const -> const interpreter &;
+  // auto restore_env() const -> const interpreter &;
+  auto get_current_env() const { return env; }
+  auto get_global_env() const-> std::weak_ptr<Environment> { return global_env; }
 
 private:
   virtual auto visit_impl(const expression::Literal &) const
@@ -94,7 +96,8 @@ private:
   mutable eval_result_t last_expr_res{utils::Monostate{}};
   mutable std::vector<eval_result_t> stmts_res{};
   mutable env_ptr_t env{};
-  mutable env_ptr_t prev_env{};
+  // mutable env_ptr_t prev_env{};
+  mutable env_ptr_t global_env{};
 
 private:
   auto expr_to_string(const utils::FormatPolicy &) const -> string_type;
