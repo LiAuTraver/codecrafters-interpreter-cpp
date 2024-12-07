@@ -16,13 +16,14 @@
 #  define _In_opt_
 #endif
 
-#include "config.hpp"
+#include <net/ancillarycat/utils/config.hpp>
+#include <net/ancillarycat/utils/Status.hpp>
+
 #include "execution_context.hpp"
-#include "ExprVisitor.hpp"
-#include "interpreter.hpp"
 #include "lexer.hpp"
+#include "ASTPrinter.hpp"
 #include "parser.hpp"
-#include "status.hpp"
+#include "interpreter.hpp"
 
 namespace net::ancillarycat::loxo {
 utils::Status show_msg() {
@@ -86,7 +87,8 @@ utils::Status parse(ExecutionContext &ctx) {
   ctx.parser.reset(new parser);
   ctx.parser->set_views(ctx.lexer->get_tokens());
   utils::Status res;
-  if (ctx.commands.front() == ExecutionContext::parse) { // NOLINT(bugprone-branch-clone)
+  if (ctx.commands.front() ==
+      ExecutionContext::parse) { // NOLINT(bugprone-branch-clone)
     res = ctx.parser->parse(parser::kExpression);
   } else if (ctx.commands.front() & ExecutionContext::needs_evaluate) {
     res = ctx.parser->parse(parser::kExpression);
@@ -99,10 +101,10 @@ utils::Status parse(ExecutionContext &ctx) {
   return res;
 }
 utils::Status evaluate(ExecutionContext &ctx) {
-  dbg(info, "evaluating...");
+  dbg(info, "evaluating...")
   ctx.interpreter.reset(new interpreter);
   auto res = ctx.interpreter->evaluate(*ctx.parser->get_expression());
-  dbg(info, "evaluation completed.");
+  dbg(info, "evaluation completed.")
   return res;
 }
 utils::Status interpret(ExecutionContext &ctx) {
@@ -199,7 +201,7 @@ int loxo_main(_In_ const int argc,
     interpret_result = interpret(ctx);
   }
   if (ctx.commands.front() == ExecutionContext::interpret) {
-      writeInterpResultToContextStream(ctx);
+    writeInterpResultToContextStream(ctx);
     if (interpret_result.ok()) {
       std::cout << ctx.output_stream.view() << std::endl;
       return 0;

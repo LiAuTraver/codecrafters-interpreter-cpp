@@ -10,7 +10,8 @@
 #include <unordered_set>
 #include <vector>
 
-#include "config.hpp"
+#include <net/ancillarycat/utils/config.hpp>
+#include "details/loxo_fwd.hpp"
 
 namespace net::ancillarycat::loxo {
 class LOXO_API lexer;
@@ -26,7 +27,7 @@ struct ExecutionContext;
 
 NODISCARD_LOXO(loxo_main)
 extern int loxo_main(_In_ int, _In_ char **, _Inout_ ExecutionContext &);
-/// mimic the from llvm clang-driver's ToolContext
+/// mimic from llvm clang-driver's ToolContext
 struct ExecutionContext {
   inline explicit ExecutionContext()
       : lexer(nullptr, &delete_lexer_fwd), parser(nullptr, &delete_parser_fwd),

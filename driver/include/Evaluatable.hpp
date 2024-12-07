@@ -1,4 +1,5 @@
-#pragma once
+#ifndef AC_LOXO_EVALUATABLE_HPP
+#define AC_LOXO_EVALUATABLE_HPP
 
 #include <algorithm>
 #include <cmath>
@@ -11,12 +12,11 @@
 #include <vector>
 #include <functional>
 
-#include "Monostate.hpp"
-#include "Variant.hpp"
-#include "config.hpp"
-#include "statement.hpp"
-#include "utils.hpp"
-#include "loxo_fwd.hpp"
+#include <net/ancillarycat/utils/Variant.hpp>
+
+#include "details/loxo_fwd.hpp"
+#include "details/IVisitor.hpp"
+#include "Token.hpp"
 
 namespace net::ancillarycat::loxo::evaluation {
 
@@ -25,7 +25,7 @@ namespace net::ancillarycat::loxo::evaluation {
 /// @implements utils::Printable
 class Evaluatable : public utils::Printable {
 public:
-  using eval_result_t = utils::VisitorBase::eval_result_t;
+  using eval_result_t = utils::IVisitor::eval_result_t;
 
 public:
   constexpr Evaluatable() = default;
@@ -168,40 +168,29 @@ private:
   auto to_string_impl(const utils::FormatPolicy &) const
       -> string_type override;
 };
-
-class Error : public Evaluatable, public utils::Viewable {
-public:
-  using string_view_type = utils::Viewable::string_view_type;
-
-public:
-  Error() = default;
-  Error(string_view_type,
-        uint_least32_t = std::numeric_limits<uint_least32_t>::max());
-  explicit Error(string_type &&, uint_least32_t &&) noexcept;
-  Error(const Error &);
-  Error(Error &&) noexcept;
-  Error &operator=(const Error &);
-  Error &operator=(Error &&) noexcept;
-  virtual ~Error() = default;
-
-private:
-  auto to_string_impl(const utils::FormatPolicy &) const
-      -> string_type override;
-  auto to_string_view_impl(const utils::FormatPolicy &) const
-      -> string_view_type override;
-
-private:
-  string_type message;
-};
 class Callable : public Evaluatable {
+  struct Function {
+    using token_t = Token;
+    using stmt_ptr_t = std::shared_ptr<statement::Stmt>;
+    string_type name;
+    std::vector<string_type> parameters;
+    std::vector<stmt_ptr_t> body;
+  };
+
 public:
-  using args_t = std::vector<eval_result_t>;
+  enum type_t : uint8_t {
+    kOrdinary = 0,
+    kClosure = 1,
+  };
+
+public:
+  using args_t = std::vector<utils::IVisitor::variant_type>;
   using string_view_type = utils::Viewable::string_view_type;
-  using native_function_t =
-      std::function<eval_result_t(const interpreter &, args_t &)>;
-  using custom_function_t = statement::Function;
-  using function_t = utils::
-      Variant<utils::Monostate, native_function_t, custom_function_t>;
+  using native_function_t = std::function<utils::IVisitor::variant_type(
+      const interpreter &, args_t &)>;
+  using custom_function_t = Function;
+  using function_t =
+      utils::Variant<utils::Monostate, native_function_t, custom_function_t>;
 
 public:
   Callable() = default;
@@ -209,24 +198,23 @@ public:
 
 private:
   Callable(unsigned, native_function_t &&);
-  Callable(unsigned, custom_function_t &&);
+  Callable(unsigned, custom_function_t &&, type_t);
 
 public:
-  static auto create_custom(unsigned,
-                            custom_function_t &&) -> Callable;
-  static auto create_native(unsigned, native_function_t &&)
-      -> Callable;
+  static auto create_custom(unsigned, custom_function_t &&, type_t) -> Callable;
+  static auto create_native(unsigned, native_function_t &&) -> Callable;
 
 public:
   constexpr inline auto arity() const -> unsigned { return my_arity; }
 
 public:
-  auto call(const interpreter &, args_t &) -> eval_result_t;
+  auto call(const interpreter &, args_t &&) const -> eval_result_t;
 
 private:
   // dont support static variables in this function
   unsigned my_arity = std::numeric_limits<unsigned>::quiet_NaN();
   function_t my_function{utils::Monostate{}};
+  type_t my_type = kOrdinary;
 
 private:
   static constexpr auto native_signature = "<native fn>"sv;
@@ -237,3 +225,4 @@ private:
 };
 
 } // namespace net::ancillarycat::loxo::evaluation
+#endif // AC_LOXO_EVALUATABLE_HPP

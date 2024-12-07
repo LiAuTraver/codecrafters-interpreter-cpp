@@ -11,11 +11,11 @@
 #include <utility>
 #include <vector>
 
-#include "config.hpp"
-#include "ExprVisitor.hpp"
-#include "loxo_fwd.hpp"
-#include "parse_error.hpp"
+#include "details/loxo_fwd.hpp"
+
+#include "details/IVisitor.hpp"
 #include "Token.hpp"
+#include "parse_error.hpp"
 
 /// @namespace net::ancillarycat::loxo::expression
 namespace net::ancillarycat::loxo::expression {
@@ -29,7 +29,7 @@ public:
   using ostringstream_t = std::ostringstream;
   using token_t = Token;
   using expr_ptr_t = std::shared_ptr<base_type>;
-  using expr_result_t = ExprVisitor::eval_result_t;
+  using expr_result_t = utils::IVisitor::eval_result_t;
 
 public:
   virtual ~Expr() = default;
@@ -143,9 +143,9 @@ public:
   virtual ~Logical() override = default;
 
 public:
-  token_t op{};
-  expr_ptr_t left{nullptr};
-  expr_ptr_t right{nullptr};
+  token_t op;
+  expr_ptr_t left;
+  expr_ptr_t right;
 
 private:
   virtual auto to_string_impl(const utils::FormatPolicy &) const
@@ -158,8 +158,8 @@ public:
   virtual ~Call() override = default;
 
 public:
-  expr_ptr_t callee{nullptr};
-  token_t paren{};
+  expr_ptr_t callee;
+  token_t paren;
   std::vector<expr_ptr_t> args;
 
 private:
@@ -168,22 +168,4 @@ private:
   expr_result_t accept_impl(const ExprVisitor &) const override;
 };
 
-/// @implements Expr
-class IllegalExpr : public Expr {
-public:
-  constexpr IllegalExpr() = default;
-  virtual ~IllegalExpr() override = default;
-  explicit IllegalExpr(token_t, parse_error);
-
-private:
-  virtual auto accept_impl(const ExprVisitor &visitor) const
-      -> expr_result_t override;
-  virtual auto to_string_impl(const utils::FormatPolicy &format_policy) const
-      -> string_type override;
-
-public:
-  token_t token;
-  parse_error error;
-  // std::shared_ptr<IllegalExpr> next = nullptr;
-};
 } // namespace net::ancillarycat::loxo::expression

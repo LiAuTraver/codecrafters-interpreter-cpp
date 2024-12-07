@@ -4,8 +4,7 @@
 #include <string_view>
 
 #include "config.hpp"
-#include "loxo_fwd.hpp"
-#include "utils.hpp"
+#include "format.hpp"
 
 namespace net::ancillarycat::utils {
 /// @brief Represents a stateless type that can be used as a placeholder

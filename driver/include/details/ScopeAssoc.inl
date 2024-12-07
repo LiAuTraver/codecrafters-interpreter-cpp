@@ -1,4 +1,8 @@
-#pragma once
+/// @note no include guard.
+#ifdef AC_LOXO_SCOPEASSOC_INL
+#error "please do not include ScopeAssoc.inl in other files; include Environment.hpp instead"
+#endif
+#define AC_LOXO_SCOPEASSOC_INL
 #include <cstddef>
 #include <cstdint>
 #include <functional>
@@ -8,31 +12,31 @@
 #include <string>
 #include <string_view>
 #include <variant>
+#include <net/ancillarycat/utils/Status.hpp>
 
-#include "config.hpp"
-#include "loxo_fwd.hpp"
-#include "utils.hpp"
-#include "status.hpp"
-#include "Evaluatable.hpp"
+#include "details/loxo_fwd.hpp"
+#include "details/IVisitor.hpp"
 
 namespace net::ancillarycat::loxo::evaluation {
-class ScopeAssoc : utils::Printable {
+class ScopeAssoc : public utils::Printable {
   friend class ::net::ancillarycat::loxo::Environment;
 
 public:
-  using eval_result_t = utils::VisitorBase::eval_result_t;
-  using string_view_type = utils::VisitorBase::string_view_type;
+  using variant_type = utils::IVisitor::variant_type;
+  using string_view_type = utils::IVisitor::string_view_type;
   using association_t =
-      std::pair<string_type, std::pair<eval_result_t, uint_least32_t>>;
+      std::pair<string_type, std::pair<variant_type, uint_least32_t>>;
   using associations_t =
-      std::unordered_map<string_type, std::pair<eval_result_t, uint_least32_t>>;
+      std::unordered_map<string_type, std::pair<variant_type, uint_least32_t>>;
 
 public:
   constexpr ScopeAssoc() = default;
   virtual ~ScopeAssoc() override = default;
 
 private:
-  auto add(const string_type &, const eval_result_t &, uint_least32_t = std::numeric_limits<uint_least32_t>::quiet_NaN())
+  auto add(const string_type &,
+           const variant_type &,
+           uint_least32_t = std::numeric_limits<uint_least32_t>::quiet_NaN())
       -> utils::Status;
   auto find(this auto &&self, const string_type &name)
       -> std::optional<associations_t::iterator>;

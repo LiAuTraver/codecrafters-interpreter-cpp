@@ -24,16 +24,18 @@ statement      -> exprStmt
                 | block 
                 | ifStmt
                 | whileStmt
-                | forStmt ;
+                | forStmt 
+                | returnStmt ;
 
-exprStmt       -> expression ";" ;
-printStmt      -> "print" expression ";" ;
-block          -> "{" declaration* "}" ;
-ifStmt         -> "if" "(" expression ")" statement ( "else" statement )? ;
-whileStmt      -> "while" "(" expression ")" statement ;
-forStmt        -> "for" "(" ( varDecl | exprStmt | ";" )
+exprStmt        -> expression ";" ;
+printStmt       -> "print" expression ";" ;
+block           -> "{" declaration* "}" ;
+ifStmt          -> "if" "(" expression ")" statement ( "else" statement )? ;
+whileStmt       -> "while" "(" expression ")" statement ;
+forStmt         -> "for" "(" ( varDecl | exprStmt | ";" )
                            expression? ";"
                            expression? ")" statement ;
+returnStmt      -> "return" expression? ";" ;
 ```
 
 Expression Grammar
@@ -41,7 +43,7 @@ Expression Grammar
 expression     -> assignment ;
 
 assignment     -> IDENTIFIER "=" assignment
-               | logic_or ;
+                | logic_or ;
 
 logic_or       -> logic_and ( "or" logic_and )* ;
 logic_and      -> equality ( "and" equality )* ;
@@ -53,12 +55,22 @@ unary          -> ( "!" | "-" ) unary
                 | call ;
 call           -> primary ( "(" arguments? ")" )* ;
 primary        -> NUMBER | STRING | "true" | "false" | "nil"
-               | "(" expression ")" | IDENTIFIER ;
+                | "(" expression ")" | IDENTIFIER ;
 ```
 
-miscellaneous
+Miscellaneous
 ```cpp
 arguments     -> expression ( "," expression )* ;
 function      -> IDENTIFIER "(" parameters? ")" block ;
 parameters    -> IDENTIFIER ( "," IDENTIFIER )* ;
+alnums        -> [a-zA-Z0-9] 
+               | [.!@#$%^&*()] 
+               | [...] ;
+```
+
+Lexical
+```cpp
+number        -> digit + ( "." digit + )? ;
+string        -> "\"" + ([[alnums]])* + "\"" ;
+identifier    -> [a-zA-Z_] + [a-zA-Z0-9_]* ;
 ```

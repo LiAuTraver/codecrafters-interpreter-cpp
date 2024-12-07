@@ -1,7 +1,6 @@
 #pragma once
 
-#include "config.hpp"
-#include "loxo_fwd.hpp"
+#include "details/loxo_fwd.hpp"
 
 namespace net::ancillarycat::loxo {
 class parse_error {

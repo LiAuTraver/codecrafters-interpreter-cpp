@@ -1,18 +1,18 @@
-#pragma once
+#ifndef LOXO_EXPRVISITOR_HPP
+#define LOXO_EXPRVISITOR_HPP
 #include <type_traits>
 #include <variant>
 
-#include "config.hpp"
+#include <net/ancillarycat/utils/Variant.hpp>
+#include <net/ancillarycat/utils/Status.hpp>
+
+#include "details/loxo_fwd.hpp"
+
+#include "details/IVisitor.hpp"
 #include "Evaluatable.hpp"
-#include "utils.hpp"
-#include "loxo_fwd.hpp"
-#include "status.hpp"
-
-#include "Variant.hpp"
-
 namespace net::ancillarycat::loxo::expression {
 /// @interface ExprVisitor
-class ExprVisitor : virtual public utils::VisitorBase {
+class ExprVisitor : virtual public utils::IVisitor {
 public:
   virtual ~ExprVisitor() = default;
 
@@ -21,7 +21,8 @@ public:
   /// @brief Visit the expression
   /// @attention tbh i don't really like the idea of making a virtual
   ///      function private, but coreguidelines says it's a good practice.
-  /// @note  why make virtual function private? see <a href="https://stackoverflow.com/questions/2170688/private-virtual-method-in-c">here</a>
+  /// @note  why make virtual function private? see <a href="https://stackoverflow.com/questions/2170688/private-virtual-method-in-c">
+  ///      here</a>
   // clang-format on
   template <typename DerivedExpr>
     requires std::is_base_of_v<Expr, DerivedExpr>
@@ -40,84 +41,10 @@ private:
   virtual eval_result_t visit_impl(const Assignment &) const = 0;
   virtual eval_result_t visit_impl(const Logical &) const = 0;
   virtual eval_result_t visit_impl(const Call &) const = 0;
-  virtual eval_result_t visit_impl(const IllegalExpr &) const = 0;
-  virtual utils::Status evaluate_impl(const Expr &) const = 0;
+
+private:
+  virtual stmt_result_t evaluate_impl(const Expr &) const = 0;
   virtual eval_result_t get_result_impl() const = 0;
 };
-/// @brief a dummy visitor that does nothing but test compilation
-/// @implements ExprVisitor
-class DummyVisitor : public ExprVisitor {
-private:
-  virtual auto visit_impl(const Literal &) const -> eval_result_t override {
-    return {};
-  }
-  virtual auto visit_impl(const Unary &) const -> eval_result_t override {
-    return {};
-  }
-  virtual auto visit_impl(const Binary &) const -> eval_result_t override {
-    return {};
-  }
-  virtual auto visit_impl(const Grouping &) const -> eval_result_t override {
-    return {};
-  }
-  virtual auto visit_impl(const IllegalExpr &) const -> eval_result_t override {
-    return {};
-  }
-  virtual auto visit_impl(const Assignment &) const -> eval_result_t override {
-    return {};
-  }
-  virtual auto visit_impl(const Variable &) const -> eval_result_t override {
-    return {};
-  }
-  virtual auto visit_impl(const Logical &) const -> eval_result_t override {
-    return {};
-  }
-  virtual auto visit_impl(const Call &) const -> eval_result_t override {
-    return {};
-  }
-
-private:
-  auto to_string_impl(const utils::FormatPolicy &format_policy) const
-      -> string_type override {
-    return "dummy visitor"s;
-  }
-  utils::Status evaluate_impl(const Expr &) const override {
-    return utils::InvalidArgument("dummy visitor");
-  }
-  eval_result_t get_result_impl() const override { return {}; }
-
-private:
-} inline static const _dummy_visitor;
-/// @implements ExprVisitor
-class LOXO_API ASTPrinter : public ExprVisitor, public utils::Viewable {
-public:
-  using ostream_t = std::ostream;
-  using ostringstream_t = std::ostringstream;
-
-public:
-  ASTPrinter() = default;
-  virtual ~ASTPrinter() override = default;
-
-private:
-  virtual eval_result_t visit_impl(const Literal &) const override;
-  virtual eval_result_t visit_impl(const Unary &) const override;
-  virtual eval_result_t visit_impl(const Binary &) const override;
-  virtual eval_result_t visit_impl(const Grouping &) const override;
-  virtual eval_result_t visit_impl(const Variable &) const override;
-  virtual eval_result_t visit_impl(const Assignment &) const override;
-  virtual eval_result_t visit_impl(const Logical &) const override;
-  virtual eval_result_t visit_impl(const Call &) const override;
-  virtual eval_result_t visit_impl(const IllegalExpr &) const override;
-  virtual utils::Status evaluate_impl(const Expr &) const override;
-  virtual string_type
-  to_string_impl(const utils::FormatPolicy &) const override;
-  auto to_string_view_impl(const utils::FormatPolicy &) const
-      -> utils::Viewable::string_view_type override;
-  eval_result_t get_result_impl() const override;
-
-private:
-  eval_result_t res{utils::Monostate{}};
-  mutable ostringstream_t oss;
-  mutable ostringstream_t error_stream;
-};
 } // namespace net::ancillarycat::loxo::expression
+#endif // LOXO_EXPRVISITOR_HPP

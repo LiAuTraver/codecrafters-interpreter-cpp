@@ -8,7 +8,8 @@
 #include <utility>
 
 #include "config.hpp"
-#include "loxo_fwd.hpp"
+#include "format.hpp"
+
 
 namespace net::ancillarycat::utils {
 /// @brief a simple file reader that reads the contents of a file
@@ -22,18 +23,16 @@ public:
   using ostringstream_t = ostringstream;
 
 public:
-  inline explicit
-      // constexpr // clang 18.1 failed
-      file_reader(path_t path_)
+  inline explicit constexpr file_reader(path_t path_)
       : filePath(std::move(path_)) {}
   inline constexpr ~file_reader() = default;
 
 public:
   NODISCARD_LOXO(path_t) inline string_t get_contents() const {
     ifstream_t file(filePath);
-    if (not file) {
-      return string_t();
-    }
+    if (not file)
+      return {};
+
     ostringstream_t buffer;
     buffer << file.rdbuf();
     return buffer.str();

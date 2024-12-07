@@ -41,8 +41,7 @@ void alterToolContext(loxo::ExecutionContext &execution_context) {
 // NOLINTNEXTLINE // <-- why clang-tidy warns the main function?
 int main(int argc, char **argv, char **envp) {
 
-  auto &tool_context =
-      loxo::ExecutionContext::inspectArgs(argc, argv, envp);
+  auto &tool_context = loxo::ExecutionContext::inspectArgs(argc, argv, envp);
 
   dbg_block(alterToolContext(tool_context);
 
@@ -55,7 +54,7 @@ int main(int argc, char **argv, char **envp) {
                     : loxo::ExecutionContext::command_sv(
                           tool_context.commands.front()));
             // dbg(info, "Input files: {}", tool_context.input_files);
-						// MSVC failed 										^^^^^^^^(a vec of path)
+            // MSVC failed                    ^^^^^^^^(a vec of path)
             std::ranges::for_each(
                 tool_context.input_files,
                 [](const auto &file) { dbg(info, "Input file: {}", file); });

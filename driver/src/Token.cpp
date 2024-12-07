@@ -9,13 +9,10 @@
 #include <cmath>
 #include <source_location>
 
-#include "config.hpp"
-#include "loxo_fwd.hpp"
-#include "utils.hpp"
+#include "details/loxo_fwd.hpp"
 
-#include "lex_error.hpp"
+#include "details/lex_error.hpp"
 #include "Token.hpp"
-
 
 namespace net::ancillarycat::loxo {
 template <typename Ty>
@@ -303,8 +300,7 @@ Token::to_string_impl(const utils::FormatPolicy &policy) const {
       return ""s;
     }
   default:
-    dbg(critical, "unreachable code reached: {}", LOXO_STACKTRACE);
-    contract_assert(false);
+    contract_assert(false, 1, "should not happen");
     break;
   }
   if (policy == utils::kDefault) {
@@ -314,11 +310,9 @@ Token::to_string_impl(const utils::FormatPolicy &policy) const {
   } else if (policy == utils::kTokenOnly) {
     // for ast print.
     return utils::format("{}", lexeme_sv);
-  } else {
-    dbg(critical, "unreachable code reached: {}", LOXO_STACKTRACE);
-    contract_assert(false);
-    std::unreachable();
   }
+  contract_assert(false, 1, "should not happen");
+  return ""s;
 }
 
 auto format_as(const Token &token) -> Token::string_type {

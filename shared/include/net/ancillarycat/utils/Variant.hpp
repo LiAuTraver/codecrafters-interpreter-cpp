@@ -8,8 +8,8 @@
 #include <typeinfo>
 
 #include "config.hpp"
-#include "loxo_fwd.hpp"
-#include "utils.hpp"
+#include "format.hpp"
+
 #include "Monostate.hpp"
 
 namespace net::ancillarycat::utils {

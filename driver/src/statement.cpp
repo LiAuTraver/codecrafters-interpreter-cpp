@@ -1,14 +1,14 @@
 #include <utility>
 #include <cmath>
+#include <net/ancillarycat/utils/Status.hpp>
 
-#include "config.hpp"
-#include "utils.hpp"
-#include "loxo_fwd.hpp"
+#include "details/loxo_fwd.hpp"
 
 #include "Evaluatable.hpp"
 #include "statement.hpp"
 
 #include "expression.hpp"
+#include "StmtVisitor.hpp"
 
 namespace net::ancillarycat::loxo::statement {
 Stmt::stmt_result_t Variable::accept_impl(const StmtVisitor &visitor) const {
@@ -79,20 +79,22 @@ auto Function::to_string_impl(const utils::FormatPolicy &format_policy) const
     result.pop_back();
     result.pop_back();
   }
-  // result += ") {\n";
-  // for (const auto &stmt : this->body) {
-  //   result += stmt->to_string(format_policy);
-  // }
-  // result += "}\n";
   result.append(") { ... }");
   return result;
 }
 auto Function::accept_impl(const StmtVisitor &visitor) const -> stmt_result_t {
   return visitor.visit(*this);
 }
+auto Return::to_string_impl(const utils::FormatPolicy &format_policy) const
+    -> string_type {
+  return "return "s.append(this->value->to_string(format_policy));
+}
+auto Return::accept_impl(const StmtVisitor &visitor) const -> stmt_result_t {
+  return visitor.visit(*this);
+}
 auto For::to_string_impl(const utils::FormatPolicy &format_policy) const
     -> string_type {
-  string_type result = "for (";
+  auto result = "for ("s;
   if (this->initializer) {
     result += this->initializer->to_string(format_policy);
   }
@@ -111,15 +113,5 @@ auto For::to_string_impl(const utils::FormatPolicy &format_policy) const
 Stmt::stmt_result_t For::accept_impl(const StmtVisitor &visitor) const {
   return visitor.visit(*this);
 }
-auto IllegalStmt::to_string_impl(const utils::FormatPolicy &) const
-    -> string_type {
-  return message;
-}
-auto IllegalStmt::to_string_view_impl(const utils::FormatPolicy &) const
-    -> string_view_type {
-  return message;
-}
-Stmt::stmt_result_t IllegalStmt::accept_impl(const StmtVisitor &visitor) const {
-  return visitor.visit(*this);
-}
+
 } // namespace net::ancillarycat::loxo::statement

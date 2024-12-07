@@ -17,13 +17,13 @@ TEST(scan, invalid_path) {
 }
 
 TEST(scan, empty_file) {
-  const auto filepath = path(R"(Z:/loxo/examples/empty.lox)");
+  const auto filepath = path(R"(Z:/loxo/examples/scanning/empty.lox)");
   auto result = get_result(filepath);
   EXPECT_EQ(result, "EOF  null\n");
 }
 
 TEST(scan, simple1) {
-  const auto filepath = path(R"(Z:/loxo/examples/simple1.lox)");
+  const auto filepath = path(R"(Z:/loxo/examples/scanning/simple1.lox)");
   auto result = get_result(filepath);
   EXPECT_EQ(result, "VAR var null\n"
                     "IDENTIFIER language null\n"
@@ -34,7 +34,7 @@ TEST(scan, simple1) {
 }
 
 TEST(scan, simple2) {
-  const auto filepath = path(R"(Z:/loxo/examples/simple2.lox)");
+  const auto filepath = path(R"(Z:/loxo/examples/scanning/simple2.lox)");
   auto result = get_result(filepath);
   EXPECT_EQ(result, "LEFT_PAREN ( null\n"
                     "LEFT_PAREN ( null\n"
@@ -43,7 +43,7 @@ TEST(scan, simple2) {
 }
 
 TEST(scan, simple3) {
-  const auto filepath = path(R"(Z:/loxo/examples/simple3.lox)");
+  const auto filepath = path(R"(Z:/loxo/examples/scanning/simple3.lox)");
   auto result = get_result(filepath);
   EXPECT_EQ(result, "LEFT_PAREN ( null\n"
                     "LEFT_BRACE { null\n"

@@ -2,10 +2,9 @@
 
 #include <memory>
 #include <vector>
-#include "config.hpp"
-#include "utils.hpp"
-#include "loxo_fwd.hpp"
-#include "StmtVisitor.hpp"
+
+#include "details/loxo_fwd.hpp"
+
 #include "Token.hpp"
 
 namespace net::ancillarycat::loxo::statement {
@@ -49,7 +48,7 @@ public:
 
 public:
   token_t name;
-  expr_ptr_t initializer{nullptr};
+  expr_ptr_t initializer;
 
 private:
   auto accept_impl(const StmtVisitor &) const -> stmt_result_t override;
@@ -63,7 +62,7 @@ public:
   virtual ~Print() override = default;
 
 public:
-  expr_ptr_t value{nullptr};
+  expr_ptr_t value;
 
 private:
 private:
@@ -78,7 +77,7 @@ public:
   virtual ~Expression() override = default;
 
 public:
-  expr_ptr_t expr{nullptr};
+  expr_ptr_t expr;
 
 private:
 private:
@@ -113,9 +112,9 @@ public:
   virtual ~If() = default;
 
 public:
-  expr_ptr_t condition{nullptr};
-  stmt_ptr_t then_branch{nullptr};
-  stmt_ptr_t else_branch{nullptr}; // needed to set to nullptr
+  expr_ptr_t condition;
+  stmt_ptr_t then_branch;
+  stmt_ptr_t else_branch; // needed to set to nullptr
 
 private:
   auto to_string_impl(const utils::FormatPolicy &) const
@@ -131,8 +130,8 @@ public:
   virtual ~While() = default;
 
 public:
-  expr_ptr_t condition{nullptr};
-  stmt_ptr_t body{nullptr};
+  expr_ptr_t condition;
+  stmt_ptr_t body;
 
 private:
   auto to_string_impl(const utils::FormatPolicy &) const
@@ -151,10 +150,10 @@ public:
   virtual ~For() = default;
 
 public:
-  stmt_ptr_t initializer{nullptr};
-  expr_ptr_t condition{nullptr};
-  expr_ptr_t increment{nullptr};
-  stmt_ptr_t body{nullptr};
+  stmt_ptr_t initializer;
+  expr_ptr_t condition;
+  expr_ptr_t increment;
+  stmt_ptr_t body;
 
 private:
   auto to_string_impl(const utils::FormatPolicy &) const
@@ -181,20 +180,19 @@ private:
       -> string_type override;
   auto accept_impl(const StmtVisitor &) const -> stmt_result_t override;
 };
-class IllegalStmt : public Stmt, utils::Viewable {
+
+class Return : public Stmt {
 public:
-  IllegalStmt(const string_view_type message_sv) : message(message_sv) {}
-  explicit IllegalStmt(string_type &&message) : message(std::move(message)) {}
-  virtual ~IllegalStmt() override = default;
+  constexpr Return() = default;
+  explicit Return(expr_ptr_t &&value) : value(std::move(value)) {}
+  virtual ~Return() = default;
 
 public:
-  string_type message;
+  expr_ptr_t value;
 
 private:
   auto to_string_impl(const utils::FormatPolicy &) const
       -> string_type override;
-  auto to_string_view_impl(const utils::FormatPolicy &) const
-      -> string_view_type override;
   auto accept_impl(const StmtVisitor &) const -> stmt_result_t override;
 };
 } // namespace net::ancillarycat::loxo::statement

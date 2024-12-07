@@ -11,12 +11,10 @@
 #include <variant>
 #include <vector>
 
-#include "config.hpp"
+#include "details/loxo_fwd.hpp"
+
 #include "parse_error.hpp"
-#include "statement.hpp"
-#include "status.hpp"
 #include "Token.hpp"
-#include "TokenType.hpp"
 
 namespace net::ancillarycat::loxo {
 class LOXO_API parser {
@@ -79,6 +77,7 @@ private:
   auto block_stmt() -> stmt_ptr_t;
   auto while_stmt() -> stmt_ptr_t;
   auto for_stmt() -> stmt_ptr_t;
+  auto return_stmt() -> stmt_ptr_t;
   auto var_decl() -> stmt_ptr_t;
   auto function_decl() -> stmt_ptr_t;
 
@@ -86,7 +85,7 @@ private:
   /// <br>
   /// FIXME: 2. add a field to the parser to track the error, not returns a
   ///         shared_ptr
-  auto synchronize(const parse_error &) -> expr_ptr_t;
+  auto synchronize(const parse_error &) -> utils::Status;
 
 private:
   /// @remark used in @link while_stmt @endlink and @link if_stmt @endlink
