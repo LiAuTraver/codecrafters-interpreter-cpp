@@ -35,3 +35,10 @@ TEST(function, return1) {
   EXPECT_EQ(str, "can see me\n3\ndivide by 0 is not allowed. will show 'nan'.\nnan\n");
   EXPECT_EQ(callback, 0);
 }
+
+TEST(function, resurse1) {
+  const auto path = R"(Z:\loxo\examples\fn\recurse1.lox)";
+  auto [callback, str] = get_result(path);
+  EXPECT_EQ(str, "55\ntrue\n");
+  EXPECT_EQ(callback, 0);
+}

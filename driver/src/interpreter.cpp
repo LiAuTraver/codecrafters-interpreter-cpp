@@ -255,9 +255,10 @@ auto interpreter::evaluate_impl(const expression::Expr &expr) const
 }
 auto interpreter::visit_impl(const statement::Return &expr) const
     -> stmt_result_t {
-  // if (!this->prev_env) {
-  //   return {utils::InvalidArgument("return statement outside of function.")};
-  // }
+  if (not expr.value) {
+  dbg(info, "returning nil")
+    return Returning({{evaluation::NilValue}});
+  }
   auto res = evaluate(*expr.value);
   dbg(info, "return value: {}", res->underlying_string())
   if (!res) {

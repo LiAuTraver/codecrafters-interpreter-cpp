@@ -34,7 +34,9 @@ public:
   auto set_env(env_ptr_t) const -> const interpreter &;
   // auto restore_env() const -> const interpreter &;
   auto get_current_env() const { return env; }
-  auto get_global_env() const-> std::weak_ptr<Environment> { return global_env; }
+  auto get_global_env() const -> std::weak_ptr<Environment> {
+    return global_env;
+  }
 
 private:
   virtual auto visit_impl(const expression::Literal &) const
@@ -107,15 +109,19 @@ private:
       -> string_type override;
 
 private:
+  NODISCARD_LOXO(Status)
+  inline interpreter::stmt_result_t
+  Returning(interpreter::eval_result_t &&res)const {
+    this->last_expr_res.reset(*res).ignore_error();
+    return {utils::Status::kReturning, *res};
+  }
+  NODISCARD_LOXO(Status)
+  inline interpreter::stmt_result_t Returning(interpreter::eval_result_t &res) const{
+    this->last_expr_res.reset(*res).ignore_error();
+    return {utils::Status::kReturning, *res};
+  }
+
+private:
   friend LOXO_API void delete_interpreter_fwd(interpreter *);
 };
-
-NODISCARD_LOXO(Status)
-inline interpreter::stmt_result_t Returning(interpreter::eval_result_t &&res) {
-  return {utils::Status::kReturning, res.value()};
-}
-NODISCARD_LOXO(Status)
-inline interpreter::stmt_result_t Returning(interpreter::eval_result_t &res) {
-  return {utils::Status::kReturning, res.value()};
-}
 } // namespace net::ancillarycat::loxo
