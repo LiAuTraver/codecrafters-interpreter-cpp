@@ -36,7 +36,7 @@ auto interpreter::interpret(
       return maybe_env.as_status();
     has_init_global_env = true;
     this->env = maybe_env.value();
-    this->global_env = env;
+    // this->global_env = env;
   }
 
   for (const auto &stmt : stmts)
@@ -48,7 +48,8 @@ auto interpreter::interpret(
   return utils::OkStatus();
 }
 
-auto interpreter::set_env(env_ptr_t new_env) const -> const interpreter & {
+auto interpreter::set_env(const env_ptr_t &new_env) const
+    -> const interpreter & {
   env = new_env;
   return *this;
 }
@@ -111,7 +112,7 @@ auto interpreter::visit_impl(const statement::Variable &stmt) const
     contract_assert(!!std::any_cast<string_view_type>(&stmt.name.literal),
                     1,
                     "variable name should be a string")
-    dbg(info,
+    dbg(trace,
         "variable name: {}, value: {}",
         std::any_cast<string_view_type>(stmt.name.literal),
         eval_res->underlying_string())
@@ -197,15 +198,25 @@ auto interpreter::visit_impl(const statement::Function &stmt) const
   // TODO: function overloading
   // clang-format off
   if (auto res = env->get(stmt.name.to_string(utils::kTokenOnly));
-  !res.empty())
-    return {utils::InvalidArgument(utils::format(
-        "Function '{}' already defined. \n"
-        "Function overloading is not supported yet.",
-        stmt.name.to_string(utils::kTokenOnly)))};
+  !res.empty()){
+    // FIXME: seems something went wrong with my logic here.
+    dbg(warn, "found the function already defined... use it")
+    return res;
+  }
+    // return {utils::InvalidArgument(utils::format(
+    //     "Function '{}' already defined. \n"
+    //     "Function overloading is not supported yet.",
+    //     stmt.name.to_string(utils::kTokenOnly)))};
 
-  return env->add(
-      stmt.name.to_string(utils::kTokenOnly),
-      evaluation::Callable::create_custom(
+  dbg(info,"func name: {}",
+      stmt.name.to_string(utils::kTokenOnly))
+
+  // dbg(info,"env and parent: {}",
+  //     env->parent == this->global_env? "global" : "local"
+  //     )
+      
+
+  auto callable = evaluation::Callable::create_custom(
           stmt.parameters.size(),
           {stmt.name.to_string(utils::kTokenOnly),
            stmt.parameters
@@ -214,7 +225,10 @@ auto interpreter::visit_impl(const statement::Function &stmt) const
              })
            | std::ranges::to<std::vector<string_type>>(),
            stmt.body.statements},
-           this->env == this->global_env? evaluation::Callable::kOrdinary : evaluation::Callable::kClosure),
+           this->env); 
+  return env->add(
+      stmt.name.to_string(utils::kTokenOnly),
+      callable,
       stmt.name.line);
   // clang-format on
 }
@@ -264,12 +278,12 @@ auto interpreter::visit_impl(const statement::Return &expr) const
   if (!res) {
     return res;
   }
-  dbg(info, "result: {}", res->underlying_string())
+  dbg(trace, "result: {}", res->underlying_string())
   return Returning(*res);
 }
 auto interpreter::visit_impl(const expression::Literal &expr) const
     -> eval_result_t {
-  dbg(info, "literal type: {}", expr.literal.type)
+  dbg(trace, "literal type: {}", expr.literal.type)
   if (expr.literal.is_type(kMonostate)) {
     dbg(critical, "should not happen.")
     contract_assert(false)

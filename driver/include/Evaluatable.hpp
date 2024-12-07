@@ -178,10 +178,10 @@ class Callable : public Evaluatable {
   };
 
 public:
-  enum type_t : uint8_t {
-    kOrdinary = 0,
-    kClosure = 1,
-  };
+  // enum type_t : uint8_t {
+  //   kOrdinary = 0,
+  //   kClosure = 1,
+  // };
 
 public:
   using args_t = std::vector<utils::IVisitor::variant_type>;
@@ -191,18 +191,20 @@ public:
   using custom_function_t = Function;
   using function_t =
       utils::Variant<utils::Monostate, native_function_t, custom_function_t>;
+  using env_t = Environment;
+  using env_ptr_t = std::shared_ptr<env_t>;
 
 public:
   Callable() = default;
   virtual ~Callable() = default;
 
 private:
-  Callable(unsigned, native_function_t &&);
-  Callable(unsigned, custom_function_t &&, type_t);
+  Callable(unsigned, native_function_t &&, const env_ptr_t&);
+  Callable(unsigned, custom_function_t &&, const env_ptr_t&);
 
 public:
-  static auto create_custom(unsigned, custom_function_t &&, type_t) -> Callable;
-  static auto create_native(unsigned, native_function_t &&) -> Callable;
+  static auto create_custom(unsigned, custom_function_t &&, const env_ptr_t&) -> Callable;
+  static auto create_native(unsigned, native_function_t &&, const env_ptr_t&) -> Callable;
 
 public:
   constexpr inline auto arity() const -> unsigned { return my_arity; }
@@ -214,7 +216,7 @@ private:
   // dont support static variables in this function
   unsigned my_arity = std::numeric_limits<unsigned>::quiet_NaN();
   function_t my_function{utils::Monostate{}};
-  type_t my_type = kOrdinary;
+  env_ptr_t my_env;
 
 private:
   static constexpr auto native_signature = "<native fn>"sv;

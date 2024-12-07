@@ -32,6 +32,10 @@ public:
 public:
   constexpr ScopeAssoc() = default;
   virtual ~ScopeAssoc() override = default;
+  ScopeAssoc(const ScopeAssoc &that) = default;
+  ScopeAssoc(ScopeAssoc &&that) noexcept = default;
+  auto operator=(const ScopeAssoc &that) -> ScopeAssoc & = default;
+  auto operator=(ScopeAssoc &&that) noexcept -> ScopeAssoc & = default;
 
 private:
   auto add(const string_type &,

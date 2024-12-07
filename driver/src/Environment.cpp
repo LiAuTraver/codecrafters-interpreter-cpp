@@ -13,12 +13,8 @@
 
 namespace net::ancillarycat::loxo {
 
-Environment::Environment() : current(std::make_unique<scope_env_t>()) {
-}
-
 Environment::Environment(const std::shared_ptr<self_type> &enclosing)
-  : current(std::make_unique<scope_env_t>()), parent(enclosing) {
-}
+    :  parent(enclosing) {}
 
 Environment::Environment(Environment &&that) noexcept {
   current = std::move(that.current);
@@ -35,31 +31,36 @@ auto Environment::operator=(Environment &&that) noexcept -> Environment & {
 }
 
 auto Environment::getGlobalEnvironment()
-  -> utils::StatusOr<std::shared_ptr<Environment>> {
+    -> utils::StatusOr<std::shared_ptr<Environment>> {
   static auto has_init = false;
   if (has_init)
-    return utils::InvalidArgument("init global env twice");
-
+    return global_env;
   has_init = true;
-  auto env = std::make_shared<Environment>();
-  env->add("clock"s,
-           evaluation::Callable::create_native(
-               0,
-               [](const interpreter &, evaluation::Callable::args_t &) {
-                 dbg(trace, "clock() called")
-                 return std::chrono::duration_cast<std::chrono::seconds>(
-                         std::chrono::system_clock::now().time_since_epoch())
-                     .count();
-               }))
-     .ignore_error();
-  env->add("about",
-           evaluation::Callable::create_native(
-               0,
-               [](const interpreter &, evaluation::Callable::args_t &) {
-                 return "loxo programming language, based on book Crafting Interpreters's lox.";
-               }))
-     .ignore_error();
-  return env;
+  global_env = std::make_shared<Environment>();
+  global_env
+      ->add(
+          "clock"s,
+          evaluation::Callable::create_native(
+              0,
+              [](const interpreter &, evaluation::Callable::args_t &) {
+                dbg(trace, "clock() called")
+                return std::chrono::duration_cast<std::chrono::seconds>(
+                           std::chrono::system_clock::now().time_since_epoch())
+                    .count();
+              },
+              nullptr))
+      .ignore_error();
+  global_env
+      ->add("about",
+            evaluation::Callable::create_native(
+                0,
+                [](const interpreter &, evaluation::Callable::args_t &) {
+                  return "loxo programming language, based on book Crafting "
+                         "Interpreters's lox.";
+                },
+                nullptr))
+      .ignore_error();
+  return global_env;
 }
 
 auto Environment::createScopeEnvironment(
@@ -70,7 +71,7 @@ auto Environment::createScopeEnvironment(
 auto Environment::add(const string_type &name,
                       const utils::IVisitor::variant_type &value,
                       const uint_least32_t line) const -> utils::Status {
-  return current->add(name, value, line);
+  return current.add(name, value, line);
 }
 
 auto Environment::reassign(const string_type &name,
@@ -85,7 +86,7 @@ auto Environment::reassign(const string_type &name,
 }
 
 auto Environment::get(const string_type &name) const
-  -> utils::IVisitor::variant_type {
+    -> utils::IVisitor::variant_type {
   if (auto it = find(name))
     return {(*it)->second.first};
 
@@ -94,23 +95,21 @@ auto Environment::get(const string_type &name) const
 
 // NOLINTNEXTLINE
 auto Environment::find(const string_type &name) const
-  -> std::optional<self_type::scope_env_t::associations_t::iterator> {
-  if (auto maybe_it = current->find(name)) {
+    -> std::optional<self_type::scope_env_t::associations_t::iterator> {
+  if (auto maybe_it = current.find(name)) {
     // NOLINTNEXTLINE
     dbg_block(
         if (!parent) {
-        return nullptr;
+          return nullptr;
         } if (auto another_it = parent->find(name)) {
-        dbg(warn,
-          "variable '{}' is shadowed; previously declared at line {}",
-          name,
-          (*another_it)->second.second);
+          dbg(warn,
+              "variable '{}' is shadowed; previously declared at line {}",
+              name,
+              (*another_it)->second.second);
         })
     return maybe_it;
   }
 
-  // if (auto enclosing = parent.lock())
-  //   return enclosing->find(name);
   if (auto enclosing = parent.get()) {
     return enclosing->find(name);
   }
@@ -124,9 +123,9 @@ auto Environment::copy() const -> std::shared_ptr<self_type> {
 }
 
 auto Environment::to_string_impl(const utils::FormatPolicy &format_policy) const
-  -> string_type {
+    -> string_type {
   string_type result;
-  result += current->to_string(utils::FormatPolicy::kTokenOnly);
+  result += current.to_string(utils::FormatPolicy::kTokenOnly);
   if (auto enclosing = this->parent.get()) {
     result += enclosing->to_string(utils::FormatPolicy::kTokenOnly);
   }

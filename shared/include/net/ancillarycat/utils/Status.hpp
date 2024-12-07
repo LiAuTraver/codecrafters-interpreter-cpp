@@ -51,21 +51,19 @@ public:
       : my_code(that.my_code), my_message(std::move(that.my_message)),
         my_location(that.my_location) {
     that.my_code = kMovedFrom;
-    that.my_message = "This status has been moved from."sv;
+    that.my_message = "This status has been moved from."s;
     that.my_location = std::source_location::current();
   }
 
   NODISCARD_LOXO(Status)
-  Status(const Status &that)
-      : my_code(that.my_code), my_message(that.my_message),
-        my_location(that.my_location) {}
+  Status(const Status &that) = default;
 
   Status &operator=(Status &&that) noexcept {
     my_code = that.my_code;
     my_message = std::move(that.my_message);
     my_location = that.my_location;
     that.my_code = kMovedFrom;
-    that.my_message = "This status has been moved from.";
+    that.my_message = "This status has been moved from."s;
     that.my_location = std::source_location::current();
     return *this;
   }
@@ -148,8 +146,8 @@ public:
   inline constexpr value_type operator*(this auto &&self) noexcept {
     return self.my_value;
   }
-  inline constexpr auto
-  operator->(this auto &&self) noexcept -> decltype(auto) {
+  inline constexpr auto operator->(this auto &&self) noexcept
+      -> decltype(auto) {
     return std::addressof(self.my_value);
   }
   base_type as_status(this auto &&self) noexcept {
@@ -159,7 +157,7 @@ public:
   auto reset(Ty &&value) noexcept {
     my_value = std::move(value);
     my_code = kOkStatus;
-    my_message = "OkStatus";
+    my_message.clear();
     my_location = std::source_location::current();
     return *this;
   }

@@ -31,12 +31,12 @@ public:
 public:
   stmt_result_t interpret(std::span<std::shared_ptr<statement::Stmt>>) const;
   // auto save_env() const -> const interpreter &;
-  auto set_env(env_ptr_t) const -> const interpreter &;
+  auto set_env(const env_ptr_t&) const -> const interpreter &;
   // auto restore_env() const -> const interpreter &;
   auto get_current_env() const { return env; }
-  auto get_global_env() const -> std::weak_ptr<Environment> {
-    return global_env;
-  }
+  // auto get_global_env() const -> std::weak_ptr<Environment> {
+  //   return global_env;
+  // }
 
 private:
   virtual auto visit_impl(const expression::Literal &) const
@@ -99,7 +99,7 @@ private:
   mutable std::vector<eval_result_t> stmts_res{};
   mutable env_ptr_t env{};
   // mutable env_ptr_t prev_env{};
-  mutable env_ptr_t global_env{};
+  // mutable env_ptr_t global_env{};
   // temporary fix, is it's true, do not `to_string` for last_expr.
   mutable bool is_interpreting_stmts = false;
 

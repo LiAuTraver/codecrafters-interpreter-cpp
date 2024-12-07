@@ -42,3 +42,25 @@ TEST(function, resurse1) {
   EXPECT_EQ(str, "55\ntrue\n");
   EXPECT_EQ(callback, 0);
 }
+
+TEST(function, withargs) {
+  const auto path = R"(Z:\loxo\examples\fn\withargs.lox)";
+  auto [callback, str] = get_result(path);
+  EXPECT_EQ(str, "foo\n");
+  EXPECT_EQ(callback, 0);
+}
+
+TEST(function, nested1) {
+  const auto path = R"(Z:\loxo\examples\fn\nested1.lox)";
+  auto [callback, str] = get_result(path);
+  EXPECT_EQ(str, "Numbers >= 55:\n55\n56\n57\n58\n59\nNumbers >= 10:\n10\n11\n12\n13\n14\n");
+  EXPECT_EQ(callback, 0);
+}
+
+// nested2
+TEST(function, nested2) {
+  const auto path = R"(Z:\loxo\examples\fn\nested2.lox)";
+  auto [callback, str] = get_result(path);
+  EXPECT_EQ(str, "6\n6\n");
+  EXPECT_EQ(callback, 0);
+}
