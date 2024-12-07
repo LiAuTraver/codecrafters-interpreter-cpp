@@ -1,6 +1,7 @@
 #pragma once
 #include "details/variadic.h"
 #include <version>
+#include <filesystem>
 
 #if __has_include(<sal.h>)
 #  include <sal.h>
@@ -42,8 +43,8 @@
 template <>
 struct fmt::formatter<std::filesystem::path> : fmt::formatter<std::string> {
   template <typename FormatContext>
-  auto format(const std::filesystem::path &p, FormatContext &ctx) const
-      -> decltype(ctx.out()) {
+  auto format(const std::filesystem::path &p,
+              FormatContext &ctx) const -> decltype(ctx.out()) {
     return fmt::formatter<std::string>::format(p.string(), ctx);
   }
 };
@@ -54,8 +55,8 @@ struct fmt::formatter<std::filesystem::path> : fmt::formatter<std::string> {
 template <>
 struct ::fmt::formatter<::std::stacktrace> : ::fmt::formatter<::std::string> {
   template <typename FormatContext>
-  auto format(const ::std::stacktrace &st, FormatContext &ctx)
-      -> decltype(ctx.out()) {
+  auto format(const ::std::stacktrace &st,
+              FormatContext &ctx) -> decltype(ctx.out()) {
     std::string result;
     for (const auto &entry : st) {
       result += fmt::format("{} {} {} {}\n",
@@ -120,11 +121,12 @@ struct ::fmt::formatter<::std::stacktrace> : ::fmt::formatter<::std::string> {
 #  define LOXO_FORCEINLINE [[clang::always_inline]]
 #  define LOXO_DEBUG_BREAK __builtin_debugtrap();
 #  define LOXO_DEBUG_FUNCTION_NAME __PRETTY_FUNCTION__
-#elifdef __GNUC__
+// Visual Studio's intellisense cannot recognize `elifdef` yet.
+#elif defined(__GNUC__)
 #  define LOXO_FORCEINLINE [[gnu::always_inline]]
 #  define LOXO_DEBUG_BREAK __builtin_trap();
 #  define LOXO_DEBUG_FUNCTION_NAME __PRETTY_FUNCTION__
-#elifdef _MSC_VER
+#elif defined(_MSC_VER)
 #  define LOXO_FORCEINLINE [[msvc::forceinline]]
 #  define LOXO_DEBUG_BREAK __debugbreak();
 #  define LOXO_DEBUG_FUNCTION_NAME __FUNCSIG__
@@ -286,7 +288,7 @@ struct ::fmt::formatter<::std::stacktrace> : ::fmt::formatter<::std::string> {
 #  define LOXO_DEBUG_ONLY(...)
 #  define LOXO_NOEXCEPT_IF(...) noexcept(__VA_ARGS__)
 #  define LOXO_NOEXCEPT noexcept
-#  define dbg_break
+#  define LOXO_DBG_BREAK
 #endif
 /// @def LOXO_INITIALIZATION(_log_level_) initializes the spdlog framework
 /// @note only call it once in the whole exec; never call it twice.
@@ -363,8 +365,8 @@ template <class Fun_> struct loxo_deferrer_ {
   inline constexpr ~loxo_deferrer_() { f_(); }
 };
 template <class Fun_>
-static inline constexpr auto operator*(loxo_defer_helper_struct_, Fun_ f_)
-    -> loxo_deferrer_<Fun_> {
+static inline constexpr auto operator*(loxo_defer_helper_struct_,
+                                       Fun_ f_) -> loxo_deferrer_<Fun_> {
   return {f_};
 }
 #define LOXO_DEFER                                                             \

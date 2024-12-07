@@ -53,7 +53,8 @@ auto interpreter::save_and_renew_env() const -> const interpreter & {
 }
 auto interpreter::restore_env() const -> const interpreter & {
   env = prev_env;
-  prev_env.reset(); // cvt to nullptr
+  // TODO
+  prev_env = prev_env->parent;
   return *this;
 }
 evaluation::Boolean
@@ -133,7 +134,8 @@ auto interpreter::visit_impl(const statement::Print &stmt) const
   if (!eval_res)
     return eval_res;
   stmts_res.emplace_back(*eval_res);
-  return utils::OkStatus();
+  // return utils::OkStatus();
+  return {{evaluation::NilValue}};
 }
 auto interpreter::visit_impl(const statement::If &stmt) const -> stmt_result_t {
   auto eval_res = evaluate(*stmt.condition);
@@ -251,7 +253,7 @@ auto interpreter::evaluate_impl(const expression::Expr &expr) const
   auto res = expr.accept(*this);
   if (!res)
     return res;
-  dbg(info, "result: {}", res->underlying_string());
+  dbg(info, "result: {}", res->underlying_string())
   return last_expr_res.reset(*res);
 }
 auto interpreter::visit_impl(const statement::Return &expr) const
@@ -260,19 +262,19 @@ auto interpreter::visit_impl(const statement::Return &expr) const
     return {utils::InvalidArgument("return statement outside of function.")};
   }
   auto res = evaluate(*expr.value);
-  dbg(info, "return value: {}", res->underlying_string());
+  dbg(info, "return value: {}", res->underlying_string())
   if (!res) {
     return res;
   }
-  dbg(info, "result: {}", res->underlying_string());
+  dbg(info, "result: {}", res->underlying_string())
   // TODO(...)
   return Returning(*res);
 }
 auto interpreter::visit_impl(const expression::Literal &expr) const
     -> eval_result_t {
-  dbg(info, "literal type: {}", expr.literal.type);
+  dbg(info, "literal type: {}", expr.literal.type)
   if (expr.literal.is_type(kMonostate)) {
-    dbg(critical, "should not happen.");
+    dbg(critical, "should not happen.")
     contract_assert(false)
     return {};
   }
@@ -304,7 +306,7 @@ auto interpreter::visit_impl(const expression::Unary &expr) const
   if (expr.op.is_type(kMinus)) {
     if (utils::holds_alternative<evaluation::Number>(inner_expr.value())) {
       auto value = utils::get<evaluation::Number>(inner_expr.value());
-      dbg(trace, "unary minus: {}", value);
+      dbg(trace, "unary minus: {}", value)
       return {evaluation::Number{value * (-1)}};
     }
     return {utils::InvalidArgument(
@@ -312,10 +314,10 @@ auto interpreter::visit_impl(const expression::Unary &expr) const
   }
   if (expr.op.is_type(kBang)) {
     auto value = is_true_value(inner_expr.value());
-    dbg(trace, "unary bang: {}", value);
+    dbg(trace, "unary bang: {}", value)
     return {evaluation::Boolean{!value}};
   }
-  contract_assert(false, 1, "unreachable code reached");
+  contract_assert(false, 1, "unreachable code reached")
   return {utils::Monostate{}};
 }
 
@@ -337,8 +339,8 @@ auto interpreter::visit_impl(const expression::Binary &expr) const
   }
 
   if (lhs->index() != rhs->index()) {
-    dbg(error, "type mismatch: lhs: {}, rhs: {}", lhs->index(), rhs->index());
-    dbg(warn, "current implementation only support same type binary operation");
+    dbg(error, "type mismatch: lhs: {}, rhs: {}", lhs->index(), rhs->index())
+    dbg(warn, "current implementation only support same type binary operation")
     return {utils::InvalidArgument(
         utils::format("Operands must be two numbers or two strings.\n[line "
                       "{}]",
@@ -374,8 +376,8 @@ auto interpreter::visit_impl(const expression::Binary &expr) const
       break;
     }
   }
-  dbg(error, "unimplemented binary operator: {}", expr.op.to_string());
-  contract_assert(false);
+  dbg(error, "unimplemented binary operator: {}", expr.op.to_string())
+  contract_assert(false)
   return {utils::InvalidArgument(utils::format(
       "unimplemented binary operator.\n[line {}]", expr.op.line))};
 }
@@ -420,7 +422,7 @@ auto interpreter::visit_impl(const expression::Logical &expr) const
       return {*lhs};
     if (expr.op.is_type(kAnd))
       return {expr.right->accept(*this)};
-    contract_assert(false, 1, "unimplemented logical operator");
+    contract_assert(false, 1, "unimplemented logical operator")
     return {utils::Monostate{}};
   }
   // left is false, evaluate right.
@@ -428,7 +430,7 @@ auto interpreter::visit_impl(const expression::Logical &expr) const
     return {expr.right->accept(*this)};
   if (expr.op.is_type(kAnd))
     return {evaluation::Boolean{false, expr.op.line}};
-  contract_assert(false, 1, "unimplemented logical operator");
+  contract_assert(false, 1, "unimplemented logical operator")
   return {utils::Monostate{}};
 }
 auto interpreter::visit_impl(const expression::Call &expr) const
@@ -480,8 +482,8 @@ auto interpreter::value_to_string(const utils::FormatPolicy &format_policy,
 }
 auto interpreter::to_string_impl(const utils::FormatPolicy &format_policy) const
     -> string_type {
-  dbg(info, "last_expr_res index: {}", last_expr_res->index());
-  dbg(info, "stmts size: {}", stmts_res.size());
+  dbg(info, "last_expr_res index: {}", last_expr_res->index())
+  dbg(info, "stmts size: {}", stmts_res.size())
   if (stmts_res.empty()) { // we are parse an expression, not a statement
     if (last_expr_res->index())
       return value_to_string(format_policy, last_expr_res);

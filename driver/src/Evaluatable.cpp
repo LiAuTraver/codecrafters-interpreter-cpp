@@ -250,10 +250,12 @@ auto Callable::call(const interpreter &interpreter,
                 if (!res.ok()) {
                   if (res.code() == utils::Status::kReturning) {
                     my_result = interpreter.get_result();
-                    dbg(info, "returning: {}", my_result->underlying_string());
+                    // FIXME: i my logic was completely gone here: `last_expr`
+                    //              itself was a mistake!
+                    dbg(info, "returning: {}", my_result->underlying_string())
                     dbg(info,
-                        "current interpreter's last expr: {}",
-                        interpreter.get_result()->underlying_string());
+                        "current interpreter's returned res: {}",
+                        res->underlying_string())
                     interpreter.restore_env();
                     return my_result;
                   }
@@ -262,14 +264,13 @@ auto Callable::call(const interpreter &interpreter,
                   return res;
                 }
               }
-              dbg(info, "void function, returning nil")
+              dbg(info, "void function, returning nil.")
               return {NilValue};
             },
             [](const auto &) -> eval_result_t {
               contract_assert(false, 1, "should not happen");
               return {utils::NotFoundError("no function to call")};
             }});
-  TODO(...)
 }
 auto Callable::to_string_impl(const utils::FormatPolicy &) const
     -> string_type {

@@ -69,8 +69,8 @@ public:
     that.my_location = std::source_location::current();
     return *this;
   }
-  inline constexpr explicit operator bool(this auto &&self) noexcept {
-    return self.ok();
+  inline LOXO_CONSTEXPR_IF_NOT_MSVC explicit operator bool() const noexcept {
+    return this->ok();
   }
 
   NODISCARD_LOXO(Status) bool ok() const noexcept {
@@ -105,10 +105,7 @@ public:
 ///         it's designed to be as identical as possible to the
 ///         `absl::StatusOr` class.
 /// @tparam Ty the type of the value
-template <Storable Ty>
-class
-    //  // <- no need, template class
-    NODISCARD_LOXO(StatusOr) StatusOr : public Status {
+template <Storable Ty> class NODISCARD_LOXO(StatusOr) StatusOr : public Status {
 public:
   using base_type = Status;
   using value_type = Ty;
@@ -151,8 +148,8 @@ public:
   inline constexpr value_type operator*(this auto &&self) noexcept {
     return self.my_value;
   }
-  inline constexpr auto operator->(this auto &&self) noexcept
-      -> decltype(auto) {
+  inline constexpr auto
+  operator->(this auto &&self) noexcept -> decltype(auto) {
     return std::addressof(self.my_value);
   }
   base_type as_status(this auto &&self) noexcept {

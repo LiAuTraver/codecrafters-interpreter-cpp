@@ -1,7 +1,8 @@
 cmake_minimum_required(VERSION 3.13)
 project(loxo VERSION 1.0.0 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 23)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_C_STANDARD 23)
+# set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # disable those additionial targets added by CTest
 #         see https://stackoverflow.com/questions/56089330/cmake-creates-lots-of-targets-i-didnt-specify
 set_property(GLOBAL PROPERTY CTEST_TARGETS_ADDED 1)
