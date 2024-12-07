@@ -452,10 +452,11 @@ auto interpreter::visit_impl(const expression::Call &expr) const
 
   // `result` would change in `get_call_args`, so we need to save it.
   const auto callee = expr.callee;
-  if (!utils::holds_alternative<evaluation::Callable>(*res))
-    return {utils::NotFoundError(utils::format("Not a function: {}\n[line {}]",
-                                               callee->to_string(),
-                                               expr.paren.line))};
+  if (!utils::holds_alternative<evaluation::Callable>(*res)) {
+    dbg(error, "bad function call: {} is not a function", callee->to_string())
+    return {utils::NotFoundError(utils::format(
+        "Can only call functions and classes.\n[line {}]", expr.paren.line))};
+  }
 
   auto callable = utils::get<evaluation::Callable>(*res);
   const auto maybe_args = get_call_args(expr);
