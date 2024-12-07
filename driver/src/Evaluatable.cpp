@@ -338,8 +338,8 @@ auto Callable::call(const interpreter &interpreter,
                   return res;
                 }
               }
-              dbg(info, "void function, returning nothing.")
-              return {utils::Monostate{}};
+              dbg(info, "void function, returning nil.")
+              return {NilValue};
             },
             [](const auto &) -> eval_result_t {
               contract_assert(false, 1, "should not happen")

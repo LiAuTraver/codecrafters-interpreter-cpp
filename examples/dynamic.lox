@@ -1,2 +1,6 @@
-fun f(){}
-f();
+fun f() {
+return;
+print "bad";
+}
+
+print f();

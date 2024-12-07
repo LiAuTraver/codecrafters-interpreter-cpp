@@ -28,7 +28,7 @@ interpreter::interpreter() : env(std::make_shared<Environment>()) {}
 auto interpreter::interpret(
     const std::span<std::shared_ptr<statement::Stmt>> stmts) const
     -> stmt_result_t {
-
+  is_interpreting_stmts = true;
   static bool has_init_global_env = false;
   if (!has_init_global_env) {
     auto maybe_env = Environment::getGlobalEnvironment();
@@ -256,7 +256,7 @@ auto interpreter::evaluate_impl(const expression::Expr &expr) const
 auto interpreter::visit_impl(const statement::Return &expr) const
     -> stmt_result_t {
   if (not expr.value) {
-  dbg(info, "returning nil")
+    dbg(info, "returning nil")
     return Returning({{evaluation::NilValue}});
   }
   auto res = evaluate(*expr.value);
@@ -265,7 +265,6 @@ auto interpreter::visit_impl(const statement::Return &expr) const
     return res;
   }
   dbg(info, "result: {}", res->underlying_string())
-  // TODO(...)
   return Returning(*res);
 }
 auto interpreter::visit_impl(const expression::Literal &expr) const
@@ -483,7 +482,7 @@ auto interpreter::to_string_impl(const utils::FormatPolicy &format_policy) const
   dbg(info, "last_expr_res index: {}", last_expr_res->index())
   dbg(info, "stmts size: {}", stmts_res.size())
   if (stmts_res.empty()) { // we are parse an expression, not a statement
-    if (last_expr_res->index())
+    if (last_expr_res->index() && !is_interpreting_stmts)
       return value_to_string(format_policy, last_expr_res);
     else
       return {};

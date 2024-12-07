@@ -100,6 +100,8 @@ private:
   mutable env_ptr_t env{};
   // mutable env_ptr_t prev_env{};
   mutable env_ptr_t global_env{};
+  // temporary fix, is it's true, do not `to_string` for last_expr.
+  mutable bool is_interpreting_stmts = false;
 
 private:
   auto expr_to_string(const utils::FormatPolicy &) const -> string_type;
@@ -111,12 +113,13 @@ private:
 private:
   NODISCARD_LOXO(Status)
   inline interpreter::stmt_result_t
-  Returning(interpreter::eval_result_t &&res)const {
+  Returning(interpreter::eval_result_t &&res) const {
     this->last_expr_res.reset(*res).ignore_error();
     return {utils::Status::kReturning, *res};
   }
   NODISCARD_LOXO(Status)
-  inline interpreter::stmt_result_t Returning(interpreter::eval_result_t &res) const{
+  inline interpreter::stmt_result_t
+  Returning(interpreter::eval_result_t &res) const {
     this->last_expr_res.reset(*res).ignore_error();
     return {utils::Status::kReturning, *res};
   }
