@@ -20,19 +20,13 @@ namespace net::ancillarycat::loxo {
 class Environment : public utils::Printable,
                     public std::enable_shared_from_this<Environment> {
 public:
-  // enum class kScopeType : uint_least8_t {
-  //   kGlobal = 0, // global scope
-  //   kClosure = 1, // closure scope, which encloses the upper scope's env
-  //   kFunction = 2,
-  // };
-public:
   using string_view_type = evaluation::ScopeAssoc::string_view_type;
   using scope_env_t = evaluation::ScopeAssoc;
-  using scope_env_ptr_t = std::unique_ptr<scope_env_t>;
+  // using scope_env_ptr_t = std::unique_ptr<scope_env_t>;
   using self_type = Environment;
 
 public:
-  Environment();
+  Environment() = default;
   explicit Environment(const std::shared_ptr<self_type> &);
   Environment(const Environment &) = delete;
   auto operator=(const Environment &) = delete;
@@ -59,10 +53,10 @@ public:
   auto get(const string_type &) const -> utils::IVisitor::variant_type;
   auto copy() const -> std::shared_ptr<self_type>;
 
-//private:
-  scope_env_ptr_t current;
-  //std::weak_ptr<self_type> parent;
+private:
+  mutable scope_env_t current;
   std::shared_ptr<self_type> parent;
+  static inline std::shared_ptr<self_type> global_env;
 
 private:
   auto to_string_impl(const utils::FormatPolicy &) const

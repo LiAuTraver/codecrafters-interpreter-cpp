@@ -28,7 +28,7 @@ interpreter::interpreter() : env(std::make_shared<Environment>()) {}
 auto interpreter::interpret(
     const std::span<std::shared_ptr<statement::Stmt>> stmts) const
     -> stmt_result_t {
-
+  is_interpreting_stmts = true;
   static bool has_init_global_env = false;
   if (!has_init_global_env) {
     auto maybe_env = Environment::getGlobalEnvironment();
@@ -36,7 +36,7 @@ auto interpreter::interpret(
       return maybe_env.as_status();
     has_init_global_env = true;
     this->env = maybe_env.value();
-    this->global_env = env;
+    // this->global_env = env;
   }
 
   for (const auto &stmt : stmts)
@@ -48,7 +48,8 @@ auto interpreter::interpret(
   return utils::OkStatus();
 }
 
-auto interpreter::set_env(env_ptr_t new_env) const -> const interpreter & {
+auto interpreter::set_env(const env_ptr_t &new_env) const
+    -> const interpreter & {
   env = new_env;
   return *this;
 }
@@ -111,7 +112,7 @@ auto interpreter::visit_impl(const statement::Variable &stmt) const
     contract_assert(!!std::any_cast<string_view_type>(&stmt.name.literal),
                     1,
                     "variable name should be a string")
-    dbg(info,
+    dbg(trace,
         "variable name: {}, value: {}",
         std::any_cast<string_view_type>(stmt.name.literal),
         eval_res->underlying_string())
@@ -197,15 +198,25 @@ auto interpreter::visit_impl(const statement::Function &stmt) const
   // TODO: function overloading
   // clang-format off
   if (auto res = env->get(stmt.name.to_string(utils::kTokenOnly));
-  !res.empty())
-    return {utils::InvalidArgument(utils::format(
-        "Function '{}' already defined. \n"
-        "Function overloading is not supported yet.",
-        stmt.name.to_string(utils::kTokenOnly)))};
+  !res.empty()){
+    // FIXME: seems something went wrong with my logic here.
+    dbg(warn, "found the function already defined... use it")
+    return res;
+  }
+    // return {utils::InvalidArgument(utils::format(
+    //     "Function '{}' already defined. \n"
+    //     "Function overloading is not supported yet.",
+    //     stmt.name.to_string(utils::kTokenOnly)))};
 
-  return env->add(
-      stmt.name.to_string(utils::kTokenOnly),
-      evaluation::Callable::create_custom(
+  dbg(info,"func name: {}",
+      stmt.name.to_string(utils::kTokenOnly))
+
+  // dbg(info,"env and parent: {}",
+  //     env->parent == this->global_env? "global" : "local"
+  //     )
+      
+
+  auto callable = evaluation::Callable::create_custom(
           stmt.parameters.size(),
           {stmt.name.to_string(utils::kTokenOnly),
            stmt.parameters
@@ -214,7 +225,10 @@ auto interpreter::visit_impl(const statement::Function &stmt) const
              })
            | std::ranges::to<std::vector<string_type>>(),
            stmt.body.statements},
-           this->env == this->global_env? evaluation::Callable::kOrdinary : evaluation::Callable::kClosure),
+           this->env); 
+  return env->add(
+      stmt.name.to_string(utils::kTokenOnly),
+      callable,
       stmt.name.line);
   // clang-format on
 }
@@ -255,21 +269,21 @@ auto interpreter::evaluate_impl(const expression::Expr &expr) const
 }
 auto interpreter::visit_impl(const statement::Return &expr) const
     -> stmt_result_t {
-  // if (!this->prev_env) {
-  //   return {utils::InvalidArgument("return statement outside of function.")};
-  // }
+  if (not expr.value) {
+    dbg(info, "returning nil")
+    return Returning({{evaluation::NilValue}});
+  }
   auto res = evaluate(*expr.value);
   dbg(info, "return value: {}", res->underlying_string())
   if (!res) {
     return res;
   }
-  dbg(info, "result: {}", res->underlying_string())
-  // TODO(...)
+  dbg(trace, "result: {}", res->underlying_string())
   return Returning(*res);
 }
 auto interpreter::visit_impl(const expression::Literal &expr) const
     -> eval_result_t {
-  dbg(info, "literal type: {}", expr.literal.type)
+  dbg(trace, "literal type: {}", expr.literal.type)
   if (expr.literal.is_type(kMonostate)) {
     dbg(critical, "should not happen.")
     contract_assert(false)
@@ -438,10 +452,11 @@ auto interpreter::visit_impl(const expression::Call &expr) const
 
   // `result` would change in `get_call_args`, so we need to save it.
   const auto callee = expr.callee;
-  if (!utils::holds_alternative<evaluation::Callable>(*res))
-    return {utils::NotFoundError(utils::format("Not a function: {}\n[line {}]",
-                                               callee->to_string(),
-                                               expr.paren.line))};
+  if (!utils::holds_alternative<evaluation::Callable>(*res)) {
+    dbg(error, "bad function call: {} is not a function", callee->to_string())
+    return {utils::NotFoundError(utils::format(
+        "Can only call functions and classes.\n[line {}]", expr.paren.line))};
+  }
 
   auto callable = utils::get<evaluation::Callable>(*res);
   const auto maybe_args = get_call_args(expr);
@@ -482,7 +497,7 @@ auto interpreter::to_string_impl(const utils::FormatPolicy &format_policy) const
   dbg(info, "last_expr_res index: {}", last_expr_res->index())
   dbg(info, "stmts size: {}", stmts_res.size())
   if (stmts_res.empty()) { // we are parse an expression, not a statement
-    if (last_expr_res->index())
+    if (last_expr_res->index() && !is_interpreting_stmts)
       return value_to_string(format_policy, last_expr_res);
     else
       return {};

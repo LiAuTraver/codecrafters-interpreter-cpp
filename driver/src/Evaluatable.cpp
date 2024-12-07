@@ -30,8 +30,7 @@ Boolean Value::operator!() const noexcept {
 }
 
 Boolean::Boolean(const Boolean &value)
-  : Value(value.get_line()), value(value.value) {
-}
+    : Value(value.get_line()), value(value.value) {}
 
 Boolean &Boolean::operator=(const Boolean &value) {
   this->value = value.value;
@@ -40,8 +39,7 @@ Boolean &Boolean::operator=(const Boolean &value) {
 }
 
 Boolean::Boolean(Boolean &&value) noexcept
-  : Value(value.get_line()), value(value.value) {
-}
+    : Value(value.get_line()), value(value.value) {}
 
 Boolean &Boolean::operator=(Boolean &&value) noexcept {
   this->value = value.value;
@@ -67,7 +65,7 @@ bool Boolean::is_true() const noexcept {
 }
 
 auto Boolean::to_string_impl(const utils::FormatPolicy &format_policy) const
-  -> string_type {
+    -> string_type {
   contract_assert(value.has_value())
   return value.value() ? "true"s : "false"s;
 }
@@ -93,35 +91,30 @@ Nil &Nil::operator=(Nil &&that) noexcept {
 }
 
 auto Nil::to_string_impl(const utils::FormatPolicy &format_policy) const
-  -> string_type {
+    -> string_type {
   return "nil"s;
 }
 
 auto Nil::to_string_view_impl(const utils::FormatPolicy &format_policy) const
-  -> string_view_type {
+    -> string_view_type {
   return "nil"sv;
 }
 
 String::String(const string_type &value, const uint_least32_t line)
-  : Evaluatable(line), value(value) {
-}
+    : Evaluatable(line), value(value) {}
 
 String::String(const string_view_type value, const uint_least32_t line)
-  : Evaluatable(line), value(value) {
-}
+    : Evaluatable(line), value(value) {}
 
 String::String(string_type &&value, const uint_least32_t line) noexcept
-  : Evaluatable(line), value(std::move(value)) {
-}
+    : Evaluatable(line), value(std::move(value)) {}
 
 String::String(const String &that)
-  : Evaluatable(that.get_line()), utils::Viewable(that), value(that.value) {
-}
+    : Evaluatable(that.get_line()), utils::Viewable(that), value(that.value) {}
 
 String::String(String &&that) noexcept
-  : Evaluatable(that.get_line()), utils::Viewable(that),
-    value(std::move(that.value)) {
-}
+    : Evaluatable(that.get_line()), utils::Viewable(that),
+      value(std::move(that.value)) {}
 
 String &String::operator=(const String &that) {
   if (this == &that)
@@ -154,26 +147,23 @@ Boolean String::operator!=(const String &rhs) const {
 String::operator Boolean() const { return True; }
 
 auto String::to_string_impl(const utils::FormatPolicy &format_policy) const
-  -> string_type {
+    -> string_type {
   return value;
 }
 
 auto String::to_string_view_impl(const utils::FormatPolicy &format_policy) const
-  -> string_view_type {
+    -> string_view_type {
   return value;
 }
 
 Number::Number(const long double value, const uint_least32_t line)
-  : Value(line), value(value) {
-}
+    : Value(line), value(value) {}
 
 Number::Number(const Number &that)
-  : Value(that.get_line()), value(that.value) {
-}
+    : Value(that.get_line()), value(that.value) {}
 
 Number::Number(Number &&that) noexcept
-  : Value(that.get_line()), value(that.value) {
-}
+    : Value(that.get_line()), value(that.value) {}
 
 Number &Number::operator=(const Number &that) {
   if (this == &that)
@@ -229,8 +219,8 @@ Number Number::operator*(const Number &that) const {
 
 Number Number::operator/(const Number &that) const {
   return that.value == 0L
-           ? Number{std::numeric_limits<long double>::signaling_NaN()}
-           : Number{value / that.value};
+             ? Number{std::numeric_limits<long double>::signaling_NaN()}
+             : Number{value / that.value};
 }
 
 Number &Number::operator+=(const Number &that) {
@@ -249,106 +239,106 @@ Number &Number::operator*=(const Number &that) {
 }
 
 Number &Number::operator/=(const Number &that) {
-  value = that.value == 0L
-            ? std::numeric_limits<long double>::signaling_NaN()
-            : value / that.value;
+  value = that.value == 0L ? std::numeric_limits<long double>::signaling_NaN()
+                           : value / that.value;
   return *this;
 }
 
 auto Number::to_string_impl(const utils::FormatPolicy &format_policy) const
-  -> string_type {
+    -> string_type {
   return utils::format("{}", value);
 }
 
-Callable::Callable(unsigned argc, native_function_t &&func) {
+Callable::Callable(unsigned argc,
+                   native_function_t &&func,
+                   const env_ptr_t &env) {
   my_arity = argc;
   my_function.emplace(std::move(func));
+  my_env = env;
 }
 
 Callable::Callable(unsigned argc,
                    custom_function_t &&block,
-                   const type_t functionType) {
+                   const env_ptr_t &env) {
   my_arity = argc;
   my_function.emplace(std::move(block));
+  my_env = env;
 }
 
 auto Callable::create_custom(unsigned argc,
                              custom_function_t &&func,
-                             const type_t functionType) -> Callable {
-  return {argc, std::move(func), functionType};
+                             const env_ptr_t &env) -> Callable {
+  return {argc, std::move(func), env};
 }
 
 auto Callable::create_native(unsigned argc,
-                             native_function_t &&func) -> Callable {
-  return {argc, std::move(func)};
+                             native_function_t &&func,
+                             const env_ptr_t &env) -> Callable {
+  return {argc, std::move(func), env};
 }
 
-auto Callable::call(const interpreter &interpreter,
-                    args_t &&args) const -> eval_result_t {
+auto Callable::call(const interpreter &interpreter, args_t &&args) const
+    -> eval_result_t {
   contract_assert(this->arity() == args.size(),
                   1,
                   "arity mismatch; should check it before calling")
-  return my_function.visit(
-      match{[&](const native_function_t &native_function) -> eval_result_t {
-              return {native_function.operator()(interpreter, args)};
-            },
-            [&](const custom_function_t &custom_function) -> eval_result_t {
-              auto saved_env = interpreter.get_current_env();
-              auto scoped_env = this->my_type == kOrdinary
-                                  ? std::make_shared<Environment>(
-                                      interpreter.get_global_env().lock())
-                                  : std::make_shared<Environment>(saved_env);
-              if (!scoped_env) {
-                contract_assert(false, 1, "should not happen")
-                return {utils::NotFoundError("no function to call")};
+  return my_function.visit(match{
+      [&](const native_function_t &native_function) -> eval_result_t {
+        return {native_function.operator()(interpreter, args)};
+      },
+      [&](const custom_function_t &custom_function) -> eval_result_t {
+        auto saved_env = interpreter.get_current_env();
+
+        auto scoped_env = std::make_shared<Environment>(this->my_env);
+
+        for (size_t i = 0; i < custom_function.parameters.size(); ++i) {
+          if (auto res =
+                  scoped_env->add(custom_function.parameters[i], args[i]);
+              !res.ok()) {
+            return res;
+          }
+        }
+
+        dbg(info, "entering a function...")
+        interpreter.set_env(scoped_env);
+
+        for (auto index = 0ull; index < custom_function.body.size(); ++index) {
+          auto res = interpreter.execute(*custom_function.body[index]);
+          if (!res) {
+            if (res.code() == utils::Status::kReturning) {
+              auto my_result = interpreter.get_result();
+              // FIXME: i my logic was completely gone here: `last_expr`
+              //              itself was a mistake!
+              dbg(info, "returning: {}", my_result->underlying_string())
+              dbg(info,
+                  "current interpreter's returned res: {}",
+                  res->underlying_string())
+
+              interpreter.set_env(saved_env);
+              // check whether the return stmt is the last stmt in the block
+              if (index != custom_function.body.size() - 1) {
+                dbg(warn,
+                    "return statement is not the last statement in the "
+                    "block.unreachable code detected.")
               }
-              interpreter.set_env(scoped_env);
-
-              dbg(info, "entering a function...")
-
-              for (size_t i = 0; i < custom_function.parameters.size(); ++i) {
-                if (auto res =
-                      scoped_env->add(custom_function.parameters[i], args[i]);
-                  !res.ok()) {
-                  // interpreter.restore_env();
-                  return res;
-                }
-              }
-
-              eval_result_t my_result{NilValue};
-
-              for (const auto &stmt : custom_function.body) {
-                auto res = interpreter.execute(*stmt);
-                if (!res.ok()) {
-                  if (res.code() == utils::Status::kReturning) {
-                    my_result = interpreter.get_result();
-                    // FIXME: i my logic was completely gone here: `last_expr`
-                    //              itself was a mistake!
-                    dbg(info, "returning: {}", my_result->underlying_string())
-                    dbg(info,
-                        "current interpreter's returned res: {}",
-                        res->underlying_string())
-                    // interpreter.restore_env();
-                    interpreter.set_env(saved_env);
-                    return my_result;
-                  }
-                  // interpreter.restore_env();
-                  interpreter.set_env(saved_env);
-                  // else, error, return as is
-                  return res;
-                }
-              }
-              dbg(info, "void function, returning nil.")
-              return {NilValue};
-            },
-            [](const auto &) -> eval_result_t {
-              contract_assert(false, 1, "should not happen")
-              return {utils::NotFoundError("no function to call")};
-            }});
+              return my_result;
+            }
+            interpreter.set_env(saved_env);
+            // else, error, return as is
+            return res;
+          }
+        }
+        dbg(info, "void function, returning nil.")
+        return {NilValue};
+      },
+      [](const auto &) -> eval_result_t {
+        contract_assert(false, 1, "should not happen")
+        return {utils::NotFoundError("no function to call")};
+      }});
 }
 
 auto Callable::to_string_impl(const utils::FormatPolicy &) const
-  -> string_type {
+    -> string_type {
   return my_function.visit(match{
       [](const native_function_t &) { return "<native fn>"s; },
       [](const custom_function_t &f) {
