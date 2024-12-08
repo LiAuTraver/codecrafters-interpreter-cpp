@@ -134,7 +134,7 @@ private:
 };
 } // namespace net::ancillarycat::utils
 
-template <> struct ::std::formatter<::net::ancillarycat::utils::Printable> {
+template <> struct std::formatter<::net::ancillarycat::utils::Printable> {
   constexpr auto parse(::std::format_parse_context &ctx) { return ctx.begin(); }
   template <typename FormatContext>
   auto format(const ::net::ancillarycat::utils::Printable &p,
