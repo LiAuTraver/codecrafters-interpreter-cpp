@@ -52,9 +52,9 @@ program        → declaration* EOF ;
 
 ### Declaration
 ```cpp
-declaration    -> varDecl // statement::Variable
-                | statement // statement::Stmt
-                | funcDecl ; // statement::Function
+declaration    -> varDecl
+                | statement
+                | funcDecl ;
 
 varDecl        -> "var" IDENTIFIER ( "=" expression )? ";" ;
 funcDecl   -> "fun" function ;  
@@ -62,13 +62,13 @@ funcDecl   -> "fun" function ;
 
 ### Statement
 ```cpp
-statement      -> exprStmt // statement::Expression
-                | printStmt // statement::Print
-                | block // statement::Block
-                | ifStmt // statement::If
-                | whileStmt // statement::While
-                | forStmt // statement::For
-                | returnStmt ; // statement::Return
+statement      -> exprStmt
+                | printStmt
+                | block
+                | ifStmt
+                | whileStmt
+                | forStmt
+                | returnStmt ;
 
 exprStmt        -> expression ";" ;
 printStmt       -> "print" expression ";" ;
@@ -85,20 +85,19 @@ returnStmt      -> "return" expression? ";" ;
 ```cpp
 expression     -> assignment ;
 
-assignment     -> IDENTIFIER "=" assignment // expression::Assign
+assignment     -> IDENTIFIER "=" assignment
                 | logic_or ;
 
-logic_or       -> logic_and ( "or" logic_and )* ; // expression::Logical
-logic_and      -> equality ( "and" equality )* ;  // ditto
-equality       -> comparison ( ( "!=" | "==" ) comparison )* ; // expression::Binary
-comparison     -> term ( ( ">" | ">=" | "<" | "<=" ) term )* ; // ditto
+logic_or       -> logic_and ( "or" logic_and )* ;
+logic_and      -> equality ( "and" equality )* ; 
+equality       -> comparison ( ( "!=" | "==" ) comparison )* ;
+comparison     -> term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
 term           -> factor ( ( "-" | "+" ) factor )* ;
 factor         -> unary ( ( "/" | "*" ) unary )* ;
-unary          -> ( "!" | "-" ) unary // expression::Unary
-                | call ; // expression::Call
+unary          -> ( "!" | "-" ) unary
+                | call ;
 call           -> primary ( "(" arguments? ")" )* ;
 
-// expression::Literal, Number, String, Boolean, Nil, Grouping
 primary        -> NUMBER | STRING | "true" | "false" | "nil"
                 | "(" expression ")" | IDENTIFIER ;
 ```
