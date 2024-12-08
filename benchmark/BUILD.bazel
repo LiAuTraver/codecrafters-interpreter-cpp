@@ -1,16 +1,25 @@
 cc_binary(
-		name = "benchmark",
-		srcs = [
-				"benchmark.cpp"
-		],
-		copts = [
-				"/std:c++latest"
-		],
-		defines = [
-				"AC_CPP_DEBUG",
-				"LIBLOCOGRAPH_SHARED"
-		],
-		deps = [
-				"@google_benchmark//:benchmark",
-		],
+    name = "fib_bm",
+    srcs = [
+        "fib_bm.cpp",
+        "//shared:execution_context.hpp",
+        "//shared:loxo_driver.cpp",
+        "//shared:test_env.hpp",
+    ],
+    copts = [
+        "/std:c++latest",
+        "/Ishared",
+        "/Ishared/include",
+        "/Idriver/include"
+    ],
+    defines = [
+        "AC_CPP_DEBUG",
+        "LIBLOXO_SHARED",
+    ],
+    deps = [
+        "@fmt",
+        "@google_benchmark//:benchmark",
+        "@spdlog",
+        "//driver:driver",
+    ],
 )

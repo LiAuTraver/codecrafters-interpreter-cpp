@@ -1,16 +1,15 @@
 #include <algorithm>
 #include <cmath>
 #include <net/ancillarycat/utils/Monostate.hpp>
+#include <net/ancillarycat/utils/Status.hpp>
+#include <net/ancillarycat/utils/config.hpp>
+#include <memory>
 
 #include "details/loxo_fwd.hpp"
 
 #include "Evaluatable.hpp"
-
-#include <memory>
-
+#include "Environment.hpp"
 #include "interpreter.hpp"
-#include "net/ancillarycat/utils/Status.hpp"
-#include "net/ancillarycat/utils/config.hpp"
 
 namespace net::ancillarycat::loxo::evaluation {
 using utils::match;
@@ -277,64 +276,58 @@ auto Callable::create_native(unsigned argc,
   return {argc, std::move(func), env};
 }
 
-auto Callable::call(const interpreter &interpreter, args_t &&args) const
-    -> eval_result_t {
+auto Callable::call(const interpreter &interpreter,
+                    args_t &&args) const -> eval_result_t {
   contract_assert(this->arity() == args.size(),
                   1,
                   "arity mismatch; should check it before calling")
-  return my_function.visit(match{
-      [&](const native_function_t &native_function) -> eval_result_t {
-        return {native_function.operator()(interpreter, args)};
-      },
-      [&](const custom_function_t &custom_function) -> eval_result_t {
-        auto saved_env = interpreter.get_current_env();
+  return my_function.visit(
+      match{[&](const native_function_t &native_function) -> eval_result_t {
+              return {native_function.operator()(interpreter, args)};
+            },
+            [&](const custom_function_t &custom_function) -> eval_result_t {
+              auto saved_env = interpreter.get_current_env();
 
-        auto scoped_env = std::make_shared<Environment>(this->my_env);
+              auto scoped_env = std::make_shared<Environment>(this->my_env);
 
-        for (size_t i = 0; i < custom_function.parameters.size(); ++i) {
-          if (auto res =
-                  scoped_env->add(custom_function.parameters[i], args[i]);
-              !res.ok()) {
-            return res;
-          }
-        }
-
-        dbg(info, "entering a function...")
-        interpreter.set_env(scoped_env);
-
-        for (auto index = 0ull; index < custom_function.body.size(); ++index) {
-          auto res = interpreter.execute(*custom_function.body[index]);
-          if (!res) {
-            if (res.code() == utils::Status::kReturning) {
-              auto my_result = interpreter.get_result();
-              // FIXME: i my logic was completely gone here: `last_expr`
-              //              itself was a mistake!
-              dbg(info, "returning: {}", my_result->underlying_string())
-              dbg(info,
-                  "current interpreter's returned res: {}",
-                  res->underlying_string())
-
-              interpreter.set_env(saved_env);
-              // check whether the return stmt is the last stmt in the block
-              if (index != custom_function.body.size() - 1) {
-                dbg(warn,
-                    "return statement is not the last statement in the "
-                    "block.unreachable code detected.")
+              for (size_t i = 0; i < custom_function.parameters.size(); ++i) {
+                if (auto res =
+                        scoped_env->add(custom_function.parameters[i], args[i]);
+                    !res.ok()) {
+                  return res;
+                }
               }
-              return my_result;
-            }
-            interpreter.set_env(saved_env);
-            // else, error, return as is
-            return res;
-          }
-        }
-        dbg(info, "void function, returning nil.")
-        return {NilValue};
-      },
-      [](const auto &) -> eval_result_t {
-        contract_assert(false, 1, "should not happen")
-        return {utils::NotFoundError("no function to call")};
-      }});
+
+              dbg(info, "entering a function...")
+              interpreter.set_env(scoped_env);
+
+              for (const auto &index : custom_function.body) {
+                auto res = interpreter.execute(*index);
+                if (!res) {
+                  if (res.code() == utils::Status::kReturning) {
+                    auto my_result = interpreter.get_result();
+                    // FIXME: i my logic was completely gone here: `last_expr`
+                    //              itself was a mistake!
+                    dbg(info, "returning: {}", my_result->underlying_string())
+                    dbg(info,
+                        "current interpreter's returned res: {}",
+                        res->underlying_string())
+
+                    interpreter.set_env(saved_env);
+                    return my_result;
+                  }
+                  interpreter.set_env(saved_env);
+                  // else, error, return as is
+                  return res;
+                }
+              }
+              dbg(info, "void function, returning nil.")
+              return {NilValue};
+            },
+            [](const auto &) -> eval_result_t {
+              contract_assert(false, 1, "should not happen")
+              return {utils::NotFoundError("no function to call")};
+            }});
 }
 
 auto Callable::to_string_impl(const utils::FormatPolicy &) const

@@ -84,9 +84,8 @@ public:
   }
   template <typename Args>
     requires requires { std::declval<variant_type>().template emplace<Args>(); }
-  constexpr auto
-  emplace() noexcept(noexcept(my_variant.template emplace<Args>()))
-      -> decltype(auto) {
+  constexpr auto emplace() noexcept(
+      noexcept(my_variant.template emplace<Args>())) -> decltype(auto) {
     return my_variant.template emplace<Args>();
   }
   constexpr auto &get() const { return my_variant; }
@@ -139,8 +138,8 @@ private:
   /// @brief get the value of the variant; a wrapper around @link std::get
   /// @endlink
   template <class Ty, class... MyTypes>
-  friend inline constexpr auto get(const Variant<MyTypes...> &v)
-      -> decltype(auto);
+  friend inline constexpr auto
+  get(const Variant<MyTypes...> &v) -> decltype(auto);
 };
 /// @brief check if the variant holds a specific type;
 ///  a wrapper around @link std::holds_alternative @endlink
@@ -153,7 +152,7 @@ inline constexpr auto get(const Variant<MyTypes...> &v) -> decltype(auto) {
   return v.is_valid() ? std::get<Ty>(v.get()) : Ty{};
 }
 template <class Ty, class... MyTypes>
-NODISCARD_LOXO(get_if)
+[[nodiscard]]
 inline constexpr auto get_if(Variant<MyTypes...> *v) noexcept {
   return v->is_valid() ? std::get_if<Ty>(&v->get()) : nullptr;
 }

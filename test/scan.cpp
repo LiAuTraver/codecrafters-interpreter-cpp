@@ -1,3 +1,4 @@
+#include <gtest/gtest.h>
 #include "test_env.hpp"
 
 auto get_result(const auto &filepath) {
@@ -25,34 +26,37 @@ TEST(scan, empty_file) {
 TEST(scan, simple1) {
   const auto filepath = path(R"(Z:/loxo/examples/scanning/simple1.lox)");
   auto result = get_result(filepath);
-  EXPECT_EQ(result, "VAR var null\n"
-                    "IDENTIFIER language null\n"
-                    "EQUAL = null\n"
-                    "STRING \"lox\" lox\n"
-                    "SEMICOLON ; null\n"
-                    "EOF  null\n");
+  EXPECT_EQ(result,
+            "VAR var null\n"
+            "IDENTIFIER language null\n"
+            "EQUAL = null\n"
+            "STRING \"lox\" lox\n"
+            "SEMICOLON ; null\n"
+            "EOF  null\n");
 }
 
 TEST(scan, simple2) {
   const auto filepath = path(R"(Z:/loxo/examples/scanning/simple2.lox)");
   auto result = get_result(filepath);
-  EXPECT_EQ(result, "LEFT_PAREN ( null\n"
-                    "LEFT_PAREN ( null\n"
-                    "RIGHT_PAREN ) null\n"
-                    "EOF  null\n");
+  EXPECT_EQ(result,
+            "LEFT_PAREN ( null\n"
+            "LEFT_PAREN ( null\n"
+            "RIGHT_PAREN ) null\n"
+            "EOF  null\n");
 }
 
 TEST(scan, simple3) {
   const auto filepath = path(R"(Z:/loxo/examples/scanning/simple3.lox)");
   auto result = get_result(filepath);
-  EXPECT_EQ(result, "LEFT_PAREN ( null\n"
-                    "LEFT_BRACE { null\n"
-                    "STAR * null\n"
-                    "DOT . null\n"
-                    "COMMA , null\n"
-                    "PLUS + null\n"
-                    "STAR * null\n"
-                    "RIGHT_BRACE } null\n"
-                    "RIGHT_PAREN ) null\n"
-                    "EOF  null\n");
+  EXPECT_EQ(result,
+            "LEFT_PAREN ( null\n"
+            "LEFT_BRACE { null\n"
+            "STAR * null\n"
+            "DOT . null\n"
+            "COMMA , null\n"
+            "PLUS + null\n"
+            "STAR * null\n"
+            "RIGHT_BRACE } null\n"
+            "RIGHT_PAREN ) null\n"
+            "EOF  null\n");
 }

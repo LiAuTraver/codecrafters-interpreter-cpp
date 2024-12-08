@@ -44,8 +44,8 @@ public:
   }
 
 private:
-  auto to_string_impl(const utils::FormatPolicy &) const
-      -> string_type override;
+  auto
+  to_string_impl(const utils::FormatPolicy &) const -> string_type override;
 
 public:
   /// @brief the type of the token
@@ -62,9 +62,9 @@ public:
 private:
   friend auto format_as(const Token &) -> Token::string_type;
   template <typename Ty>
-  inline auto cast_literal() const
-      -> decltype(auto) // <- mix const/no-const pointer would result in a
-                        // compile error
+  inline auto
+  cast_literal() const -> decltype(auto) // <- mix const/no-const pointer would
+                                         // result in a compile error
     requires std::default_initializable<Ty>;
 };
 } // namespace net::ancillarycat::loxo

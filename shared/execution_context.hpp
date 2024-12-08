@@ -11,7 +11,7 @@
 #include <vector>
 
 #include <net/ancillarycat/utils/config.hpp>
-#include "details/loxo_fwd.hpp"
+#include <details/loxo_fwd.hpp>
 
 namespace net::ancillarycat::loxo {
 class LOXO_API lexer;
@@ -25,7 +25,7 @@ extern LOXO_API void delete_parser_fwd(parser *);
 extern LOXO_API void delete_interpreter_fwd(interpreter *);
 struct ExecutionContext;
 
-NODISCARD_LOXO(loxo_main)
+[[nodiscard]]
 extern int loxo_main(_In_ int, _In_ char **, _Inout_ ExecutionContext &);
 /// mimic from llvm clang-driver's ToolContext
 struct ExecutionContext {
@@ -58,12 +58,16 @@ static inline constexpr uint16_t _lex_ = 1 << 1;
 static inline constexpr uint16_t _parse_ = 1 << 2;
 static inline constexpr uint16_t _evaluate_ = 1 << 3;
 static inline constexpr uint16_t _interpret_ = 1 << 4;
-static inline constexpr uint16_t _version_ = 1 << 5;
-static inline constexpr uint16_t _test_ = 1 << 6;
+static inline constexpr uint16_t _repl_ = 1 << 5;
+static inline constexpr uint16_t _stdin_ = 1 << 6;
+static inline constexpr uint16_t _version_ = 1 << 7;
+static inline constexpr uint16_t _test_ = 1 << 8;
+
 static inline constexpr uint16_t _needs_lex_ =
     _lex_ | _parse_ | _evaluate_ | _interpret_;
 static inline constexpr uint16_t _needs_parse_ =
     _parse_ | _evaluate_ | _interpret_;
+static inline constexpr uint16_t _enable_cli_cmd_ = _repl_ | _stdin_;
 
 /// @note MSVC has wired behavior with my enums; also the `|` operator inside
 /// enum, so I made a workaround here.
@@ -81,6 +85,8 @@ enum ExecutionContext::commands_t : uint16_t {
   parse = details::_parse_,
   evaluate = details::_evaluate_,
   interpret = details::_interpret_,
+  REPL = details::_repl_,
+  stream = details::_stdin_,
   version = details::_version_,
   test = details::_test_,
   needs_lex = details::_needs_lex_,
@@ -101,6 +107,10 @@ inline void ExecutionContext::addCommands(char **&argv) {
     commands.emplace_back(commands_t::evaluate);
   } else if (std::string_view(*(argv + 1)) == "run") {
     commands.emplace_back(commands_t::interpret);
+  } else if (std::string_view(*(argv + 1)) == "repl") {
+    commands.emplace_back(commands_t::REPL);
+  } else if (std::string_view(*(argv + 1)) == "stdin") {
+    commands.emplace_back(commands_t::stream);
   } else if (std::string_view(*(argv + 1)) == "test") {
     commands.emplace_back(commands_t::test);
   } else if (std::string_view(*(argv + 1)) == "help") {
@@ -135,6 +145,10 @@ ExecutionContext::inspectArgs(const int argc, char **&argv, char **&envp) {
   for (auto i = 2ull; *(argv + i); ++i) {
     ctx.input_files.emplace_back(*(argv + i));
   }
+#ifdef AC_CPP_DEBUG
+  // set to nullptr for debugging
+  argv = nullptr;
+#endif
   return ctx;
 }
 inline std::string_view ExecutionContext::command_sv(const commands_t &cmd) {
@@ -155,6 +169,10 @@ inline std::string_view ExecutionContext::command_sv(const commands_t &cmd) {
     return "help"sv;
   case version:
     return "version"sv;
+  case REPL:
+    return "repl"sv;
+  case stream:
+    return "stdin"sv;
   default:
     return "unknown"sv;
   }

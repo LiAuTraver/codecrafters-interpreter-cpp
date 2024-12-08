@@ -1,5 +1,6 @@
 #include <string>
 #include <utility>
+#include <gtest/gtest.h>
 #include "test_env.hpp"
 
 namespace {

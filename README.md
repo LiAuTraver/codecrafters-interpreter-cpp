@@ -1,50 +1,136 @@
-[![progress-banner](https://backend.codecrafters.io/progress/interpreter/38a426bb-4217-4238-bc94-8f14c07c0faf)](https://app.codecrafters.io/users/codecrafters-bot?r=2qF)
+# Lox Interpreter written in C++
 
-This is a starting point for C++ solutions to the
-["Build your own Interpreter" Challenge](https://app.codecrafters.io/courses/interpreter/overview).
+> my exercise for codecrafters' online judge repo see [here](https://github.com/LiAuTraver/codecrafters-interpreter-cpp); this is a more detailed version of my exercise's codebase.
 
-This challenge follows the book
-[Crafting Interpreters](https://craftinginterpreters.com/) by Robert Nystrom.
+> from [Crafting Interpreters](http://www.craftinginterpreters.com/appendix-i.html)
 
-In this challenge you'll build an interpreter for
-[Lox](https://craftinginterpreters.com/the-lox-language.html), a simple
-scripting language. Along the way, you'll learn about tokenization, ASTs,
-tree-walk interpreters and more.
+![blob:chrome-untrusted://image-magnify/4bb9a6a4-9238-4402-b0f9-431c6537a396](https://craftinginterpreters.com/image/header.png)
 
-Before starting this challenge, make sure you've read the "Welcome" part of the
-book that contains these chapters:
+## Build
 
-- [Introduction](https://craftinginterpreters.com/introduction.html) (chapter 1)
-- [A Map of the Territory](https://craftinginterpreters.com/a-map-of-the-territory.html)
-  (chapter 2)
-- [The Lox Language](https://craftinginterpreters.com/the-lox-language.html)
-  (chapter 3)
+A C++23 compiler is required to build the project; tested with gcc, clang, and MSVC. Bazel or CMake is required to build the project.
 
-These chapters don't involve writing code, so they won't be covered in this
-challenge. This challenge will start from chapter 4,
-[Scanning](https://craftinginterpreters.com/scanning.html).
+### Debug mode
 
-**Note**: If you're viewing this repo on GitHub, head over to
-[codecrafters.io](https://codecrafters.io) to try the challenge.
-
-# Passing the first stage
-
-The entry point for your program is in `src/main.cpp`. Study and uncomment the
-relevant code, and push your changes to pass the first stage:
-
-```sh
-git commit -am "pass 1st stage" # any msg
-git push origin master
+#### with Bazel(currently only configured for Windows)
+```powershell
+bazel build //tools:intepreter # build the interpreter
+bazel test //tests:... # run the tests
 ```
 
-Time to move on to the next stage!
+#### with CMake
+vcpkg is required to install the dependencies.
+Make sure the option `AC_CPP_DEBUG` is set to `ON` in the CMakeLists.txt file.
+```powershell
+cmake --preset= # see available presets, make sure to alter the toolchain file
+```
 
-# Stage 2 & beyond
+### Release mode
+No external dependencies are required for release mode. 
+You can run Bazel or CMake as mentioned above(only for target `interpreter`),
+or run the `run.sh` script in the root directory(Linux)
+.
 
-Note: This section is for stages 2 and beyond.
+## Run
 
-1. Ensure you have `cmake` installed locally
-2. Run `./your_program.sh` to run your program, which is implemented in
-   `src/main.cpp`.
-3. Commit your changes and run `git push origin master` to submit your solution
-   to CodeCrafters. Test output will be streamed to your terminal.
+### Run the interpreter
+by default the interpreter will output nothing in debug mode but only spdlog messages. comment the code in [execution_context.hpp, line 148-151](shared/execution_context.hpp) to see the output.
+```powershell
+interpreter.exe tokenize <source>
+interpreter.exe parse <source>
+interpreter.exe evaluate <source>
+interpreter.exe run <source>
+# repl was on the way... but not in a forseeable future...
+```
+
+## Grammar
+
+### Syntax
+```cpp
+program        → declaration* EOF ;
+```
+
+### Declaration
+```cpp
+declaration    -> varDecl // statement::Variable
+                | statement // statement::Stmt
+                | funcDecl ; // statement::Function
+
+varDecl        -> "var" IDENTIFIER ( "=" expression )? ";" ;
+funcDecl   -> "fun" function ;  
+```
+
+### Statement
+```cpp
+statement      -> exprStmt // statement::Expression
+                | printStmt // statement::Print
+                | block // statement::Block
+                | ifStmt // statement::If
+                | whileStmt // statement::While
+                | forStmt // statement::For
+                | returnStmt ; // statement::Return
+
+exprStmt        -> expression ";" ;
+printStmt       -> "print" expression ";" ;
+block           -> "{" declaration* "}" ;
+ifStmt          -> "if" "(" expression ")" statement ( "else" statement )? ;
+whileStmt       -> "while" "(" expression ")" statement ;
+forStmt         -> "for" "(" ( varDecl | exprStmt | ";" )
+                           expression? ";"
+                           expression? ")" statement ;
+returnStmt      -> "return" expression? ";" ;
+```
+
+### Expression
+```cpp
+expression     -> assignment ;
+
+assignment     -> IDENTIFIER "=" assignment // expression::Assign
+                | logic_or ;
+
+logic_or       -> logic_and ( "or" logic_and )* ; // expression::Logical
+logic_and      -> equality ( "and" equality )* ;  // ditto
+equality       -> comparison ( ( "!=" | "==" ) comparison )* ; // expression::Binary
+comparison     -> term ( ( ">" | ">=" | "<" | "<=" ) term )* ; // ditto
+term           -> factor ( ( "-" | "+" ) factor )* ;
+factor         -> unary ( ( "/" | "*" ) unary )* ;
+unary          -> ( "!" | "-" ) unary // expression::Unary
+                | call ; // expression::Call
+call           -> primary ( "(" arguments? ")" )* ;
+
+// expression::Literal, Number, String, Boolean, Nil, Grouping
+primary        -> NUMBER | STRING | "true" | "false" | "nil"
+                | "(" expression ")" | IDENTIFIER ;
+```
+
+### Miscellaneous
+```cpp
+arguments     -> expression ( "," expression )* ;
+function      -> IDENTIFIER "(" parameters? ")" block ;
+parameters    -> IDENTIFIER ( "," IDENTIFIER )* ;
+alnums        -> [a-zA-Z0-9] 
+               | [.!@#$%^&*()] 
+               | [...] ;
+```
+
+### Lexical
+```cpp
+number        -> digit + ( "." digit + )? ;
+string        -> "\"" + ([[alnums]])* + "\"" ;
+identifier    -> [a-zA-Z_] + [a-zA-Z0-9_]* ;
+```
+> note: the `cpp` was just for syntax highlighting in vscode to make it look prettier than plain text.
+
+## Project Structure
+![dependencies for interpreter](image/interpreter.png)
+> generated by Bazel
+## Notes
+This exercise is still in active development, and I will be updating it as I progress through the book.
+
+TODO(pirority from high to low)
+- [ ] Binding and resolving
+- [ ] Add `class` support
+- [ ] JVM bytecode generation
+- [ ] Add class inheritance support
+- [ ] LLVM IR generation
+- [ ] (may never realize 😂)Machine code generation(x86_64, risc-v)

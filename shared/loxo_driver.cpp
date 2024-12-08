@@ -129,7 +129,7 @@ void writeInterpResultToContextStream(ExecutionContext &ctx) {
   ctx.output_stream << ctx.interpreter->to_string();
 }
 // clang-format off
-NODISCARD_LOXO(loxo_main)
+[[nodiscard]]
 int loxo_main(_In_ const int argc,
               _In_opt_ char **argv, //! @note argv can be nullptr(debug mode or google test)
               _Inout_ ExecutionContext &ctx)
@@ -170,12 +170,14 @@ int loxo_main(_In_ const int argc,
     dbg(error, "Parsing failed: {}", parse_result.message());
     ctx.error_stream << parse_result.message() << std::endl;
     // for codecrafter's test
-    std::cerr << parse_result.message() << std::endl;
+    if (argv)
+      std::cerr << parse_result.message() << std::endl;
     return 65;
   }
   if (ctx.commands.front() == ExecutionContext::parse) {
     writeParseResultToContextStream(ctx);
-    std::cout << ctx.output_stream.str() << std::endl;
+    if (argv)
+      std::cout << ctx.output_stream.str() << std::endl;
     return 0;
   }
 
@@ -186,13 +188,15 @@ int loxo_main(_In_ const int argc,
   if (ctx.commands.front() == ExecutionContext::evaluate) {
     if (evaluate_result.ok()) {
       writeExprResultToContextStream(ctx);
-      std::cout << ctx.output_stream.view() << std::endl;
+      if (argv)
+        std::cout << ctx.output_stream.view() << std::endl;
       return 0;
     } else {
       dbg(error, "Evaluation failed: {}", evaluate_result.message());
       ctx.error_stream << evaluate_result.message() << std::endl;
       // for codecrafter's test
-      std::cerr << evaluate_result.message() << std::endl;
+      if (argv)
+        std::cerr << evaluate_result.message() << std::endl;
       return 70;
     }
   }
@@ -203,14 +207,17 @@ int loxo_main(_In_ const int argc,
   if (ctx.commands.front() == ExecutionContext::interpret) {
     writeInterpResultToContextStream(ctx);
     if (interpret_result.ok()) {
-      std::cout << ctx.output_stream.view() << std::endl;
+      if (argv)
+        std::cout << ctx.output_stream.view() << std::endl;
       return 0;
     } else {
       dbg(error, "Interpretation failed: {}", interpret_result.message());
       ctx.error_stream << interpret_result.message() << std::endl;
       // for codecrafter's test
-      std::cout << ctx.output_stream.view();
-      std::cerr << ctx.error_stream.view(); // DONT add newline character
+      if (argv)
+        std::cout << ctx.output_stream.view();
+      if (argv)
+        std::cerr << ctx.error_stream.view(); // DONT add newline character
       return 70;
     }
   }

@@ -137,7 +137,6 @@ TEST(interpret, reassign5) {
   EXPECT_EQ(callback, 0);
 }
 
-
 TEST(interpret, scope1) {
   const auto path = R"(Z:\loxo\examples\interp\scope1.lox)";
   auto [callback, str] = get_result(path);

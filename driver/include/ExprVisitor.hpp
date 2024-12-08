@@ -21,8 +21,7 @@ public:
   /// @brief Visit the expression
   /// @attention tbh i don't really like the idea of making a virtual
   ///      function private, but coreguidelines says it's a good practice.
-  /// @note  why make virtual function private? see <a href="https://stackoverflow.com/questions/2170688/private-virtual-method-in-c">
-  ///      here</a>
+  /// @note see <a href="https://stackoverflow.com/questions/2170688/private-virtual-method-in-c">here</a>
   // clang-format on
   template <typename DerivedExpr>
     requires std::is_base_of_v<Expr, DerivedExpr>

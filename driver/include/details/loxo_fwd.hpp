@@ -20,14 +20,10 @@
 #  else
 #    define LOXO_API __attribute__((visibility("default")))
 #  endif
-#  define LOXO_INLINE
 #else
 #  define LOXO_API
-#  define LOXO_INLINE inline
 #endif
 
-
-// NOLINTBEGIN(bugprone-forward-declaration-namespace)
 namespace net::ancillarycat::loxo {
 
 class Token;
@@ -41,7 +37,7 @@ class parse_error;
 
 class interpreter;
 class Environment;
-
+// NOLINTBEGIN(bugprone-forward-declaration-namespace)
 namespace expression {
 class Expr;
 class Literal;
@@ -55,7 +51,6 @@ class Call;
 class IllegalExpr;
 
 class ExprVisitor;
-class DummyVisitor;
 } // namespace expression
 namespace statement {
 class Stmt;
@@ -71,7 +66,6 @@ class Return;
 class IllegalStmt;
 
 class StmtVisitor;
-class DummyVisitor;
 } // namespace statement
 namespace evaluation {
 class Evaluatable;
@@ -84,6 +78,7 @@ class Callable;
 
 class ScopeAssoc;
 } // namespace evaluation
+// NOLINTEND(bugprone-forward-declaration-namespace)
 
 using utils::operator""s;
 using utils::operator""sv;
@@ -93,4 +88,3 @@ inline static constexpr auto tolerable_chars = "_`"sv;
 inline static constexpr auto whitespace_chars = " \t\r"sv;
 inline static constexpr auto newline_chars = "\n\v\f"sv;
 } // namespace net::ancillarycat::loxo
-// NOLINTEND(bugprone-forward-declaration-namespace)

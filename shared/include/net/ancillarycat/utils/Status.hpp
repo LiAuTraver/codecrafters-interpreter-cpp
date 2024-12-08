@@ -13,9 +13,9 @@ namespace net::ancillarycat::utils {
 /// @brief A class that represents the status of a function call. it's designed
 /// to be as identical as possible to the `absl::Status` class, for
 /// `absl::Status` seems to fail to compile with clang++ on Windows.
-class NODISCARD_LOXO(Status) Status {
+class [[nodiscard]] Status {
 public:
-  enum NODISCARD_LOXO(Code) Code : uint8_t {
+  enum [[nodiscard]] Code : uint8_t {
     kOkStatus = 0,
     kError = 1, // represents a generic error
     kAlreadyExistsError = 2,
@@ -28,25 +28,26 @@ public:
     kParseError = 9,
     kNotImplementedError = 11,
 
-    // values specific for interpreter, not an `error` but a `status`
+    /// @return values specific for interpreter, not an `error` but a `status`
+    /// @note `.ok()` will return `false`.
     kReturning = 12,
 
     kUnknownError = std::numeric_limits<uint8_t>::max(),
   };
 
 public:
-  NODISCARD_LOXO(Status)
+  [[nodiscard]]
   Status()
       : my_code(kOkStatus), my_message("<default initialized>"),
         my_location(std::source_location::current()) {}
 
-  NODISCARD_LOXO(Status)
+  [[nodiscard]]
   Status(Code code,
          string_view message = "<no message provided>",
          const std::source_location &location = std::source_location::current())
       : my_code(code), my_message(message), my_location(location) {}
 
-  NODISCARD_LOXO(Status)
+  [[nodiscard]]
   Status(Status &&that) noexcept
       : my_code(that.my_code), my_message(std::move(that.my_message)),
         my_location(that.my_location) {
@@ -55,8 +56,9 @@ public:
     that.my_location = std::source_location::current();
   }
 
-  NODISCARD_LOXO(Status)
+  [[nodiscard]]
   Status(const Status &that) = default;
+  auto operator=(const Status &that) -> Status & = default;
 
   Status &operator=(Status &&that) noexcept {
     my_code = that.my_code;
@@ -67,23 +69,18 @@ public:
     that.my_location = std::source_location::current();
     return *this;
   }
-  inline LOXO_CONSTEXPR_IF_NOT_MSVC explicit operator bool() const noexcept {
+  inline AC_UTILS_CONSTEXPR_IF_NOT_MSVC explicit
+  operator bool() const noexcept {
     return this->ok();
   }
 
-  NODISCARD_LOXO(Status) bool ok() const noexcept {
-    return my_code == kOkStatus;
-  }
+  [[nodiscard]] bool ok() const noexcept { return my_code == kOkStatus; }
   Code code() const { return my_code; }
-  NODISCARD_LOXO(string_view) string_view message() const { return my_message; }
-  NODISCARD_LOXO(source_location) std::source_location location() const {
-    return my_location;
-  }
-  NODISCARD_LOXO(stacktrace) string stacktrace() const {
-    return LOXO_STACKTRACE;
-  }
+  [[nodiscard]] string_view message() const { return my_message; }
+  [[nodiscard]] std::source_location location() const { return my_location; }
+  [[nodiscard]] string stacktrace() const { return AC_UTILS_STACKTRACE; }
   void ignore_error() const { contract_assert(ok()); }
-  NODISCARD_LOXO(string) inline string from_source_location() const {
+  [[nodiscard]] inline string from_source_location() const {
     return utils::format("file {0}\n"
                          "              function {1},\n"
                          "              Ln {2} Col {3}\n",
@@ -103,7 +100,7 @@ public:
 ///         it's designed to be as identical as possible to the
 ///         `absl::StatusOr` class.
 /// @tparam Ty the type of the value
-template <Storable Ty> class NODISCARD_LOXO(StatusOr) StatusOr : public Status {
+template <Storable Ty> class [[nodiscard]] StatusOr : public Status {
 public:
   using base_type = Status;
   using value_type = Ty;
@@ -146,8 +143,8 @@ public:
   inline constexpr value_type operator*(this auto &&self) noexcept {
     return self.my_value;
   }
-  inline constexpr auto operator->(this auto &&self) noexcept
-      -> decltype(auto) {
+  inline constexpr auto
+  operator->(this auto &&self) noexcept -> decltype(auto) {
     return std::addressof(self.my_value);
   }
   base_type as_status(this auto &&self) noexcept {
@@ -166,76 +163,76 @@ private:
   value_type my_value;
 };
 
-NODISCARD_LOXO(Status)
+[[nodiscard]]
 inline Status OkStatus(
     const std::source_location &location = std::source_location::current()) {
   return {Status::kOkStatus, "OkStatus", location};
 }
 
-NODISCARD_LOXO(Status)
+[[nodiscard]]
 inline Status AlreadyExistsError(
     const std::string_view message,
     const std::source_location &location = std::source_location::current()) {
   return {Status::kAlreadyExistsError, message, location};
 }
 
-NODISCARD_LOXO(Status)
+[[nodiscard]]
 inline Status FileNotFoundError(
     const std::string_view message,
     const std::source_location &location = std::source_location::current()) {
   return {Status::kNotFoundError, message, location};
 }
 
-NODISCARD_LOXO(Status)
+[[nodiscard]]
 inline Status NotFoundError(
     const std::string_view message,
     const std::source_location &location = std::source_location::current()) {
   return {Status::kNotFoundError, message, location};
 }
 
-NODISCARD_LOXO(Status)
+[[nodiscard]]
 inline Status UnknownError(
     const std::string_view message,
     const std::source_location &location = std::source_location::current()) {
   return {Status::kUnknownError, message, location};
 }
 
-NODISCARD_LOXO(Status)
+[[nodiscard]]
 inline Status PermissionDeniedError(
     const std::string_view message,
     const std::source_location &location = std::source_location::current()) {
   return {Status::kPermissionDeniedError, message, location};
 }
 
-NODISCARD_LOXO(Status)
+[[nodiscard]]
 inline Status InvalidArgument(
     const string_view message,
     const std::source_location &location = std::source_location::current()) {
   return {Status::kInvalidArgument, message, location};
 }
 
-NODISCARD_LOXO(Status)
+[[nodiscard]]
 inline Status CommandNotFound(
     const string_view message,
     const std::source_location &location = std::source_location::current()) {
   return {Status::kCommandNotFound, message, location};
 }
 
-NODISCARD_LOXO(Status)
+[[nodiscard]]
 inline Status EmptyInput(
     const string_view message,
     const std::source_location &location = std::source_location::current()) {
   return {Status::kEmptyInput, message, location};
 }
 
-NODISCARD_LOXO(Status)
+[[nodiscard]]
 inline Status ParseError(
     const string_view message,
     const std::source_location &location = std::source_location::current()) {
   return {Status::kParseError, message, location};
 }
 
-NODISCARD_LOXO(Status)
+[[nodiscard]]
 inline Status NotImplementedError(
     const string_view message,
     const std::source_location &location = std::source_location::current()) {

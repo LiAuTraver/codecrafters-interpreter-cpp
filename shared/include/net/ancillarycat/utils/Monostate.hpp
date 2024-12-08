@@ -25,21 +25,21 @@ public:
   }
 
 private:
-  inline constexpr auto to_string_impl(const FormatPolicy &) const
-      -> string_type override {
+  inline constexpr auto
+  to_string_impl(const FormatPolicy &) const -> string_type override {
     return {};
   }
-  inline constexpr auto to_string_view_impl(const FormatPolicy &) const
-      -> string_view_type override {
+  inline constexpr auto
+  to_string_view_impl(const FormatPolicy &) const -> string_view_type override {
     return {};
   }
   friend inline consteval auto operator==(const Monostate &,
                                           const Monostate &) noexcept -> bool {
     return true;
   }
-  friend inline consteval auto operator<=>(const Monostate &,
-                                           const Monostate &) noexcept
-      -> std::strong_ordering {
+  friend inline consteval auto
+  operator<=>(const Monostate &,
+              const Monostate &) noexcept -> std::strong_ordering {
     return std::strong_ordering::equal;
   }
 };
