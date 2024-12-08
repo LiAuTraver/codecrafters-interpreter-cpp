@@ -1,8 +1,17 @@
+Diagnostics:
+  UnusedIncludes: None
+  Suppress:
+    - misc-unused-using-decls
+    - cppcoreguidelines-narrowing-conversions
+    - google-explicit-constructor
+    - hicpp-exception-baseclass
+    - c++26-extensions
 InlayHints:
   BlockEnd: true
 Hover:
   ShowAKA: true
 CompileFlags:
   Add:
-    - /std:c++latest
+    - -std=c++23
     - -IM:\vcpkg\installed\x64-windows\include
+    - -IN:\CustomProgramFiles\verilator\include

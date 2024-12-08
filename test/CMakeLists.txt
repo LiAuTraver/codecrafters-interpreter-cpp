@@ -19,16 +19,6 @@ else ()
     add_compile_options(-DGTEST_CREATE_SHARED_LIBRARY=1)
 endif ()
 enable_testing()
-if (AC_CPP_DEBUG)
-    macro(copy_dlls_for target)
-        add_custom_command(TARGET ${target} POST_BUILD
-                COMMENT "copy necessary dynamic libraries to the test directory"
-                COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                $<TARGET_FILE:driver>
-                $<TARGET_FILE_DIR:${target}>
-        )
-    endmacro(copy_dlls_for)
-endif ()
 
 function(create_test_executable test_name)
     add_executable(${test_name} ${ARGN})

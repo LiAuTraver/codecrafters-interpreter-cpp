@@ -52,8 +52,8 @@ public:
 
 private:
   virtual auto accept_impl(const ExprVisitor &) const -> expr_result_t override;
-  virtual auto to_string_impl(const utils::FormatPolicy &) const
-      -> string_type override;
+  virtual auto
+  to_string_impl(const utils::FormatPolicy &) const -> string_type override;
 
 public:
   token_t literal;
@@ -67,8 +67,8 @@ public:
 
 private:
   virtual auto accept_impl(const ExprVisitor &) const -> expr_result_t override;
-  virtual auto to_string_impl(const utils::FormatPolicy &) const
-      -> string_type override;
+  virtual auto
+  to_string_impl(const utils::FormatPolicy &) const -> string_type override;
 
 public:
   token_t op;
@@ -83,8 +83,8 @@ public:
 
 private:
   virtual auto accept_impl(const ExprVisitor &) const -> expr_result_t override;
-  virtual auto to_string_impl(const utils::FormatPolicy &) const
-      -> string_type override;
+  virtual auto
+  to_string_impl(const utils::FormatPolicy &) const -> string_type override;
 
 public:
   token_t op;
@@ -102,8 +102,8 @@ public:
 
 private:
   auto accept_impl(const ExprVisitor &) const -> expr_result_t override;
-  auto to_string_impl(const utils::FormatPolicy &) const
-      -> string_type override;
+  auto
+  to_string_impl(const utils::FormatPolicy &) const -> string_type override;
 };
 
 class Grouping : public Expr {
@@ -113,8 +113,8 @@ public:
 
 private:
   virtual auto accept_impl(const ExprVisitor &) const -> expr_result_t override;
-  virtual auto to_string_impl(const utils::FormatPolicy &) const
-      -> string_type override;
+  virtual auto
+  to_string_impl(const utils::FormatPolicy &) const -> string_type override;
 
 public:
   expr_ptr_t expr;
@@ -132,8 +132,8 @@ public:
 
 private:
   virtual auto accept_impl(const ExprVisitor &) const -> expr_result_t override;
-  virtual auto to_string_impl(const utils::FormatPolicy &) const
-      -> string_type override;
+  virtual auto
+  to_string_impl(const utils::FormatPolicy &) const -> string_type override;
 };
 /// @implements Expr
 class Logical : public Expr {
@@ -148,8 +148,8 @@ public:
   expr_ptr_t right;
 
 private:
-  virtual auto to_string_impl(const utils::FormatPolicy &) const
-      -> string_type override;
+  virtual auto
+  to_string_impl(const utils::FormatPolicy &) const -> string_type override;
   virtual auto accept_impl(const ExprVisitor &) const -> expr_result_t override;
 };
 class Call : public Expr {
@@ -163,8 +163,8 @@ public:
   std::vector<expr_ptr_t> args;
 
 private:
-  auto to_string_impl(const utils::FormatPolicy &) const
-      -> string_type override;
+  auto
+  to_string_impl(const utils::FormatPolicy &) const -> string_type override;
   expr_result_t accept_impl(const ExprVisitor &) const override;
 };
 

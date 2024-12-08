@@ -19,9 +19,9 @@
 #  include <fmt/core.h>
 #  include <fmt/format.h>
 #endif
-#include "../shared/execution_context.hpp"
+#include "execution_context.hpp"
 
-LOXO_INITIALIZATION(info);
+AC_SPDLOG_INITIALIZATION(loxo, info);
 using namespace net::ancillarycat;
 
 void alterToolContext(loxo::ExecutionContext &execution_context) {
@@ -34,7 +34,7 @@ void alterToolContext(loxo::ExecutionContext &execution_context) {
       execution_context.input_files.emplace_back(debugInputFilePath);
     else {
       dbg(critical, "file not found: {}", debugInputFilePath);
-      LOXO_DEBUG_BREAK
+      AC_UTILS_DEBUG_BREAK
     }
   }
 }

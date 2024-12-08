@@ -9,18 +9,20 @@ def loxo_add_test(name, src):
         name = name,
         srcs = [
             src,
-            "test_env.hpp",
             "//shared:loxo_driver.cpp",
             "//shared:execution_context.hpp",
+            "//shared:test_env.hpp"
         ],
         copts = [
             "/Iexternal/gtest/googletest/include",
             "/Iexternal/gtest/googletest",
+            "/Ishared",
+            "/Ishared/include",
             "/std:c++latest",
         ],
         defines = [
-          "AC_CPP_DEBUG",
-          "LIBLOXO_SHARED",
+            "AC_CPP_DEBUG",
+            "LIBLOXO_SHARED",
         ],
         includes = ["driver/include"],
         deps = [

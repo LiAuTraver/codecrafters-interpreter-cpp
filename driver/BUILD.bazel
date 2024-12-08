@@ -7,6 +7,7 @@ cc_library(
     srcs = driver_srcs,
     copts = [
         "/std:c++latest",
+        "/Ishared/include", # MUST be added, relative to the WORKSPACE file
     ],
     defines = [
         "AC_CPP_DEBUG",
@@ -19,5 +20,6 @@ cc_library(
     deps = [
         "@fmt",
         "@spdlog",
+        "//shared:utils",
     ],
 )

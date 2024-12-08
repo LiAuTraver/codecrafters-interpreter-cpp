@@ -84,7 +84,8 @@ enum FormatPolicy : uint8_t {
   kTokenOnly = 1,
 };
 /// @interface Printable
-/// @brief A class that represents a printable object
+/// @brief A class that represents a printable object; can be directly printed
+/// via `std::cout` or `fmt::print`.
 class Printable {
 public:
   using string_type = std::string;
@@ -133,14 +134,14 @@ private:
 };
 } // namespace net::ancillarycat::utils
 
-template <> struct std::formatter<net::ancillarycat::utils::Printable> {
+template <> struct ::std::formatter<::net::ancillarycat::utils::Printable> {
   constexpr auto parse(::std::format_parse_context &ctx) { return ctx.begin(); }
   template <typename FormatContext>
-  auto format(const net::ancillarycat::utils::Printable &p,
+  auto format(const ::net::ancillarycat::utils::Printable &p,
               FormatContext &ctx) {
     return ::std::format_to(
         ctx.out(),
         "{}",
-        p.to_string(net::ancillarycat::utils::FormatPolicy::kDefault));
+        p.to_string(::net::ancillarycat::utils::FormatPolicy::kDefault));
   }
 };

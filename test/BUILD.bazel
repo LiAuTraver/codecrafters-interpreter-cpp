@@ -16,3 +16,13 @@ loxo_add_test(
     "interpret",
     "interpret.cpp",
 )
+
+loxo_add_test(
+    "controlflow",
+    "controlflow.cpp",
+)
+
+loxo_add_test(
+    "function",
+    "function.cpp",
+)

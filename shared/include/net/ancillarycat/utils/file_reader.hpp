@@ -10,7 +10,6 @@
 #include "config.hpp"
 #include "format.hpp"
 
-
 namespace net::ancillarycat::utils {
 /// @brief a simple file reader that reads the contents of a file
 /// @note the file reader is not thread-safe, and will consume a lot of memory
@@ -28,7 +27,7 @@ public:
   inline constexpr ~file_reader() = default;
 
 public:
-  NODISCARD_LOXO(path_t) inline string_t get_contents() const {
+  [[nodiscard]] inline string_t get_contents() const {
     ifstream_t file(filePath);
     if (not file)
       return {};
@@ -37,7 +36,7 @@ public:
     buffer << file.rdbuf();
     return buffer.str();
   }
-  NODISCARD_LOXO(path_t) inline path_t filepath() const { return filePath; }
+  [[nodiscard]] inline path_t filepath() const { return filePath; }
 
 private:
   const path_t filePath;

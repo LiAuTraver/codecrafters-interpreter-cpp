@@ -25,9 +25,8 @@ namespace net::ancillarycat::loxo {
 using utils::match;
 using enum TokenType::type_t;
 interpreter::interpreter() : env(std::make_shared<Environment>()) {}
-auto interpreter::interpret(
-    const std::span<std::shared_ptr<statement::Stmt>> stmts) const
-    -> stmt_result_t {
+auto interpreter::interpret(const std::span<std::shared_ptr<statement::Stmt>>
+                                stmts) const -> stmt_result_t {
   is_interpreting_stmts = true;
   static bool has_init_global_env = false;
   if (!has_init_global_env) {

@@ -14,7 +14,7 @@
 namespace net::ancillarycat::loxo {
 
 Environment::Environment(const std::shared_ptr<self_type> &enclosing)
-    :  parent(enclosing) {}
+    : parent(enclosing) {}
 
 Environment::Environment(Environment &&that) noexcept {
   current = std::move(that.current);

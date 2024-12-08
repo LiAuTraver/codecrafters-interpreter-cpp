@@ -7,10 +7,13 @@ cc_binary(
     ] ,
     copts = [
         "/std:c++latest",
+        "/Ishared/include",
+        "/Ishared",
+        "/Idriver/include", 
     ],
     defines = [
         "AC_CPP_DEBUG",
-        "LIBLOXO_SHARED", # wired build error if build dll
+        "LIBLOXO_SHARED",
     ],
     includes = [
         "driver/include",

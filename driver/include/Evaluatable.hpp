@@ -72,14 +72,14 @@ public:
   virtual ~Boolean() = default;
 
 private:
-  auto to_string_impl(const utils::FormatPolicy &) const
-      -> string_type override;
+  auto
+  to_string_impl(const utils::FormatPolicy &) const -> string_type override;
   auto to_string_view_impl(const utils::FormatPolicy &) const
       -> string_view_type override;
 
 private:
   std::optional<bool> value = std::nullopt;
-} static inline LOXO_CONSTEXPR_IF_NOT_MSVC True{true, 0}, False{false, 0};
+} static inline AC_UTILS_CONSTEXPR_IF_NOT_MSVC True{true, 0}, False{false, 0};
 
 class LOXO_API Nil : public Value, public utils::Viewable {
 public:
@@ -92,11 +92,11 @@ public:
   virtual ~Nil() = default;
 
 private:
-  auto to_string_impl(const utils::FormatPolicy &) const
-      -> string_type override;
+  auto
+  to_string_impl(const utils::FormatPolicy &) const -> string_type override;
   auto to_string_view_impl(const utils::FormatPolicy &) const
       -> string_view_type override;
-} static inline LOXO_CONSTEXPR_IF_NOT_MSVC NilValue{};
+} static inline AC_UTILS_CONSTEXPR_IF_NOT_MSVC NilValue{};
 
 class String : public Evaluatable, public utils::Viewable {
 public:
@@ -124,8 +124,8 @@ public:
   explicit operator Boolean() const;
 
 private:
-  auto to_string_impl(const utils::FormatPolicy &) const
-      -> string_type override;
+  auto
+  to_string_impl(const utils::FormatPolicy &) const -> string_type override;
   auto to_string_view_impl(const utils::FormatPolicy &) const
       -> string_view_type override;
 
@@ -165,8 +165,8 @@ private:
   long double value = std::numeric_limits<long double>::quiet_NaN();
 
 private:
-  auto to_string_impl(const utils::FormatPolicy &) const
-      -> string_type override;
+  auto
+  to_string_impl(const utils::FormatPolicy &) const -> string_type override;
 };
 class Callable : public Evaluatable {
   struct Function {
@@ -199,12 +199,14 @@ public:
   virtual ~Callable() = default;
 
 private:
-  Callable(unsigned, native_function_t &&, const env_ptr_t&);
-  Callable(unsigned, custom_function_t &&, const env_ptr_t&);
+  Callable(unsigned, native_function_t &&, const env_ptr_t &);
+  Callable(unsigned, custom_function_t &&, const env_ptr_t &);
 
 public:
-  static auto create_custom(unsigned, custom_function_t &&, const env_ptr_t&) -> Callable;
-  static auto create_native(unsigned, native_function_t &&, const env_ptr_t&) -> Callable;
+  static auto
+  create_custom(unsigned, custom_function_t &&, const env_ptr_t &) -> Callable;
+  static auto
+  create_native(unsigned, native_function_t &&, const env_ptr_t &) -> Callable;
 
 public:
   constexpr inline auto arity() const -> unsigned { return my_arity; }
@@ -222,8 +224,8 @@ private:
   static constexpr auto native_signature = "<native fn>"sv;
 
 private:
-  auto to_string_impl(const utils::FormatPolicy &) const
-      -> string_type override;
+  auto
+  to_string_impl(const utils::FormatPolicy &) const -> string_type override;
 };
 
 } // namespace net::ancillarycat::loxo::evaluation

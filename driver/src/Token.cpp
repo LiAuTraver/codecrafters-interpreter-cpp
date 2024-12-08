@@ -42,7 +42,7 @@ Token::number_to_string(const utils::FormatPolicy policy) const {
       else if (policy == utils::kTokenOnly)
         return utils::format("{:.1f}", *ptr);
       else {
-        dbg(critical, "unreachable code reached: {}", LOXO_STACKTRACE);
+        dbg(critical, "unreachable code reached: {}", AC_UTILS_STACKTRACE);
         contract_assert(false);
         std::unreachable();
       }
@@ -53,7 +53,7 @@ Token::number_to_string(const utils::FormatPolicy policy) const {
     else if (policy == utils::kTokenOnly)
       return utils::format("{}", *ptr);
     else {
-      dbg(critical, "unreachable code reached: {}", LOXO_STACKTRACE);
+      dbg(critical, "unreachable code reached: {}", AC_UTILS_STACKTRACE);
       contract_assert(false);
       std::unreachable();
     }
@@ -64,7 +64,7 @@ Token::number_to_string(const utils::FormatPolicy policy) const {
     else if (policy == utils::kTokenOnly)
       return utils::format("{}", "<failed to access data>");
     else {
-      dbg(critical, "unreachable code reached: {}", LOXO_STACKTRACE);
+      dbg(critical, "unreachable code reached: {}", AC_UTILS_STACKTRACE);
       contract_assert(false);
       std::unreachable();
     }

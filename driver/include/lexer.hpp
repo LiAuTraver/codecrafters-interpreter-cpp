@@ -91,9 +91,7 @@ private:
              std::convertible_to<Predicate, bool>;
 
 public:
-  NODISCARD_LOXO(token_views_t) const tokens_t &get_tokens() const {
-    return tokens;
-  }
+  [[nodiscard]] const tokens_t &get_tokens() const { return tokens; }
 
 private:
   /// @brief convert a string to a number

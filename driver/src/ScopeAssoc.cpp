@@ -10,7 +10,6 @@
 
 #include "Evaluatable.hpp"
 
-
 namespace net::ancillarycat::loxo::evaluation {
 utils::Status ScopeAssoc::add(const string_type &name,
                               const variant_type &value,
