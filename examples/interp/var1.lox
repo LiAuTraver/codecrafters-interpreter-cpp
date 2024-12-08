@@ -1,2 +1,0 @@
-var world = 10;
-print world;

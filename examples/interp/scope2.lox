@@ -1,4 +1,0 @@
-{
-    var hello = "baz";
-    print hello;
-}

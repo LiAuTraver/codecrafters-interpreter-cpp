@@ -1,8 +1,0 @@
-if (false or "ok") print "baz";
-if (nil or "ok") print "baz";
-
-if (false or false) print "world";
-if (true or "world") print "world";
-
-if (24 or "bar") print "bar";
-if ("bar" or "bar") print "bar";
