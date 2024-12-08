@@ -1,6 +1,6 @@
 # Lox Interpreter written in C++
 
-> my main repo see [here](https://github.com/LiAuTraver/codecrafters-interpreter-cpp); this repo is exclusively for online judge in [codecrafters](https://codecrafters.io/)
+> my main repo see [here](https://github.com/LiAuTraver/loxo); this repo is exclusively for online judge in [codecrafters](https://codecrafters.io/)
 
 > codecrafters' original `README` see below.
 
