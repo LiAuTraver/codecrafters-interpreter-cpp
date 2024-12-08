@@ -55,9 +55,7 @@ build
 build-*
 vcpkg_installed
 .vs
-
 .cache
-# *.lox
 
 ### Bazel specific files ###
 Testing
@@ -66,3 +64,17 @@ bazel-*
 .clwb
 .aswb
 *.in
+
+
+### master branch ignored files(main branch was dev-1) ###
+examples
+third_party
+benchmark
+test
+cmake
+image
+.idea
+.vscode
+*.bazel
+*.bazel*
+*.bzl
