@@ -118,7 +118,7 @@ inline void ExecutionContext::addCommands(char **&argv) {
   } else if (std::string_view(*(argv + 1)) == "version") {
     commands.emplace_back(commands_t::version);
   } else
-    dbg(critical, "Unknown command: {}", *(argv + 1));
+    dbg(critical, "Unknown command: {}", *(argv + 1))
 }
 inline ExecutionContext &
 ExecutionContext::inspectArgs(const int argc, char **&argv, char **&envp) {
@@ -140,7 +140,7 @@ ExecutionContext::inspectArgs(const int argc, char **&argv, char **&envp) {
   }
   // for now: ignore envp, accept only one file
   if (argc > 3) {
-    dbg(error, "currently only one file is supported.");
+    dbg(error, "currently only one file is supported.")
   }
   for (auto i = 2ull; *(argv + i); ++i) {
     ctx.input_files.emplace_back(*(argv + i));

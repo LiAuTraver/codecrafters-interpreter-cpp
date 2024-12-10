@@ -41,8 +41,7 @@ public:
   virtual ~Variable() override = default;
 
 public:
-  AC_UTILS_CONSTEXPR_IF_NOT_MSVC auto inline has_initilizer() const noexcept
-      -> bool {
+  AC_CONSTEXPR20 auto inline has_initilizer() const noexcept -> bool {
     return initializer != nullptr;
   }
 
@@ -52,8 +51,8 @@ public:
 
 private:
   auto accept_impl(const StmtVisitor &) const -> stmt_result_t override;
-  auto
-  to_string_impl(const utils::FormatPolicy &) const -> string_type override;
+  auto to_string_impl(const utils::FormatPolicy &) const
+      -> string_type override;
 };
 class Print : public Stmt {
 public:
@@ -66,8 +65,8 @@ public:
 
 private:
 private:
-  auto
-  to_string_impl(const utils::FormatPolicy &) const -> string_type override;
+  auto to_string_impl(const utils::FormatPolicy &) const
+      -> string_type override;
   auto accept_impl(const StmtVisitor &) const -> stmt_result_t override;
 };
 class Expression : public Stmt {
@@ -81,8 +80,8 @@ public:
 
 private:
 private:
-  auto
-  to_string_impl(const utils::FormatPolicy &) const -> string_type override;
+  auto to_string_impl(const utils::FormatPolicy &) const
+      -> string_type override;
   auto accept_impl(const StmtVisitor &) const -> stmt_result_t override;
 };
 class Block : public Stmt {
@@ -96,8 +95,8 @@ public:
   std::vector<stmt_ptr_t> statements;
 
 private:
-  auto
-  to_string_impl(const utils::FormatPolicy &) const -> string_type override;
+  auto to_string_impl(const utils::FormatPolicy &) const
+      -> string_type override;
   auto accept_impl(const StmtVisitor &) const -> stmt_result_t override;
 };
 
@@ -117,8 +116,8 @@ public:
   stmt_ptr_t else_branch; // needed to set to nullptr
 
 private:
-  auto
-  to_string_impl(const utils::FormatPolicy &) const -> string_type override;
+  auto to_string_impl(const utils::FormatPolicy &) const
+      -> string_type override;
   auto accept_impl(const StmtVisitor &) const -> stmt_result_t override;
 };
 
@@ -134,8 +133,8 @@ public:
   stmt_ptr_t body;
 
 private:
-  auto
-  to_string_impl(const utils::FormatPolicy &) const -> string_type override;
+  auto to_string_impl(const utils::FormatPolicy &) const
+      -> string_type override;
   auto accept_impl(const StmtVisitor &) const -> stmt_result_t override;
 };
 class For : public Stmt {
@@ -156,8 +155,8 @@ public:
   stmt_ptr_t body;
 
 private:
-  auto
-  to_string_impl(const utils::FormatPolicy &) const -> string_type override;
+  auto to_string_impl(const utils::FormatPolicy &) const
+      -> string_type override;
   auto accept_impl(const StmtVisitor &) const -> stmt_result_t override;
 };
 class Function : public Stmt {
@@ -176,8 +175,8 @@ public:
   Block body;
 
 private:
-  auto
-  to_string_impl(const utils::FormatPolicy &) const -> string_type override;
+  auto to_string_impl(const utils::FormatPolicy &) const
+      -> string_type override;
   auto accept_impl(const StmtVisitor &) const -> stmt_result_t override;
 };
 
@@ -191,8 +190,8 @@ public:
   expr_ptr_t value;
 
 private:
-  auto
-  to_string_impl(const utils::FormatPolicy &) const -> string_type override;
+  auto to_string_impl(const utils::FormatPolicy &) const
+      -> string_type override;
   auto accept_impl(const StmtVisitor &) const -> stmt_result_t override;
 };
 } // namespace net::ancillarycat::loxo::statement

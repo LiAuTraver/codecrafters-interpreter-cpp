@@ -16,7 +16,7 @@ namespace net::ancillarycat::loxo {
 parser &parser::set_views(const token_views_t tokens) {
   contract_assert(tokens.size() && tokens.back().is_type(kEndOfFile),
                   1,
-                  "tokens must have at least 1 token and ends with EOF");
+                  "tokens must have at least 1 token and ends with EOF")
   this->tokens = tokens;
   this->cursor = tokens.begin();
   return *this;
@@ -31,7 +31,7 @@ bool parser::is_at_end(const size_type offset) const {
          cursor->is_type(kEndOfFile);
 }
 auto parser::get(const size_type offset) -> token_t {
-  contract_assert(cursor < tokens.end());
+  contract_assert(cursor < tokens.end())
   auto &token = *cursor;
   cursor += offset;
   return token;
@@ -44,7 +44,7 @@ auto parser::parse(const ParsePolicy &parse_policy) -> utils::Status try {
       stmts.emplace_back(next_declaration());
     }
   } else {
-    contract_assert(false, 0, "unknown parse policy.");
+    contract_assert(false, 0, "unknown parse policy.")
   }
   return utils::OkStatus();
 } catch (const utils::Status &status) {
@@ -55,14 +55,14 @@ auto parser::get_statements() const -> stmt_ptrs_t & {
   contract_assert(not stmts.empty(),
                   1,
                   "statements are empty; maybe you called `parse(kExpression)` "
-                  "but not `parse(kStatement)`?");
+                  "but not `parse(kStatement)`?")
   return stmts;
 }
 auto parser::get_expression() const -> expr_ptr_t & {
   contract_assert(expr_head != nullptr,
                   1,
                   "expression is null; maybe you called `parse(kStatement)` "
-                  "but not `parse(kExpression)`?");
+                  "but not `parse(kExpression)`?")
   return expr_head;
 }
 auto parser::next_expression() -> expr_ptr_t { return assignment(); }
@@ -429,11 +429,11 @@ auto parser::synchronize(const parse_error &parse_error) -> utils::Status {
   auto error_token = this->get();
   dbg(warn,
       "error at '{}'",
-      error_token.to_string(utils::FormatPolicy::kTokenOnly));
+      error_token.to_string(utils::FormatPolicy::kTokenOnly))
 
   while (!is_at_end() && !inspect(kSemicolon)) {
     dbg_block(auto discarded_token = peek();
-              dbg(warn, "discarding {}", discarded_token););
+              dbg(warn, "discarding {}", discarded_token);)
     this->get();
   }
   return utils::Status{

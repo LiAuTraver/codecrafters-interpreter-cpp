@@ -16,12 +16,13 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux" AND NOT DEFINED ENV{AC_CPP_DEBUG})
   add_compile_options(-Wno-deprecated -Wno-deprecated-declarations)
 endif()
 
-file(GLOB_RECURSE DRIVER_HEADER_FILES driver/include/*.hpp)
-file(GLOB_RECURSE DRIVER_SOURCE_FILES driver/src/*.cpp)
 include_directories(driver/include)
 include_directories(packages)
 include_directories(shared)
 include_directories(shared/include)
+file(GLOB_RECURSE DRIVER_HEADER_FILES driver/include/*.hpp)
+file(GLOB_RECURSE DRIVER_SOURCE_FILES driver/src/*.cpp)
+file(GLOB_RECURSE SHARED_HEADER_FILES shared/include/*.hpp)
 
 if(${CMAKE_GENERATOR} MATCHES "Visual Studio")
   message(STATUS "Visual Studio detected")
@@ -73,6 +74,8 @@ endif()
 if(LOXO_BUILD_SHARED)
   add_library(driver SHARED
     ${DRIVER_SOURCE_FILES}
+    ${DRIVER_HEADER_FILES}
+    ${SHARED_HEADER_FILES}
   )
   target_compile_options(driver PUBLIC
     $<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>>: -DLIBLOXO_SHARED>
@@ -84,6 +87,7 @@ else()
   add_library(driver STATIC
     ${DRIVER_HEADER_FILES}
     ${DRIVER_SOURCE_FILES}
+    ${SHARED_HEADER_FILES}
   )
   set_target_properties(driver PROPERTIES LINKER_LANGUAGE CXX)
   message(STATUS "Building static library")

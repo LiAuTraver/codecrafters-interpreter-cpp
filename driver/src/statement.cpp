@@ -106,7 +106,7 @@ auto For::to_string_impl(const utils::FormatPolicy &format_policy) const
   if (this->increment) {
     result += this->increment->to_string(format_policy);
   }
-  contract_assert(!!this->body, 1, "for loop body is null; shouldn't happen");
+  contract_assert(!!this->body, 1, "for loop body is null; shouldn't happen")
   result += ") " + this->body->to_string(format_policy);
   return result;
 }

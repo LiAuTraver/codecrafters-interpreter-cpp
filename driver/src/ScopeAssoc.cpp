@@ -21,7 +21,7 @@ utils::Status ScopeAssoc::add(const string_type &name,
     dbg(warn,
         "The variable {} is already defined in the environment. redefining "
         "it...",
-        name);
+        name)
   }
 
   associations.insert_or_assign(name.data(), std::pair{value, line});

@@ -10,6 +10,7 @@ cc_binary(
         "/Ishared/include",
         "/Ishared",
         "/Idriver/include", 
+        "/Zc:preprocessor",
     ],
     defines = [
         "AC_CPP_DEBUG",

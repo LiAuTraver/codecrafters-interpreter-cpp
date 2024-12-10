@@ -39,9 +39,9 @@ std::any lexer::to_number(string_view_type value) {
       std::from_chars(value.data(), value.data() + value.size(), number);
   if (ec == std::errc())
     return {number};
-  dbg(error, "Unable to convert string to number: {}", value);
-  dbg(error, "Error code: {}", std::to_underlying(ec));
-  dbg(error, "Error position: {}", p);
+  dbg(error, "Unable to convert string to number: {}", value)
+  dbg(error, "Error code: {}", std::to_underlying(ec))
+  dbg(error, "Error position: {}", p)
   return {};
 }
 lexer::lexer(lexer &&other) noexcept
@@ -99,7 +99,7 @@ void lexer::add_identifier_and_keyword() {
   auto value = lex_identifier();
   auto it = keywords.find(value);
   if (it == keywords.end()) {
-    dbg(trace, "identifier: {}", value);
+    dbg(trace, "identifier: {}", value)
     add_token(kIdentifier, value);
     return;
   }
@@ -112,7 +112,7 @@ void lexer::add_identifier_and_keyword() {
     add_token(kFalse, false);
     break;
   default:
-    dbg(info, "keyword: {}", value);
+    dbg(trace, "keyword: {}", value)
     add_token(it->second);
   }
 }
@@ -121,18 +121,18 @@ void lexer::add_number() {
     add_token(kNumber, value);
     return;
   }
-  dbg(error, "invalid number.");
+  dbg(error, "invalid number.")
 }
 void lexer::add_string() {
   // hard to do...
   auto status = lex_string();
   auto value = string_view_type(contents.data() + head + 1, cursor - head - 2);
   if (status != utils::Status::kOkStatus) {
-    dbg(error, "Unterminated string.");
+    dbg(error, "Unterminated string.")
     add_lex_error(error_t::kUnterminatedString);
     return;
   }
-  dbg(trace, "string value: {}", value);
+  dbg(trace, "string value: {}", value)
   add_token(kString, value);
 }
 void lexer::add_comment() {
@@ -142,7 +142,7 @@ void lexer::add_comment() {
 void lexer::next_token() {
   // token1 token2
   // 			 ^ cursor position
-  contract_assert(cursor < contents.size());
+  contract_assert(cursor < contents.size())
 
   switch (auto c = get()) {
   case '(':
@@ -194,7 +194,7 @@ void lexer::next_token() {
       return add_identifier_and_keyword();
     }
     add_lex_error(error_t::kUnexpectedCharacter);
-    dbg(error, "unexpected character: {}", c);
+    dbg(error, "unexpected character: {}", c)
   }
 }
 lexer::char_t lexer::peek(const size_t offset) const {
@@ -203,7 +203,7 @@ lexer::char_t lexer::peek(const size_t offset) const {
   return contents[cursor + offset];
 }
 const lexer::char_t &lexer::get(const size_t offset) {
-  contract_assert(cursor < contents.size());
+  contract_assert(cursor < contents.size())
   auto &c = contents[cursor];
   cursor += offset;
   return c;
@@ -223,12 +223,12 @@ void lexer::add_token(const token_type_t &type, std::any literal) {
     return;
   }
   auto lexeme = string_view_type(contents.data() + head, cursor - head);
-  dbg(trace, "lexeme: {}", lexeme);
+  dbg(trace, "lexeme: {}", lexeme)
   tokens.emplace_back(type, lexeme, std::move(literal), current_line);
   lexeme_views.emplace_back(lexeme);
 }
 void lexer::add_lex_error(const error_code_t type) {
-  dbg(error, "Lexical error: {}", contents.substr(head, cursor - head));
+  dbg(error, "Lexical error: {}", contents.substr(head, cursor - head))
   error_count++;
   return add_token(kLexError, std::make_any<error_t>(type));
 }
@@ -241,7 +241,7 @@ lexer::status_t::Code lexer::lex_string() {
     get();
   }
   if (is_at_end() && peek() != '"') {
-    dbg(error, "Unterminated string.");
+    dbg(error, "Unterminated string.")
     return status_t::kError;
   }
   // "i am a string..."

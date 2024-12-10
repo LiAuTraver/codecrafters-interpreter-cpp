@@ -33,7 +33,7 @@ void alterToolContext(loxo::ExecutionContext &execution_context) {
     if (exists(debugInputFilePath))
       execution_context.input_files.emplace_back(debugInputFilePath);
     else {
-      dbg(critical, "file not found: {}", debugInputFilePath);
+      dbg(critical, "file not found: {}", debugInputFilePath)
       AC_UTILS_DEBUG_BREAK
     }
   }
@@ -59,7 +59,7 @@ int main(int argc, char **argv, char **envp) {
                 tool_context.input_files,
                 [](const auto &file) { dbg(info, "Input file: {}", file); });
             dbg(info, "Execution directory: {}", tool_context.execution_dir);
-            dbg(info, "Temp directory: {}", tool_context.tempdir));
+            dbg(info, "Temp directory: {}", tool_context.tempdir))
 
   return loxo::loxo_main(argc, argv, tool_context);
 }

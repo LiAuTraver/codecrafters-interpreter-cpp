@@ -314,7 +314,7 @@ struct ::fmt::formatter<::std::stacktrace> : ::fmt::formatter<::std::string> {
     return nullptr;                                                            \
   }();
 
-#if (defined(_MSVC_TRADITIONAL) || _MSVC_TRADITIONAL) && !defined(__clang__)
+#if (defined(_MSVC_TRADITIONAL) && _MSVC_TRADITIONAL) && !defined(__clang__)
 /// @brief MSVC traditional preprocessor
 /// @def dbg(_level_, _msg_, ...)
 /// @note MSVC can't get through this:
@@ -322,8 +322,8 @@ struct ::fmt::formatter<::std::stacktrace> : ::fmt::formatter<::std::string> {
 ///       thus can't just simply write #dbg(...) to replace this macro.
 /// @see
 /// https://learn.microsoft.com/en-us/cpp/preprocessor/preprocessor-experimental-overview
-#  warning                                                                     \
-      "MSVC traditional preprocessor was used. no additional debug info will be provided. to enable MSVC's new preprocessor, add compiler flag `/Zc:preprocessor`."
+#  pragma message(                                                             \
+      "MSVC traditional preprocessor was used. no additional debug info will be provided. to enable MSVC's new preprocessor, add compiler flag `/Zc:preprocessor`.")
 #  define dbg(_level_, _msg_, ...)                                             \
     AC_UTILS_DEBUG_LOGGING(_level_, _msg_, ##__VA_ARGS__)
 #  define contract_assert(...)
@@ -360,15 +360,16 @@ struct ::fmt::formatter<::std::stacktrace> : ::fmt::formatter<::std::string> {
 
 #if defined(_MSC_VER) && !defined(__clang__)
 /// @remark currenty, MSVC's constexpr was really disgusting.
-#  define AC_UTILS_CONSTEXPR_IF_NOT_MSVC
+#  define AC_CONSTEXPR20
+#  pragma warning(disable : 4244) // conversion from 'int' to 'char' warning
 #else
-#  define AC_UTILS_CONSTEXPR_IF_NOT_MSVC constexpr
+#  define AC_CONSTEXPR20 constexpr
 #endif
 
 /// @see
 /// https://stackoverflow.com/questions/32432450/what-is-standard-defer-finalizer-implementation-in-c
 struct accat_utils_defer_helper_struct_ {};
-template <class Fun_> struct accat_utils_deferrer_ {
+template <class Fun_> struct accat_utils_deferrer_ { // NOLINT
   Fun_ f_;
   inline constexpr accat_utils_deferrer_(Fun_ f) : f_(f) {}
   inline constexpr ~accat_utils_deferrer_() { f_(); }

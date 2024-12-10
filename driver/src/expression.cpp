@@ -58,7 +58,7 @@ Assignment::Assignment(token_t &&name, expr_ptr_t &&value)
     : name(std::move(name)), value_expr(std::move(value)) {}
 auto Assignment::to_string_impl(const utils::FormatPolicy &format_policy) const
     -> string_type {
-  TODO();
+  TODO()
 }
 Logical::Logical(token_t &&op, expr_ptr_t &&left, expr_ptr_t &&right)
     : op(std::move(op)), left(std::move(left)), right(std::move(right)) {}

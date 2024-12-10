@@ -54,15 +54,15 @@ inline auto get_if(const std::any &literal) -> decltype(auto)
   const auto ptr = std::any_cast<Ty>(&literal);
   if (not ptr)
     dbg_block({
-      dbg(error, "bad any cast.");
+      dbg(error, "bad any cast.")
       dbg(info,
           "Expect type: {}, actual type: {}",
           typeid(Ty).name(),
-          literal.type().name());
+          literal.type().name())
       dbg(warn,
           "\033[033mNote: this lexer treat all number as long double; meybe "
           "you "
-          "accidentally passed an integer?\033[0m");
+          "accidentally passed an integer?\033[0m")
     })
 
   return ptr;
@@ -92,11 +92,15 @@ public:
 
 public:
   constexpr Printable() = default;
+  constexpr Printable(const Printable &) = default;
+  constexpr Printable(Printable &&) noexcept = default;
+  constexpr auto operator=(const Printable &) -> Printable & = default;
+  constexpr auto operator=(Printable &&) noexcept -> Printable & = default;
   virtual ~Printable() = default;
 
 public:
-  auto to_string(const FormatPolicy &format_policy = kDefault) const
-      -> string_type {
+  [[nodiscard]] auto
+  to_string(const FormatPolicy &format_policy = kDefault) const -> string_type {
     return to_string_impl(format_policy);
   }
 
@@ -121,10 +125,15 @@ public:
 
 public:
   constexpr Viewable() = default;
+  constexpr Viewable(const Viewable &) = default;
+  constexpr Viewable(Viewable &&) noexcept = default;
+  constexpr auto operator=(const Viewable &) -> Viewable & = default;
+  constexpr auto operator=(Viewable &&) noexcept -> Viewable & = default;
   virtual ~Viewable() = default;
 
 public:
-  auto to_string_view(const FormatPolicy &format_policy = kDefault) const {
+  [[nodiscard]] auto
+  to_string_view(const FormatPolicy &format_policy = kDefault) const {
     return to_string_view_impl(format_policy);
   }
 
@@ -135,7 +144,9 @@ private:
 } // namespace net::ancillarycat::utils
 
 template <> struct std::formatter<::net::ancillarycat::utils::Printable> {
-  constexpr auto parse(::std::format_parse_context &ctx) { return ctx.begin(); }
+  constexpr auto parse(::std::format_parse_context &ctx) const {
+    return ctx.begin();
+  }
   template <typename FormatContext>
   auto format(const ::net::ancillarycat::utils::Printable &p,
               FormatContext &ctx) {

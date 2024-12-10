@@ -42,8 +42,8 @@ Token::number_to_string(const utils::FormatPolicy policy) const {
       else if (policy == utils::kTokenOnly)
         return utils::format("{:.1f}", *ptr);
       else {
-        dbg(critical, "unreachable code reached: {}", AC_UTILS_STACKTRACE);
-        contract_assert(false);
+        dbg(critical, "unreachable code reached: {}", AC_UTILS_STACKTRACE)
+        contract_assert(false)
         std::unreachable();
       }
     }
@@ -53,19 +53,19 @@ Token::number_to_string(const utils::FormatPolicy policy) const {
     else if (policy == utils::kTokenOnly)
       return utils::format("{}", *ptr);
     else {
-      dbg(critical, "unreachable code reached: {}", AC_UTILS_STACKTRACE);
-      contract_assert(false);
+      dbg(critical, "unreachable code reached: {}", AC_UTILS_STACKTRACE)
+      contract_assert(false)
       std::unreachable();
     }
   } else {
-    dbg_block(literal = nullptr;);
+    dbg_block(literal = nullptr;)
     if (policy == utils::kDefault)
       return utils::format("NUMBER {} {}", lexeme, "<failed to access data>");
     else if (policy == utils::kTokenOnly)
       return utils::format("{}", "<failed to access data>");
     else {
-      dbg(critical, "unreachable code reached: {}", AC_UTILS_STACKTRACE);
-      contract_assert(false);
+      dbg(critical, "unreachable code reached: {}", AC_UTILS_STACKTRACE)
+      contract_assert(false)
       std::unreachable();
     }
   }
@@ -188,7 +188,7 @@ Token::to_string_impl(const utils::FormatPolicy &policy) const {
   case kString:
     type_sv = "STRING"sv;
     lexeme_sv = lexeme;
-    contract_assert(lexeme_sv.front() == '"' && lexeme_sv.back() == '"');
+    contract_assert(lexeme_sv.front() == '"' && lexeme_sv.back() == '"')
     if (policy == utils::FormatPolicy::kTokenOnly) {
       // codecrafter's string lit pase output does not need `"`, so remove them
       lexeme_sv = lexeme_sv.substr(1, lexeme_sv.size() - 2);
@@ -198,7 +198,7 @@ Token::to_string_impl(const utils::FormatPolicy &policy) const {
     else
       literal_sv = "<failed to access data>"sv;
     if (policy == utils::kDefault)
-      contract_assert(lexeme_sv.substr(1, lexeme_sv.size() - 2), literal_sv);
+      contract_assert(lexeme_sv.substr(1, lexeme_sv.size() - 2), literal_sv)
     break;
   case kNumber:
     return number_to_string(policy);
@@ -300,7 +300,7 @@ Token::to_string_impl(const utils::FormatPolicy &policy) const {
       return ""s;
     }
   default:
-    contract_assert(false, 1, "should not happen");
+    contract_assert(false, 1, "should not happen")
     break;
   }
   if (policy == utils::kDefault) {
@@ -311,7 +311,7 @@ Token::to_string_impl(const utils::FormatPolicy &policy) const {
     // for ast print.
     return utils::format("{}", lexeme_sv);
   }
-  contract_assert(false, 1, "should not happen");
+  contract_assert(false, 1, "should not happen")
   return ""s;
 }
 

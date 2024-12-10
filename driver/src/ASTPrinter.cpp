@@ -13,28 +13,28 @@
 
 namespace net::ancillarycat::loxo::expression {
 ASTPrinter::eval_result_t ASTPrinter::visit_impl(const Grouping &expr) const {
-  dbg(info, "Grouping: {}", expr.to_string());
+  dbg(trace, "Grouping: {}", expr.to_string())
   oss << expr << std::endl;
   return {};
 }
 ASTPrinter::eval_result_t ASTPrinter::visit_impl(const Variable &expr) const {
-  dbg(info, "Variable: {}", expr.to_string());
+  dbg(trace, "Variable: {}", expr.to_string())
   oss << expr << std::endl;
   return {};
 }
 utils::IVisitor::eval_result_t
 ASTPrinter::visit_impl(const Assignment &expr) const {
-  dbg(info, "Assignment: {}", expr.to_string());
+  dbg(trace, "Assignment: {}", expr.to_string())
   oss << expr << std::endl;
   return {};
 }
 ASTPrinter::eval_result_t ASTPrinter::visit_impl(const Logical &expr) const {
-  dbg(info, "Logical: {}", expr.to_string());
+  dbg(trace, "Logical: {}", expr.to_string())
   oss << expr << std::endl;
   return {};
 }
 ASTPrinter::eval_result_t ASTPrinter::visit_impl(const Call &expr) const {
-  dbg(info, "Call: {}", expr.to_string());
+  dbg(trace, "Call: {}", expr.to_string())
   oss << expr << std::endl;
   return {};
 }
@@ -43,17 +43,17 @@ auto ASTPrinter::evaluate_impl(const Expr &expr) const -> stmt_result_t {
   return utils::OkStatus();
 }
 ASTPrinter::eval_result_t ASTPrinter::visit_impl(const Literal &expr) const {
-  dbg(info, "Literal: {}", expr.to_string());
+  dbg(trace, "Literal: {}", expr.to_string())
   oss << expr << std::endl;
   return {};
 }
 ASTPrinter::eval_result_t ASTPrinter::visit_impl(const Unary &expr) const {
-  dbg(info, "Unary: {}", expr.to_string());
+  dbg(trace, "Unary: {}", expr.to_string())
   oss << expr << std::endl;
   return {};
 }
 ASTPrinter::eval_result_t ASTPrinter::visit_impl(const Binary &expr) const {
-  dbg(info, "Binary: {}", expr.to_string());
+  dbg(trace, "Binary: {}", expr.to_string())
   oss << expr << std::endl;
   return {};
 }

@@ -77,7 +77,7 @@ auto Environment::add(const string_type &name,
 auto Environment::reassign(const string_type &name,
                            const utils::IVisitor::variant_type &value,
                            const uint_least32_t line) const -> utils::Status {
-  if (auto it = find(name)) {
+  if (const auto it = find(name)) {
     (*it)->second.first = value;
     (*it)->second.second = line;
     return utils::OkStatus();
@@ -87,7 +87,7 @@ auto Environment::reassign(const string_type &name,
 
 auto Environment::get(const string_type &name) const
     -> utils::IVisitor::variant_type {
-  if (auto it = find(name))
+  if (const auto it = find(name))
     return {(*it)->second.first};
 
   return {utils::Monostate{}};
@@ -101,7 +101,7 @@ auto Environment::find(const string_type &name) const
     dbg_block(
         if (!parent) {
           return nullptr;
-        } if (auto another_it = parent->find(name)) {
+        } if (const auto another_it = parent->find(name)) {
           dbg(warn,
               "variable '{}' is shadowed; previously declared at line {}",
               name,
@@ -110,7 +110,7 @@ auto Environment::find(const string_type &name) const
     return maybe_it;
   }
 
-  if (auto enclosing = parent.get()) {
+  if (const auto enclosing = parent.get()) {
     return enclosing->find(name);
   }
 
@@ -126,7 +126,7 @@ auto Environment::to_string_impl(const utils::FormatPolicy &format_policy) const
     -> string_type {
   string_type result;
   result += current.to_string(utils::FormatPolicy::kTokenOnly);
-  if (auto enclosing = this->parent.get()) {
+  if (const auto enclosing = this->parent.get()) {
     result += enclosing->to_string(utils::FormatPolicy::kTokenOnly);
   }
   return result;

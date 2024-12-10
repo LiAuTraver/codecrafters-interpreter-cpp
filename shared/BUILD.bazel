@@ -11,12 +11,13 @@ cc_library(
     defines = [
         "AC_CPP_DEBUG",
     ],
-    deps = [
-        "@fmt",
-        "@spdlog",
-    ],
     copts = [
         "/std:c++latest",
         "/Iinclude",
+        "/Zc:preprocessor",
+    ],
+    deps = [
+        "@fmt",
+        "@spdlog",
     ],
 )

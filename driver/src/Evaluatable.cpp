@@ -4,6 +4,7 @@
 #include <net/ancillarycat/utils/Status.hpp>
 #include <net/ancillarycat/utils/config.hpp>
 #include <memory>
+#include <utility>
 
 #include "details/loxo_fwd.hpp"
 
@@ -109,10 +110,10 @@ String::String(string_type &&value, const uint_least32_t line) noexcept
     : Evaluatable(line), value(std::move(value)) {}
 
 String::String(const String &that)
-    : Evaluatable(that.get_line()), utils::Viewable(that), value(that.value) {}
+    : Evaluatable(that.get_line()), utils::Viewable(), value(that.value) {}
 
 String::String(String &&that) noexcept
-    : Evaluatable(that.get_line()), utils::Viewable(that),
+    : Evaluatable(that.get_line()), utils::Viewable(),
       value(std::move(that.value)) {}
 
 String &String::operator=(const String &that) {
@@ -276,8 +277,8 @@ auto Callable::create_native(unsigned argc,
   return {argc, std::move(func), env};
 }
 
-auto Callable::call(const interpreter &interpreter,
-                    args_t &&args) const -> eval_result_t {
+auto Callable::call(const interpreter &interpreter, args_t &&args) const
+    -> eval_result_t {
   contract_assert(this->arity() == args.size(),
                   1,
                   "arity mismatch; should check it before calling")

@@ -27,26 +27,26 @@
 
 namespace net::ancillarycat::loxo {
 utils::Status show_msg() {
-  dbg(critical, "please provide a command.");
-  contract_assert(false);
+  dbg(critical, "please provide a command.")
+  contract_assert(false)
   return utils::Status::kEmptyInput;
 }
 utils::Status onFileOperationFailed(const utils::Status &load_result) {
-  dbg(error, "{}", load_result.message().data());
+  dbg(error, "{}", load_result.message().data())
   return utils::Status::kPermissionDeniedError;
 }
 utils::Status onLexOperationFailed(const utils::Status &lex_result) {
-  dbg(warn, "{}", lex_result.message().data());
+  dbg(warn, "{}", lex_result.message().data())
   return utils::Status::kError;
 }
 utils::Status onLexOperationExit(const ExecutionContext &ctx) {
-  dbg(error, "lexing process completed with {} error(s).", ctx.lexer->error());
+  dbg(error, "lexing process completed with {} error(s).", ctx.lexer->error())
   return utils::Status::kError;
 }
 utils::Status onCommandNotFound(const ExecutionContext &ctx) {
   dbg(error,
       "Unknown command: {}",
-      ExecutionContext::command_sv(ctx.commands.front()));
+      ExecutionContext::command_sv(ctx.commands.front()))
   return utils::Status::kCommandNotFound;
 }
 void writeLexResultsToContextStream(ExecutionContext &ctx,
@@ -79,11 +79,11 @@ utils::Status tokenize(ExecutionContext &ctx) {
   if (!ctx.lexer->ok()) {
     return onLexOperationExit(ctx);
   }
-  dbg(info, "lexing process completed successfully with no errors.");
+  dbg(info, "lexing process completed successfully with no errors.")
   return utils::Status::kOkStatus;
 }
 utils::Status parse(ExecutionContext &ctx) {
-  dbg(info, "Parsing...");
+  dbg(info, "Parsing...")
   ctx.parser.reset(new parser);
   ctx.parser->set_views(ctx.lexer->get_tokens());
   utils::Status res;
@@ -95,9 +95,9 @@ utils::Status parse(ExecutionContext &ctx) {
   } else if (ctx.commands.front() & ExecutionContext::needs_interpret) {
     res = ctx.parser->parse(parser::kStatement);
   } else {
-    TODO("unimplemented");
+    TODO("unimplemented")
   }
-  dbg(info, "Parsing completed.");
+  dbg(info, "Parsing completed.")
   return res;
 }
 utils::Status evaluate(ExecutionContext &ctx) {
@@ -108,16 +108,16 @@ utils::Status evaluate(ExecutionContext &ctx) {
   return res;
 }
 utils::Status interpret(ExecutionContext &ctx) {
-  dbg(info, "interpreting...");
+  dbg(info, "interpreting...")
   ctx.interpreter.reset(new interpreter);
   auto res = ctx.interpreter->interpret(ctx.parser->get_statements());
-  dbg(info, "interpretation completed.");
+  dbg(info, "interpretation completed.")
   return res;
 }
 void writeParseResultToContextStream(ExecutionContext &ctx) {
   expression::ASTPrinter astPrinter;
   auto res = astPrinter.evaluate(*ctx.parser->get_expression());
-  contract_assert(res.ok());
+  contract_assert(res.ok())
   ctx.output_stream << astPrinter.to_string();
 }
 void writeExprResultToContextStream(ExecutionContext &ctx) {
@@ -136,10 +136,10 @@ int loxo_main(_In_ const int argc,
 // clang-format on
 {
   if (!argv) {
-    dbg(info, "Debug mode enabled.");
+    dbg(info, "Debug mode enabled.")
   }
   if (argc == 0) {
-    dbg(critical, "No arguments provided.");
+    dbg(critical, "No arguments provided.")
     return 1;
   }
   if (ctx.commands.empty()) {
@@ -167,7 +167,7 @@ int loxo_main(_In_ const int argc,
     parse_result = parse(ctx);
   }
   if (!parse_result.ok()) {
-    dbg(error, "Parsing failed: {}", parse_result.message());
+    dbg(error, "Parsing failed: {}", parse_result.message())
     ctx.error_stream << parse_result.message() << std::endl;
     // for codecrafter's test
     if (argv)
@@ -192,7 +192,7 @@ int loxo_main(_In_ const int argc,
         std::cout << ctx.output_stream.view() << std::endl;
       return 0;
     } else {
-      dbg(error, "Evaluation failed: {}", evaluate_result.message());
+      dbg(error, "Evaluation failed: {}", evaluate_result.message())
       ctx.error_stream << evaluate_result.message() << std::endl;
       // for codecrafter's test
       if (argv)
@@ -211,7 +211,7 @@ int loxo_main(_In_ const int argc,
         std::cout << ctx.output_stream.view() << std::endl;
       return 0;
     } else {
-      dbg(error, "Interpretation failed: {}", interpret_result.message());
+      dbg(error, "Interpretation failed: {}", interpret_result.message())
       ctx.error_stream << interpret_result.message() << std::endl;
       // for codecrafter's test
       if (argv)

@@ -36,18 +36,19 @@ public:
   virtual ~Environment() override = default;
 
 public:
-  static auto
-  getGlobalEnvironment() -> utils::StatusOr<std::shared_ptr<self_type>>;
+  static auto getGlobalEnvironment()
+      -> utils::StatusOr<std::shared_ptr<self_type>>;
   static auto createScopeEnvironment(const std::shared_ptr<self_type> &)
       -> std::shared_ptr<self_type>;
 
 public:
   auto find(const string_type &) const
       -> std::optional<self_type::scope_env_t::associations_t::iterator>;
-  auto add(const string_type &,
-           const utils::IVisitor::variant_type &,
-           uint_least32_t = std::numeric_limits<uint_least32_t>::quiet_NaN())
-      const -> utils::Status;
+  auto
+  add(const string_type &,
+      const utils::IVisitor::variant_type &,
+      uint_least32_t = std::numeric_limits<uint_least32_t>::quiet_NaN()) const
+      -> utils::Status;
   auto reassign(const string_type &,
                 const utils::IVisitor::variant_type &,
                 uint_least32_t) const -> utils::Status;
@@ -60,8 +61,8 @@ private:
   static inline std::shared_ptr<self_type> global_env;
 
 private:
-  auto
-  to_string_impl(const utils::FormatPolicy &) const -> string_type override;
+  auto to_string_impl(const utils::FormatPolicy &) const
+      -> string_type override;
 };
 } // namespace net::ancillarycat::loxo
 

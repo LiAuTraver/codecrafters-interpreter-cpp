@@ -84,8 +84,9 @@ public:
   }
   template <typename Args>
     requires requires { std::declval<variant_type>().template emplace<Args>(); }
-  constexpr auto emplace() noexcept(
-      noexcept(my_variant.template emplace<Args>())) -> decltype(auto) {
+  constexpr auto
+  emplace() noexcept(noexcept(my_variant.template emplace<Args>()))
+      -> decltype(auto) {
     return my_variant.template emplace<Args>();
   }
   constexpr auto &get() const { return my_variant; }
@@ -116,7 +117,7 @@ private:
 private:
   inline constexpr bool is_valid() const noexcept {
     auto ans = my_variant.index() != std::variant_npos;
-    contract_assert(ans);
+    contract_assert(ans)
     return ans;
   }
 
@@ -138,8 +139,8 @@ private:
   /// @brief get the value of the variant; a wrapper around @link std::get
   /// @endlink
   template <class Ty, class... MyTypes>
-  friend inline constexpr auto
-  get(const Variant<MyTypes...> &v) -> decltype(auto);
+  friend inline constexpr auto get(const Variant<MyTypes...> &v)
+      -> decltype(auto);
 };
 /// @brief check if the variant holds a specific type;
 ///  a wrapper around @link std::holds_alternative @endlink

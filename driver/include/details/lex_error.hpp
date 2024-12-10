@@ -37,14 +37,14 @@ inline lex_error::string_t
 lex_error::to_string(const string_view_t lexeme_sv,
                      const uint_least32_t line) const {
   if (!line)
-    dbg(warn, "line number is 0");
+    dbg(warn, "line number is 0")
   if (lexeme_sv.empty())
-    dbg(warn, "lexeme is empty");
+    dbg(warn, "lexeme is empty")
 
   auto msg = string_t{};
   switch (type) {
   case kMonostate:
-    dbg(critical, "Shouldn't happen: type is kMonostate");
+    dbg(critical, "Shouldn't happen: type is kMonostate")
     msg = "Internal error";
     break;
   case kUnexpectedCharacter:
@@ -55,7 +55,7 @@ lex_error::to_string(const string_view_t lexeme_sv,
     break;
   }
   auto str = utils::format("[line {}] Error: {}", line, msg);
-  dbg(error, "{}", str);
+  dbg(error, "{}", str)
   return str;
 }
 
