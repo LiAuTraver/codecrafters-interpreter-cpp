@@ -269,6 +269,10 @@ auto interpreter::evaluate_impl(const expression::Expr &expr) const
 }
 auto interpreter::visit_impl(const statement::Return &expr) const
     -> stmt_result_t {
+  if (this->env == *Environment::getGlobalEnvironment()) {
+    return {utils::InvalidArgument("Cannot return from top-level code.")};
+  }
+
   if (not expr.value) {
     dbg(info, "returning nil")
     return Returning({{evaluation::NilValue}});

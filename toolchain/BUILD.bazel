@@ -1,3 +1,8 @@
+# Copyright 2024 Original Authors. This (and files under the same directory)
+# is a copy of the original files from the Official Bazel Examples repository
+# and altered to fit the needs of this(loxo) project.
+
+
 # Copyright 2018 The Bazel Authors. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -57,6 +62,7 @@ _BUILD_TOOLS_INSTALL_PATH = "C:\\Program Files\\Microsoft Visual Studio\\2022\\C
 _MSVC_VERSION = "14.42.34433"
 _WINDOWS_10_SDK_VERSION = "10.0.22621.0"
 _MSVC_INSTALL_PATH = "{}VC\\Tools\\MSVC\\{}\\".format(_BUILD_TOOLS_INSTALL_PATH, _MSVC_VERSION)
+_USER_TEMP_DIR = "C:\\Users\\LiAu\\AppData\\Local\\Temp"
 
 _BUILTIN_INCLUDE_DIRECTORIES = [
     "{}include".format(_MSVC_INSTALL_PATH),
@@ -97,7 +103,7 @@ cc_toolchain_config(
         "{}Common7\\Tools\\".format(_BUILD_TOOLS_INSTALL_PATH),
         "C:\\WINDOWS\\system32",
     ]),
-    msvc_env_tmp = "C:\\Users\\xavib\\AppData\\Local\\Temp",
+    msvc_env_tmp = _USER_TEMP_DIR,
     msvc_lib_path = "{}bin/HostX64/x64/lib.exe".format(_MSVC_INSTALL_PATH),
     msvc_link_path = "{}bin/HostX64/x64/link.exe".format(_MSVC_INSTALL_PATH),
     msvc_ml_path = "{}bin/HostX64/x64/ml64.exe".format(_MSVC_INSTALL_PATH),

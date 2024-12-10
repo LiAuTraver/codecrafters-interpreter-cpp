@@ -1,0 +1,17 @@
+cc_binary(
+    name = "demo",
+    srcs = [
+        "demo_playground.cpp",
+    ],
+    copts = [
+        "/std:c++latest",
+        "/Zc:preprocessor",
+    ],
+    defines = [
+        "AC_CPP_DEBUG",
+    ],
+    deps = [
+        "@fmt",
+        "@spdlog",
+    ],
+)

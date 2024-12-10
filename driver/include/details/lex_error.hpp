@@ -38,23 +38,24 @@ lex_error::to_string(const string_view_t lexeme_sv,
                      const uint_least32_t line) const {
   if (!line)
     dbg(warn, "line number is 0")
-  if (lexeme_sv.empty())
-    dbg(warn, "lexeme is empty")
+  if (lexeme_sv.empty()){
+    dbg(warn, "lexeme is empty")}
 
-  auto msg = string_t{};
+  auto my_msg = string_t{};
+
   switch (type) {
   case kMonostate:
     dbg(critical, "Shouldn't happen: type is kMonostate")
-    msg = "Internal error";
+    my_msg = "Internal error";
     break;
   case kUnexpectedCharacter:
-    msg = utils::format("Unexpected character: {}", lexeme_sv.data());
+    my_msg = utils::format("Unexpected character: {}", lexeme_sv.data());
     break;
   case kUnterminatedString:
-    msg = "Unterminated string.";
+    my_msg = "Unterminated string.";
     break;
   }
-  auto str = utils::format("[line {}] Error: {}", line, msg);
+  auto str = utils::format("[line {}] Error: {}", line, my_msg);
   dbg(error, "{}", str)
   return str;
 }

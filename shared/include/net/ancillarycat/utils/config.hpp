@@ -106,7 +106,7 @@ struct ::fmt::formatter<::std::stacktrace> : ::fmt::formatter<::std::string> {
                              ##__VA_ARGS__)
 #  endif
 #else
-#  define AC_UTILS_DEBUG_LOGGING(...)
+#  define AC_UTILS_DEBUG_LOGGING(...) (void)0;
 #endif
 #if defined(__RESHARPER__) || not defined(__PRETTY_FUNCTION__)
 /// @note seems that resharper languege server can't get through
@@ -284,16 +284,15 @@ struct ::fmt::formatter<::std::stacktrace> : ::fmt::formatter<::std::string> {
 #  define AC_UTILS_NOEXCEPT         // nothing
 #else
 // if debug was turned off, do nothing.
-#  define AC_UTILS_RUNTIME_ASSERT(...)
-#  define AC_UTILS_PRECONDITION(...)
-#  define AC_UTILS_POSTCONDITION(...)
-#  define AC_UTILS_NODISCARD_MSG(...)
-#  define AC_UTILS_DEBUG_LOGGING_SETUP(...)
-#  define AC_UTILS_DEBUG_BLOCK(...)
+#  define AC_UTILS_RUNTIME_ASSERT(...) (void)0;
+#  define AC_UTILS_PRECONDITION(...) (void)0;
+#  define AC_UTILS_POSTCONDITION(...) (void)0;
+#  define AC_UTILS_DEBUG_LOGGING_SETUP(...) (void)0;
+#  define AC_UTILS_DEBUG_BLOCK(...) (void)0;
 #  define AC_UTILS_DEBUG_ONLY(...)
 #  define AC_UTILS_NOEXCEPT_IF(...) noexcept(__VA_ARGS__)
 #  define AC_UTILS_NOEXCEPT noexcept
-#  define AC_UTILS_DBG_BREAK
+#  define AC_UTILS_DBG_BREAK (void)0;
 #endif
 /// @def AC_SPDLOG_INITIALIZATION(_exec_, _log_level_) initializes the spdlog
 /// framework
