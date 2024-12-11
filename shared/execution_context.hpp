@@ -17,9 +17,8 @@ namespace net::ancillarycat::loxo {
 class LOXO_API lexer;
 class LOXO_API parser;
 class LOXO_API interpreter;
-/// @remark why? because the forward declaration is not enough for @link
-/// std::unique_ptr @endlink, also I don't want to include those implementation
-/// files.
+/// @remark forward declaration isn't enough for @link std::unique_ptr @endlink,
+/// nor do I want to include those implementation files.
 extern LOXO_API void delete_lexer_fwd(lexer *);
 extern LOXO_API void delete_parser_fwd(parser *);
 extern LOXO_API void delete_interpreter_fwd(interpreter *);
@@ -27,7 +26,7 @@ struct ExecutionContext;
 
 [[nodiscard]]
 extern int loxo_main(_In_ int, _In_ char **, _Inout_ ExecutionContext &);
-/// mimic from llvm clang-driver's ToolContext
+/// @brief mimic from llvm clang-driver's ToolContext
 struct ExecutionContext {
   inline explicit ExecutionContext()
       : lexer(nullptr, &delete_lexer_fwd), parser(nullptr, &delete_parser_fwd),
@@ -97,8 +96,8 @@ enum ExecutionContext::commands_t : uint16_t {
 };
 
 inline void ExecutionContext::addCommands(char **&argv) {
-  // // currently only accept one command
-  // // ctx.commands.emplace_back(*(argv + 1));
+  // currently only accept one command
+  // ctx.commands.emplace_back(*(argv + 1));
   if (std::string_view(*(argv + 1)) == "tokenize") {
     commands.emplace_back(commands_t::lex);
   } else if (std::string_view(*(argv + 1)) == "parse") {

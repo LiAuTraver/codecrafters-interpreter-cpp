@@ -38,7 +38,7 @@ ASTPrinter::eval_result_t ASTPrinter::visit_impl(const Call &expr) const {
   oss << expr << std::endl;
   return {};
 }
-auto ASTPrinter::evaluate_impl(const Expr &expr) const -> stmt_result_t {
+auto ASTPrinter::evaluate_impl(const Expr &expr) const -> eval_result_t {
   const_cast<eval_result_t &>(res) = expr.accept(*this);
   return utils::OkStatus();
 }

@@ -22,9 +22,10 @@
 
 namespace net::ancillarycat::utils {
 template <Variantable... Ts> class Variant;
+class Printable;
+class Viewable;
+enum FormatPolicy : uint8_t;
 #ifndef LOXO_USE_FMT_FORMAT
-#  include <format>
-#  include <print>
 using ::std::format;
 using ::std::print;
 using ::std::println;
@@ -33,8 +34,7 @@ using ::fmt::format;
 using ::fmt::print;
 using ::fmt::println;
 #endif
-} // namespace net::ancillarycat::utils
-namespace net::ancillarycat::utils {
+
 // clang-format off
 /*!
    @brief cast the literal to the specified type and also log the value in debug mode.
@@ -75,10 +75,6 @@ bool is_integer(Ty &&value) noexcept {
 template <typename... Ts> struct match : Ts... {
   using Ts::operator()...;
 };
-template <typename ReturnType, typename... Ts> struct match2 : Ts... {
-  using Ts::operator()...;
-};
-enum FormatPolicy : uint8_t;
 enum FormatPolicy : uint8_t {
   kDefault = 0,
   kTokenOnly = 1,

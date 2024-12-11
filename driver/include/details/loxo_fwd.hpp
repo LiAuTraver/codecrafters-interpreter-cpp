@@ -37,6 +37,8 @@ class parse_error;
 
 class interpreter;
 class Environment;
+
+class Resolver;
 // NOLINTBEGIN(bugprone-forward-declaration-namespace)
 namespace expression {
 class Expr;

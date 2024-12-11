@@ -19,7 +19,8 @@ namespace net::ancillarycat::loxo {
 
 /// @implements expression::ExprVisitor
 class LOXO_API interpreter : virtual public expression::ExprVisitor,
-                             virtual public statement::StmtVisitor {
+                             virtual public statement::StmtVisitor,
+                              std::enable_shared_from_this<interpreter>{
 public:
   interpreter();
   virtual ~interpreter() override = default;
@@ -28,7 +29,7 @@ public:
   using env_ptr_t = std::shared_ptr<env_t>;
 
 public:
-  stmt_result_t interpret(std::span<std::shared_ptr<statement::Stmt>>) const;
+  eval_result_t interpret(std::span<std::shared_ptr<statement::Stmt>>) const;
   // auto save_env() const -> const interpreter &;
   auto set_env(const env_ptr_t &) const -> const interpreter &;
   // auto restore_env() const -> const interpreter &;
@@ -57,7 +58,7 @@ private:
 
 private:
   virtual auto evaluate_impl(const expression::Expr &) const
-      -> stmt_result_t override;
+      -> eval_result_t override;
   virtual auto get_result_impl() const -> eval_result_t override;
 
 private:
@@ -71,25 +72,25 @@ private:
 
 private:
   virtual auto visit_impl(const statement::Variable &) const
-      -> stmt_result_t override;
+      -> eval_result_t override;
   virtual auto visit_impl(const statement::Print &) const
-      -> stmt_result_t override;
+      -> eval_result_t override;
   virtual auto visit_impl(const statement::Expression &) const
-      -> stmt_result_t override;
+      -> eval_result_t override;
   virtual auto visit_impl(const statement::Block &) const
-      -> stmt_result_t override;
+      -> eval_result_t override;
   virtual auto visit_impl(const statement::If &) const
-      -> stmt_result_t override;
+      -> eval_result_t override;
   virtual auto visit_impl(const statement::While &) const
-      -> stmt_result_t override;
+      -> eval_result_t override;
   virtual auto visit_impl(const statement::For &) const
-      -> stmt_result_t override;
+      -> eval_result_t override;
   virtual auto visit_impl(const statement::Function &) const
-      -> stmt_result_t override;
+      -> eval_result_t override;
   virtual auto visit_impl(const statement::Return &) const
-      -> stmt_result_t override;
+      -> eval_result_t override;
   virtual auto execute_impl(const statement::Stmt &) const
-      -> stmt_result_t override;
+      -> eval_result_t override;
 
 private:
   /// @remark `mutable` wasn't intentional, but my design is flawed and this is
@@ -110,12 +111,12 @@ private:
       -> string_type override;
 
 private:
-  [[nodiscard]] inline interpreter::stmt_result_t
+  [[nodiscard]] inline interpreter::eval_result_t
   Returning(interpreter::eval_result_t &&res) const {
     this->last_expr_res.reset(*res).ignore_error();
     return {utils::Status::kReturning, *res};
   }
-  [[nodiscard]] inline interpreter::stmt_result_t
+  [[nodiscard]] inline interpreter::eval_result_t
   Returning(interpreter::eval_result_t &res) const {
     this->last_expr_res.reset(*res).ignore_error();
     return {utils::Status::kReturning, *res};

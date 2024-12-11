@@ -23,7 +23,6 @@ class Environment : public utils::Printable,
 public:
   using string_view_type = evaluation::ScopeAssoc::string_view_type;
   using scope_env_t = evaluation::ScopeAssoc;
-  // using scope_env_ptr_t = std::unique_ptr<scope_env_t>;
   using self_type = Environment;
 
 public:

@@ -24,7 +24,7 @@ private:
   virtual eval_result_t visit_impl(const Assignment &) const override;
   virtual eval_result_t visit_impl(const Logical &) const override;
   virtual eval_result_t visit_impl(const Call &) const override;
-  virtual stmt_result_t evaluate_impl(const Expr &) const override;
+  virtual eval_result_t evaluate_impl(const Expr &) const override;
   virtual string_type
   to_string_impl(const utils::FormatPolicy &) const override;
   auto to_string_view_impl(const utils::FormatPolicy &) const

@@ -22,18 +22,23 @@
 #include "execution_context.hpp"
 
 AC_SPDLOG_INITIALIZATION(loxo, info);
-using namespace net::ancillarycat;
 
-void alterToolContext(loxo::ExecutionContext &execution_context) {
+namespace accat = net::ancillarycat;
+
+void alterToolContext(accat::loxo::ExecutionContext &execution_context) {
   static auto debugInputFilePath =
       std::filesystem::path{"Z:/loxo/examples/dynamic.lox"};
   if (execution_context.commands.empty())
-    execution_context.commands.emplace_back(loxo::ExecutionContext::interpret);
+    execution_context.commands.emplace_back(
+        accat::loxo::ExecutionContext::interpret);
   if (execution_context.input_files.empty()) {
     if (exists(debugInputFilePath))
       execution_context.input_files.emplace_back(debugInputFilePath);
     else {
-      dbg(critical, "file not found: {}", debugInputFilePath)
+      dbg(critical,
+          "file not found: {}."
+          "you are in debug mode, please provide a file.",
+          debugInputFilePath)
       AC_UTILS_DEBUG_BREAK
     }
   }
@@ -41,7 +46,8 @@ void alterToolContext(loxo::ExecutionContext &execution_context) {
 // NOLINTNEXTLINE // <-- why clang-tidy warns the main function?
 int main(int argc, char **argv, char **envp) {
 
-  auto &tool_context = loxo::ExecutionContext::inspectArgs(argc, argv, envp);
+  auto &tool_context =
+      accat::loxo::ExecutionContext::inspectArgs(argc, argv, envp);
 
   dbg_block(alterToolContext(tool_context);
 
@@ -51,7 +57,7 @@ int main(int argc, char **argv, char **envp) {
                 "Command: {}",
                 tool_context.commands.empty()
                     ? "<no command provided>"
-                    : loxo::ExecutionContext::command_sv(
+                    : accat::loxo::ExecutionContext::command_sv(
                           tool_context.commands.front()));
             // dbg(info, "Input files: {}", tool_context.input_files);
             // MSVC failed                    ^^^^^^^^(a vec of path)
@@ -61,5 +67,5 @@ int main(int argc, char **argv, char **envp) {
             dbg(info, "Execution directory: {}", tool_context.execution_dir);
             dbg(info, "Temp directory: {}", tool_context.tempdir))
 
-  return loxo::loxo_main(argc, argv, tool_context);
+  return accat::loxo::loxo_main(argc, argv, tool_context);
 }

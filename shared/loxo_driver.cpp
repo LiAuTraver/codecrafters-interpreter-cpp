@@ -29,35 +29,36 @@ namespace net::ancillarycat::loxo {
 utils::Status show_msg() {
   dbg(critical, "please provide a command.")
   contract_assert(false)
-  return utils::Status::kEmptyInput;
+  // return utils::Status::kEmptyInput;
+  return utils::EmptyInputError("please provide a command.");
 }
 utils::Status onFileOperationFailed(const utils::Status &load_result) {
   dbg(error, "{}", load_result.message().data())
-  return utils::Status::kPermissionDeniedError;
+  return load_result;
 }
 utils::Status onLexOperationFailed(const utils::Status &lex_result) {
   dbg(warn, "{}", lex_result.message().data())
-  return utils::Status::kError;
+  return lex_result;
 }
 utils::Status onLexOperationExit(const ExecutionContext &ctx) {
   dbg(error, "lexing process completed with {} error(s).", ctx.lexer->error())
-  return utils::Status::kError;
+  return {utils::Status::kLexError, "Lexing process completed with errors."};
 }
 utils::Status onCommandNotFound(const ExecutionContext &ctx) {
   dbg(error,
       "Unknown command: {}",
       ExecutionContext::command_sv(ctx.commands.front()))
-  return utils::Status::kCommandNotFound;
+  return {utils::Status::kCommandNotFound, "Unknown command."};
 }
 void writeLexResultsToContextStream(ExecutionContext &ctx,
                                     const lexer::tokens_t &tokens) {
   std::ranges::for_each(tokens, [&ctx](const auto &token) {
-    if (token.type.type == TokenType::kLexError) {
+    if (token.type == TokenType::kLexError) {
       ctx.error_stream << token.to_string() << std::endl;
     }
   });
   std::ranges::for_each(tokens, [&ctx](const auto &token) {
-    if (token.type.type != TokenType::kLexError) {
+    if (token.type != TokenType::kLexError) {
       ctx.output_stream << token.to_string() << std::endl;
     }
   });
@@ -80,7 +81,7 @@ utils::Status tokenize(ExecutionContext &ctx) {
     return onLexOperationExit(ctx);
   }
   dbg(info, "lexing process completed successfully with no errors.")
-  return utils::Status::kOkStatus;
+  return utils::OkStatus();
 }
 utils::Status parse(ExecutionContext &ctx) {
   dbg(info, "Parsing...")

@@ -57,7 +57,7 @@ vcpkg_installed
 .vs
 
 .cache
-# *.lox
+cmake-build-*
 
 ### Bazel specific files ###
 Testing

@@ -27,7 +27,7 @@ using enum TokenType::type_t;
 interpreter::interpreter() : env(std::make_shared<Environment>()) {}
 auto interpreter::interpret(
     const std::span<std::shared_ptr<statement::Stmt>> stmts) const
-    -> stmt_result_t {
+    -> eval_result_t {
   is_interpreting_stmts = true;
   static bool has_init_global_env = false;
   if (!has_init_global_env) {
@@ -103,7 +103,7 @@ auto interpreter::get_call_args(const expression::Call &expr) const
   return {args};
 }
 auto interpreter::visit_impl(const statement::Variable &stmt) const
-    -> stmt_result_t {
+    -> eval_result_t {
 
   if (stmt.has_initilizer()) {
     auto eval_res = evaluate(*stmt.initializer);
@@ -126,7 +126,7 @@ auto interpreter::visit_impl(const statement::Variable &stmt) const
                   stmt.name.line);
 }
 auto interpreter::visit_impl(const statement::Print &stmt) const
-    -> stmt_result_t {
+    -> eval_result_t {
   auto eval_res = evaluate(*stmt.value);
   if (!eval_res)
     return eval_res;
@@ -134,7 +134,7 @@ auto interpreter::visit_impl(const statement::Print &stmt) const
   // return utils::OkStatus();
   return {{evaluation::NilValue}};
 }
-auto interpreter::visit_impl(const statement::If &stmt) const -> stmt_result_t {
+auto interpreter::visit_impl(const statement::If &stmt) const -> eval_result_t {
   auto eval_res = evaluate(*stmt.condition);
   if (!eval_res)
     return eval_res;
@@ -154,8 +154,8 @@ auto interpreter::visit_impl(const statement::If &stmt) const -> stmt_result_t {
   return {*eval_res};
 }
 auto interpreter::visit_impl(const statement::While &stmt) const
-    -> stmt_result_t {
-  stmt_result_t res;
+    -> eval_result_t {
+  eval_result_t res;
   do {
     auto eval_res = evaluate(*stmt.condition);
     if (!eval_res)
@@ -170,7 +170,7 @@ auto interpreter::visit_impl(const statement::While &stmt) const
   return {*res};
 }
 auto interpreter::visit_impl(const statement::For &stmt) const
-    -> stmt_result_t {
+    -> eval_result_t {
 
   if (stmt.initializer)
     if (auto res = execute(*stmt.initializer); !res)
@@ -194,7 +194,7 @@ auto interpreter::visit_impl(const statement::For &stmt) const
   return utils::OkStatus();
 }
 auto interpreter::visit_impl(const statement::Function &stmt) const
-    -> stmt_result_t {
+    -> eval_result_t {
   // TODO: function overloading
   // clang-format off
   if (auto res = env->get(stmt.name.to_string(utils::kTokenOnly));
@@ -233,11 +233,11 @@ auto interpreter::visit_impl(const statement::Function &stmt) const
   // clang-format on
 }
 auto interpreter::visit_impl(const statement::Expression &stmt) const
-    -> stmt_result_t {
+    -> eval_result_t {
   return evaluate(*stmt.expr);
 }
 auto interpreter::visit_impl(const statement::Block &stmt) const
-    -> stmt_result_t {
+    -> eval_result_t {
   auto original_env = env; // save the original environment
   auto sub_env = std::make_shared<Environment>(env);
   env = sub_env;
@@ -252,7 +252,7 @@ auto interpreter::visit_impl(const statement::Block &stmt) const
   return utils::OkStatus();
 }
 auto interpreter::execute_impl(const statement::Stmt &stmt) const
-    -> stmt_result_t {
+    -> eval_result_t {
   return stmt.accept(*this);
 }
 auto interpreter::get_result_impl() const -> eval_result_t {
@@ -260,7 +260,7 @@ auto interpreter::get_result_impl() const -> eval_result_t {
 }
 
 auto interpreter::evaluate_impl(const expression::Expr &expr) const
-    -> stmt_result_t {
+    -> eval_result_t {
   auto res = expr.accept(*this);
   if (!res)
     return res;
@@ -268,7 +268,7 @@ auto interpreter::evaluate_impl(const expression::Expr &expr) const
   return last_expr_res.reset(*res);
 }
 auto interpreter::visit_impl(const statement::Return &expr) const
-    -> stmt_result_t {
+    -> eval_result_t {
   if (this->env == *Environment::getGlobalEnvironment()) {
     return {utils::InvalidArgument("Cannot return from top-level code.")};
   }

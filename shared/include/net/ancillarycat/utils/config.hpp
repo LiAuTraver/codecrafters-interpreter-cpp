@@ -308,8 +308,8 @@ struct ::fmt::formatter<::std::stacktrace> : ::fmt::formatter<::std::string> {
     ::std::cout << ::std::flush;                                               \
     ::std::cerr << ::std::flush;                                               \
     AC_UTILS_DEBUG_LOGGING(info,                                               \
-                           "\033[36mspdlog framework initialized.\033[0m");    \
-    AC_UTILS_DEBUG_LOGGING_SETUP(_exec_, _log_level_, "Debug mode enabled");   \
+                           "\033[36mspdlog framework initialized.\033[0m")     \
+    AC_UTILS_DEBUG_LOGGING_SETUP(_exec_, _log_level_, "Debug mode enabled")    \
     return nullptr;                                                            \
   }();
 

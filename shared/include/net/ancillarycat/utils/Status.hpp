@@ -25,7 +25,8 @@ public:
     kInvalidArgument = 6,
     kCommandNotFound = 7,
     kEmptyInput = 8,
-    kParseError = 9,
+    kLexError = 9,
+    kParseError = 10,
     kNotImplementedError = 11,
 
     /// @return values specific for interpreter, not an `error` but a `status`
@@ -230,7 +231,7 @@ inline AC_CONSTEXPR20 Status CommandNotFound(
   return {Status::kCommandNotFound, message, location};
 }
 
-inline AC_CONSTEXPR20 Status EmptyInput(
+inline AC_CONSTEXPR20 Status EmptyInputError(
     const string_view message,
     const std::source_location &location = std::source_location::current()) {
   return {Status::kEmptyInput, message, location};

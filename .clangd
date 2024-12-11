@@ -1,5 +1,5 @@
 Diagnostics:
-  UnusedIncludes: None
+  UnusedIncludes: Strict
   Suppress:
     - misc-unused-using-decls
     - cppcoreguidelines-narrowing-conversions
@@ -14,4 +14,3 @@ CompileFlags:
   Add:
     - -std=c++23
     - -IM:\vcpkg\installed\x64-windows\include
-    - -IN:\CustomProgramFiles\verilator\include

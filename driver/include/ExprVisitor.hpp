@@ -42,7 +42,7 @@ private:
   virtual eval_result_t visit_impl(const Call &) const = 0;
 
 private:
-  virtual stmt_result_t evaluate_impl(const Expr &) const = 0;
+  virtual eval_result_t evaluate_impl(const Expr &) const = 0;
   virtual eval_result_t get_result_impl() const = 0;
 };
 } // namespace net::ancillarycat::loxo::expression

@@ -5,3 +5,5 @@ cmake-build-release
 bazel-out
 bazel-bin
 examples
+.idea
+.vscode

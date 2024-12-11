@@ -10,16 +10,17 @@ cc_binary(
         "/std:c++latest",
         "/Ishared",
         "/Ishared/include",
-        "/Idriver/include"
+        "/Idriver/include",
+        "/Zc:preprocessor",
     ],
     defines = [
         "AC_CPP_DEBUG",
         "LIBLOXO_SHARED",
     ],
     deps = [
+        "//driver",
         "@fmt",
         "@google_benchmark//:benchmark",
         "@spdlog",
-        "//driver:driver",
     ],
 )
