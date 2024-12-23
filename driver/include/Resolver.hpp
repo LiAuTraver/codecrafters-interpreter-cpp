@@ -12,11 +12,11 @@ class Resolver : virtual public expression::ExprVisitor,
                  virtual public statement::StmtVisitor,
                  public std::enable_shared_from_this<Resolver> {
 public:
-  inline explicit Resolver(interpreter &interpreter);
+  inline explicit Resolver(::net::ancillarycat::loxo::interpreter &interpreter);
   virtual ~Resolver() override = default;
 
 private:
-  interpreter &interpreter;
+  class ::net::ancillarycat::loxo::interpreter &interpreter;
 
 private:
   auto visit_impl(const expression::Literal &) const -> eval_result_t override;

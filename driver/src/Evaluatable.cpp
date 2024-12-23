@@ -295,7 +295,7 @@ auto Callable::call(const interpreter &interpreter, args_t &&args) const
                 if (auto res =
                         scoped_env->add(custom_function.parameters[i], args[i]);
                     !res.ok()) {
-                  return res;
+                  return {res};
                 }
               }
 
@@ -323,7 +323,7 @@ auto Callable::call(const interpreter &interpreter, args_t &&args) const
                 }
               }
               dbg(info, "void function, returning nil.")
-              return {NilValue};
+              return {{NilValue}};
             },
             [](const auto &) -> eval_result_t {
               contract_assert(false, 1, "should not happen")

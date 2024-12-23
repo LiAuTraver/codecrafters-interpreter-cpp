@@ -178,12 +178,6 @@ class Callable : public Evaluatable {
   };
 
 public:
-  // enum type_t : uint8_t {
-  //   kOrdinary = 0,
-  //   kClosure = 1,
-  // };
-
-public:
   using args_t = std::vector<utils::IVisitor::variant_type>;
   using string_view_type = utils::Viewable::string_view_type;
   using native_function_t = std::function<utils::IVisitor::variant_type(

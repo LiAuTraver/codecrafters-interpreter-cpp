@@ -128,6 +128,8 @@ ExecutionContext::inspectArgs(const int argc, char **&argv, char **&envp) {
   //! @note according to standard, `set_rdbuf` shall be protected;
   //! for some reason, MSVC's STL makes it public.
   //! did not compile with libstdc++.
+  //! @see
+  //! <a href="https://github.com/microsoft/STL/issues/2829">this issue</a>
   // ctx.output_stream.set_rdbuf(std::cout.rdbuf());
   ctx.execution_dir = std::filesystem::current_path();
   ctx.tempdir = std::filesystem::temp_directory_path();
