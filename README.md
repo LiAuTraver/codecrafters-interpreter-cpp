@@ -36,10 +36,10 @@ or run the `run.sh` script in the root directory(Linux)
 ### Run the interpreter
 by default the interpreter will output nothing in debug mode but only spdlog messages. comment the code in [execution_context.hpp, line 148-151](shared/execution_context.hpp) to see the output.
 ```powershell
-interpreter.exe tokenize <source>
-interpreter.exe parse <source>
-interpreter.exe evaluate <source>
-interpreter.exe run <source>
+interpreter tokenize <source>
+interpreter parse <source>
+interpreter evaluate <source>
+interpreter run <source>
 # repl was on the way... but not in a forseeable future...
 ```
 
