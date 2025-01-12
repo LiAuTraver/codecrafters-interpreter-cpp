@@ -3,7 +3,7 @@
 #include <utility>
 #include <vector>
 
-#include <net/ancillarycat/utils/Status.hpp>
+#include <accat/auxilia/auxilia.hpp>
 
 #include "details/loxo_fwd.hpp"
 
@@ -11,11 +11,10 @@
 #include "expression.hpp"
 
 #include "parser.hpp"
-namespace net::ancillarycat::loxo {
+namespace accat::loxo {
 // NOLINTBEGIN(misc-no-recursion)
 parser &parser::set_views(const token_views_t tokens) {
   contract_assert(tokens.size() && tokens.back().is_type(kEndOfFile),
-                  1,
                   "tokens must have at least 1 token and ends with EOF")
   this->tokens = tokens;
   this->cursor = tokens.begin();
@@ -36,7 +35,7 @@ auto parser::get(const size_type offset) -> token_t {
   cursor += offset;
   return token;
 }
-auto parser::parse(const ParsePolicy &parse_policy) -> utils::Status try {
+auto parser::parse(const ParsePolicy &parse_policy) -> auxilia::Status try {
   if (parse_policy == kExpression) {
     expr_head = next_expression();
   } else if (parse_policy == kStatement) {
@@ -44,23 +43,23 @@ auto parser::parse(const ParsePolicy &parse_policy) -> utils::Status try {
       stmts.emplace_back(next_declaration());
     }
   } else {
-    contract_assert(false, 0, "unknown parse policy.")
+    contract_assert(false, "unknown parse policy.")
   }
-  return utils::OkStatus();
-} catch (const utils::Status &status) {
+  return auxilia::OkStatus();
+} catch (const auxilia::Status &status) {
   return status;
 }
 
 auto parser::get_statements() const -> stmt_ptrs_t & {
   contract_assert(not stmts.empty(),
-                  1,
+
                   "statements are empty; maybe you called `parse(kExpression)` "
                   "but not `parse(kStatement)`?")
   return stmts;
 }
 auto parser::get_expression() const -> expr_ptr_t & {
   contract_assert(expr_head != nullptr,
-                  1,
+
                   "expression is null; maybe you called `parse(kStatement)` "
                   "but not `parse(kExpression)`?")
   return expr_head;
@@ -422,28 +421,31 @@ auto parser::next_statement() -> stmt_ptr_t {
   }
   return expr_stmt();
 }
-auto parser::synchronize(const parse_error &parse_error) -> utils::Status {
+auto parser::synchronize(const parse_error &parse_error) -> auxilia::Status {
   /// advance until we have a semicolon
   // cueerntly cursor is at the error token: peek() returns the error token,
   // get() returns the error token and advances the cursor
   auto error_token = this->get();
   dbg(warn,
       "error at '{}'",
-      error_token.to_string(utils::FormatPolicy::kTokenOnly))
+      error_token.to_string(auxilia::FormatPolicy::kTokenOnly))
 
   while (!is_at_end() && !inspect(kSemicolon)) {
-    dbg_block(auto discarded_token = peek();
-              dbg(warn, "discarding {}", discarded_token);)
+    dbg_block
+    {
+      auto discarded_token = peek();
+      dbg(warn, "discarding {}", discarded_token);
+    };
     this->get();
   }
-  return utils::Status{
-      utils::Status::kParseError,
-      utils::format("[line {}] Error at '{}': {}",
-                    error_token.line,
-                    error_token.to_string(utils::FormatPolicy::kTokenOnly),
-                    parse_error.message())};
+  return auxilia::Status{
+      auxilia::Status::kParseError,
+      auxilia::format("[line {}] Error at '{}': {}",
+                      error_token.line,
+                      error_token.to_string(auxilia::FormatPolicy::kTokenOnly),
+                      parse_error.message())};
 }
 LOXO_API void delete_parser_fwd(parser *ptr) { delete ptr; }
 
 // NOLINTEND(misc-no-recursion)
-} // namespace net::ancillarycat::loxo
+} // namespace accat::loxo

@@ -1,7 +1,7 @@
 // NOLINTBEGIN
 #include <filesystem>
 
-#include <net/ancillarycat/utils/config.hpp>
+#include <accat/auxilia/auxilia.hpp>
 #include <execution_context.hpp>
 
 static inline auto you_should_not_include_this_header_file_twice =
@@ -10,12 +10,12 @@ static inline auto you_should_not_include_this_header_file_twice =
   __FILE__ "<-- this_file_is_left_without_include_gurad_by_design";
   return nullptr;
 }();
-namespace net::ancillarycat::loxo {
+namespace accat::loxo {
 struct ExecutionContext;
 [[nodiscard]]
 extern int loxo_main(int, char **, ExecutionContext &);
-} // namespace net::ancillarycat::loxo
-using namespace net::ancillarycat::loxo;
+} // namespace accat::loxo
+using namespace accat::loxo;
 using namespace std::string_view_literals;
 using namespace std::filesystem;
 // NOLINTEND

@@ -3,9 +3,10 @@
 #include <string>
 #include <string_view>
 
+#include "accat/auxilia/details/format.hpp"
 #include "details/loxo_fwd.hpp"
 
-namespace net::ancillarycat::loxo {
+namespace accat::loxo {
 class LOXO_API lex_error {
 public:
   enum type_t : uint8_t {
@@ -15,8 +16,8 @@ public:
   };
 
 public:
-  using string_t = utils::string;
-  using string_view_t = utils::string_view;
+  using string_t = auxilia::string;
+  using string_view_t = auxilia::string_view;
 
 public:
   constexpr lex_error() = default;
@@ -49,20 +50,20 @@ lex_error::to_string(const string_view_t lexeme_sv,
     my_msg = "Internal error";
     break;
   case kUnexpectedCharacter:
-    my_msg = utils::format("Unexpected character: {}", lexeme_sv.data());
+    my_msg = auxilia::format("Unexpected character: {}", lexeme_sv.data());
     break;
   case kUnterminatedString:
     my_msg = "Unterminated string.";
     break;
   }
-  auto str = utils::format("[line {}] Error: {}", line, my_msg);
+  auto str = auxilia::format("[line {}] Error: {}", line, my_msg);
   dbg(error, "{}", str)
   return str;
 }
 
 inline auto
 format_to(const lex_error &lex_error,
-          const utils::FormatPolicy format_policy = utils::kDefault) {
+          const auxilia::FormatPolicy format_policy = auxilia::FormatPolicy::kDefault) {
   return lex_error.to_string();
 }
-} // namespace net::ancillarycat::loxo
+} // namespace accat::loxo

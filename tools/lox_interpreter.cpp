@@ -23,8 +23,6 @@
 
 AC_SPDLOG_INITIALIZATION(loxo, info);
 
-namespace accat = net::ancillarycat;
-
 void alterToolContext(accat::loxo::ExecutionContext &execution_context) {
   static auto debugInputFilePath =
       std::filesystem::path{"Z:/loxo/examples/dynamic.lox"};
@@ -49,23 +47,26 @@ int main(int argc, char **argv, char **envp) {
   auto &tool_context =
       accat::loxo::ExecutionContext::inspectArgs(argc, argv, envp);
 
-  dbg_block(alterToolContext(tool_context);
+  dbg_block
+  {
+    alterToolContext(tool_context);
 
-            dbg(info, "Executable name: {}", tool_context.executable_name);
-            dbg(info, "Executable path: {}", tool_context.executable_path);
-            dbg(info,
-                "Command: {}",
-                tool_context.commands.empty()
-                    ? "<no command provided>"
-                    : accat::loxo::ExecutionContext::command_sv(
-                          tool_context.commands.front()));
-            // dbg(info, "Input files: {}", tool_context.input_files);
-            // MSVC failed                    ^^^^^^^^(a vec of path)
-            std::ranges::for_each(
-                tool_context.input_files,
-                [](const auto &file) { dbg(info, "Input file: {}", file); });
-            dbg(info, "Execution directory: {}", tool_context.execution_dir);
-            dbg(info, "Temp directory: {}", tool_context.tempdir))
+    dbg(info, "Executable name: {}", tool_context.executable_name);
+    dbg(info, "Executable path: {}", tool_context.executable_path);
+    dbg(info,
+        "Command: {}",
+        tool_context.commands.empty()
+            ? "<no command provided>"
+            : accat::loxo::ExecutionContext::command_sv(
+                  tool_context.commands.front()));
+    // dbg(info, "Input files: {}", tool_context.input_files);
+    // MSVC failed                    ^^^^^^^^(a vec of path)
+    std::ranges::for_each(tool_context.input_files, [](const auto &file) {
+      dbg(info, "Input file: {}", file);
+    });
+    dbg(info, "Execution directory: {}", tool_context.execution_dir);
+    dbg(info, "Temp directory: {}", tool_context.tempdir)
+  };
 
   return accat::loxo::loxo_main(argc, argv, tool_context);
 }

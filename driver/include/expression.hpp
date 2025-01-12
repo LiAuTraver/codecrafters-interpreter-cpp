@@ -17,10 +17,10 @@
 #include "Token.hpp"
 #include "parse_error.hpp"
 
-/// @namespace net::ancillarycat::loxo::expression
-namespace net::ancillarycat::loxo::expression {
+/// @namespace accat::loxo::expression
+namespace accat::loxo::expression {
 /// @interface Expr
-class Expr : public utils::Printable,
+class Expr : public auxilia::Printable<Expr>,
              public std::enable_shared_from_this<Expr> {
 public:
   using base_type = Expr;
@@ -29,7 +29,7 @@ public:
   using ostringstream_t = std::ostringstream;
   using token_t = Token;
   using expr_ptr_t = std::shared_ptr<base_type>;
-  using expr_result_t = utils::IVisitor::eval_result_t;
+  using expr_result_t = auxilia::IVisitor::eval_result_t;
 
 public:
   virtual ~Expr() = default;
@@ -40,7 +40,8 @@ public:
   auto accept(const DerivedVisitor &visitor) const {
     return accept_impl(visitor);
   }
-
+public:
+  virtual auto to_string(const auxilia::FormatPolicy &) const -> string_type = 0;
 private:
   virtual expr_result_t accept_impl(const ExprVisitor &) const = 0;
 };
@@ -52,8 +53,9 @@ public:
 
 private:
   virtual auto accept_impl(const ExprVisitor &) const -> expr_result_t override;
-  virtual auto to_string_impl(const utils::FormatPolicy &) const
-      -> string_type override;
+
+public:
+  virtual auto to_string(const auxilia::FormatPolicy &) const -> string_type override;
 
 public:
   token_t literal;
@@ -67,8 +69,9 @@ public:
 
 private:
   virtual auto accept_impl(const ExprVisitor &) const -> expr_result_t override;
-  virtual auto to_string_impl(const utils::FormatPolicy &) const
-      -> string_type override;
+
+public:
+  virtual auto to_string(const auxilia::FormatPolicy &) const -> string_type override;
 
 public:
   token_t op;
@@ -83,8 +86,9 @@ public:
 
 private:
   virtual auto accept_impl(const ExprVisitor &) const -> expr_result_t override;
-  virtual auto to_string_impl(const utils::FormatPolicy &) const
-      -> string_type override;
+
+public:
+  virtual auto to_string(const auxilia::FormatPolicy &) const -> string_type override;
 
 public:
   token_t op;
@@ -102,8 +106,9 @@ public:
 
 private:
   auto accept_impl(const ExprVisitor &) const -> expr_result_t override;
-  auto to_string_impl(const utils::FormatPolicy &) const
-      -> string_type override;
+
+public:
+  auto to_string(const auxilia::FormatPolicy &) const -> string_type override;
 };
 
 class Grouping : public Expr {
@@ -113,8 +118,9 @@ public:
 
 private:
   virtual auto accept_impl(const ExprVisitor &) const -> expr_result_t override;
-  virtual auto to_string_impl(const utils::FormatPolicy &) const
-      -> string_type override;
+
+public:
+  virtual auto to_string(const auxilia::FormatPolicy &) const -> string_type override;
 
 public:
   expr_ptr_t expr;
@@ -132,8 +138,9 @@ public:
 
 private:
   virtual auto accept_impl(const ExprVisitor &) const -> expr_result_t override;
-  virtual auto to_string_impl(const utils::FormatPolicy &) const
-      -> string_type override;
+
+public:
+  virtual auto to_string(const auxilia::FormatPolicy &) const -> string_type override;
 };
 /// @implements Expr
 class Logical : public Expr {
@@ -148,8 +155,8 @@ public:
   expr_ptr_t right;
 
 private:
-  virtual auto to_string_impl(const utils::FormatPolicy &) const
-      -> string_type override;
+public:
+  virtual auto to_string(const auxilia::FormatPolicy &) const -> string_type override;
   virtual auto accept_impl(const ExprVisitor &) const -> expr_result_t override;
 };
 class Call : public Expr {
@@ -163,9 +170,9 @@ public:
   std::vector<expr_ptr_t> args;
 
 private:
-  auto to_string_impl(const utils::FormatPolicy &) const
-      -> string_type override;
+public:
+  auto to_string(const auxilia::FormatPolicy &) const -> string_type override;
   expr_result_t accept_impl(const ExprVisitor &) const override;
 };
 
-} // namespace net::ancillarycat::loxo::expression
+} // namespace accat::loxo::expression

@@ -1,8 +1,6 @@
 #include <algorithm>
 #include <cmath>
-#include <net/ancillarycat/utils/Monostate.hpp>
-#include <net/ancillarycat/utils/Status.hpp>
-#include <net/ancillarycat/utils/config.hpp>
+#include <accat/auxilia/auxilia.hpp>
 #include <memory>
 #include <utility>
 
@@ -12,8 +10,8 @@
 #include "Environment.hpp"
 #include "interpreter.hpp"
 
-namespace net::ancillarycat::loxo::evaluation {
-using utils::match;
+namespace accat::loxo::evaluation {
+using auxilia::match;
 
 Value::operator Boolean() const noexcept {
   if (dynamic_cast<const Nil *>(this)) {
@@ -64,14 +62,14 @@ bool Boolean::is_true() const noexcept {
   return value.value();
 }
 
-auto Boolean::to_string_impl(const utils::FormatPolicy &format_policy) const
+auto Boolean::to_string(const auxilia::FormatPolicy &format_policy) const
     -> string_type {
   contract_assert(value.has_value())
   return value.value() ? "true"s : "false"s;
 }
 
-auto Boolean::to_string_view_impl(
-    const utils::FormatPolicy &format_policy) const -> string_view_type {
+auto Boolean::to_string_view(
+    const auxilia::FormatPolicy &format_policy) const -> string_view_type {
   contract_assert(value.has_value())
   return value.value() ? "true"sv : "false"sv;
 }
@@ -90,12 +88,12 @@ Nil &Nil::operator=(Nil &&that) noexcept {
   return *this;
 }
 
-auto Nil::to_string_impl(const utils::FormatPolicy &format_policy) const
+auto Nil::to_string(const auxilia::FormatPolicy &format_policy) const
     -> string_type {
   return "nil"s;
 }
 
-auto Nil::to_string_view_impl(const utils::FormatPolicy &format_policy) const
+auto Nil::to_string_view(const auxilia::FormatPolicy &format_policy) const
     -> string_view_type {
   return "nil"sv;
 }
@@ -110,10 +108,10 @@ String::String(string_type &&value, const uint_least32_t line) noexcept
     : Evaluatable(line), value(std::move(value)) {}
 
 String::String(const String &that)
-    : Evaluatable(that.get_line()), utils::Viewable(), value(that.value) {}
+    : Evaluatable(that.get_line()), value(that.value) {}
 
 String::String(String &&that) noexcept
-    : Evaluatable(that.get_line()), utils::Viewable(),
+    : Evaluatable(that.get_line()),
       value(std::move(that.value)) {}
 
 String &String::operator=(const String &that) {
@@ -146,12 +144,12 @@ Boolean String::operator!=(const String &rhs) const {
 
 String::operator Boolean() const { return True; }
 
-auto String::to_string_impl(const utils::FormatPolicy &format_policy) const
+auto String::to_string(const auxilia::FormatPolicy &format_policy) const
     -> string_type {
   return value;
 }
 
-auto String::to_string_view_impl(const utils::FormatPolicy &format_policy) const
+auto String::to_string_view(const auxilia::FormatPolicy &format_policy) const
     -> string_view_type {
   return value;
 }
@@ -244,9 +242,9 @@ Number &Number::operator/=(const Number &that) {
   return *this;
 }
 
-auto Number::to_string_impl(const utils::FormatPolicy &format_policy) const
+auto Number::to_string(const auxilia::FormatPolicy &format_policy) const
     -> string_type {
-  return utils::format("{}", value);
+  return auxilia::format("{}", value);
 }
 
 Callable::Callable(unsigned argc,
@@ -280,7 +278,6 @@ auto Callable::create_native(unsigned argc,
 auto Callable::call(const interpreter &interpreter, args_t &&args) const
     -> eval_result_t {
   contract_assert(this->arity() == args.size(),
-                  1,
                   "arity mismatch; should check it before calling")
   return my_function.visit(
       match{[&](const native_function_t &native_function) -> eval_result_t {
@@ -305,7 +302,7 @@ auto Callable::call(const interpreter &interpreter, args_t &&args) const
               for (const auto &index : custom_function.body) {
                 auto res = interpreter.execute(*index);
                 if (!res) {
-                  if (res.code() == utils::Status::kReturning) {
+                  if (res.code() == auxilia::Status::kReturning) {
                     auto my_result = interpreter.get_result();
                     // FIXME: i my logic was completely gone here: `last_expr`
                     //              itself was a mistake!
@@ -326,19 +323,19 @@ auto Callable::call(const interpreter &interpreter, args_t &&args) const
               return {{NilValue}};
             },
             [](const auto &) -> eval_result_t {
-              contract_assert(false, 1, "should not happen")
-              return {utils::NotFoundError("no function to call")};
+              dbg_break
+              return {auxilia::NotFoundError("no function to call")};
             }});
 }
 
-auto Callable::to_string_impl(const utils::FormatPolicy &) const
+auto Callable::to_string(const auxilia::FormatPolicy &) const
     -> string_type {
   return my_function.visit(match{
       [](const native_function_t &) { return "<native fn>"s; },
       [](const custom_function_t &f) {
-        return utils::format("<fn {}>", f.name);
+        return auxilia::format("<fn {}>", f.name);
       },
       [](const auto &) { return "<unknown fn>"s; },
   });
 }
-} // namespace net::ancillarycat::loxo::evaluation
+} // namespace accat::loxo::evaluation

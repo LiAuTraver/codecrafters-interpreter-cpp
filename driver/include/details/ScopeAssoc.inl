@@ -1,6 +1,7 @@
 /// @note no include guard.
 #ifdef AC_LOXO_SCOPEASSOC_INL
-#error "please do not include ScopeAssoc.inl in other files; include Environment.hpp instead"
+#  error                                                                       \
+      "please do not include ScopeAssoc.inl in other files; include Environment.hpp instead"
 #endif
 #define AC_LOXO_SCOPEASSOC_INL
 #include <cstddef>
@@ -12,18 +13,18 @@
 #include <string>
 #include <string_view>
 #include <variant>
-#include <net/ancillarycat/utils/Status.hpp>
+#include <accat/auxilia/auxilia.hpp>
 
 #include "details/loxo_fwd.hpp"
 #include "details/IVisitor.hpp"
 
-namespace net::ancillarycat::loxo::evaluation {
-class ScopeAssoc : public utils::Printable {
-  friend class ::net::ancillarycat::loxo::Environment;
+namespace accat::loxo::evaluation {
+class ScopeAssoc : public auxilia::Printable<ScopeAssoc> {
+  friend class ::accat::loxo::Environment;
 
 public:
-  using variant_type = utils::IVisitor::variant_type;
-  using string_view_type = utils::IVisitor::string_view_type;
+  using variant_type = auxilia::IVisitor::variant_type;
+  using string_view_type = auxilia::IVisitor::string_view_type;
   using association_t =
       std::pair<string_type, std::pair<variant_type, uint_least32_t>>;
   using associations_t =
@@ -31,7 +32,7 @@ public:
 
 public:
   constexpr ScopeAssoc() = default;
-  virtual ~ScopeAssoc() override = default;
+  ~ScopeAssoc() = default;
   ScopeAssoc(const ScopeAssoc &that) = default;
   ScopeAssoc(ScopeAssoc &&that) noexcept = default;
   auto operator=(const ScopeAssoc &that) -> ScopeAssoc & = default;
@@ -41,16 +42,15 @@ private:
   auto add(const string_type &,
            const variant_type &,
            uint_least32_t = std::numeric_limits<uint_least32_t>::quiet_NaN())
-      -> utils::Status;
+      -> auxilia::Status;
   auto find(this auto &&self, const string_type &name)
       -> std::optional<associations_t::iterator>;
 
 private:
   associations_t associations{};
 
-private:
-  auto to_string_impl(const utils::FormatPolicy &) const
-      -> string_type override;
+public:
+  auto to_string(const auxilia::FormatPolicy &) const -> string_type;
 };
 auto ScopeAssoc::find(this auto &&self, const string_type &name)
     -> std::optional<associations_t::iterator> {
@@ -58,4 +58,4 @@ auto ScopeAssoc::find(this auto &&self, const string_type &name)
     return it;
   return std::nullopt;
 }
-} // namespace net::ancillarycat::loxo::evaluation
+} // namespace accat::loxo::evaluation

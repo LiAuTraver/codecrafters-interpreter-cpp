@@ -5,9 +5,10 @@
 #include <utility>
 #include <span>
 
-#include <net/ancillarycat/utils/Status.hpp>
+#include <accat/auxilia/auxilia.hpp>
 #include <vector>
 
+#include "accat/auxilia/details/format.hpp"
 #include "details/loxo_fwd.hpp"
 
 #include "expression.hpp"
@@ -15,12 +16,13 @@
 #include "ExprVisitor.hpp"
 #include "StmtVisitor.hpp"
 
-namespace net::ancillarycat::loxo {
+namespace accat::loxo {
 
 /// @implements expression::ExprVisitor
-class LOXO_API interpreter : virtual public expression::ExprVisitor,
+class LOXO_API interpreter : public auxilia::Printable<interpreter>,
+                             virtual public expression::ExprVisitor,
                              virtual public statement::StmtVisitor,
-                              std::enable_shared_from_this<interpreter>{
+                             std::enable_shared_from_this<interpreter> {
 public:
   interpreter();
   virtual ~interpreter() override = default;
@@ -68,7 +70,7 @@ private:
   evaluation::Boolean is_deep_equal(const eval_result_t &,
                                     const eval_result_t &) const;
   auto get_call_args(const expression::Call &expr) const
-      -> utils::StatusOr<std::vector<variant_type>>;
+      -> auxilia::StatusOr<std::vector<variant_type>>;
 
 private:
   virtual auto visit_impl(const statement::Variable &) const
@@ -95,7 +97,7 @@ private:
 private:
   /// @remark `mutable` wasn't intentional, but my design is flawed and this is
   /// a temporary fix.
-  mutable eval_result_t last_expr_res{utils::Monostate{}};
+  mutable eval_result_t last_expr_res{auxilia::Monostate{}};
   mutable std::vector<eval_result_t> stmts_res{};
   mutable env_ptr_t env{};
   // mutable env_ptr_t prev_env{};
@@ -104,25 +106,27 @@ private:
   mutable bool is_interpreting_stmts = false;
 
 private:
-  auto expr_to_string(const utils::FormatPolicy &) const -> string_type;
-  auto value_to_string(const utils::FormatPolicy &, const eval_result_t &) const
-      -> string_type;
-  virtual auto to_string_impl(const utils::FormatPolicy &) const
-      -> string_type override;
+  auto expr_to_string(const auxilia::FormatPolicy &) const -> string_type;
+  auto value_to_string(const auxilia::FormatPolicy &,
+                       const eval_result_t &) const -> string_type;
+
+public:
+  auto to_string(const auxilia::FormatPolicy & =
+                     auxilia::FormatPolicy::kDefault) const -> string_type;
 
 private:
   [[nodiscard]] inline interpreter::eval_result_t
   Returning(interpreter::eval_result_t &&res) const {
-    this->last_expr_res.reset(*res).ignore_error();
-    return {utils::Status::kReturning, *res};
+    this->last_expr_res.reset(res.value()).ignore_error();
+    return {auxilia::Status::kReturning, res.value()};
   }
   [[nodiscard]] inline interpreter::eval_result_t
   Returning(interpreter::eval_result_t &res) const {
-    this->last_expr_res.reset(*res).ignore_error();
-    return {utils::Status::kReturning, *res};
+    this->last_expr_res.reset(res.value()).ignore_error();
+    return {auxilia::Status::kReturning, res.value()};
   }
 
 private:
   friend LOXO_API void delete_interpreter_fwd(interpreter *);
 };
-} // namespace net::ancillarycat::loxo
+} // namespace accat::loxo

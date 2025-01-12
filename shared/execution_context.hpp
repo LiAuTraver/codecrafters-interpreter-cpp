@@ -10,10 +10,10 @@
 #include <unordered_set>
 #include <vector>
 
-#include <net/ancillarycat/utils/config.hpp>
+#include <accat/auxilia/auxilia.hpp>
 #include <details/loxo_fwd.hpp>
 
-namespace net::ancillarycat::loxo {
+namespace accat::loxo {
 class LOXO_API lexer;
 class LOXO_API parser;
 class LOXO_API interpreter;
@@ -178,4 +178,4 @@ inline std::string_view ExecutionContext::command_sv(const commands_t &cmd) {
     return "unknown"sv;
   }
 }
-} // namespace net::ancillarycat::loxo
+} // namespace accat::loxo

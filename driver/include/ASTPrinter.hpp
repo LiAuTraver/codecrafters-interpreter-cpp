@@ -1,15 +1,19 @@
 #pragma once
 
+#include "accat/auxilia/details/format.hpp"
 #include "details/loxo_fwd.hpp"
 #include "details/IVisitor.hpp"
 #include "ExprVisitor.hpp"
 
-namespace net::ancillarycat::loxo::expression {
+namespace accat::loxo::expression {
 /// @implements ExprVisitor
-class LOXO_API ASTPrinter : public ExprVisitor, public utils::Viewable {
+class LOXO_API ASTPrinter : public ExprVisitor,
+                            public auxilia::Viewable<ASTPrinter> {
 public:
   using ostream_t = std::ostream;
   using ostringstream_t = std::ostringstream;
+  using string_type = auxilia::string;
+  using string_view_type = auxilia::string_view;
 
 public:
   ASTPrinter() = default;
@@ -25,15 +29,15 @@ private:
   virtual eval_result_t visit_impl(const Logical &) const override;
   virtual eval_result_t visit_impl(const Call &) const override;
   virtual eval_result_t evaluate_impl(const Expr &) const override;
-  virtual string_type
-  to_string_impl(const utils::FormatPolicy &) const override;
-  auto to_string_view_impl(const utils::FormatPolicy &) const
-      -> utils::Viewable::string_view_type override;
+
+public:
+  string_type to_string(const auxilia::FormatPolicy & = auxilia::FormatPolicy::kDefault) const;
+  auto to_string_view(const auxilia::FormatPolicy & = auxilia::FormatPolicy::kDefault) const -> string_view_type;
   eval_result_t get_result_impl() const override;
 
 private:
-  eval_result_t res{utils::Monostate{}};
+  eval_result_t res{auxilia::Monostate{}};
   mutable ostringstream_t oss;
   mutable ostringstream_t error_stream;
 };
-} // namespace net::ancillarycat::loxo::expression
+} // namespace accat::loxo::expression

@@ -5,10 +5,10 @@
     },
   ],
   "settings": {
-    "animations.Command-Palette": "Slide",
-    "animations.Install-Method": "Apc Customize UI++",
-    "animations.Auto-Install": true,
     "C_Cpp.clang_format_path": "clang-format",
-    "C_Cpp.clang_format_sortIncludes": false
+    "C_Cpp.clang_format_sortIncludes": false,
+    "[Log]": {
+      "editor.fontSize": 15,
+    }
   }
 }

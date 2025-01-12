@@ -3,15 +3,15 @@
 #include <string_view>
 #include <variant>
 
-#include <net/ancillarycat/utils/Variant.hpp>
+#include <accat/auxilia/auxilia.hpp>
 
 #include "details/loxo_fwd.hpp"
 #include "details/ScopeAssoc.inl"
 
 #include "Evaluatable.hpp"
 
-namespace net::ancillarycat::loxo::evaluation {
-utils::Status ScopeAssoc::add(const string_type &name,
+namespace accat::loxo::evaluation {
+auxilia::Status ScopeAssoc::add(const string_type &name,
                               const variant_type &value,
                               const uint_least32_t line) {
   if (associations.contains(name)) {
@@ -25,10 +25,10 @@ utils::Status ScopeAssoc::add(const string_type &name,
   }
 
   associations.insert_or_assign(name.data(), std::pair{value, line});
-  return utils::OkStatus();
+  return auxilia::OkStatus();
 }
-auto ScopeAssoc::to_string_impl(const utils::FormatPolicy &format_policy) const
+auto ScopeAssoc::to_string(const auxilia::FormatPolicy &format_policy) const
     -> string_type {
   return {};
 }
-} // namespace net::ancillarycat::loxo::evaluation
+} // namespace accat::loxo::evaluation

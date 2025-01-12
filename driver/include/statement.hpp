@@ -7,8 +7,8 @@
 
 #include "Token.hpp"
 
-namespace net::ancillarycat::loxo::statement {
-class Stmt : public utils::Printable,
+namespace accat::loxo::statement {
+class Stmt : public auxilia::Printable<Stmt>,
              public std::enable_shared_from_this<Stmt> {
 public:
   using base_type = Stmt;
@@ -18,7 +18,7 @@ public:
   using token_t = Token;
   using stmt_ptr_t = std::shared_ptr<base_type>;
   using expr_ptr_t = std::shared_ptr<expression::Expr>;
-  using stmt_result_t = utils::Status;
+  using stmt_result_t = auxilia::Status;
 
 public:
   virtual ~Stmt() = default;
@@ -29,7 +29,8 @@ public:
   auto accept(const DerivedVisitor &visitor) const {
     return accept_impl(visitor);
   }
-
+public:
+  virtual auto to_string(const auxilia::FormatPolicy &) const -> string_type = 0;
 private:
   virtual stmt_result_t accept_impl(const StmtVisitor &) const = 0;
 };
@@ -51,8 +52,9 @@ public:
 
 private:
   auto accept_impl(const StmtVisitor &) const -> stmt_result_t override;
-  auto to_string_impl(const utils::FormatPolicy &) const
-      -> string_type override;
+
+public:
+  virtual auto to_string(const auxilia::FormatPolicy & ) const -> string_type override;
 };
 class Print : public Stmt {
 public:
@@ -64,9 +66,10 @@ public:
   expr_ptr_t value;
 
 private:
+public:
+  virtual auto to_string(const auxilia::FormatPolicy & ) const -> string_type override;
+
 private:
-  auto to_string_impl(const utils::FormatPolicy &) const
-      -> string_type override;
   auto accept_impl(const StmtVisitor &) const -> stmt_result_t override;
 };
 class Expression : public Stmt {
@@ -78,10 +81,10 @@ public:
 public:
   expr_ptr_t expr;
 
+public:
+  virtual auto to_string(const auxilia::FormatPolicy & ) const -> string_type override;
+
 private:
-private:
-  auto to_string_impl(const utils::FormatPolicy &) const
-      -> string_type override;
   auto accept_impl(const StmtVisitor &) const -> stmt_result_t override;
 };
 class Block : public Stmt {
@@ -94,9 +97,10 @@ public:
 public:
   std::vector<stmt_ptr_t> statements;
 
+public:
+  virtual auto to_string(const auxilia::FormatPolicy & ) const -> string_type override;
+
 private:
-  auto to_string_impl(const utils::FormatPolicy &) const
-      -> string_type override;
   auto accept_impl(const StmtVisitor &) const -> stmt_result_t override;
 };
 
@@ -115,9 +119,10 @@ public:
   stmt_ptr_t then_branch;
   stmt_ptr_t else_branch; // needed to set to nullptr
 
+public:
+  virtual auto to_string(const auxilia::FormatPolicy & ) const -> string_type override;
+
 private:
-  auto to_string_impl(const utils::FormatPolicy &) const
-      -> string_type override;
   auto accept_impl(const StmtVisitor &) const -> stmt_result_t override;
 };
 
@@ -132,9 +137,10 @@ public:
   expr_ptr_t condition;
   stmt_ptr_t body;
 
+public:
+  virtual auto to_string(const auxilia::FormatPolicy & ) const -> string_type override;
+
 private:
-  auto to_string_impl(const utils::FormatPolicy &) const
-      -> string_type override;
   auto accept_impl(const StmtVisitor &) const -> stmt_result_t override;
 };
 class For : public Stmt {
@@ -154,9 +160,10 @@ public:
   expr_ptr_t increment;
   stmt_ptr_t body;
 
+public:
+  virtual auto to_string(const auxilia::FormatPolicy & ) const -> string_type override;
+
 private:
-  auto to_string_impl(const utils::FormatPolicy &) const
-      -> string_type override;
   auto accept_impl(const StmtVisitor &) const -> stmt_result_t override;
 };
 class Function : public Stmt {
@@ -174,9 +181,10 @@ public:
   std::vector<token_t> parameters;
   Block body;
 
+public:
+  virtual auto to_string(const auxilia::FormatPolicy & ) const -> string_type override;
+
 private:
-  auto to_string_impl(const utils::FormatPolicy &) const
-      -> string_type override;
   auto accept_impl(const StmtVisitor &) const -> stmt_result_t override;
 };
 
@@ -189,9 +197,10 @@ public:
 public:
   expr_ptr_t value;
 
+public:
+  virtual auto to_string(const auxilia::FormatPolicy & ) const -> string_type override;
+
 private:
-  auto to_string_impl(const utils::FormatPolicy &) const
-      -> string_type override;
   auto accept_impl(const StmtVisitor &) const -> stmt_result_t override;
 };
-} // namespace net::ancillarycat::loxo::statement
+} // namespace accat::loxo::statement

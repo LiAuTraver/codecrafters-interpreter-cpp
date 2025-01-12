@@ -4,14 +4,15 @@
 #include <unordered_map>
 #include <memory>
 
-#include <net/ancillarycat/utils/Status.hpp>
+#include <accat/auxilia/auxilia.hpp>
 
+#include "accat/auxilia/details/Status.hpp"
 #include "details/IVisitor.hpp"
 #include "details/loxo_fwd.hpp"
 #include "Environment.hpp"
 #include "Evaluatable.hpp"
 
-namespace net::ancillarycat::loxo {
+namespace accat::loxo {
 
 Environment::Environment(const std::shared_ptr<self_type> &enclosing)
     : parent(enclosing) {}
@@ -31,7 +32,7 @@ auto Environment::operator=(Environment &&that) noexcept -> Environment & {
 }
 
 auto Environment::getGlobalEnvironment()
-    -> utils::StatusOr<std::shared_ptr<Environment>> {
+    -> auxilia::StatusOr<std::shared_ptr<Environment>> {
   static auto has_init = false;
   if (has_init)
     return global_env;
@@ -69,28 +70,28 @@ auto Environment::createScopeEnvironment(
 }
 
 auto Environment::add(const string_type &name,
-                      const utils::IVisitor::variant_type &value,
-                      const uint_least32_t line) const -> utils::Status {
+                      const auxilia::IVisitor::variant_type &value,
+                      const uint_least32_t line) const -> auxilia::Status {
   return current.add(name, value, line);
 }
 
 auto Environment::reassign(const string_type &name,
-                           const utils::IVisitor::variant_type &value,
-                           const uint_least32_t line) const -> utils::Status {
+                           const auxilia::IVisitor::variant_type &value,
+                           const uint_least32_t line) const -> auxilia::Status {
   if (const auto it = find(name)) {
     (*it)->second.first = value;
     (*it)->second.second = line;
-    return utils::OkStatus();
+    return auxilia::OkStatus();
   }
-  return utils::InvalidArgument("variable not defined");
+  return auxilia::InvalidArgumentError("variable not defined");
 }
 
 auto Environment::get(const string_type &name) const
-    -> utils::IVisitor::variant_type {
+    -> auxilia::IVisitor::variant_type {
   if (const auto it = find(name))
     return {(*it)->second.first};
 
-  return {utils::Monostate{}};
+  return {auxilia::Monostate{}};
 }
 
 // NOLINTNEXTLINE
@@ -98,15 +99,19 @@ auto Environment::find(const string_type &name) const
     -> std::optional<self_type::scope_env_t::associations_t::iterator> {
   if (auto maybe_it = current.find(name)) {
     // NOLINTNEXTLINE
-    dbg_block(
-        if (!parent) {
-          return nullptr;
-        } if (const auto another_it = parent->find(name)) {
-          dbg(warn,
-              "variable '{}' is shadowed; previously declared at line {}",
-              name,
-              (*another_it)->second.second);
-        })
+    dbg_block
+    {
+      if (!parent) {
+        return nullptr;
+      }
+      if (const auto another_it = parent->find(name)) {
+        dbg(warn,
+            "variable '{}' is shadowed; previously declared at line {}",
+            name,
+            (*another_it)->second.second);
+      }
+      return nullptr;
+    };
     return maybe_it;
   }
 
@@ -122,13 +127,13 @@ auto Environment::copy() const -> std::shared_ptr<self_type> {
   TODO("^^^ failed to compile")
 }
 
-auto Environment::to_string_impl(const utils::FormatPolicy &format_policy) const
-    -> string_type {
+auto Environment::to_string(
+    const auxilia::FormatPolicy &format_policy) const -> string_type {
   string_type result;
-  result += current.to_string(utils::FormatPolicy::kTokenOnly);
+  result += current.to_string(auxilia::FormatPolicy::kTokenOnly);
   if (const auto enclosing = this->parent.get()) {
-    result += enclosing->to_string(utils::FormatPolicy::kTokenOnly);
+    result += enclosing->to_string(auxilia::FormatPolicy::kTokenOnly);
   }
   return result;
 }
-} // namespace net::ancillarycat::loxo
+} // namespace accat::loxo

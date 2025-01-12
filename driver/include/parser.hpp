@@ -16,7 +16,7 @@
 #include "parse_error.hpp"
 #include "Token.hpp"
 
-namespace net::ancillarycat::loxo {
+namespace accat::loxo {
 class LOXO_API parser {
 public:
   enum ParsePolicy {
@@ -46,7 +46,7 @@ public:
   /// @note Expression needs to be shared; especially for variables.
   ///  `(a + b) * (a + b)`. `(a + b)` is shared. `std::unique_ptr` may
   /// bring redundancy.
-  auto parse(const ParsePolicy &) -> utils::Status;
+  auto parse(const ParsePolicy &) -> auxilia::Status;
   auto get_statements() const -> stmt_ptrs_t &;
   auto get_expression() const -> expr_ptr_t &;
 
@@ -85,7 +85,7 @@ private:
   /// <br>
   /// FIXME: 2. add a field to the parser to track the error, not returns a
   ///         shared_ptr
-  auto synchronize(const parse_error &) -> utils::Status;
+  auto synchronize(const parse_error &) -> auxilia::Status;
 
 private:
   /// @remark used in @link while_stmt @endlink and @link if_stmt @endlink
@@ -126,4 +126,4 @@ bool parser::inspect(Args &&...args) {
     return false;
   return (... || (peek().type.type == args));
 }
-} // namespace net::ancillarycat::loxo
+} // namespace accat::loxo

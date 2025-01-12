@@ -12,28 +12,30 @@
 #include <vector>
 #include <functional>
 
-#include <net/ancillarycat/utils/Variant.hpp>
+#include <accat/auxilia/auxilia.hpp>
 
 #include "details/loxo_fwd.hpp"
 #include "details/IVisitor.hpp"
 #include "Token.hpp"
 
-namespace net::ancillarycat::loxo::evaluation {
+namespace accat::loxo::evaluation {
 
 /// @brief A class that represents an evaluatable object
 /// @interface Evaluatable
-/// @implements utils::Printable
-class Evaluatable : public utils::Printable {
+/// @implements auxilia::Printable
+class Evaluatable : public auxilia::Printable<Evaluatable> {
 public:
-  using eval_result_t = utils::IVisitor::eval_result_t;
+  using eval_result_t = auxilia::IVisitor::eval_result_t;
 
 public:
   constexpr Evaluatable() = default;
   explicit constexpr Evaluatable(const uint_least32_t line) : line(line) {}
-  virtual ~Evaluatable() override = default;
+  virtual ~Evaluatable() = default;
   auto operator=(const Evaluatable &) -> Evaluatable & = default;
   uint_least32_t get_line() const { return line; }
-
+public:
+  virtual auto to_string(const auxilia::FormatPolicy &) const
+      -> string_type = 0;
 private:
   uint_least32_t line = std::numeric_limits<uint_least32_t>::quiet_NaN();
 };
@@ -50,7 +52,7 @@ public:
   Boolean operator!() const noexcept;
 };
 
-class LOXO_API Boolean : public Value, public utils::Viewable {
+class LOXO_API Boolean : public Value, public auxilia::Viewable<Boolean> {
 public:
   constexpr Boolean() = default;
   constexpr Boolean(bool value,
@@ -71,17 +73,17 @@ public:
   auto is_true() const noexcept -> bool;
   virtual ~Boolean() = default;
 
-private:
-  auto to_string_impl(const utils::FormatPolicy &) const
-      -> string_type override;
-  auto to_string_view_impl(const utils::FormatPolicy &) const
-      -> string_view_type override;
+public:
+  auto to_string(const auxilia::FormatPolicy &) const
+      -> string_type;
+  auto to_string_view(const auxilia::FormatPolicy &) const
+      -> string_view_type;
 
 private:
   std::optional<bool> value = std::nullopt;
 } static inline AC_CONSTEXPR20 True{true, 0}, False{false, 0};
 
-class LOXO_API Nil : public Value, public utils::Viewable {
+class LOXO_API Nil : public Value, public auxilia::Viewable<Nil> {
 public:
   constexpr Nil() = default;
   explicit Nil(const uint_least32_t line) : Value(line) {}
@@ -91,14 +93,14 @@ public:
   Nil &operator=(Nil &&) noexcept;
   virtual ~Nil() = default;
 
-private:
-  auto to_string_impl(const utils::FormatPolicy &) const
-      -> string_type override;
-  auto to_string_view_impl(const utils::FormatPolicy &) const
-      -> string_view_type override;
+public:
+  auto to_string(const auxilia::FormatPolicy &) const
+      -> string_type;
+  auto to_string_view(const auxilia::FormatPolicy &) const
+      -> string_view_type;
 } static inline AC_CONSTEXPR20 NilValue{};
 
-class String : public Evaluatable, public utils::Viewable {
+class String : public Evaluatable, public auxilia::Viewable<String> {
 public:
   constexpr String() = default;
   explicit String(
@@ -123,11 +125,11 @@ public:
   Boolean operator!=(const String &) const;
   explicit operator Boolean() const;
 
-private:
-  auto to_string_impl(const utils::FormatPolicy &) const
-      -> string_type override;
-  auto to_string_view_impl(const utils::FormatPolicy &) const
-      -> string_view_type override;
+public:
+  auto to_string(const auxilia::FormatPolicy &) const
+      -> string_type;
+  auto to_string_view(const auxilia::FormatPolicy &) const
+      -> string_view_type;
 
 private:
   string_type value;
@@ -164,9 +166,9 @@ public:
 private:
   long double value = std::numeric_limits<long double>::quiet_NaN();
 
-private:
-  auto to_string_impl(const utils::FormatPolicy &) const
-      -> string_type override;
+public:
+  auto to_string(const auxilia::FormatPolicy &) const
+      -> string_type;
 };
 class Callable : public Evaluatable {
   struct Function {
@@ -178,13 +180,13 @@ class Callable : public Evaluatable {
   };
 
 public:
-  using args_t = std::vector<utils::IVisitor::variant_type>;
-  using string_view_type = utils::Viewable::string_view_type;
-  using native_function_t = std::function<utils::IVisitor::variant_type(
+  using args_t = std::vector<auxilia::IVisitor::variant_type>;
+  using string_view_type = auxilia::string_view;
+  using native_function_t = std::function<auxilia::IVisitor::variant_type(
       const interpreter &, args_t &)>;
   using custom_function_t = Function;
   using function_t =
-      utils::Variant<utils::Monostate, native_function_t, custom_function_t>;
+      auxilia::Variant<auxilia::Monostate, native_function_t, custom_function_t>;
   using env_t = Environment;
   using env_ptr_t = std::shared_ptr<env_t>;
 
@@ -211,16 +213,16 @@ public:
 private:
   // dont support static variables in this function
   unsigned my_arity = std::numeric_limits<unsigned>::quiet_NaN();
-  function_t my_function{utils::Monostate{}};
+  function_t my_function{auxilia::Monostate{}};
   env_ptr_t my_env;
 
 private:
   static constexpr auto native_signature = "<native fn>"sv;
 
-private:
-  auto to_string_impl(const utils::FormatPolicy &) const
-      -> string_type override;
+public:
+  auto to_string(const auxilia::FormatPolicy &) const
+      -> string_type;
 };
 
-} // namespace net::ancillarycat::loxo::evaluation
+} // namespace accat::loxo::evaluation
 #endif // AC_LOXO_EVALUATABLE_HPP

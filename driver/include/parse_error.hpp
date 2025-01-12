@@ -2,7 +2,7 @@
 
 #include "details/loxo_fwd.hpp"
 
-namespace net::ancillarycat::loxo {
+namespace accat::loxo {
 class parse_error {
 public:
   enum error_type_t : uint8_t {
@@ -28,11 +28,11 @@ public:
   ~parse_error() = default;
 
 public:
-  utils::string_view message() const noexcept { return my_message; }
+  auxilia::string_view message() const noexcept { return my_message; }
   error_type_t error() const noexcept { return my_error; }
 
 private:
   error_type_t my_error = kMonostate;
   string_type my_message = "<no message provided>";
 };
-} // namespace net::ancillarycat::loxo
+} // namespace accat::loxo

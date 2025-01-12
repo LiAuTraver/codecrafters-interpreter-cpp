@@ -14,7 +14,8 @@
 #include "details/lex_error.hpp"
 #include "Token.hpp"
 
-namespace net::ancillarycat::loxo {
+namespace accat::loxo {
+using enum auxilia::FormatPolicy;
 template <typename Ty>
 inline auto Token::cast_literal() const -> decltype(auto)
   requires std::default_initializable<Ty>
@@ -33,14 +34,14 @@ Token::Token(const token_type &type,
              const uint_least32_t line)
     : type(type), lexeme(lexeme), literal(std::move(literal)), line(line) {}
 Token::string_type
-Token::number_to_string(const utils::FormatPolicy policy) const {
+Token::number_to_string(const auxilia::FormatPolicy policy) const {
   if (auto ptr = cast_literal<long double>()) {
     // 42 -> 42.0
-    if (utils::is_integer(*ptr)) {
-      if (policy == utils::kDefault)
-        return utils::format("NUMBER {} {:.1f}", lexeme, *ptr);
-      else if (policy == utils::kTokenOnly)
-        return utils::format("{:.1f}", *ptr);
+    if (auxilia::is_integer(*ptr)) {
+      if (policy == kDefault)
+        return auxilia::format("NUMBER {} {:.1f}", lexeme, *ptr);
+      else if (policy == kTokenOnly)
+        return auxilia::format("{:.1f}", *ptr);
       else {
         dbg(critical, "unreachable code reached: {}", AC_UTILS_STACKTRACE)
         contract_assert(false)
@@ -48,21 +49,21 @@ Token::number_to_string(const utils::FormatPolicy policy) const {
       }
     }
     //  leave as is
-    if (policy == utils::kDefault)
-      return utils::format("NUMBER {} {}", lexeme, *ptr);
-    else if (policy == utils::kTokenOnly)
-      return utils::format("{}", *ptr);
+    if (policy == kDefault)
+      return auxilia::format("NUMBER {} {}", lexeme, *ptr);
+    else if (policy == kTokenOnly)
+      return auxilia::format("{}", *ptr);
     else {
       dbg(critical, "unreachable code reached: {}", AC_UTILS_STACKTRACE)
       contract_assert(false)
       std::unreachable();
     }
   } else {
-    dbg_block(literal = nullptr;)
-    if (policy == utils::kDefault)
-      return utils::format("NUMBER {} {}", lexeme, "<failed to access data>");
-    else if (policy == utils::kTokenOnly)
-      return utils::format("{}", "<failed to access data>");
+    dbg_block{literal = nullptr;};
+    if (policy == kDefault)
+      return auxilia::format("NUMBER {} {}", lexeme, "<failed to access data>");
+    else if (policy == kTokenOnly)
+      return auxilia::format("{}", "<failed to access data>");
     else {
       dbg(critical, "unreachable code reached: {}", AC_UTILS_STACKTRACE)
       contract_assert(false)
@@ -71,7 +72,7 @@ Token::number_to_string(const utils::FormatPolicy policy) const {
   }
 }
 Token::string_type
-Token::to_string_impl(const utils::FormatPolicy &policy) const {
+Token::to_string(const auxilia::FormatPolicy &policy) const {
   using namespace std::string_literals;
   using enum TokenType::type_t;
   auto type_sv = ""sv;
@@ -189,7 +190,7 @@ Token::to_string_impl(const utils::FormatPolicy &policy) const {
     type_sv = "STRING"sv;
     lexeme_sv = lexeme;
     contract_assert(lexeme_sv.front() == '"' && lexeme_sv.back() == '"')
-    if (policy == utils::FormatPolicy::kTokenOnly) {
+    if (policy == auxilia::FormatPolicy::kTokenOnly) {
       // codecrafter's string lit pase output does not need `"`, so remove them
       lexeme_sv = lexeme_sv.substr(1, lexeme_sv.size() - 2);
     }
@@ -197,8 +198,8 @@ Token::to_string_impl(const utils::FormatPolicy &policy) const {
       literal_sv = *ptr;
     else
       literal_sv = "<failed to access data>"sv;
-    if (policy == utils::kDefault)
-      contract_assert(lexeme_sv.substr(1, lexeme_sv.size() - 2), literal_sv)
+    if (policy == kDefault)
+      contract_assert(lexeme_sv.substr(1, lexeme_sv.size() - 2)== literal_sv)
     break;
   case kNumber:
     return number_to_string(policy);
@@ -288,34 +289,34 @@ Token::to_string_impl(const utils::FormatPolicy &policy) const {
     literal_sv = "null"sv;
     break;
   case kLexError:
-    if (policy == utils::kDefault) {
+    if (policy == kDefault) {
       // /// @note message is different from the other cases.
       if (auto ptr = cast_literal<error_t>())
         return ptr->to_string(lexeme, line);
       else
-        return utils::format(
+        return auxilia::format(
             "[line {}] Error: {}", line, "<failed to access data>");
     } else {
       // do nothing
       return ""s;
     }
   default:
-    contract_assert(false, 1, "should not happen")
+    contract_assert(false,  "should not happen")
     break;
   }
-  if (policy == utils::kDefault) {
+  if (policy == kDefault) {
     /// @note DON'T use `.data()` since it's not null-terminated and will the
     /// string will last till the end
-    return utils::format("{} {} {}", type_sv, lexeme_sv, literal_sv);
-  } else if (policy == utils::kTokenOnly) {
+    return auxilia::format("{} {} {}", type_sv, lexeme_sv, literal_sv);
+  } else if (policy == kTokenOnly) {
     // for ast print.
-    return utils::format("{}", lexeme_sv);
+    return auxilia::format("{}", lexeme_sv);
   }
-  contract_assert(false, 1, "should not happen")
+  contract_assert(false, "should not happen")
   return ""s;
 }
 
 auto format_as(const Token &token) -> Token::string_type {
-  return token.to_string(utils::FormatPolicy::kDefault);
+  return token.to_string(auxilia::FormatPolicy::kDefault);
 }
-} // namespace net::ancillarycat::loxo
+} // namespace accat::loxo

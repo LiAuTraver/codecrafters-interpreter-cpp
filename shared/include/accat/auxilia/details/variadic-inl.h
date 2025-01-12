@@ -1,12 +1,13 @@
 //////////////////////////////////////////////////////////////////////////
-//! @file variadic.h
+//! @file variadic-inl.h
 //! @brief Variadic macros for C and C++.
 //!
 //! This file provides macros to define and utilize variadic functions
 //! in C and C++. It enables overloading of functions based on the
 //! number of parameters provided.
 //!
-//! @note This is an internal header file, included by other library headers.
+//! @note This is an internal header file, included by other library
+//! headers.
 //!
 //! @see
 //! https://stackoverflow.com/questions/11761703/overloading-macro-on-number-of-arguments
@@ -15,7 +16,8 @@
 //! // Example usage:
 //! #define foo(...) AC_UTILS_VFUNC(foo, ##__VA_ARGS__)
 //! // the `##` is used to remove the comma if no arguments are passed;
-//! //                       modern preprocessor will handle this automatically.
+//! //                       modern preprocessor will handle this
+//! automatically.
 //!
 //! void foo_0();
 //! void foo_1(int);
@@ -32,7 +34,7 @@
 // clang-format off
 /// @def AC_UTILS_VFUNC_ARG_COUNT_IMPL
 /// @brief macros to count the number of arguments up to 63
-#define AC_UTILS_VFUNC_ARG_COUNT_IMPL(                                             \
+#define AC_UTILS_VFUNC_ARG_COUNT_IMPL(                                         \
   _0, _1, _2, _3, _4, _5, _6, _7, _8, _9,                                      \
   _10, _11, _12, _13, _14, _15, _16, _17, _18,                                 \
   _19, _20, _21, _22, _23, _24, _25, _26, _27,                                 \
@@ -45,8 +47,8 @@
 
 /// @def AC_UTILS_VFUNC_ARG_COUNT
 /// @brief macro to count the number of arguments
-#define AC_UTILS_VFUNC_ARG_COUNT(...)                                              \
-  AC_UTILS_VFUNC_ARG_COUNT_IMPL(_, ## __VA_ARGS__,                                 \
+#define AC_UTILS_VFUNC_ARG_COUNT(...)                                          \
+  AC_UTILS_VFUNC_ARG_COUNT_IMPL(_, ## __VA_ARGS__,                             \
   63, 62, 61, 60, 59, 58, 57, 56, 55, 54,                                      \
   53, 52, 51, 50, 49, 48, 47, 46, 45, 44,                                      \
   43, 42, 41, 40, 39, 38, 37, 36, 35, 34,                                      \
@@ -72,8 +74,7 @@
   (__VA_ARGS__) // NOLINT(bugprone-reserved-identifier)
 
 /// @def AC_UTILS_COUNTER
-/// @brief Helper macro to expand __COUNTER__; currently has no usage in this
-/// project.
+/// @brief Helper macro to expand __COUNTER__
 #if defined(__COUNTER__) && ((__COUNTER__ + 1) == (__COUNTER__ + 0))
 #  define AC_UTILS_COUNTER __COUNTER__
 #else

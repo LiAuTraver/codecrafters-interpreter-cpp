@@ -13,14 +13,15 @@
 #include <utility>
 #include <vector>
 
+#include "accat/auxilia/details/Status.hpp"
 #include "details/loxo_fwd.hpp"
 
 #include "details/lex_error.hpp"
 #include "lexer.hpp"
 #include "Token.hpp"
 
-/// @namespace net::ancillarycat::loxo
-namespace net::ancillarycat::loxo {
+/// @namespace accat::loxo
+namespace accat::loxo {
 template <typename Predicate>
 bool lexer::advance_if(Predicate &&predicate)
   requires std::invocable<Predicate, char_t> &&
@@ -68,23 +69,23 @@ lexer &lexer::operator=(lexer &&other) noexcept {
 }
 lexer::status_t lexer::load(const path_type &filepath) const {
   if (not contents.empty())
-    return utils::AlreadyExistsError("File already loaded");
+    return auxilia::AlreadyExistsError("File already loaded");
   if (not std::filesystem::exists(filepath))
-    return utils::FileNotFoundError("File does not exist: " +
+    return auxilia::NotFoundError("File does not exist: " +
                                     filepath.string());
   file_reader_t reader(filepath);
   const_cast<string_type &>(contents) = reader.get_contents();
-  return utils::OkStatus();
+  return auxilia::OkStatus();
 }
 lexer::status_t lexer::load(const std::istream &ss) {
   if (not contents.empty())
-    return utils::AlreadyExistsError("Content already loaded");
+    return auxilia::AlreadyExistsError("Content already loaded");
   std::ostringstream oss;
   oss << ss.rdbuf();
   const_cast<string_type &>(contents) = oss.str();
   tokens.clear();
   lexeme_views.clear();
-  return utils::OkStatus();
+  return auxilia::OkStatus();
 }
 
 lexer::status_t lexer::lex() {
@@ -93,7 +94,7 @@ lexer::status_t lexer::lex() {
     next_token();
   }
   add_token(kEndOfFile);
-  return utils::OkStatus();
+  return auxilia::OkStatus();
 }
 void lexer::add_identifier_and_keyword() {
   auto value = lex_identifier();
@@ -127,7 +128,7 @@ void lexer::add_string() {
   // hard to do...
   auto status = lex_string();
   auto value = string_view_type(contents.data() + head + 1, cursor - head - 2);
-  if (status != utils::Status::kOkStatus) {
+  if (status != auxilia::Status::kOk) {
     dbg(error, "Unterminated string.")
     add_lex_error(error_t::kUnterminatedString);
     return;
@@ -242,13 +243,13 @@ lexer::status_t::Code lexer::lex_string() {
   }
   if (is_at_end() && peek() != '"') {
     dbg(error, "Unterminated string.")
-    return status_t::kError;
+    return status_t::kInvalidArgument;
   }
   // "i am a string..."
   // 						      ^ cursor position
   else
     get(); // consume the closing quote.
-  return status_t::kOkStatus;
+  return status_t::kOk;
 }
 std::any lexer::lex_number(const bool is_negative) {
   while (std::isdigit(peek(), std::locale())) {
@@ -296,4 +297,4 @@ lexer::string_view_type lexer::lex_identifier() {
   return value;
 }
 LOXO_API void delete_lexer_fwd(lexer *ptr) { delete ptr; }
-} // namespace net::ancillarycat::loxo
+} // namespace accat::loxo

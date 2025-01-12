@@ -3,16 +3,15 @@
 #include <type_traits>
 #include <variant>
 
-#include <net/ancillarycat/utils/Variant.hpp>
-#include <net/ancillarycat/utils/Status.hpp>
+#include <accat/auxilia/auxilia.hpp>
 
 #include "details/loxo_fwd.hpp"
 
 #include "details/IVisitor.hpp"
 #include "Evaluatable.hpp"
-namespace net::ancillarycat::loxo::expression {
+namespace accat::loxo::expression {
 /// @interface ExprVisitor
-class ExprVisitor : virtual public utils::IVisitor {
+class ExprVisitor : virtual public auxilia::IVisitor {
 public:
   virtual ~ExprVisitor() = default;
 
@@ -45,5 +44,5 @@ private:
   virtual eval_result_t evaluate_impl(const Expr &) const = 0;
   virtual eval_result_t get_result_impl() const = 0;
 };
-} // namespace net::ancillarycat::loxo::expression
+} // namespace accat::loxo::expression
 #endif // LOXO_EXPRVISITOR_HPP

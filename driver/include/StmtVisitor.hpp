@@ -3,18 +3,17 @@
 #include <variant>
 #include <cmath>
 
-#include <net/ancillarycat/utils/Status.hpp>
-#include <net/ancillarycat/utils/Variant.hpp>
+#include <accat/auxilia/auxilia.hpp>
 
 #include "details/loxo_fwd.hpp"
 #include "details/IVisitor.hpp"
 
 #include "Evaluatable.hpp"
 
-namespace net::ancillarycat::loxo::statement {
-/// @implements utils::Printable
+namespace accat::loxo::statement {
+/// @implements auxilia::Printable
 /// @interface StmtVisitor
-class StmtVisitor : virtual public utils::IVisitor {
+class StmtVisitor : virtual public auxilia::IVisitor {
 public:
   template <typename DerivedStmt>
     requires std::is_base_of_v<Stmt, DerivedStmt>
@@ -35,5 +34,5 @@ private:
   virtual eval_result_t visit_impl(const Return &) const = 0;
   virtual eval_result_t execute_impl(const Stmt &) const = 0;
 };
-} // namespace net::ancillarycat::loxo::statement
+} // namespace accat::loxo::statement
 #endif // LOXO_STMTVISITOR_HPP

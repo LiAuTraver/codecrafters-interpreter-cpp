@@ -2,6 +2,7 @@
 #include <cstddef>
 #include <print>
 #include <ranges>
+#include "include/accat/auxilia/details/Status.hpp"
 #if __has_include(<spdlog/spdlog.h>)
 #  include <spdlog/spdlog.h>
 #endif
@@ -16,8 +17,7 @@
 #  define _In_opt_
 #endif
 
-#include <net/ancillarycat/utils/config.hpp>
-#include <net/ancillarycat/utils/Status.hpp>
+#include <accat/auxilia/auxilia.hpp>
 
 #include "execution_context.hpp"
 #include "lexer.hpp"
@@ -25,30 +25,32 @@
 #include "parser.hpp"
 #include "interpreter.hpp"
 
-namespace net::ancillarycat::loxo {
-utils::Status show_msg() {
+namespace accat::loxo {
+auxilia::Status show_msg() {
   dbg(critical, "please provide a command.")
   contract_assert(false)
-  // return utils::Status::kEmptyInput;
-  return utils::EmptyInputError("please provide a command.");
+  // return auxilia::Status::kEmptyInput;
+  return auxilia::InvalidArgumentError("please provide a command.");
 }
-utils::Status onFileOperationFailed(const utils::Status &load_result) {
+auxilia::Status onFileOperationFailed(const auxilia::Status &load_result) {
   dbg(error, "{}", load_result.message().data())
   return load_result;
 }
-utils::Status onLexOperationFailed(const utils::Status &lex_result) {
+auxilia::Status onLexOperationFailed(const auxilia::Status &lex_result) {
   dbg(warn, "{}", lex_result.message().data())
   return lex_result;
 }
-utils::Status onLexOperationExit(const ExecutionContext &ctx) {
+auxilia::Status onLexOperationExit(const ExecutionContext &ctx) {
   dbg(error, "lexing process completed with {} error(s).", ctx.lexer->error())
-  return {utils::Status::kLexError, "Lexing process completed with errors."};
+  return {auxilia::Status::kLexError, "Lexing process completed with errors."};
 }
-utils::Status onCommandNotFound(const ExecutionContext &ctx) {
+auxilia::Status onCommandNotFound(const ExecutionContext &ctx) {
   dbg(error,
       "Unknown command: {}",
       ExecutionContext::command_sv(ctx.commands.front()))
-  return {utils::Status::kCommandNotFound, "Unknown command."};
+  return auxilia::InvalidArgumentError(
+      "Unknown command: "s +
+      ExecutionContext::command_sv(ctx.commands.front()).data());
 }
 void writeLexResultsToContextStream(ExecutionContext &ctx,
                                     const lexer::tokens_t &tokens) {
@@ -63,17 +65,17 @@ void writeLexResultsToContextStream(ExecutionContext &ctx,
     }
   });
 }
-utils::Status tokenize(ExecutionContext &ctx) {
+auxilia::Status tokenize(ExecutionContext &ctx) {
   if (ctx.input_files.size() != 1) {
     return show_msg();
   }
   ctx.lexer.reset(new lexer);
-  if (const utils::Status load_result =
+  if (const auxilia::Status load_result =
           ctx.lexer->load(*ctx.input_files.cbegin());
       !load_result.ok()) {
     return onFileOperationFailed(load_result);
   }
-  const utils::Status lex_result = ctx.lexer->lex();
+  const auxilia::Status lex_result = ctx.lexer->lex();
   if (!lex_result.ok()) {
     return onLexOperationFailed(lex_result);
   }
@@ -81,13 +83,13 @@ utils::Status tokenize(ExecutionContext &ctx) {
     return onLexOperationExit(ctx);
   }
   dbg(info, "lexing process completed successfully with no errors.")
-  return utils::OkStatus();
+  return auxilia::OkStatus();
 }
-utils::Status parse(ExecutionContext &ctx) {
+auxilia::Status parse(ExecutionContext &ctx) {
   dbg(info, "Parsing...")
   ctx.parser.reset(new parser);
   ctx.parser->set_views(ctx.lexer->get_tokens());
-  utils::Status res;
+  auxilia::Status res;
   if (ctx.commands.front() ==
       ExecutionContext::parse) { // NOLINT(bugprone-branch-clone)
     res = ctx.parser->parse(parser::kExpression);
@@ -101,14 +103,14 @@ utils::Status parse(ExecutionContext &ctx) {
   dbg(info, "Parsing completed.")
   return res;
 }
-utils::Status evaluate(ExecutionContext &ctx) {
+auxilia::Status evaluate(ExecutionContext &ctx) {
   dbg(info, "evaluating...")
   ctx.interpreter.reset(new interpreter);
   auto res = ctx.interpreter->evaluate(*ctx.parser->get_expression());
   dbg(info, "evaluation completed.")
   return res;
 }
-utils::Status interpret(ExecutionContext &ctx) {
+auxilia::Status interpret(ExecutionContext &ctx) {
   dbg(info, "interpreting...")
   ctx.interpreter.reset(new interpreter);
   auto res = ctx.interpreter->interpret(ctx.parser->get_statements());
@@ -151,7 +153,7 @@ int loxo_main(_In_ const int argc,
     std::println(stderr, "No input files provided.");
     return 1;
   }
-  utils::Status lex_result;
+  auxilia::Status lex_result;
   if (ctx.commands.front() & ExecutionContext::needs_lex) {
     lex_result = tokenize(ctx);
   }
@@ -163,7 +165,7 @@ int loxo_main(_In_ const int argc,
     std::cout << ctx.output_stream.str() << std::endl;
     return lex_result.ok() ? 0 : 65;
   }
-  utils::Status parse_result;
+  auxilia::Status parse_result;
   if (ctx.commands.front() & ExecutionContext::needs_parse) {
     parse_result = parse(ctx);
   }
@@ -182,7 +184,7 @@ int loxo_main(_In_ const int argc,
     return 0;
   }
 
-  utils::Status evaluate_result;
+  auxilia::Status evaluate_result;
   if (ctx.commands.front() & ExecutionContext::needs_evaluate) {
     evaluate_result = evaluate(ctx);
   }
@@ -201,7 +203,7 @@ int loxo_main(_In_ const int argc,
       return 70;
     }
   }
-  utils::Status interpret_result;
+  auxilia::Status interpret_result;
   if (ctx.commands.front() & ExecutionContext::needs_interpret) {
     interpret_result = interpret(ctx);
   }
@@ -222,6 +224,6 @@ int loxo_main(_In_ const int argc,
       return 70;
     }
   }
-  return onCommandNotFound(ctx).code();
+  return onCommandNotFound(ctx).raw_code();
 }
-} // namespace net::ancillarycat::loxo
+} // namespace accat::loxo

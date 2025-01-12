@@ -7,6 +7,7 @@
 #include <numeric>
 #include <string>
 
+#include "accat/auxilia/details/format.hpp"
 #include "details/loxo_fwd.hpp"
 
 #ifdef AC_LOXO_DETAILS_TOKENTYPE_HPP
@@ -15,12 +16,12 @@
 #endif
 #include "details/TokenType.inl"
 
-namespace net::ancillarycat::loxo {
-class LOXO_API Token : public utils::Printable {
+namespace accat::loxo {
+class LOXO_API Token : public auxilia::Printable<Token> {
 public:
   using token_type = TokenType;
   using error_t = lex_error;
-  using string_view_type = utils::string_view;
+  using string_view_type = auxilia::string_view;
 
 public:
   Token() = default;
@@ -38,14 +39,14 @@ public:
           std::underlying_type_t<enum token_type::type_t>>::signaling_NaN());
 
 public:
-  string_type number_to_string(utils::FormatPolicy policy) const;
+  string_type number_to_string(auxilia::FormatPolicy policy) const;
   constexpr auto is_type(const token_type &type) const noexcept -> bool {
     return this->type == type;
   }
 
-private:
-  auto to_string_impl(const utils::FormatPolicy &) const
-      -> string_type override;
+public:
+  auto to_string(const auxilia::FormatPolicy & = auxilia::FormatPolicy::kDefault) const
+      -> string_type;
 
 public:
   /// @brief the type of the token
@@ -67,14 +68,6 @@ private:
                         // result in a compile error
     requires std::default_initializable<Ty>;
 };
-} // namespace net::ancillarycat::loxo
-
-template <> struct std::formatter<net::ancillarycat::loxo::Token> {
-  constexpr auto parse(std::format_parse_context &ctx) { return ctx.begin(); }
-  template <typename FormatContext>
-  auto format(const net::ancillarycat::loxo::Token &token, FormatContext &ctx) {
-    return format_to(ctx.out(), "{}", token.to_string());
-  }
-};
+} // namespace accat::loxo
 
 #endif // AC_LOXO_TOKEN_HPP

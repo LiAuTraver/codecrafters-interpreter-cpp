@@ -1,25 +1,26 @@
 #pragma once
 
-#include <utility>
-#include <variant>
-#include <string>
-#include <string_view>
 #include <type_traits>
-#include <typeinfo>
+#include <utility>
+#include "./config.hpp"
+#include "./format.hpp"
 
-#include "config.hpp"
-#include "format.hpp"
-
-#include "Monostate.hpp"
-
-namespace net::ancillarycat::utils {
+#include "./Monostate.hpp"
+EXPORT_AUXILIA
+namespace accat::auxilia {
 /// @brief A simple variant wrapper class around @link std::variant @endlink for
 /// convenience when evaluating expressions, especially when the operation was
 /// `to_string` or check the type's name when debugging.
 /// @note exception-free variant wrapper
-template <Variantable... Types> class Variant : public Printable, Viewable {
+template <Variantable... Types>
+class Variant : public Printable<Variant<Types...>>,
+                public Viewable<Variant<Types...>> {
+  using self_type = Variant<Types...>;
+
 public:
   using variant_type = std::variant<Types...>;
+  using string_type = typename Printable<self_type>::string_type;
+  using string_view_type = typename Viewable<self_type>::string_view_type;
 
 public:
   inline constexpr Variant() = default;
@@ -38,7 +39,7 @@ public:
     that.my_variant.template emplace<Monostate>();
     return *this;
   }
-  virtual ~Variant() override = default;
+  ~Variant() = default;
 
 public:
   auto set(Variant &&that = {}) noexcept -> Variant & {
@@ -50,14 +51,19 @@ public:
   auto visit(this auto &&self, Callable &&callable) -> decltype(auto) {
     using ReturnType = decltype(std::forward<Callable>(callable)(
         std::declval<variant_type>()));
-    static_assert(std::is_default_constructible_v<ReturnType>,
+    static_assert(std::is_default_constructible_v<ReturnType> ||
+                      std::is_same_v<ReturnType, void>,
                   "ReturnType must be default constructible");
-    return self.is_valid()
-               ? static_cast<ReturnType>(std::visit(
-                     std::forward<Callable>(callable), self.my_variant))
-               : ReturnType{};
+    if constexpr (std::is_same_v<ReturnType, void>) {
+      return std::visit(std::forward<Callable>(callable), self.my_variant);
+    } else {
+      return self.is_valid()
+                 ? static_cast<ReturnType>(std::visit(
+                       std::forward<Callable>(callable), self.my_variant))
+                 : ReturnType{};
+    }
   }
-  string_view_type type_name() const {
+  auto type_name() const {
     return is_valid() ? this->visit([]([[maybe_unused]] const auto &value)
                                         -> string_view_type {
       return typeid(value).name();
@@ -89,7 +95,7 @@ public:
       -> decltype(auto) {
     return my_variant.template emplace<Args>();
   }
-  constexpr auto &get() const { return my_variant; }
+  auto &get() const { return my_variant; }
   constexpr auto swap(Variant &that) noexcept(
       std::conjunction_v<std::is_nothrow_move_constructible<Types...>,
                          std::is_nothrow_swappable<Types...>>) -> Variant & {
@@ -115,20 +121,30 @@ private:
   variant_type my_variant{Monostate{}};
 
 private:
-  inline constexpr bool is_valid() const noexcept {
+  inline bool is_valid() const noexcept {
     auto ans = my_variant.index() != std::variant_npos;
     contract_assert(ans)
     return ans;
   }
 
-private:
-  constexpr auto to_string_impl(const FormatPolicy &format_policy) const
-      -> string_type override {
-    return typeid(decltype(*this)).name();
+public:
+  constexpr auto to_string(const FormatPolicy &format_policy) const
+      -> string_type {
+    if (format_policy == FormatPolicy::kDefault) {
+      return typeid(decltype(*this)).name();
+    } else if (format_policy == FormatPolicy::kDetailed) {
+      return typeid(decltype(*this)).raw_name();
+    }
+    std::unreachable();
   }
-  constexpr auto to_string_view_impl(const FormatPolicy &format_policy) const
-      -> string_view_type override {
-    return typeid(decltype(*this)).name();
+  constexpr auto to_string_view(const FormatPolicy &format_policy) const
+      -> string_view_type {
+    if (format_policy == FormatPolicy::kDefault) {
+      return typeid(decltype(*this)).name();
+    } else if (format_policy == FormatPolicy::kDetailed) {
+      return typeid(decltype(*this)).raw_name();
+    }
+    std::unreachable();
   }
 
 private:
@@ -139,7 +155,7 @@ private:
   /// @brief get the value of the variant; a wrapper around @link std::get
   /// @endlink
   template <class Ty, class... MyTypes>
-  friend inline constexpr auto get(const Variant<MyTypes...> &v)
+  friend inline auto get(const Variant<MyTypes...> &v)
       -> decltype(auto);
 };
 /// @brief check if the variant holds a specific type;
@@ -149,7 +165,7 @@ inline constexpr bool holds_alternative(const Variant<MyTypes...> &v) noexcept {
   return std::holds_alternative<Ty>(v.get());
 }
 template <class Ty, class... MyTypes>
-inline constexpr auto get(const Variant<MyTypes...> &v) -> decltype(auto) {
+inline auto get(const Variant<MyTypes...> &v) -> decltype(auto) {
   return v.is_valid() ? std::get<Ty>(v.get()) : Ty{};
 }
 template <class Ty, class... MyTypes>
@@ -157,4 +173,4 @@ template <class Ty, class... MyTypes>
 inline constexpr auto get_if(Variant<MyTypes...> *v) noexcept {
   return v->is_valid() ? std::get_if<Ty>(&v->get()) : nullptr;
 }
-} // namespace net::ancillarycat::utils
+} // namespace accat::auxilia

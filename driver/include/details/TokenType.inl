@@ -12,11 +12,12 @@
 
 #include "details/loxo_fwd.hpp"
 
-namespace net::ancillarycat::loxo {
+namespace accat::loxo {
 /// @brief enhanced token type, more like rust's enum
-/// @implements utils::Printable
-/// @implements utils::Viewable
-class LOXO_API TokenType : public utils::Printable, public utils::Viewable {
+/// @implements auxilia::Printable
+/// @implements auxilia::Viewable
+class LOXO_API TokenType : public auxilia::Printable<TokenType>,
+                           public auxilia::Viewable<TokenType> {
 public:
   enum type_t : uint16_t;
 
@@ -76,11 +77,10 @@ public:
 public:
   type_t type;
 
-private:
-  inline auto to_string_impl(const utils::FormatPolicy &) const
-      -> string_type override;
-  inline auto to_string_view_impl(const utils::FormatPolicy &) const
-      -> string_view_type override;
+public:
+  auto to_string_view(const auxilia::FormatPolicy &) const -> string_view_type;
+  auto to_string(const auxilia::FormatPolicy &) const -> string_type;
+
 };
 inline static const auto keywords =
     std::unordered_map<TokenType::string_view_type, TokenType>{
@@ -101,12 +101,12 @@ inline static const auto keywords =
         {"var"sv, {TokenType::kVar}},
         {"while"sv, {TokenType::kWhile}},
     };
-TokenType::string_view_type
-TokenType::to_string_view_impl(const utils::FormatPolicy &) const {
+inline TokenType::string_view_type
+TokenType::to_string_view(const auxilia::FormatPolicy &) const {
   return string_view_type{format_as(*this)};
 }
-TokenType::string_type
-TokenType::to_string_impl(const utils::FormatPolicy &) const {
+inline TokenType::string_type
+TokenType::to_string(const auxilia::FormatPolicy &) const {
   return string_type{format_as(*this)};
 }
 inline auto format_as(const TokenType &t) noexcept
@@ -200,4 +200,4 @@ inline auto format_as(const TokenType &t) noexcept
     return "UNKNOWN"sv;
   }
 }
-} // namespace net::ancillarycat::loxo
+} // namespace accat::loxo

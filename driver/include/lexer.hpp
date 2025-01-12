@@ -8,27 +8,26 @@
 #include <string_view>
 #include <vector>
 
-#include <net/ancillarycat/utils/file_reader.hpp>
-#include <net/ancillarycat/utils/Status.hpp>
+#include <accat/auxilia/auxilia.hpp>
 
 #include "details/loxo_fwd.hpp"
 #include "details/lex_error.hpp"
 #include "Token.hpp"
 
-/// @namespace net::ancillarycat::loxo
-namespace net::ancillarycat::loxo {
+/// @namespace accat::loxo
+namespace accat::loxo {
 class LOXO_API lexer {
 public:
-  using size_type = typename utils::string::size_type;
-  using string_type = utils::string;
-  using string_view_type = utils::string_view;
-  using path_type = utils::path;
-  using status_t = utils::Status;
+  using size_type = typename auxilia::string::size_type;
+  using string_type = auxilia::string;
+  using string_view_type = auxilia::string_view;
+  using path_type = auxilia::path;
+  using status_t = auxilia::Status;
   using token_t = Token;
   using token_type_t = token_t::token_type;
   using tokens_t = std::vector<token_t>;
   using lexeme_views_t = std::vector<string_view_type>;
-  using file_reader_t = utils::file_reader;
+  using file_reader_t = auxilia::file_reader;
   using char_t = typename string_type::value_type;
   using error_t = lex_error;
   using error_code_t = typename error_t::type_t;
@@ -121,4 +120,4 @@ private:
 private:
   friend LOXO_API void delete_lexer_fwd(lexer *);
 };
-} // namespace net::ancillarycat::loxo
+} // namespace accat::loxo

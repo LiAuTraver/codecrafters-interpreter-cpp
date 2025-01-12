@@ -7,8 +7,7 @@
 #include <tuple>
 #include <type_traits>
 
-#include <net/ancillarycat/utils/config.hpp>
-#include <net/ancillarycat/utils/format.hpp>
+#include <accat/auxilia/auxilia.hpp>
 
 #ifdef LIBLOXO_SHARED
 #  ifdef _WIN32
@@ -24,7 +23,7 @@
 #  define LOXO_API
 #endif
 
-namespace net::ancillarycat::loxo {
+namespace accat::loxo {
 
 class Token;
 class TokenType;
@@ -82,11 +81,11 @@ class ScopeAssoc;
 } // namespace evaluation
 // NOLINTEND(bugprone-forward-declaration-namespace)
 
-using utils::operator""s;
-using utils::operator""sv;
+using auxilia::operator""s;
+using auxilia::operator""sv;
 inline static constexpr auto tolerable_chars = "_`"sv;
 /// @note intolarable in codecrafter test
 // inline static constexpr auto conditional_tolerable_chars = "@$#"sv;
 inline static constexpr auto whitespace_chars = " \t\r"sv;
 inline static constexpr auto newline_chars = "\n\v\f"sv;
-} // namespace net::ancillarycat::loxo
+} // namespace accat::loxo

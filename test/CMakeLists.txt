@@ -18,7 +18,6 @@ if (${CMAKE_CXX_COMPILER} STREQUAL "MSVC")
 else ()
     add_compile_options(-DGTEST_CREATE_SHARED_LIBRARY=1)
 endif ()
-enable_testing()
 
 function(create_test_executable test_name)
     add_executable(${test_name} ${ARGN})

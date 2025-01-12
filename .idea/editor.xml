@@ -284,13 +284,19 @@
     <option name="/Default/CodeInspection/ExcludedFiles/FilesAndFoldersToSkip2/=7020124F_002D9FFC_002D4AC3_002D8F3D_002DAAB8E0240759_002Ff_003Avcmaker_002Ehpp_002Fl_003Asrc_003Fvcmaker_002Ehpp/@EntryIndexedValue" value="ForceIncluded" type="string" />
     <option name="/Default/CodeInspection/ExcludedFiles/FilesAndFoldersToSkip2/=7020124F_002D9FFC_002D4AC3_002D8F3D_002DAAB8E0240759_002Ff_003A_005F_005Fstdarg_005Fva_005Farg_002Eh_002Fl_003A_002E_002E_003F_002E_002E_003F_002E_002E_003F_002E_002E_003F_002E_002E_003Fusr_003Flib_003Fllvm_002D18_003Flib_003Fclang_003F18_003Finclude_003F_005F_005Fstdarg_005Fva_005Farg_002Eh/@EntryIndexedValue" value="ForceIncluded" type="string" />
     <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppSmartPointerVsMakeFunction/@EntryIndexRemoved" />
+    <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppCStyleCast/@EntryIndexRemoved" />
     <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppFunctionalStyleCast/@EntryIndexRemoved" />
     <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppReinterpretCastFromVoidPtr/@EntryIndexRemoved" />
+    <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppNonExplicitConvertingConstructor/@EntryIndexRemoved" />
     <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppNonExplicitConversionOperator/@EntryIndexRemoved" />
     <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppDiscardedPostfixOperatorResult/@EntryIndexRemoved" />
     <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppConstValueFunctionReturnType/@EntryIndexRemoved" />
+    <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppMemberFunctionMayBeConst/@EntryIndexRemoved" />
+    <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppMemberFunctionMayBeStatic/@EntryIndexRemoved" />
+    <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppLocalVariableMayBeConst/@EntryIndexRemoved" />
     <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppParameterMayBeConst/@EntryIndexRemoved" />
     <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppVariableCanBeMadeConstexpr/@EntryIndexRemoved" />
+    <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppParameterMayBeConstPtrOrRef/@EntryIndexRemoved" />
     <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppPassValueParameterByConstReference/@EntryIndexRemoved" />
     <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppThrowExpressionCanBeReplacedWithRethrow/@EntryIndexRemoved" />
     <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppZeroConstantCanBeReplacedWithNullptr/@EntryIndexRemoved" />
@@ -299,6 +305,7 @@
     <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=IfStdIsConstantEvaluatedCanBeReplaced/@EntryIndexRemoved" />
     <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=StdIsConstantEvaluatedWillAlwaysEvaluateToConstant/@EntryIndexRemoved" />
     <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=ConstevalIfIsAlwaysConstant/@EntryIndexRemoved" />
+    <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppClassCanBeFinal/@EntryIndexRemoved" />
     <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppUseStructuredBinding/@EntryIndexRemoved" />
     <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppUseTypeTraitAlias/@EntryIndexRemoved" />
     <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppUseAlgorithmWithCount/@EntryIndexRemoved" />
@@ -387,6 +394,9 @@
     <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppUnsignedZeroComparison/@EntryIndexRemoved" />
     <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppMultiCharacterLiteral/@EntryIndexRemoved" />
     <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppMultiCharacterWideLiteral/@EntryIndexRemoved" />
+    <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppRedundantQualifier/@EntryIndexRemoved" />
+    <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppRedundantAccessSpecifier/@EntryIndexRemoved" />
+    <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppAccessSpecifierWithNoDeclarations/@EntryIndexRemoved" />
     <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppRedundantTypenameKeyword/@EntryIndexRemoved" />
     <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppRedundantTemplateKeyword/@EntryIndexRemoved" />
     <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppRedundantElseKeyword/@EntryIndexRemoved" />
@@ -395,6 +405,7 @@
     <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppRedundantEmptyStatement/@EntryIndexRemoved" />
     <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppRedundantEmptyDeclaration/@EntryIndexRemoved" />
     <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppRedundantParentheses/@EntryIndexRemoved" />
+    <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppRedundantLambdaParameterList/@EntryIndexRemoved" />
     <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppRedundantCastExpression/@EntryIndexRemoved" />
     <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppHeaderHasBeenAlreadyIncluded/@EntryIndexRemoved" />
     <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppTemplateArgumentsCanBeDeduced/@EntryIndexRemoved" />
@@ -403,6 +414,7 @@
     <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppRedundantStaticSpecifierOnMemberAllocationFunction/@EntryIndexRemoved" />
     <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppRedundantStaticSpecifierOnThreadLocalLocalVariable/@EntryIndexRemoved" />
     <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppRedundantBaseClassAccessSpecifier/@EntryIndexRemoved" />
+    <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppRedundantInlineSpecifier/@EntryIndexRemoved" />
     <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppRedundantConstSpecifier/@EntryIndexRemoved" />
     <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppRedundantBooleanExpressionArgument/@EntryIndexRemoved" />
     <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppRedundantVoidArgumentList/@EntryIndexRemoved" />
@@ -418,9 +430,30 @@
     <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppConditionalExpressionCanBeSimplified/@EntryIndexRemoved" />
     <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppRedundantExportKeyword/@EntryIndexRemoved" />
     <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppRedundantZeroInitializerInAggregateInitialization/@EntryIndexRemoved" />
+    <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppUserDefinedLiteralSuffixDoesNotStartWithUnderscore/@EntryIndexRemoved" />
+    <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppClassIsIncomplete/@EntryIndexRemoved" />
+    <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppTemplateParameterShadowing/@EntryIndexRemoved" />
+    <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppMutableSpecifierOnReferenceMember/@EntryIndexRemoved" />
+    <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppDefaultInitializationWithNoUserConstructor/@EntryIndexRemoved" />
+    <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppExplicitSpecializationInNonNamespaceScope/@EntryIndexRemoved" />
+    <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppUnionMemberOfReferenceType/@EntryIndexRemoved" />
+    <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppUninitializedDependentBaseClass/@EntryIndexRemoved" />
+    <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppPrecompiledHeaderIsNotIncluded/@EntryIndexRemoved" />
+    <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppPrecompiledHeaderNotFound/@EntryIndexRemoved" />
+    <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppCoroutineCallResolveError/@EntryIndexRemoved" />
+    <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppAwaiterTypeIsNotClass/@EntryIndexRemoved" />
+    <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppOutParameterMustBeWritten/@EntryIndexRemoved" />
+    <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppWarningDirective/@EntryIndexRemoved" />
+    <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppStaticAssertFailure/@EntryIndexRemoved" />
+    <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppEvaluationFailure/@EntryIndexRemoved" />
     <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppDeclaratorNeverUsed/@EntryIndexRemoved" />
+    <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppTypeAliasNeverUsed/@EntryIndexRemoved" />
+    <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppConceptNeverUsed/@EntryIndexRemoved" />
     <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppClassNeverUsed/@EntryIndexRemoved" />
+    <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppEnumeratorNeverUsed/@EntryIndexRemoved" />
     <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppLambdaCaptureNeverUsed/@EntryIndexRemoved" />
+    <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppLocalVariableWithNonTrivialDtorIsNeverUsed/@EntryIndexRemoved" />
+    <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppParameterNeverUsed/@EntryIndexRemoved" />
     <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppTemplateParameterNeverUsed/@EntryIndexRemoved" />
     <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppEntityAssignedButNoRead/@EntryIndexRemoved" />
     <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppEntityUsedOnlyInUnevaluatedContext/@EntryIndexRemoved" />
@@ -428,6 +461,7 @@
     <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppObjectMemberMightNotBeInitialized/@EntryIndexRemoved" />
     <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppSomeObjectMembersMightNotBeInitialized/@EntryIndexRemoved" />
     <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppDeclaratorUsedBeforeInitialization/@EntryIndexRemoved" />
+    <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppUnusedIncludeDirective/@EntryIndexRemoved" />
     <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppNotAllPathsReturnValue/@EntryIndexRemoved" />
     <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CDeclarationWithImplicitIntType/@EntryIndexRemoved" />
     <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppFunctionDoesntReturnValue/@EntryIndexRemoved" />
@@ -446,12 +480,25 @@
     <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppMsExtDoubleUserConversionInCopyInit/@EntryIndexRemoved" />
     <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppMsExtCopyElisionInCopyInitDeclarator/@EntryIndexRemoved" />
     <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppMsExtNotInitializedStaticConstLocalVar/@EntryIndexRemoved" />
+    <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppRemoveRedundantBraces/@EntryIndexRemoved" />
+    <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppEnforceIfStatementBraces/@EntryIndexRemoved" />
+    <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppEnforceForStatementBraces/@EntryIndexRemoved" />
+    <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppEnforceWhileStatementBraces/@EntryIndexRemoved" />
+    <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppEnforceDoStatementBraces/@EntryIndexRemoved" />
     <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppWrongIncludesOrder/@EntryIndexRemoved" />
     <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppWrongSlashesInIncludeDirective/@EntryIndexRemoved" />
     <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppEnforceNestedNamespacesStyle/@EntryIndexRemoved" />
+    <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppEnforceTypeAliasCodeStyle/@EntryIndexRemoved" />
+    <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppEnforceFunctionDeclarationStyle/@EntryIndexRemoved" />
     <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppMemberInitializersOrder/@EntryIndexRemoved" />
+    <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppEnforceOverridingFunctionStyle/@EntryIndexRemoved" />
+    <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppEnforceOverridingDestructorStyle/@EntryIndexRemoved" />
     <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppUseAuto/@EntryIndexRemoved" />
     <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppUseAutoForNumeric/@EntryIndexRemoved" />
+    <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppEnforceCVQualifiersPlacement/@EntryIndexRemoved" />
+    <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppEnforceCVQualifiersOrder/@EntryIndexRemoved" />
+    <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppUnnecessaryWhitespace/@EntryIndexRemoved" />
+    <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppTabsAreDisallowed/@EntryIndexRemoved" />
     <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppDFAConstantConditions/@EntryIndexRemoved" />
     <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppDFANullDereference/@EntryIndexRemoved" />
     <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppDFANotInitializedField/@EntryIndexRemoved" />
@@ -471,5 +518,8 @@
     <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppDFAUnusedValue/@EntryIndexRemoved" />
     <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppDFAUnreadVariable/@EntryIndexRemoved" />
     <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppDFATimeOver/@EntryIndexRemoved" />
+    <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CppInconsistentNaming/@EntryIndexRemoved" />
+    <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=StringLiteralTypo/@EntryIndexRemoved" />
+    <option name="/Default/CodeInspection/Highlighting/InspectionSeverities/=CommentTypo/@EntryIndexRemoved" />
   </component>
 </project>
