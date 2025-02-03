@@ -428,7 +428,7 @@ auto parser::synchronize(const parse_error &parse_error) -> auxilia::Status {
   auto error_token = this->get();
   dbg(warn,
       "error at '{}'",
-      error_token.to_string(auxilia::FormatPolicy::kTokenOnly))
+      error_token.to_string(auxilia::FormatPolicy::kDetailed))
 
   while (!is_at_end() && !inspect(kSemicolon)) {
     dbg_block
@@ -442,7 +442,7 @@ auto parser::synchronize(const parse_error &parse_error) -> auxilia::Status {
       auxilia::Status::kParseError,
       auxilia::format("[line {}] Error at '{}': {}",
                       error_token.line,
-                      error_token.to_string(auxilia::FormatPolicy::kTokenOnly),
+                      error_token.to_string(auxilia::FormatPolicy::kDetailed),
                       parse_error.message())};
 }
 LOXO_API void delete_parser_fwd(parser *ptr) { delete ptr; }

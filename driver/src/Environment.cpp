@@ -130,9 +130,9 @@ auto Environment::copy() const -> std::shared_ptr<self_type> {
 auto Environment::to_string(
     const auxilia::FormatPolicy &format_policy) const -> string_type {
   string_type result;
-  result += current.to_string(auxilia::FormatPolicy::kTokenOnly);
+  result += current.to_string(auxilia::FormatPolicy::kDetailed);
   if (const auto enclosing = this->parent.get()) {
-    result += enclosing->to_string(auxilia::FormatPolicy::kTokenOnly);
+    result += enclosing->to_string(auxilia::FormatPolicy::kDetailed);
   }
   return result;
 }

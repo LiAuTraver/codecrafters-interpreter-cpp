@@ -13,7 +13,7 @@ Expr::expr_result_t Literal::accept_impl(const ExprVisitor &visitor) const {
   return visitor.visit(*this);
 }
 Expr::string_type Literal::to_string(const auxilia::FormatPolicy &) const {
-  return literal.to_string(auxilia::FormatPolicy::kTokenOnly);
+  return literal.to_string(auxilia::FormatPolicy::kDetailed);
 }
 Unary::Unary(token_t &&op, expr_ptr_t &&expr)
     : op(std::move(op)), expr(std::move(expr)) {}
@@ -22,7 +22,7 @@ Expr::expr_result_t Unary::accept_impl(const ExprVisitor &visitor) const {
 }
 Expr::string_type
 Unary::to_string(const auxilia::FormatPolicy &format_policy) const {
-  return "(" + op.to_string(auxilia::FormatPolicy::kTokenOnly) + " " +
+  return "(" + op.to_string(auxilia::FormatPolicy::kDetailed) + " " +
          expr->to_string(format_policy) + ")";
 }
 Binary::Binary(token_t &&op, expr_ptr_t &&left, expr_ptr_t &&right)
@@ -32,7 +32,7 @@ Expr::expr_result_t Binary::accept_impl(const ExprVisitor &visitor) const {
 }
 Expr::string_type
 Binary::to_string(const auxilia::FormatPolicy &format_policy) const {
-  return "(" + op.to_string(auxilia::FormatPolicy::kTokenOnly) + " " +
+  return "(" + op.to_string(auxilia::FormatPolicy::kDetailed) + " " +
          left->to_string(format_policy) + " " +
          right->to_string(format_policy) + ")";
 }
@@ -42,7 +42,7 @@ Expr::expr_result_t Variable::accept_impl(const ExprVisitor &visitor) const {
 }
 auto Variable::to_string(const auxilia::FormatPolicy &format_policy) const
     -> string_type {
-  return name.to_string(auxilia::FormatPolicy::kTokenOnly);
+  return name.to_string(auxilia::FormatPolicy::kDetailed);
 }
 Grouping::Grouping(expr_ptr_t &&expr) : expr(std::move(expr)) {}
 Expr::expr_result_t Grouping::accept_impl(const ExprVisitor &visitor) const {

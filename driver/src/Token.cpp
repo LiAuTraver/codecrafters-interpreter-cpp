@@ -40,7 +40,7 @@ Token::number_to_string(const auxilia::FormatPolicy policy) const {
     if (auxilia::is_integer(*ptr)) {
       if (policy == kDefault)
         return auxilia::format("NUMBER {} {:.1f}", lexeme, *ptr);
-      else if (policy == kTokenOnly)
+      else if (policy == kDetailed)
         return auxilia::format("{:.1f}", *ptr);
       else {
         dbg(critical, "unreachable code reached: {}", AC_UTILS_STACKTRACE)
@@ -51,7 +51,7 @@ Token::number_to_string(const auxilia::FormatPolicy policy) const {
     //  leave as is
     if (policy == kDefault)
       return auxilia::format("NUMBER {} {}", lexeme, *ptr);
-    else if (policy == kTokenOnly)
+    else if (policy == kDetailed)
       return auxilia::format("{}", *ptr);
     else {
       dbg(critical, "unreachable code reached: {}", AC_UTILS_STACKTRACE)
@@ -62,7 +62,7 @@ Token::number_to_string(const auxilia::FormatPolicy policy) const {
     dbg_block{literal = nullptr;};
     if (policy == kDefault)
       return auxilia::format("NUMBER {} {}", lexeme, "<failed to access data>");
-    else if (policy == kTokenOnly)
+    else if (policy == kDetailed)
       return auxilia::format("{}", "<failed to access data>");
     else {
       dbg(critical, "unreachable code reached: {}", AC_UTILS_STACKTRACE)
@@ -190,7 +190,7 @@ Token::to_string(const auxilia::FormatPolicy &policy) const {
     type_sv = "STRING"sv;
     lexeme_sv = lexeme;
     contract_assert(lexeme_sv.front() == '"' && lexeme_sv.back() == '"')
-    if (policy == auxilia::FormatPolicy::kTokenOnly) {
+    if (policy == auxilia::FormatPolicy::kDetailed) {
       // codecrafter's string lit pase output does not need `"`, so remove them
       lexeme_sv = lexeme_sv.substr(1, lexeme_sv.size() - 2);
     }
@@ -308,7 +308,7 @@ Token::to_string(const auxilia::FormatPolicy &policy) const {
     /// @note DON'T use `.data()` since it's not null-terminated and will the
     /// string will last till the end
     return auxilia::format("{} {} {}", type_sv, lexeme_sv, literal_sv);
-  } else if (policy == kTokenOnly) {
+  } else if (policy == kDetailed) {
     // for ast print.
     return auxilia::format("{}", lexeme_sv);
   }

@@ -115,12 +115,12 @@ auto interpreter::visit_impl(const statement::Variable &stmt) const
         std::any_cast<string_view_type>(stmt.name.literal),
         eval_res->underlying_string())
     // string view failed again; not null-terminated
-    return {env->add(stmt.name.to_string(auxilia::FormatPolicy::kTokenOnly),
+    return {env->add(stmt.name.to_string(auxilia::FormatPolicy::kDetailed),
                      eval_res.value(),
                      stmt.name.line)};
   }
   // if no initializer, it's a nil value.
-  return env->add(stmt.name.to_string(auxilia::FormatPolicy::kTokenOnly),
+  return env->add(stmt.name.to_string(auxilia::FormatPolicy::kDetailed),
                   evaluation::NilValue,
                   stmt.name.line);
 }
@@ -196,7 +196,7 @@ auto interpreter::visit_impl(const statement::Function &stmt) const
     -> eval_result_t {
   // TODO: function overloading
   // clang-format off
-  if (auto res = env->get(stmt.name.to_string(auxilia::FormatPolicy::kTokenOnly));
+  if (auto res = env->get(stmt.name.to_string(auxilia::FormatPolicy::kDetailed));
   !res.empty()){
     // FIXME: seems something went wrong with my logic here.
     dbg(warn, "found the function already defined... use it")
@@ -205,10 +205,10 @@ auto interpreter::visit_impl(const statement::Function &stmt) const
     // return {auxilia::InvalidArgumentError(auxilia::format(
     //     "Function '{}' already defined. \n"
     //     "Function overloading is not supported yet.",
-    //     stmt.name.to_string(auxilia::FormatPolicy::kTokenOnly)))};
+    //     stmt.name.to_string(auxilia::FormatPolicy::kDetailed)))};
 
   dbg(info,"func name: {}",
-      stmt.name.to_string(auxilia::FormatPolicy::kTokenOnly))
+      stmt.name.to_string(auxilia::FormatPolicy::kDetailed))
 
   // dbg(info,"env and parent: {}",
   //     env->parent == this->global_env? "global" : "local"
@@ -217,16 +217,16 @@ auto interpreter::visit_impl(const statement::Function &stmt) const
 
   auto callable = evaluation::Callable::create_custom(
           stmt.parameters.size(),
-          {stmt.name.to_string(auxilia::FormatPolicy::kTokenOnly),
+          {stmt.name.to_string(auxilia::FormatPolicy::kDetailed),
            stmt.parameters
            | std::ranges::views::transform([&](const auto &param) {
-               return param.to_string(auxilia::FormatPolicy::kTokenOnly);
+               return param.to_string(auxilia::FormatPolicy::kDetailed);
              })
            | std::ranges::to<std::vector<string_type>>(),
            stmt.body.statements},
            this->env); 
   return env->add(
-      stmt.name.to_string(auxilia::FormatPolicy::kTokenOnly),
+      stmt.name.to_string(auxilia::FormatPolicy::kDetailed),
       callable,
       stmt.name.line);
   // clang-format on
@@ -403,13 +403,13 @@ auto interpreter::visit_impl(const expression::Grouping &expr) const
 auto interpreter::visit_impl(const expression::Variable &expr) const
     -> eval_result_t {
   if (auto res =
-          env->get(expr.name.to_string(auxilia::FormatPolicy::kTokenOnly));
+          env->get(expr.name.to_string(auxilia::FormatPolicy::kDetailed));
       !res.empty())
     return res;
 
   return {auxilia::NotFoundError(
       auxilia::format("Undefined variable '{}'.\n[line {}]",
-                      expr.name.to_string(auxilia::FormatPolicy::kTokenOnly),
+                      expr.name.to_string(auxilia::FormatPolicy::kDetailed),
                       expr.name.line))};
 }
 auto interpreter::visit_impl(const expression::Assignment &expr) const
@@ -419,12 +419,12 @@ auto interpreter::visit_impl(const expression::Assignment &expr) const
   if (!res)
     return res;
 
-  if (!env->reassign(expr.name.to_string(auxilia::FormatPolicy::kTokenOnly),
+  if (!env->reassign(expr.name.to_string(auxilia::FormatPolicy::kDetailed),
                      *res,
                      expr.name.line))
     return {auxilia::NotFoundError(
         auxilia::format("Undefined variable '{}'.\n[line {}]",
-                        expr.name.to_string(auxilia::FormatPolicy::kTokenOnly),
+                        expr.name.to_string(auxilia::FormatPolicy::kDetailed),
                         expr.name.line))};
   return *res;
 }
