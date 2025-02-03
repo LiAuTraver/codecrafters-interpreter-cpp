@@ -2,19 +2,11 @@
 #include <cstddef>
 #include <print>
 #include <ranges>
-#include "include/accat/auxilia/details/Status.hpp"
 #if __has_include(<spdlog/spdlog.h>)
 #  include <spdlog/spdlog.h>
 #endif
 #if __has_include(<fmt/core.h>)
 #  include <fmt/core.h>
-#endif
-#if __has_include(<sal.h>)
-#  include <sal.h>
-#else
-#  define _In_
-#  define _Inout_
-#  define _In_opt_
 #endif
 
 #include <accat/auxilia/auxilia.hpp>
@@ -28,7 +20,7 @@
 namespace accat::loxo {
 auxilia::Status show_msg() {
   dbg(critical, "please provide a command.")
-  contract_assert(false)
+dbg_break
   // return auxilia::Status::kEmptyInput;
   return auxilia::InvalidArgumentError("please provide a command.");
 }
@@ -75,8 +67,7 @@ auxilia::Status tokenize(ExecutionContext &ctx) {
       !load_result.ok()) {
     return onFileOperationFailed(load_result);
   }
-  const auxilia::Status lex_result = ctx.lexer->lex();
-  if (!lex_result.ok()) {
+  if (const auxilia::Status lex_result = ctx.lexer->lex(); !lex_result.ok()) {
     return onLexOperationFailed(lex_result);
   }
   if (!ctx.lexer->ok()) {
@@ -120,7 +111,7 @@ auxilia::Status interpret(ExecutionContext &ctx) {
 void writeParseResultToContextStream(ExecutionContext &ctx) {
   expression::ASTPrinter astPrinter;
   auto res = astPrinter.evaluate(*ctx.parser->get_expression());
-  contract_assert(res.ok())
+  contract_assert(res.ok(), "{}", res.message())
   ctx.output_stream << astPrinter.to_string();
 }
 void writeExprResultToContextStream(ExecutionContext &ctx) {

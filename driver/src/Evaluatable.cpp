@@ -58,19 +58,19 @@ auto Boolean::make_false(const uint_least32_t line) -> Boolean {
 }
 
 bool Boolean::is_true() const noexcept {
-  contract_assert(value.has_value() && (bool)"value is not set")
+  contract_assert(value.has_value(),"value is not set")
   return value.value();
 }
 
 auto Boolean::to_string(const auxilia::FormatPolicy &format_policy) const
     -> string_type {
-  contract_assert(value.has_value())
+  contract_assert(value.has_value(),"value is not set")
   return value.value() ? "true"s : "false"s;
 }
 
 auto Boolean::to_string_view(
     const auxilia::FormatPolicy &format_policy) const -> string_view_type {
-  contract_assert(value.has_value())
+  contract_assert(value.has_value(),"value is not set")
   return value.value() ? "true"sv : "false"sv;
 }
 
@@ -247,7 +247,7 @@ auto Number::to_string(const auxilia::FormatPolicy &format_policy) const
   return auxilia::format("{}", value);
 }
 
-Callable::Callable(unsigned argc,
+Callable::Callable(const unsigned argc,
                    native_function_t &&func,
                    const env_ptr_t &env) {
   my_arity = argc;
@@ -255,7 +255,7 @@ Callable::Callable(unsigned argc,
   my_env = env;
 }
 
-Callable::Callable(unsigned argc,
+Callable::Callable(const unsigned argc,
                    custom_function_t &&block,
                    const env_ptr_t &env) {
   my_arity = argc;
@@ -300,8 +300,7 @@ auto Callable::call(const interpreter &interpreter, args_t &&args) const
               interpreter.set_env(scoped_env);
 
               for (const auto &index : custom_function.body) {
-                auto res = interpreter.execute(*index);
-                if (!res) {
+                if (auto res = interpreter.execute(*index); !res) {
                   if (res.code() == auxilia::Status::kReturning) {
                     auto my_result = interpreter.get_result();
                     // FIXME: i my logic was completely gone here: `last_expr`

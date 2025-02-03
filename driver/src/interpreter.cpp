@@ -289,9 +289,7 @@ auto interpreter::visit_impl(const expression::Literal &expr) const
     -> eval_result_t {
   dbg(trace, "literal type: {}", expr.literal.type)
   if (expr.literal.is_type(kMonostate)) {
-    dbg(critical, "should not happen.")
-    contract_assert(false)
-    return {};
+    dbg_break
   }
   if (expr.literal.is_type(kNil)) {
     return {evaluation::Nil{expr.literal.line}};
@@ -392,7 +390,7 @@ auto interpreter::visit_impl(const expression::Binary &expr) const
     }
   }
   dbg(error, "unimplemented binary operator: {}", expr.op.to_string())
-  contract_assert(false)
+  dbg_break
   return {auxilia::InvalidArgumentError(auxilia::format(
       "unimplemented binary operator.\n[line {}]", expr.op.line))};
 }
@@ -504,8 +502,7 @@ auto interpreter::to_string(
   if (stmts_res.empty()) { // we are parse an expression, not a statement
     if (last_expr_res->index() && !is_interpreting_stmts)
       return value_to_string(format_policy, last_expr_res);
-    else
-      return {};
+    return {};
   }
 
   string_type result_str;

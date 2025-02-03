@@ -143,7 +143,7 @@ void lexer::add_comment() {
 void lexer::next_token() {
   // token1 token2
   // 			 ^ cursor position
-  contract_assert(cursor < contents.size())
+  contract_assert(cursor < contents.size(), "cursor out of range")
 
   switch (auto c = get()) {
   case '(':
@@ -204,7 +204,7 @@ lexer::char_t lexer::peek(const size_t offset) const {
   return contents[cursor + offset];
 }
 const lexer::char_t &lexer::get(const size_t offset) {
-  contract_assert(cursor < contents.size())
+  contract_assert(cursor < contents.size(), "cursor out of range")
   auto &c = contents[cursor];
   cursor += offset;
   return c;

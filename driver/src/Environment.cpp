@@ -45,9 +45,11 @@ auto Environment::getGlobalEnvironment()
               0,
               [](const interpreter &, evaluation::Callable::args_t &) {
                 dbg(trace, "clock() called")
-                return std::chrono::duration_cast<std::chrono::seconds>(
-                           std::chrono::system_clock::now().time_since_epoch())
-                    .count();
+                return auxilia::IVisitor::variant_type{
+                    evaluation::Number{static_cast<long double>(
+                        std::chrono::duration_cast<std::chrono::seconds>(
+                            std::chrono::system_clock::now().time_since_epoch())
+                            .count())}};
               },
               nullptr))
       .ignore_error();
@@ -56,8 +58,9 @@ auto Environment::getGlobalEnvironment()
             evaluation::Callable::create_native(
                 0,
                 [](const interpreter &, evaluation::Callable::args_t &) {
-                  return "loxo programming language, based on book Crafting "
-                         "Interpreters's lox.";
+                  return auxilia::IVisitor::variant_type{evaluation::String{
+                      "loxo programming language, based on "
+                      "book Crafting Interpreters's lox."sv}};
                 },
                 nullptr))
       .ignore_error();
@@ -81,7 +84,7 @@ auto Environment::reassign(const string_type &name,
   if (const auto it = find(name)) {
     (*it)->second.first = value;
     (*it)->second.second = line;
-    return auxilia::OkStatus();
+    return {};
   }
   return auxilia::InvalidArgumentError("variable not defined");
 }
@@ -102,7 +105,7 @@ auto Environment::find(const string_type &name) const
     dbg_block
     {
       if (!parent) {
-        return nullptr;
+        return;
       }
       if (const auto another_it = parent->find(name)) {
         dbg(warn,
@@ -110,7 +113,7 @@ auto Environment::find(const string_type &name) const
             name,
             (*another_it)->second.second);
       }
-      return nullptr;
+      return;
     };
     return maybe_it;
   }
@@ -126,9 +129,9 @@ auto Environment::copy() const -> std::shared_ptr<self_type> {
   // return std::make_shared<self_type>(*this);
   TODO("^^^ failed to compile")
 }
-
-auto Environment::to_string(
-    const auxilia::FormatPolicy &format_policy) const -> string_type {
+// NOLINTNEXTLINE
+auto Environment::to_string(const auxilia::FormatPolicy &format_policy) const
+    -> string_type {
   string_type result;
   result += current.to_string(auxilia::FormatPolicy::kDetailed);
   if (const auto enclosing = this->parent.get()) {

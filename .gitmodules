@@ -1,0 +1,3 @@
+[submodule "shared/auxilia"]
+	path = shared/auxilia
+	url = git@github.com:LiAuTraver/auxilia.git

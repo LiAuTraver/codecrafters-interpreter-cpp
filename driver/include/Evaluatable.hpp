@@ -127,7 +127,7 @@ public:
 
 public:
   auto to_string(const auxilia::FormatPolicy &) const
-      -> string_type;
+      -> string_type override;
   auto to_string_view(const auxilia::FormatPolicy &) const
       -> string_view_type;
 
@@ -167,8 +167,8 @@ private:
   long double value = std::numeric_limits<long double>::quiet_NaN();
 
 public:
-  auto to_string(const auxilia::FormatPolicy &) const
-      -> string_type;
+  auto to_string(const auxilia::FormatPolicy &) const 
+      -> string_type override;
 };
 class Callable : public Evaluatable {
   struct Function {

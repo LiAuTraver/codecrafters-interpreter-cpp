@@ -40,36 +40,25 @@ Token::number_to_string(const auxilia::FormatPolicy policy) const {
     if (auxilia::is_integer(*ptr)) {
       if (policy == kDefault)
         return auxilia::format("NUMBER {} {:.1f}", lexeme, *ptr);
-      else if (policy == kDetailed)
+      if (policy == kDetailed)
         return auxilia::format("{:.1f}", *ptr);
-      else {
-        dbg(critical, "unreachable code reached: {}", AC_UTILS_STACKTRACE)
-        contract_assert(false)
-        std::unreachable();
-      }
+      dbg_break
     }
     //  leave as is
     if (policy == kDefault)
       return auxilia::format("NUMBER {} {}", lexeme, *ptr);
-    else if (policy == kDetailed)
+    if (policy == kDetailed)
       return auxilia::format("{}", *ptr);
-    else {
-      dbg(critical, "unreachable code reached: {}", AC_UTILS_STACKTRACE)
-      contract_assert(false)
-      std::unreachable();
-    }
+    dbg_break
   } else {
     dbg_block{literal = nullptr;};
     if (policy == kDefault)
       return auxilia::format("NUMBER {} {}", lexeme, "<failed to access data>");
-    else if (policy == kDetailed)
+    if (policy == kDetailed)
       return auxilia::format("{}", "<failed to access data>");
-    else {
-      dbg(critical, "unreachable code reached: {}", AC_UTILS_STACKTRACE)
-      contract_assert(false)
-      std::unreachable();
-    }
+    dbg_break
   }
+  TODO(...)
 }
 Token::string_type
 Token::to_string(const auxilia::FormatPolicy &policy) const {
@@ -189,7 +178,8 @@ Token::to_string(const auxilia::FormatPolicy &policy) const {
   case kString:
     type_sv = "STRING"sv;
     lexeme_sv = lexeme;
-    contract_assert(lexeme_sv.front() == '"' && lexeme_sv.back() == '"')
+    contract_assert(lexeme_sv.front() == '"' && lexeme_sv.back() == '"',
+                    "string literal should be enclosed in double quotes")
     if (policy == auxilia::FormatPolicy::kDetailed) {
       // codecrafter's string lit pase output does not need `"`, so remove them
       lexeme_sv = lexeme_sv.substr(1, lexeme_sv.size() - 2);
@@ -199,7 +189,8 @@ Token::to_string(const auxilia::FormatPolicy &policy) const {
     else
       literal_sv = "<failed to access data>"sv;
     if (policy == kDefault)
-      contract_assert(lexeme_sv.substr(1, lexeme_sv.size() - 2)== literal_sv)
+      contract_assert(lexeme_sv.substr(1, lexeme_sv.size() - 2)== literal_sv,
+                      "string literal should be the same as the literal")
     break;
   case kNumber:
     return number_to_string(policy);
@@ -301,7 +292,7 @@ Token::to_string(const auxilia::FormatPolicy &policy) const {
       return ""s;
     }
   default:
-    contract_assert(false,  "should not happen")
+    dbg_break
     break;
   }
   if (policy == kDefault) {
@@ -312,7 +303,7 @@ Token::to_string(const auxilia::FormatPolicy &policy) const {
     // for ast print.
     return auxilia::format("{}", lexeme_sv);
   }
-  contract_assert(false, "should not happen")
+  dbg_break
   return ""s;
 }
 

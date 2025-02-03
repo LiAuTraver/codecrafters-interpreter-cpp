@@ -30,7 +30,7 @@ bool parser::is_at_end(const size_type offset) const {
          cursor->is_type(kEndOfFile);
 }
 auto parser::get(const size_type offset) -> token_t {
-  contract_assert(cursor < tokens.end())
+  contract_assert(cursor < tokens.end(), "cursor out of range")
   auto &token = *cursor;
   cursor += offset;
   return token;
