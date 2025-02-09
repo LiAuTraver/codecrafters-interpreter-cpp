@@ -71,11 +71,15 @@ lexer::status_t lexer::load(const path_type &filepath) const {
   if (not contents.empty())
     return auxilia::AlreadyExistsError("File already loaded");
   if (not std::filesystem::exists(filepath))
-    return auxilia::NotFoundError("File does not exist: " +
-                                    filepath.string());
-  file_reader_t reader(filepath);
-  const_cast<string_type &>(contents) = reader.get_contents();
-  return auxilia::OkStatus();
+    return auxilia::NotFoundError("File does not exist: " + filepath.string());
+  auto file = std::ifstream{filepath};
+  if (not file)
+    return auxilia::PermissionDeniedError("Unable to open file " +
+                                          filepath.string());
+  auto buffer = std::ostringstream{};
+  buffer << file.rdbuf();
+  const_cast<string_type &>(contents) = buffer.str();
+  return {};
 }
 lexer::status_t lexer::load(const std::istream &ss) {
   if (not contents.empty())
@@ -85,7 +89,7 @@ lexer::status_t lexer::load(const std::istream &ss) {
   const_cast<string_type &>(contents) = oss.str();
   tokens.clear();
   lexeme_views.clear();
-  return auxilia::OkStatus();
+  return {};
 }
 
 lexer::status_t lexer::lex() {
@@ -94,7 +98,7 @@ lexer::status_t lexer::lex() {
     next_token();
   }
   add_token(kEndOfFile);
-  return auxilia::OkStatus();
+  return {};
 }
 void lexer::add_identifier_and_keyword() {
   auto value = lex_identifier();

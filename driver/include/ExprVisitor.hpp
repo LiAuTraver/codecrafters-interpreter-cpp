@@ -11,7 +11,7 @@
 #include "Evaluatable.hpp"
 namespace accat::loxo::expression {
 /// @interface ExprVisitor
-class ExprVisitor : virtual public auxilia::IVisitor {
+class ExprVisitor : virtual public IVisitor {
 public:
   virtual ~ExprVisitor() = default;
 

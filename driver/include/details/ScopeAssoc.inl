@@ -23,8 +23,8 @@ class ScopeAssoc : public auxilia::Printable<ScopeAssoc> {
   friend class ::accat::loxo::Environment;
 
 public:
-  using variant_type = auxilia::IVisitor::variant_type;
-  using string_view_type = auxilia::IVisitor::string_view_type;
+  using variant_type = IVisitor::variant_type;
+  using string_view_type = IVisitor::string_view_type;
   using association_t =
       std::pair<string_type, std::pair<variant_type, uint_least32_t>>;
   using associations_t =

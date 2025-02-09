@@ -99,14 +99,14 @@ auxilia::Status evaluate(ExecutionContext &ctx) {
   ctx.interpreter.reset(new interpreter);
   auto res = ctx.interpreter->evaluate(*ctx.parser->get_expression());
   dbg(info, "evaluation completed.")
-  return res;
+  return std::move(res).as_status();
 }
 auxilia::Status interpret(ExecutionContext &ctx) {
   dbg(info, "interpreting...")
   ctx.interpreter.reset(new interpreter);
   auto res = ctx.interpreter->interpret(ctx.parser->get_statements());
   dbg(info, "interpretation completed.")
-  return res;
+  return std::move(res).as_status();
 }
 void writeParseResultToContextStream(ExecutionContext &ctx) {
   expression::ASTPrinter astPrinter;

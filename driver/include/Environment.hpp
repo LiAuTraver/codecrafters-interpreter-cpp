@@ -45,13 +45,13 @@ public:
       -> std::optional<self_type::scope_env_t::associations_t::iterator>;
   auto
   add(const string_type &,
-      const auxilia::IVisitor::variant_type &,
+      const IVisitor::variant_type &,
       uint_least32_t = std::numeric_limits<uint_least32_t>::quiet_NaN()) const
       -> auxilia::Status;
   auto reassign(const string_type &,
-                const auxilia::IVisitor::variant_type &,
+                const IVisitor::variant_type &,
                 uint_least32_t) const -> auxilia::Status;
-  auto get(const string_type &) const -> auxilia::IVisitor::variant_type;
+  auto get(const string_type &) const -> IVisitor::variant_type;
   auto copy() const -> std::shared_ptr<self_type>;
 
 private:

@@ -27,7 +27,6 @@ public:
   using token_type_t = token_t::token_type;
   using tokens_t = std::vector<token_t>;
   using lexeme_views_t = std::vector<string_view_type>;
-  using file_reader_t = auxilia::file_reader;
   using char_t = typename string_type::value_type;
   using error_t = lex_error;
   using error_code_t = typename error_t::type_t;

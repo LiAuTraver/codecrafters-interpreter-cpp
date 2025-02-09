@@ -6,8 +6,16 @@
   <component name="CMakeWorkspace" PROJECT_DIR="$PROJECT_DIR$" />
   <component name="CidrRootsConfiguration">
     <excludeRoots>
+      <file path="$PROJECT_DIR$/.aswb" />
       <file path="$PROJECT_DIR$/.cache" />
+      <file path="$PROJECT_DIR$/.clwb" />
       <file path="$PROJECT_DIR$/.vs" />
+      <file path="$PROJECT_DIR$/.vscode" />
+      <file path="$PROJECT_DIR$/Testing" />
+      <file path="$PROJECT_DIR$/bazel-bin" />
+      <file path="$PROJECT_DIR$/bazel-loxo" />
+      <file path="$PROJECT_DIR$/bazel-out" />
+      <file path="$PROJECT_DIR$/bazel-testlogs" />
       <file path="$PROJECT_DIR$/build" />
       <file path="$PROJECT_DIR$/vcpkg_installed" />
     </excludeRoots>

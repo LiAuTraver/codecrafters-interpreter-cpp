@@ -45,7 +45,7 @@ auto Environment::getGlobalEnvironment()
               0,
               [](const interpreter &, evaluation::Callable::args_t &) {
                 dbg(trace, "clock() called")
-                return auxilia::IVisitor::variant_type{
+                return IVisitor::variant_type{
                     evaluation::Number{static_cast<long double>(
                         std::chrono::duration_cast<std::chrono::seconds>(
                             std::chrono::system_clock::now().time_since_epoch())
@@ -58,7 +58,7 @@ auto Environment::getGlobalEnvironment()
             evaluation::Callable::create_native(
                 0,
                 [](const interpreter &, evaluation::Callable::args_t &) {
-                  return auxilia::IVisitor::variant_type{evaluation::String{
+                  return IVisitor::variant_type{evaluation::String{
                       "loxo programming language, based on "
                       "book Crafting Interpreters's lox."sv}};
                 },
@@ -73,13 +73,13 @@ auto Environment::createScopeEnvironment(
 }
 
 auto Environment::add(const string_type &name,
-                      const auxilia::IVisitor::variant_type &value,
+                      const IVisitor::variant_type &value,
                       const uint_least32_t line) const -> auxilia::Status {
   return current.add(name, value, line);
 }
 
 auto Environment::reassign(const string_type &name,
-                           const auxilia::IVisitor::variant_type &value,
+                           const IVisitor::variant_type &value,
                            const uint_least32_t line) const -> auxilia::Status {
   if (const auto it = find(name)) {
     (*it)->second.first = value;
@@ -90,7 +90,7 @@ auto Environment::reassign(const string_type &name,
 }
 
 auto Environment::get(const string_type &name) const
-    -> auxilia::IVisitor::variant_type {
+    -> IVisitor::variant_type {
   if (const auto it = find(name))
     return {(*it)->second.first};
 

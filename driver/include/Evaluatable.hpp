@@ -25,7 +25,7 @@ namespace accat::loxo::evaluation {
 /// @implements auxilia::Printable
 class Evaluatable : public auxilia::Printable<Evaluatable> {
 public:
-  using eval_result_t = auxilia::IVisitor::eval_result_t;
+  using eval_result_t = IVisitor::eval_result_t;
 
 public:
   constexpr Evaluatable() = default;
@@ -180,9 +180,9 @@ class Callable : public Evaluatable {
   };
 
 public:
-  using args_t = std::vector<auxilia::IVisitor::variant_type>;
+  using args_t = std::vector<IVisitor::variant_type>;
   using string_view_type = auxilia::string_view;
-  using native_function_t = std::function<auxilia::IVisitor::variant_type(
+  using native_function_t = std::function<IVisitor::variant_type(
       const interpreter &, args_t &)>;
   using custom_function_t = Function;
   using function_t =

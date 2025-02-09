@@ -13,7 +13,7 @@
 namespace accat::loxo::statement {
 /// @implements auxilia::Printable
 /// @interface StmtVisitor
-class StmtVisitor : virtual public auxilia::IVisitor {
+class StmtVisitor : virtual public IVisitor {
 public:
   template <typename DerivedStmt>
     requires std::is_base_of_v<Stmt, DerivedStmt>
