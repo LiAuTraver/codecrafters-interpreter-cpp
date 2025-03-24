@@ -17,7 +17,7 @@
 #include "details/TokenType.inl"
 
 namespace accat::loxo {
-class LOXO_API Token : public auxilia::Printable<Token> {
+class LOXO_API Token : public auxilia::Printable {
 public:
   using token_type = TokenType;
   using error_t = lex_error;

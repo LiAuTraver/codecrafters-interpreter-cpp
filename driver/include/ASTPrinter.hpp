@@ -8,7 +8,7 @@
 namespace accat::loxo::expression {
 /// @implements ExprVisitor
 class LOXO_API ASTPrinter : public ExprVisitor,
-                            public auxilia::Viewable<ASTPrinter> {
+                            public auxilia::Viewable {
 public:
   using ostream_t = std::ostream;
   using ostringstream_t = std::ostringstream;

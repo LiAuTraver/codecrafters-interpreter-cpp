@@ -31,8 +31,7 @@ auto Environment::operator=(Environment &&that) noexcept -> Environment & {
   return *this;
 }
 
-auto Environment::getGlobalEnvironment()
-    -> auxilia::StatusOr<std::shared_ptr<Environment>> {
+auto Environment::Global() -> std::shared_ptr<Environment> {
   static auto has_init = false;
   if (has_init)
     return global_env;
@@ -89,8 +88,7 @@ auto Environment::reassign(const string_type &name,
   return auxilia::InvalidArgumentError("variable not defined");
 }
 
-auto Environment::get(const string_type &name) const
-    -> IVisitor::variant_type {
+auto Environment::get(const string_type &name) const -> IVisitor::variant_type {
   if (const auto it = find(name))
     return {(*it)->second.first};
 

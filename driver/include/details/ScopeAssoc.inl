@@ -19,7 +19,7 @@
 #include "details/IVisitor.hpp"
 
 namespace accat::loxo::evaluation {
-class ScopeAssoc : public auxilia::Printable<ScopeAssoc> {
+class ScopeAssoc : public auxilia::Printable {
   friend class ::accat::loxo::Environment;
 
 public:

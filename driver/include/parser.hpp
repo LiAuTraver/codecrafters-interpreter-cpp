@@ -28,8 +28,8 @@ public:
   using token_t = Token;
   using token_views_t = std::span<token_t>;
   using token_type_t = token_t::token_type;
-  using string_type = token_t::string_type;
-  using string_view_type = token_t::string_view_type;
+  using string_type = std::string;
+  using string_view_type = std::string_view;
   using size_type = token_views_t::size_type;
   using ssize_type = decltype(std::ssize(std::declval<token_views_t>()));
   using expr_t = expression::Expr;

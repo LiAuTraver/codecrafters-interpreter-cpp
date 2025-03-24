@@ -23,7 +23,7 @@ namespace accat::loxo::evaluation {
 /// @brief A class that represents an evaluatable object
 /// @interface Evaluatable
 /// @implements auxilia::Printable
-class Evaluatable : public auxilia::Printable<Evaluatable> {
+class Evaluatable : public auxilia::Printable {
 public:
   using eval_result_t = IVisitor::eval_result_t;
 
@@ -52,7 +52,7 @@ public:
   Boolean operator!() const noexcept;
 };
 
-class LOXO_API Boolean : public Value, public auxilia::Viewable<Boolean> {
+class LOXO_API Boolean : public Value, public auxilia::Viewable {
 public:
   constexpr Boolean() = default;
   constexpr Boolean(bool value,
@@ -83,7 +83,7 @@ private:
   std::optional<bool> value = std::nullopt;
 } static inline AC_CONSTEXPR20 True{true, 0}, False{false, 0};
 
-class LOXO_API Nil : public Value, public auxilia::Viewable<Nil> {
+class LOXO_API Nil : public Value, public auxilia::Viewable {
 public:
   constexpr Nil() = default;
   explicit Nil(const uint_least32_t line) : Value(line) {}
@@ -100,7 +100,7 @@ public:
       -> string_view_type;
 } static inline AC_CONSTEXPR20 NilValue{};
 
-class String : public Evaluatable, public auxilia::Viewable<String> {
+class String : public Evaluatable, public auxilia::Viewable {
 public:
   constexpr String() = default;
   explicit String(

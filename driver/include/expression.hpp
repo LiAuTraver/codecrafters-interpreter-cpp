@@ -20,7 +20,7 @@
 /// @namespace accat::loxo::expression
 namespace accat::loxo::expression {
 /// @interface Expr
-class Expr : public auxilia::Printable<Expr>,
+class Expr : public auxilia::Printable,
              public std::enable_shared_from_this<Expr> {
 public:
   using base_type = Expr;

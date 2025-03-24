@@ -19,7 +19,7 @@
 namespace accat::loxo {
 
 /// @implements expression::ExprVisitor
-class LOXO_API interpreter : public auxilia::Printable<interpreter>,
+class LOXO_API interpreter : public auxilia::Printable,
                              virtual public expression::ExprVisitor,
                              virtual public statement::StmtVisitor,
                              std::enable_shared_from_this<interpreter> {

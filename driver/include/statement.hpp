@@ -8,7 +8,7 @@
 #include "Token.hpp"
 
 namespace accat::loxo::statement {
-class Stmt : public auxilia::Printable<Stmt>,
+class Stmt : public auxilia::Printable,
              public std::enable_shared_from_this<Stmt> {
 public:
   using base_type = Stmt;

@@ -9,7 +9,7 @@
 
 namespace accat::loxo {
 // TODO: Implement the Resolver class
-class Resolver : auxilia::Printable<Resolver>,
+class Resolver : auxilia::Printable,
                  virtual public expression::ExprVisitor,
                  virtual public statement::StmtVisitor,
                  public std::enable_shared_from_this<Resolver> {

@@ -53,6 +53,7 @@ StatementMacros:
   - QT_REQUIRE_VERSION
   - dbg_only
   - dbg_block
+  - dbg_break
   - dbg
   - contract_assert
   - TODO

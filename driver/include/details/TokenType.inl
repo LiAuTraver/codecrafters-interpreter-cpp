@@ -16,8 +16,8 @@ namespace accat::loxo {
 /// @brief enhanced token type, more like rust's enum
 /// @implements auxilia::Printable
 /// @implements auxilia::Viewable
-class LOXO_API TokenType : public auxilia::Printable<TokenType>,
-                           public auxilia::Viewable<TokenType> {
+class LOXO_API TokenType : public auxilia::Printable,
+                           public auxilia::Viewable {
 public:
   enum type_t : uint16_t;
 

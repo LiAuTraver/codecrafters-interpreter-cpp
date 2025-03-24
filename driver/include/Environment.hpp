@@ -18,7 +18,7 @@
 
 namespace accat::loxo {
 
-class Environment : public auxilia::Printable<Environment>,
+class Environment : public auxilia::Printable,
                     public std::enable_shared_from_this<Environment> {
 public:
   using string_view_type = evaluation::ScopeAssoc::string_view_type;
@@ -35,8 +35,7 @@ public:
   ~Environment() = default;
 
 public:
-  static auto getGlobalEnvironment()
-      -> auxilia::StatusOr<std::shared_ptr<self_type>>;
+  static auto Global() -> std::shared_ptr<self_type>;
   static auto createScopeEnvironment(const std::shared_ptr<self_type> &)
       -> std::shared_ptr<self_type>;
 
@@ -60,8 +59,7 @@ private:
   static inline std::shared_ptr<self_type> global_env;
 
 public:
-  auto to_string(const auxilia::FormatPolicy &) const
-      -> string_type;
+  auto to_string(const auxilia::FormatPolicy &) const -> string_type;
 };
 } // namespace accat::loxo
 
