@@ -31,12 +31,8 @@ auto interpreter::interpret(
   is_interpreting_stmts = true;
   static bool has_init_global_env = false;
   if (!has_init_global_env) {
-    if (auto globEnv = Environment::Global()) {
-      this->env = globEnv;
+      this->env = Environment::Global();
       has_init_global_env = true;
-    } else
-      return {
-          auxilia::InvalidArgumentError("Failed to get global environment.")};
   }
 
   for (const auto &stmt : stmts)

@@ -171,7 +171,7 @@ int loxo_main(_In_ const int argc,
   if (ctx.commands.front() == ExecutionContext::parse) {
     writeParseResultToContextStream(ctx);
     if (argv)
-      std::cout << ctx.output_stream.str() << std::endl;
+      std::cout << ctx.output_stream.view() << std::endl;
     return 0;
   }
 
