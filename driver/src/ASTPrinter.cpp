@@ -24,8 +24,7 @@ ASTPrinter::eval_result_t ASTPrinter::visit_impl(const Variable &expr) const {
   oss << expr << std::endl;
   return {};
 }
-IVisitor::eval_result_t
-ASTPrinter::visit_impl(const Assignment &expr) const {
+IVisitor::eval_result_t ASTPrinter::visit_impl(const Assignment &expr) const {
   dbg(trace, "Assignment: {}", expr.to_string(auxilia::FormatPolicy::kDefault))
   oss << expr << std::endl;
   return {};
@@ -42,7 +41,7 @@ ASTPrinter::eval_result_t ASTPrinter::visit_impl(const Call &expr) const {
 }
 auto ASTPrinter::evaluate_impl(const Expr &expr) const -> eval_result_t {
   const_cast<eval_result_t &>(res) = expr.accept(*this);
-  return auxilia::OkStatus();
+  return {};
 }
 ASTPrinter::eval_result_t ASTPrinter::visit_impl(const Literal &expr) const {
   dbg(trace, "Literal: {}", expr.to_string(auxilia::FormatPolicy::kDefault))

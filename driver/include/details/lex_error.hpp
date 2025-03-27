@@ -56,9 +56,7 @@ lex_error::to_string(const string_view_t lexeme_sv,
     my_msg = "Unterminated string.";
     break;
   }
-  auto str = auxilia::format("[line {}] Error: {}", line, my_msg);
-  dbg(error, "{}", str)
-  return str;
+  return auxilia::format("[line {}] Error: {}", line, my_msg);
 }
 
 inline auto

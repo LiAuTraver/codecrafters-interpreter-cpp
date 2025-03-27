@@ -25,7 +25,7 @@ auxilia::Status ScopeAssoc::add(const string_type &name,
   }
 
   associations.insert_or_assign(name.data(), std::pair{value, line});
-  return auxilia::OkStatus();
+  return {};
 }
 auto ScopeAssoc::to_string(const auxilia::FormatPolicy &format_policy) const
     -> string_type {

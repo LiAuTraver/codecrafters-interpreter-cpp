@@ -1,12 +1,15 @@
 #include <fmt/base.h>
-int a = 1;
+#include <string>
+using namespace std::literals;
+auto str = "Global"sv;
 void p(){
-  fmt::println("{}", a);
+  fmt::println("{}", str);
 }
 
 void closure(){
   p(); // 1
-  int a = 2;
+  auto str = "Block"sv;
+  fmt::println("{}", str); // 2
   p(); // 1
 }
 

@@ -45,7 +45,7 @@ auto parser::parse(const ParsePolicy &parse_policy) -> auxilia::Status try {
   } else {
     contract_assert(false, "unknown parse policy.")
   }
-  return auxilia::OkStatus();
+  return {};
 } catch (const auxilia::Status &status) {
   return status;
 }
@@ -438,12 +438,10 @@ auto parser::synchronize(const parse_error &parse_error) -> auxilia::Status {
     };
     this->get();
   }
-  return auxilia::Status{
-      auxilia::Status::kParseError,
-      auxilia::format("[line {}] Error at '{}': {}",
-                      error_token.line,
-                      error_token.to_string(auxilia::FormatPolicy::kDetailed),
-                      parse_error.message())};
+  return auxilia::ParseError("[line {}] Error at '{}': {}",
+                             error_token.line,
+                             error_token.to_string(auxilia::FormatPolicy::kDetailed),
+                             parse_error.message());
 }
 LOXO_API void delete_parser_fwd(parser *ptr) { delete ptr; }
 

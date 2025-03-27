@@ -209,7 +209,7 @@ public:
 
 public:
   auto call(const interpreter &, args_t &&) const -> eval_result_t;
-
+    
 private:
   // dont support static variables in this function
   unsigned my_arity = std::numeric_limits<unsigned>::quiet_NaN();
@@ -220,8 +220,22 @@ private:
   static constexpr auto native_signature = "<native fn>"sv;
 
 public:
-  auto to_string(const auxilia::FormatPolicy &) const
-      -> string_type;
+  auto to_string(const auxilia::FormatPolicy &) const -> string_type;
+
+private:
+  friend inline auto operator==(
+      const Callable &lhs,
+      const Callable &rhs) -> bool {
+    return lhs.my_arity == rhs.my_arity &&
+           lhs.my_function.index() == rhs.my_function.index() &&
+           std::addressof(*lhs.my_env) ==
+               std::addressof(*rhs.my_env);
+  }
+  friend inline auto operator!=(
+      const Callable &lhs,
+      const Callable &rhs) -> bool {
+    return !(lhs == rhs);
+  }
 };
 
 } // namespace accat::loxo::evaluation

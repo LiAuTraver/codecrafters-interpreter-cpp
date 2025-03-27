@@ -19,25 +19,24 @@ else ()
     add_compile_options(-DGTEST_CREATE_SHARED_LIBRARY=1)
 endif ()
 
-function(create_test_executable test_name)
-    add_executable(${test_name} ${ARGN})
-    target_link_libraries(${test_name} PRIVATE
-            spdlog::spdlog
-            fmt::fmt
-            GTest::gtest
-            GTest::gtest_main
-            magic_enum::magic_enum
-            driver
-    )
-    if (AC_CPP_DEBUG)
-        copy_dlls_for(${test_name})
-    endif ()
-    gtest_discover_tests(${test_name})
-endfunction(create_test_executable)
-
-create_test_executable(scan.test scan.cpp ${TEST_SHARED_SOURCES})
-create_test_executable(parse.test parse.cpp ${TEST_SHARED_SOURCES})
-create_test_executable(evaluate.test evaluate.cpp ${TEST_SHARED_SOURCES})
-create_test_executable(interpret.test interpret.cpp ${TEST_SHARED_SOURCES})
-create_test_executable(controlflow.test controlflow.cpp ${TEST_SHARED_SOURCES})
-create_test_executable(function.test function.cpp ${TEST_SHARED_SOURCES})
+add_executable(loxo.test 
+        scan.cpp
+        parse.cpp
+        evaluate.cpp
+        interpret.cpp
+        controlflow.cpp
+        func.cpp
+        ${TEST_SHARED_SOURCES}
+)
+target_link_libraries(loxo.test PRIVATE
+        spdlog::spdlog
+        fmt::fmt
+        GTest::gtest
+        GTest::gtest_main
+        magic_enum::magic_enum
+        driver
+)
+if (AC_CPP_DEBUG)
+    copy_dlls_for(loxo.test)
+endif ()
+gtest_discover_tests(loxo.test)

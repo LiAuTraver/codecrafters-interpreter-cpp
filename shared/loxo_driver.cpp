@@ -20,7 +20,7 @@
 namespace accat::loxo {
 auxilia::Status show_msg() {
   dbg(critical, "please provide a command.")
-dbg_break
+  dbg_break
   // return auxilia::Status::kEmptyInput;
   return auxilia::InvalidArgumentError("please provide a command.");
 }
@@ -74,15 +74,14 @@ auxilia::Status tokenize(ExecutionContext &ctx) {
     return onLexOperationExit(ctx);
   }
   dbg(info, "lexing process completed successfully with no errors.")
-  return auxilia::OkStatus();
+  return {};
 }
 auxilia::Status parse(ExecutionContext &ctx) {
   dbg(info, "Parsing...")
   ctx.parser.reset(new parser);
   ctx.parser->set_views(ctx.lexer->get_tokens());
   auxilia::Status res;
-  if (ctx.commands.front() ==
-      ExecutionContext::parse) { // NOLINT(bugprone-branch-clone)
+  if (ctx.commands.front() == ExecutionContext::parse) {
     res = ctx.parser->parse(parser::kExpression);
   } else if (ctx.commands.front() & ExecutionContext::needs_evaluate) {
     res = ctx.parser->parse(parser::kExpression);
@@ -125,7 +124,7 @@ void writeInterpResultToContextStream(ExecutionContext &ctx) {
 // clang-format off
 [[nodiscard]]
 int loxo_main(_In_ const int argc,
-              _In_opt_ char **argv, //! @note argv can be nullptr(debug mode or google test)
+              _In_opt_ char **argv, /// @note argv can be nullptr(debug mode or google test)
               _Inout_ ExecutionContext &ctx)
 // clang-format on
 {

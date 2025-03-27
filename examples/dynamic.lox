@@ -6,8 +6,5 @@ var a = "global";
 
   showA();
   var a = "block";
-  print a;      
   showA();
-  print a;
 }
-

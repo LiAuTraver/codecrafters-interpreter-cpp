@@ -50,49 +50,23 @@ struct ExecutionContext {
   static ExecutionContext &inspectArgs(int, char **&, char **&);
   static std::string_view command_sv(const commands_t &);
 };
-namespace details {
-static inline constexpr uint16_t _dummy_tag_ = 1 << 15;
-static inline constexpr uint16_t _help_ = 1 << 0;
-static inline constexpr uint16_t _lex_ = 1 << 1;
-static inline constexpr uint16_t _parse_ = 1 << 2;
-static inline constexpr uint16_t _evaluate_ = 1 << 3;
-static inline constexpr uint16_t _interpret_ = 1 << 4;
-static inline constexpr uint16_t _repl_ = 1 << 5;
-static inline constexpr uint16_t _stdin_ = 1 << 6;
-static inline constexpr uint16_t _version_ = 1 << 7;
-static inline constexpr uint16_t _test_ = 1 << 8;
-
-static inline constexpr uint16_t _needs_lex_ =
-    _lex_ | _parse_ | _evaluate_ | _interpret_;
-static inline constexpr uint16_t _needs_parse_ =
-    _parse_ | _evaluate_ | _interpret_;
-static inline constexpr uint16_t _enable_cli_cmd_ = _repl_ | _stdin_;
-
-/// @note MSVC has wired behavior with my enums; also the `|` operator inside
-/// enum, so I made a workaround here.
-#if defined(_MSC_VER) && !defined(__clang__)
-static inline constexpr uint16_t _needs_evaluate_ = _evaluate_ | _dummy_tag_;
-static inline constexpr uint16_t _needs_interpret_ = _interpret_ | _dummy_tag_;
-#else
-static inline constexpr uint16_t _needs_evaluate_ = _evaluate_;
-static inline constexpr uint16_t _needs_interpret_ = _interpret_;
-#endif
-} // namespace details
 enum ExecutionContext::commands_t : uint16_t {
-  help = details::_help_,
-  lex = details::_lex_,
-  parse = details::_parse_,
-  evaluate = details::_evaluate_,
-  interpret = details::_interpret_,
-  REPL = details::_repl_,
-  stream = details::_stdin_,
-  version = details::_version_,
-  test = details::_test_,
-  needs_lex = details::_needs_lex_,
-  needs_parse = details::_needs_parse_,
-  needs_evaluate = details::_needs_evaluate_,
-  needs_interpret = details::_needs_interpret_,
-  unknown = std::numeric_limits<uint16_t>::max(),
+  // clang-format off
+  help            = 1 << 0,
+  lex             = 1 << 1,
+  parse           = 1 << 2,
+  evaluate        = 1 << 3,
+  interpret       = 1 << 4,
+  REPL            = 1 << 5,
+  stream          = 1 << 6,
+  version         = 1 << 7,
+  test            = 1 << 8,
+  needs_lex       = lex | parse | evaluate | interpret,
+  needs_parse     = parse | evaluate | interpret,
+  needs_evaluate  = evaluate,
+  needs_interpret = interpret,
+  unknown         = (std::numeric_limits<uint16_t>::max)()
+  // clang-format on
 };
 
 inline void ExecutionContext::addCommands(char **&argv) {

@@ -25,7 +25,7 @@ static void BM_Fib(benchmark::State &state) {
     auto currentPath = current_path();
     auto filePath =
         currentPath / "fib"s.append(fmt::to_string(i)).append(".lox");
-    std::fstream f = std::fstream(filePath, std::ios::out);
+    auto f = std::fstream(filePath, std::ios::out);
     f << fibCode;
     f.close();
     auto [_2, str] = get_result(filePath);

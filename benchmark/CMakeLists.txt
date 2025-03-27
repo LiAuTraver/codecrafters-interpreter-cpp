@@ -7,22 +7,23 @@ find_package(spdlog CONFIG REQUIRED)
 find_package(gtest CONFIG REQUIRED)
 find_package(benchmark CONFIG REQUIRED)
 
-add_executable(fib_bm
-    fib_bm.cpp
+add_executable(fib.benchmark
+    fib.bm.cpp
     ../shared/loxo_driver.cpp
 )
 
-target_include_directories(fib_bm PUBLIC
+target_include_directories(fib.benchmark PUBLIC
     ../shared
 )
 
-target_link_libraries(fib_bm PUBLIC
+target_link_libraries(fib.benchmark PUBLIC
     driver
     fmt::fmt
     spdlog::spdlog
     benchmark::benchmark
 )
-copy_dlls_for(fib_bm)
+copy_dlls_for(fib.benchmark)
+
 if(CMAKE_CXX_COMPILER_ID MATCHES MSVC)
   list(REMOVE_ITEM CMAKE_CXX_FLAGS_RELEASE "/O0")
   list(REMOVE_ITEM CMAKE_CXX_FLAGS_RELEASE "/Od")

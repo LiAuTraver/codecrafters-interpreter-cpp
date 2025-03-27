@@ -1,7 +1,7 @@
 cc_binary(
-    name = "fib_bm",
+    name = "fib.benchmark",
     srcs = [
-        "fib_bm.cpp",
+        "fib.bm.cpp",
         "//shared:execution_context.hpp",
         "//shared:loxo_driver.cpp",
         "//shared:test_env.hpp",
