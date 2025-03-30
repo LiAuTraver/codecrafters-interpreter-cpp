@@ -7,7 +7,6 @@
 # Learn more: https://codecrafters.io/program-interface
 
 set -e # Exit on failure
-export g++=/usr/local/bin/c++
-cmake -B build -S .
+cmake -DCMAKE_CXX_COMPILER=/usr/local/bin/c++ -B build -S .
 #  -DCMAKE_TOOLCHAIN_FILE=${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake
 cmake --build ./build
