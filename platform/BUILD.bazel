@@ -2,7 +2,6 @@
 # is a copy of the original files from the Official Bazel Examples repository
 # and altered to fit the needs of this(loxo) project.
 
-
 platform(
     name = "windows_x64",
     constraint_values = [

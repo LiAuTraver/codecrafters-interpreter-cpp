@@ -6,7 +6,10 @@
       "type": "cppvsdbg",
       "request": "launch",
       "program": "${command:cmake.launchTargetPath}",
-      "args": [],
+      "args": [
+        "run",
+        "Z:/loxo/examples/dynamic.lox",
+      ],
       "stopAtEntry": false,
       "cwd": "${command:cmake.launchTargetDirectory}",
       "environment": [],

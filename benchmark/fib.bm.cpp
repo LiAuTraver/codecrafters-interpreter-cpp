@@ -4,8 +4,8 @@
 namespace {
 auto get_result(auto &&filepath) {
   ExecutionContext ec;
-  ec.commands.push_back(ExecutionContext::interpret);
-  ec.input_files.push_back(filepath);
+  ec.commands.emplace_back(ExecutionContext::interpret);
+  ec.input_files.emplace_back(filepath);
   auto exec = loxo_main(3, nullptr, ec);
   return exec ? std::make_pair(exec,
                                ec.output_stream.str() + ec.error_stream.str())

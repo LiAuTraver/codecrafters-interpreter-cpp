@@ -13,30 +13,35 @@ file(GLOB_RECURSE TEST_SHARED_SOURCES ${CMAKE_SOURCE_DIR}/shared/*.cpp)
 enable_testing()
 include(CTest)
 include(GoogleTest)
-if (${CMAKE_CXX_COMPILER} STREQUAL "MSVC")
-    add_compile_options(/DGTEST_CREATE_SHARED_LIBRARY=1)
-else ()
-    add_compile_options(-DGTEST_CREATE_SHARED_LIBRARY=1)
-endif ()
 
-add_executable(loxo.test 
-        scan.cpp
-        parse.cpp
-        evaluate.cpp
-        interpret.cpp
-        controlflow.cpp
-        func.cpp
-        ${TEST_SHARED_SOURCES}
+if(${CMAKE_CXX_COMPILER} STREQUAL "MSVC")
+  add_compile_options(/DGTEST_CREATE_SHARED_LIBRARY=1)
+  add_compile_options(/DLOXO_ROOT_DIR="${PROJECT_SOURCE_DIR}")
+else()
+  add_compile_options(-DGTEST_CREATE_SHARED_LIBRARY=1)
+  add_compile_options(-DLOXO_ROOT_DIR="${PROJECT_SOURCE_DIR}")
+endif()
+
+add_executable(loxo.test
+  scan.test.cpp
+  parse.test.cpp
+  evaluate.test.cpp
+  interpret.test.cpp
+  controlflow.test.cpp
+  function.test.cpp
+  ${TEST_SHARED_SOURCES}
 )
 target_link_libraries(loxo.test PRIVATE
-        spdlog::spdlog
-        fmt::fmt
-        GTest::gtest
-        GTest::gtest_main
-        magic_enum::magic_enum
-        driver
+  spdlog::spdlog
+  fmt::fmt
+  GTest::gtest
+  GTest::gtest_main
+  magic_enum::magic_enum
+  driver
 )
-if (AC_CPP_DEBUG)
-    copy_dlls_for(loxo.test)
-endif ()
+
+if(AC_CPP_DEBUG)
+  copy_dlls_for(loxo.test)
+endif()
+
 gtest_discover_tests(loxo.test)

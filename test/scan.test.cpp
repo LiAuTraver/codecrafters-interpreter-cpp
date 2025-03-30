@@ -1,15 +1,17 @@
 #include <gtest/gtest.h>
 #include "test_env.hpp"
 
+namespace {
 auto get_result(const auto &filepath) {
   std::ostringstream oss;
   ExecutionContext ec;
-  ec.commands.push_back(ExecutionContext::lex);
-  ec.input_files.push_back(filepath);
+  ec.commands.emplace_back(ExecutionContext::lex);
+  ec.input_files.emplace_back(filepath);
   ec.output_stream.set_rdbuf(oss.rdbuf());
   auto _ = loxo_main(3, nullptr, ec);
   return oss.str();
 }
+} // namespace
 
 TEST(scan, invalid_path) {
   const auto filepath = path(R"(ABCDEF)");
@@ -18,13 +20,13 @@ TEST(scan, invalid_path) {
 }
 
 TEST(scan, empty_file) {
-  const auto filepath = path(R"(Z:/loxo/examples/scanning/empty.lox)");
+  const auto filepath = path(LOXO_ROOT_DIR R"(/examples/scanning/empty.lox)");
   auto result = get_result(filepath);
   EXPECT_EQ(result, "EOF  null\n");
 }
 
 TEST(scan, simple1) {
-  const auto filepath = path(R"(Z:/loxo/examples/scanning/simple1.lox)");
+  const auto filepath = path(LOXO_ROOT_DIR R"(/examples/scanning/simple1.lox)");
   auto result = get_result(filepath);
   EXPECT_EQ(result,
             "VAR var null\n"
@@ -36,7 +38,7 @@ TEST(scan, simple1) {
 }
 
 TEST(scan, simple2) {
-  const auto filepath = path(R"(Z:/loxo/examples/scanning/simple2.lox)");
+  const auto filepath = path(LOXO_ROOT_DIR R"(/examples/scanning/simple2.lox)");
   auto result = get_result(filepath);
   EXPECT_EQ(result,
             "LEFT_PAREN ( null\n"
@@ -46,7 +48,7 @@ TEST(scan, simple2) {
 }
 
 TEST(scan, simple3) {
-  const auto filepath = path(R"(Z:/loxo/examples/scanning/simple3.lox)");
+  const auto filepath = path(LOXO_ROOT_DIR R"(/examples/scanning/simple3.lox)");
   auto result = get_result(filepath);
   EXPECT_EQ(result,
             "LEFT_PAREN ( null\n"

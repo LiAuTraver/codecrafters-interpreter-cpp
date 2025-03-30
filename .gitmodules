@@ -1,3 +1,6 @@
 [submodule "shared/auxilia"]
 	path = shared/auxilia
 	url = git@github.com:LiAuTraver/auxilia.git
+[submodule "bazel"]
+	path = bazel
+	url = git@github.com:LiAuTraver/cazel.git

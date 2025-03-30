@@ -1,15 +1,15 @@
 cc_binary(
     name = "interpreter",
     srcs = [
+        "//shared:execution_context.hpp",
+        "//shared:loxo_driver.cpp",
         "lox_interpreter.cpp",
-				"//shared:loxo_driver.cpp",
-				"//shared:execution_context.hpp",
-    ] ,
+    ],
     copts = [
         "/std:c++latest",
         "/Ishared/include",
         "/Ishared",
-        "/Idriver/include", 
+        "/Idriver/include",
         "/Zc:preprocessor",
     ],
     defines = [
@@ -18,10 +18,10 @@ cc_binary(
     ],
     includes = [
         "driver/include",
-				"shared/",
+        "shared/",
     ],
     visibility = ["//visibility:public"],
     deps = [
-        "//driver:driver",
+        "//driver",
     ],
 )

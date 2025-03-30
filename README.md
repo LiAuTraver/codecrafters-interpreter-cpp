@@ -4,8 +4,6 @@
 
 > from [Crafting Interpreters](http://www.craftinginterpreters.com/appendix-i.html)
 
-![blob:chrome-untrusted://image-magnify/4bb9a6a4-9238-4402-b0f9-431c6537a396](https://craftinginterpreters.com/image/header.png)
-
 ## Build
 
 A C++23 compiler is required to build the project; tested with gcc, clang, and MSVC. Bazel or CMake is required to build the project.
@@ -14,7 +12,7 @@ A C++23 compiler is required to build the project; tested with gcc, clang, and M
 
 #### with Bazel(currently only configured for Windows)
 ```powershell
-bazel build //tools:intepreter # build the interpreter
+bazel build //tools:interpreter # build the interpreter
 bazel test //tests:... # run the tests
 ```
 
@@ -28,8 +26,7 @@ cmake --preset= # see available presets, make sure to alter the toolchain file
 ### Release mode
 No external dependencies are required for release mode. 
 You can run Bazel or CMake as mentioned above(only for target `interpreter`),
-or run the `run.sh` script in the root directory(Linux)
-.
+or run the `run.sh` script in the root directory(Linux).
 
 ## Run
 

@@ -61,10 +61,11 @@ enum ExecutionContext::commands_t : uint16_t {
   stream          = 1 << 6,
   version         = 1 << 7,
   test            = 1 << 8,
-  needs_lex       = lex | parse | evaluate | interpret,
-  needs_parse     = parse | evaluate | interpret,
-  needs_evaluate  = evaluate,
-  needs_interpret = interpret,
+  // msvc bug workaround
+  needs_lex       = 30,     // lex | parse | evaluate | interpret,
+  needs_parse     = 28,     // parse | evaluate | interpret,
+  needs_evaluate  = 1 << 3,
+  needs_interpret = 1 << 4,
   unknown         = (std::numeric_limits<uint16_t>::max)()
   // clang-format on
 };
@@ -99,11 +100,11 @@ ExecutionContext::inspectArgs(const int argc, char **&argv, char **&envp) {
   ctx.executable_path = argv[0];
   auto path_ = std::filesystem::path(ctx.executable_path);
   ctx.executable_name = path_.filename();
-  //! @note according to standard, `set_rdbuf` shall be protected;
-  //! for some reason, MSVC's STL makes it public.
-  //! did not compile with libstdc++.
-  //! @see
-  //! <a href="https://github.com/microsoft/STL/issues/2829">this issue</a>
+  //* @note according to standard, `set_rdbuf` shall be protected;
+  //* for some reason, MSVC's STL makes it public.
+  //* did not compile with libstdc++.
+  //* @see
+  //* <a href="https://github.com/microsoft/STL/issues/2829">this issue</a>
   // ctx.output_stream.set_rdbuf(std::cout.rdbuf());
   ctx.execution_dir = std::filesystem::current_path();
   ctx.tempdir = std::filesystem::temp_directory_path();
@@ -120,10 +121,10 @@ ExecutionContext::inspectArgs(const int argc, char **&argv, char **&envp) {
   for (auto i = 2ull; *(argv + i); ++i) {
     ctx.input_files.emplace_back(*(argv + i));
   }
-#ifdef AC_CPP_DEBUG
-  // set to nullptr for debugging
-  argv = nullptr;
-#endif
+  // #ifdef AC_CPP_DEBUG
+  //   // set to nullptr for debugging
+  //   argv = nullptr;
+  // #endif
   return ctx;
 }
 inline std::string_view ExecutionContext::command_sv(const commands_t &cmd) {

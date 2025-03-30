@@ -7,20 +7,21 @@ cc_library(
     srcs = driver_srcs,
     copts = [
         "/std:c++latest",
-        "/Ishared/include", # MUST be added, relative to the WORKSPACE file
+        "/Ishared/include",  # MUST be added, relative to the WORKSPACE file
         "/Zc:preprocessor",
     ],
     defines = [
         "AC_CPP_DEBUG",
         "LIBLOXO_SHARED",
         "driver_EXPORTS",
+        "AC_SILENCE_CPP_STANDARD_CHECK",
     ],
     includes = driver_includes,
     linkstatic = False,
     visibility = ["//visibility:public"],
     deps = [
+        "//shared/auxilia",
         "@fmt",
         "@spdlog",
-        "//shared:utils",
     ],
 )

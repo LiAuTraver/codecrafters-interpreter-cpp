@@ -1,28 +1,13 @@
 load("//test:loxo_add_test.bzl", "loxo_add_test")
 
 loxo_add_test(
-		name = "scan",
-		src = "scan.cpp",
-)
-loxo_add_test(
-		name = "parse",
-		src = "parse.cpp",
-)
-loxo_add_test(
-		name = "evaluate",
-		src = "evaluate.cpp",
-)
-loxo_add_test(
-    name = "interpret",
-    src = "interpret.cpp",
-)
-
-loxo_add_test(
-    name = "controlflow",
-    src = "controlflow.cpp",
-)
-
-loxo_add_test(
-    name = "function",
-    src = "function.cpp",
+  name = "loxo.test",
+  src = [
+    "scan.test.cpp",
+    "parse.test.cpp",
+    "evaluate.test.cpp",
+    "interpret.test.cpp",
+    "controlflow.test.cpp",
+    "function.test.cpp",
+  ],
 )
