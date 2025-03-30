@@ -72,6 +72,7 @@ else()
     auxilia
     GIT_REPOSITORY https://github.com/LiAuTraver/auxilia.git
     GIT_TAG main
+    CMAKE_ARGS -DCMAKE_CXX_COMPILER=/usr/local/bin/c++ # workaround
   )
   FetchContent_MakeAvailable(auxilia)
 endif()
