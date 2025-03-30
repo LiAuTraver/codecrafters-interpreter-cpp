@@ -51,7 +51,6 @@ Token::number_to_string(const auxilia::FormatPolicy policy) const {
       return auxilia::format("{}", *ptr);
     dbg_break
   } else {
-    dbg_block{literal = nullptr;};
     if (policy == kDefault)
       return auxilia::format("NUMBER {} {}", lexeme, "<failed to access data>");
     if (policy == kDetailed)

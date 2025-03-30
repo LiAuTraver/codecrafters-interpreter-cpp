@@ -66,6 +66,8 @@ if(AC_CPP_DEBUG)
   endif()
 
   message(STATUS "CMAKE_CXX_COMPILER_ID: ${CMAKE_CXX_COMPILER_ID}")
+else()
+  add_compile_options(-Wno-attributes)
 endif()
 
 # ## after testing, build as shared library can reduce the compile time, which is good when debugging.
