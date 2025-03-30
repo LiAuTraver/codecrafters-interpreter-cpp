@@ -171,8 +171,6 @@ auto parser::primary() -> expr_ptr_t {
   if (inspect(kIdentifier)) {
     return std::make_shared<expression::Variable>(this->get());
   }
-  ///  where's keyword??????????????
-  ///     ^^^^^^ solved: shoud not appera here and was already handled in lexer.
   if (inspect(kLeftParen)) {
     this->get();
     auto expr = next_expression();

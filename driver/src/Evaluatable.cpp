@@ -58,19 +58,19 @@ auto Boolean::make_false(const uint_least32_t line) -> Boolean {
 }
 
 bool Boolean::is_true() const noexcept {
-  contract_assert(value.has_value(),"value is not set")
+  contract_assert(value.has_value(), "value is not set")
   return value.value();
 }
 
 auto Boolean::to_string(const auxilia::FormatPolicy &format_policy) const
     -> string_type {
-  contract_assert(value.has_value(),"value is not set")
+  contract_assert(value.has_value(), "value is not set")
   return value.value() ? "true"s : "false"s;
 }
 
-auto Boolean::to_string_view(
-    const auxilia::FormatPolicy &format_policy) const -> string_view_type {
-  contract_assert(value.has_value(),"value is not set")
+auto Boolean::to_string_view(const auxilia::FormatPolicy &format_policy) const
+    -> string_view_type {
+  contract_assert(value.has_value(), "value is not set")
   return value.value() ? "true"sv : "false"sv;
 }
 
@@ -111,8 +111,7 @@ String::String(const String &that)
     : Evaluatable(that.get_line()), value(that.value) {}
 
 String::String(String &&that) noexcept
-    : Evaluatable(that.get_line()),
-      value(std::move(that.value)) {}
+    : Evaluatable(that.get_line()), value(std::move(that.value)) {}
 
 String &String::operator=(const String &that) {
   if (this == &that)
@@ -277,58 +276,59 @@ auto Callable::create_native(unsigned argc,
 
 auto Callable::call(const interpreter &interpreter, args_t &&args) const
     -> eval_result_t {
-  contract_assert(this->arity() == args.size(),
-                  "arity mismatch; should check it before calling")
-  return my_function.visit(
-      match{[&](const native_function_t &native_function) -> eval_result_t {
-              return {native_function.operator()(interpreter, args)};
-            },
-            [&](const custom_function_t &custom_function) -> eval_result_t {
-              auto saved_env = interpreter.get_current_env();
+  precondition(
+      this->arity() == args.size(),
+      "arity mismatch; should check it before calling") return my_function
+      .visit(match{
+          [&](const native_function_t &native_function) -> eval_result_t {
+            return {native_function.operator()(interpreter, args)};
+          },
+          [&](const custom_function_t &custom_function) -> eval_result_t {
+            auto saved_env = interpreter.get_current_env();
 
-              auto scoped_env = std::make_shared<Environment>(this->my_env);
+            auto scoped_env = std::make_shared<Environment>(this->my_env);
 
-              for (size_t i = 0; i < custom_function.parameters.size(); ++i) {
-                if (auto res =
-                        scoped_env->add(custom_function.parameters[i], args[i]);
-                    !res.ok()) {
-                  return {res};
-                }
+            for (size_t i = 0; i < custom_function.parameters.size(); ++i) {
+              if (auto res =
+                      scoped_env->add(custom_function.parameters[i], args[i]);
+                  !res.ok()) {
+                return {res};
               }
+            }
 
-              dbg(info, "entering a function...")
-              interpreter.set_env(scoped_env);
+            dbg(info, "entering a function...")
+            interpreter.set_env(scoped_env);
 
-              for (const auto &index : custom_function.body) {
-                if (auto res = interpreter.execute(*index); !res) {
-                  if (res.code() == auxilia::Status::kReturning) {
-                    auto my_result = interpreter.get_result();
-                    // FIXME: i my logic was completely gone here: `last_expr`
-                    //              itself was a mistake!
-                    dbg(info, "returning: {}", my_result->underlying_string())
-                    dbg(info,
-                        "current interpreter's returned res: {}",
-                        res->underlying_string())
+            defer { interpreter.set_env(saved_env); };
+            
+            for (const auto &index : custom_function.body) {
+              if (auto res = interpreter.execute(*index); !res) {
+                if (res.is_return()) {
+                  auto my_result = interpreter.get_result();
+                  // FIXME: i my logic was completely gone here: `last_expr`
+                  //              itself was a mistake!
+                  dbg(info, "returning: {}", my_result->underlying_string())
+                  dbg(info,
+                      "current interpreter's returned res: {}",
+                      res->underlying_string())
 
-                    interpreter.set_env(saved_env);
-                    return my_result;
-                  }
-                  interpreter.set_env(saved_env);
-                  // else, error, return as is
-                  return res;
+                  return my_result;
                 }
+                // else, error, return as is
+                return res;
               }
-              dbg(info, "void function, returning nil.")
-              return {{NilValue}};
-            },
-            [](const auto &) -> eval_result_t {
-              dbg_break
-              return {auxilia::NotFoundError("no function to call")};
-            }});
+            }
+
+            dbg(info, "void function, returning nil.")
+            return {{NilValue}};
+          },
+          [](const auto &) -> eval_result_t {
+            dbg_break
+            return {auxilia::NotFoundError("no function to call")};
+          }});
 }
 
-auto Callable::to_string(const auxilia::FormatPolicy &) const
-    -> string_type {
+auto Callable::to_string(const auxilia::FormatPolicy &) const -> string_type {
   return my_function.visit(match{
       [](const native_function_t &) { return "<native fn>"s; },
       [](const custom_function_t &f) {

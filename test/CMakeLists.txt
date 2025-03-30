@@ -29,6 +29,7 @@ add_executable(loxo.test
   interpret.test.cpp
   controlflow.test.cpp
   function.test.cpp
+  scope.test.cpp
   ${TEST_SHARED_SOURCES}
 )
 target_link_libraries(loxo.test PRIVATE

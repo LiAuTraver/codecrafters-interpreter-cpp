@@ -58,7 +58,7 @@ auto Environment::Global() -> std::shared_ptr<Environment> {
                 0,
                 [](const interpreter &, evaluation::Callable::args_t &) {
                   return IVisitor::variant_type{evaluation::String{
-                      "loxo programming language, based on "
+                      "lox programming language, based on "
                       "book Crafting Interpreters's lox."sv}};
                 },
                 nullptr))

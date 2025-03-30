@@ -19,10 +19,6 @@ endif()
 include_directories(driver/include)
 include_directories(packages)
 include_directories(shared)
-include_directories(shared/auxilia/include)
-file(GLOB_RECURSE DRIVER_HEADER_FILES driver/include/*.hpp)
-file(GLOB_RECURSE DRIVER_SOURCE_FILES driver/src/*.cpp)
-file(GLOB_RECURSE SHARED_HEADER_FILES shared/include/*.hpp)
 
 if(${CMAKE_GENERATOR} MATCHES "Visual Studio")
   message(STATUS "Visual Studio detected")
@@ -66,9 +62,22 @@ if(AC_CPP_DEBUG)
   endif()
 
   message(STATUS "CMAKE_CXX_COMPILER_ID: ${CMAKE_CXX_COMPILER_ID}")
+
+  add_subdirectory(shared/auxilia)
+  find_package(auxilia QUIET)
 else()
   add_compile_options(-Wno-attributes)
+  include(FetchContent)
+  FetchContent_Declare(
+    auxilia
+    GIT_REPOSITORY https://github.com/LiAuTraver/auxilia.git
+    GIT_TAG main
+  )
+  FetchContent_MakeAvailable(auxilia)
 endif()
+
+file(GLOB_RECURSE DRIVER_HEADER_FILES driver/include/*.hpp)
+file(GLOB_RECURSE DRIVER_SOURCE_FILES driver/src/*.cpp)
 
 # ## after testing, build as shared library can reduce the compile time, which is good when debugging.
 # ## note: for some wired reasons, the library would not be rebuilt if `.cpp` are changed, and `.hpp` are unchanged;
@@ -77,23 +86,24 @@ if(LOXO_BUILD_SHARED)
   add_library(driver SHARED
     ${DRIVER_SOURCE_FILES}
     ${DRIVER_HEADER_FILES}
-    ${SHARED_HEADER_FILES}
   )
   target_compile_options(driver PUBLIC
     $<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>>: -DLIBLOXO_SHARED>
     $<$<CXX_COMPILER_ID:MSVC>: /DLIBLOXO_SHARED>
   )
-  set_target_properties(driver PROPERTIES LINKER_LANGUAGE CXX)
   message(STATUS "Building shared library")
 else()
   add_library(driver STATIC
     ${DRIVER_HEADER_FILES}
     ${DRIVER_SOURCE_FILES}
-    ${SHARED_HEADER_FILES}
   )
-  set_target_properties(driver PROPERTIES LINKER_LANGUAGE CXX)
   message(STATUS "Building static library")
 endif()
+
+set_target_properties(driver PROPERTIES LINKER_LANGUAGE CXX)
+target_link_libraries(driver PUBLIC
+  auxilia::auxilia
+)
 
 add_executable(interpreter
   tools/lox_interpreter.cpp

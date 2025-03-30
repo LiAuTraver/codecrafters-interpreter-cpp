@@ -178,22 +178,29 @@ auto interpreter::visit_impl(const statement::For &stmt) const
 auto interpreter::visit_impl(const statement::Function &stmt) const
     -> eval_result_t {
   // TODO: function overloading
-  // clang-format off
-  if (auto res = env->get(stmt.name.to_string(kDetailed));
-  !res.empty()){
-    // FIXME: seems something went wrong with my logic here.
-    dbg(warn, "found the function already defined... use it")
-    return res;
+  if (auto res = env->get(stmt.name.to_string(kDetailed)); !res.empty()) {
+    if (!res.is_type<evaluation::Callable>()) {
+      dbg(error,
+          "bad function definition: {} is not a function",
+          stmt.name.to_string(kDefault))
+      return res;
+    }
+    // if arity is same, warn and overwrite the function;
+    // if arity is different, just as overloading.
+    auto callable = res.get<evaluation::Callable>();
+    if (callable.arity() == stmt.parameters.size()) {
+      dbg(warn,
+          "function {} already defined",
+          stmt.name.to_string(kDetailed))
+    } else {
+      dbg(info, "overloading function: {}", stmt.name.to_string(kDetailed))
+      TODO(unordered map, overloading)
+    }
   }
-    // return {auxilia::InvalidArgumentError(
-    //     "Function '{}' already defined. \n"
-    //     "Function overloading is not supported yet.",
-    //     stmt.name.to_string(kDetailed))};
 
-  dbg(info,"func name: {}",
-      stmt.name.to_string(kDetailed))
-      
+  dbg(info, "func name: {}", stmt.name.to_string(kDetailed))
 
+  // clang-format off
   auto callable = evaluation::Callable::create_custom(
           stmt.parameters.size(),
           {stmt.name.to_string(kDetailed),
@@ -329,7 +336,7 @@ auto interpreter::visit_impl(const expression::Binary &expr) const
   if (!rhs) {
     return rhs;
   }
-  
+
   if (expr.op.is_type(kEqualEqual)) {
     return {{is_deep_equal(lhs, rhs)}};
   }

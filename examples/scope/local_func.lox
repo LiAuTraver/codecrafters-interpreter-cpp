@@ -10,3 +10,4 @@ var variable = "global";
   var variable = "local";
 
   f();
+}

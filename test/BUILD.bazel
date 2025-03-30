@@ -9,5 +9,6 @@ loxo_add_test(
     "interpret.test.cpp",
     "controlflow.test.cpp",
     "function.test.cpp",
+    "scope.test.cpp",
   ],
 )
