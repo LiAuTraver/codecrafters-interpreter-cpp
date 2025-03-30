@@ -67,14 +67,29 @@ if(AC_CPP_DEBUG)
   find_package(auxilia QUIET)
 else()
   add_compile_options(-Wno-attributes)
-  include(FetchContent)
-  FetchContent_Declare(
-    auxilia
+  include(ExternalProject)
+  
+  # Set where to place the headers
+  set(AUXILIA_INCLUDE_DIR ${CMAKE_BINARY_DIR}/auxilia-src/include)
+  
+  # Download but don't build
+  ExternalProject_Add(auxilia_download
     GIT_REPOSITORY https://github.com/LiAuTraver/auxilia.git
     GIT_TAG main
-    CMAKE_ARGS -DCMAKE_CXX_COMPILER=/usr/local/bin/c++ # workaround
+    SOURCE_DIR ${CMAKE_BINARY_DIR}/auxilia-src
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND ""
+    INSTALL_COMMAND ""
   )
-  FetchContent_MakeAvailable(auxilia)
+  
+  # Create interface library
+  add_library(auxilia INTERFACE)
+  add_library(auxilia::auxilia ALIAS auxilia)
+  target_include_directories(auxilia INTERFACE ${AUXILIA_INCLUDE_DIR})
+  target_compile_features(auxilia INTERFACE cxx_std_23)
+  
+  # Make sure library depends on download completion
+  add_dependencies(auxilia auxilia_download)
 endif()
 
 file(GLOB_RECURSE DRIVER_HEADER_FILES driver/include/*.hpp)
