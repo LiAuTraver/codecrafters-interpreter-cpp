@@ -1,4 +1,3 @@
-#include <any>
 #include <ostream>
 #include <source_location>
 #include <sstream>

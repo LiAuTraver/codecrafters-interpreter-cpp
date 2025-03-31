@@ -1,4 +1,4 @@
-#include <any>
+
 #include <concepts>
 #include <limits>
 #include <numeric>
@@ -16,26 +16,9 @@
 
 namespace accat::loxo {
 using enum auxilia::FormatPolicy;
-template <typename Ty>
-inline auto Token::cast_literal() const -> decltype(auto)
-  requires std::default_initializable<Ty>
-{
-  return std::any_cast<Ty>(&this->literal);
-}
-Token::Token(const token_type &type,
-             string_type lexeme,
-             std::any literal,
-             const uint_least32_t line)
-    : type(type), lexeme(std::move(lexeme)), literal(std::move(literal)),
-      line(line) {}
-Token::Token(const token_type &type,
-             const string_view_type lexeme,
-             std::any literal,
-             const uint_least32_t line)
-    : type(type), lexeme(lexeme), literal(std::move(literal)), line(line) {}
 Token::string_type
 Token::number_to_string(const auxilia::FormatPolicy policy) const {
-  if (auto ptr = cast_literal<long double>()) {
+  if (auto ptr = literal.get_if<long double>()) {
     // 42 -> 42.0
     if (auxilia::is_integer(*ptr)) {
       if (policy == kDefault)
@@ -44,7 +27,7 @@ Token::number_to_string(const auxilia::FormatPolicy policy) const {
         return auxilia::format("{:.1f}", *ptr);
       dbg_break
     }
-    //  leave as is
+    // leave as is
     if (policy == kDefault)
       return auxilia::format("NUMBER {} {}", lexeme, *ptr);
     if (policy == kDetailed)
@@ -66,7 +49,7 @@ Token::to_string(const auxilia::FormatPolicy &policy) const {
   auto type_sv = ""sv;
   auto lexeme_sv = ""sv;
   auto literal_sv = ""sv;
-  if (!literal.has_value())
+  if (literal.empty())
     literal_sv = "null"sv;
   switch (type.type) {
   case kMonostate:
@@ -183,7 +166,7 @@ Token::to_string(const auxilia::FormatPolicy &policy) const {
       // codecrafter's string lit pase output does not need `"`, so remove them
       lexeme_sv = lexeme_sv.substr(1, lexeme_sv.size() - 2);
     }
-    if (auto ptr = cast_literal<string_view_type>())
+    if (auto ptr = literal.get_if<string_view_type>()) 
       literal_sv = *ptr;
     else
       literal_sv = "<failed to access data>"sv;
@@ -279,17 +262,17 @@ Token::to_string(const auxilia::FormatPolicy &policy) const {
     literal_sv = "null"sv;
     break;
   case kLexError:
-    if (policy == kDefault) {
-      // /// @note message is different from the other cases.
-      if (auto ptr = cast_literal<error_t>())
-        return ptr->to_string(lexeme, line);
-      else
-        return auxilia::format(
-            "[line {}] Error: {}", line, "<failed to access data>");
-    } else {
-      // do nothing
-      return ""s;
-    }
+    // if (policy == kDefault) {
+    //   /// @note message is different from the other cases.
+    //   if (auto ptr = cast_literal<error_t>())
+    //     return ptr->to_string(lexeme, line);
+    //   else
+    //     return auxilia::format(
+    //         "[line {}] Error: {}", line, "<failed to access data>");
+    // } else {
+    //   // do nothing
+    //   return ""s;
+    // }
   default:
     dbg_break
     break;
@@ -304,9 +287,5 @@ Token::to_string(const auxilia::FormatPolicy &policy) const {
   }
   dbg_break
   return ""s;
-}
-
-auto format_as(const Token &token) -> Token::string_type {
-  return token.to_string(auxilia::FormatPolicy::kDefault);
 }
 } // namespace accat::loxo

@@ -1,4 +1,3 @@
-#include <any>
 #include <charconv>
 #include <concepts>
 #include <filesystem>
@@ -34,15 +33,14 @@ bool lexer::advance_if(Predicate &&predicate)
 }
 template <typename Num>
   requires std::is_arithmetic_v<Num>
-std::any lexer::to_number(string_view_type value) {
+auto to_number(std::string_view value) -> lexer::literal_type {
   Num number;
   const auto &[p, ec] =
       std::from_chars(value.data(), value.data() + value.size(), number);
   if (ec == std::errc())
-    return {number};
+    return number;
   dbg(error, "Unable to convert string to number: {}", value)
-  dbg(error, "Error code: {}", std::to_underlying(ec))
-  dbg(error, "Error position: {}", p)
+  dbg(error, "Error: {}", std::make_error_code(ec).message())
   return {};
 }
 lexer::lexer(lexer &&other) noexcept
@@ -108,7 +106,6 @@ void lexer::add_identifier_and_keyword() {
     add_token(kIdentifier, value);
     return;
   }
-  // add_token(it->second);
   switch (it->second.type) {
   case kTrue:
     add_token(kTrue, true);
@@ -122,7 +119,7 @@ void lexer::add_identifier_and_keyword() {
   }
 }
 void lexer::add_number() {
-  if (auto value = lex_number(false); value.has_value()) {
+  if (auto value = lex_number(false); !value.empty()) {
     add_token(kNumber, value);
     return;
   }
@@ -222,9 +219,9 @@ bool lexer::advance_if_is(const char_t expected) {
 bool lexer::is_at_end(const size_t offset) const {
   return cursor + offset >= contents.size();
 }
-void lexer::add_token(const token_type_t &type, std::any literal) {
+void lexer::add_token(const token_type_t &type, literal_type literal) {
   if (type == kEndOfFile) { // FIXME: lexeme bug at EOF(not critical)
-    tokens.emplace_back(type, ""sv, std::any{}, current_line);
+    tokens.emplace_back(type, ""sv, literal_type{}, current_line);
     return;
   }
   auto lexeme = string_view_type(contents.data() + head, cursor - head);
@@ -235,7 +232,7 @@ void lexer::add_token(const token_type_t &type, std::any literal) {
 void lexer::add_lex_error(const error_code_t type) {
   dbg(error, "Lexical error: {}", contents.substr(head, cursor - head))
   error_count++;
-  return add_token(kLexError, std::make_any<error_t>(type));
+  return add_token(kLexError);
 }
 lexer::status_t::Code lexer::lex_string() {
   while (peek() != '"' && !is_at_end()) {
@@ -255,7 +252,7 @@ lexer::status_t::Code lexer::lex_string() {
     get(); // consume the closing quote.
   return status_t::kOk;
 }
-std::any lexer::lex_number(const bool is_negative) {
+auto lexer::lex_number(const bool is_negative) -> literal_type {
   while (std::isdigit(peek(), std::locale())) {
     get();
   }

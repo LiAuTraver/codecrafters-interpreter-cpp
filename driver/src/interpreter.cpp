@@ -100,11 +100,11 @@ auto interpreter::visit_impl(const statement::Variable &stmt) const
     auto eval_res = evaluate(*stmt.initializer);
     if (!eval_res)
       return eval_res;
-    contract_assert(!!std::any_cast<string_view_type>(&stmt.name.literal),
+    contract_assert(stmt.name.literal.is_type<string_view_type>(),
                     "variable name should be a string")
     dbg(trace,
         "variable name: {}, value: {}",
-        std::any_cast<string_view_type>(stmt.name.literal),
+        stmt.name.literal.get<string_view_type>(),
         eval_res->underlying_string())
     // string view failed again; not null-terminated
     return {env->add(
@@ -189,9 +189,7 @@ auto interpreter::visit_impl(const statement::Function &stmt) const
     // if arity is different, just as overloading.
     auto callable = res.get<evaluation::Callable>();
     if (callable.arity() == stmt.parameters.size()) {
-      dbg(warn,
-          "function {} already defined",
-          stmt.name.to_string(kDetailed))
+      dbg(warn, "function {} already defined", stmt.name.to_string(kDetailed))
     } else {
       dbg(info, "overloading function: {}", stmt.name.to_string(kDetailed))
       TODO(unordered map, overloading)
@@ -292,12 +290,11 @@ auto interpreter::visit_impl(const expression::Literal &expr) const
     return {evaluation::Boolean{false, expr.literal.line}};
   }
   if (T(kString)) {
-    return {evaluation::String{
-        std::any_cast<string_view_type>(expr.literal.literal),
-        expr.literal.line}};
+    return {evaluation::String{expr.literal.literal.get<string_view_type>(),
+                               expr.literal.line}};
   }
   if (T(kNumber)) {
-    return {evaluation::Number{std::any_cast<long double>(expr.literal.literal),
+    return {evaluation::Number{expr.literal.literal.get<long double>(),
                                expr.literal.line}};
   }
   return {auxilia::InvalidArgumentError("Expected literal value.\n[line {}]",

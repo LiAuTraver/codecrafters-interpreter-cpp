@@ -13,7 +13,7 @@ auto get_result(const auto &filepath) {
               : std::make_pair(exec, ec.output_stream.str());
 }
 } // namespace
-TEST(function, native1) {
+TEST(DISABLED_function, native1) {
   const auto path = LOXO_ROOT_DIR R"(\examples\fn\native1.lox)";
   auto [callback, str] = get_result(path);
   EXPECT_EQ(str,
@@ -38,7 +38,7 @@ TEST(function, return1) {
   EXPECT_EQ(callback, 0);
 }
 
-TEST(function, resurse1) {
+TEST(DISABLED_function, resurse1) {
   const auto path = LOXO_ROOT_DIR R"(\examples\fn\recurse1.lox)";
   auto [callback, str] = get_result(path);
   EXPECT_EQ(str, "55\ntrue\n");

@@ -1,6 +1,5 @@
 #pragma once
 
-#include <any>
 #include <cstddef>
 #include <cstdint>
 #include <source_location>
@@ -31,6 +30,7 @@ public:
   using error_t = lex_error;
   using error_code_t = typename error_t::type_t;
   using enum token_type_t::type_t;
+  using literal_type = token_t::literal_type;
 
 public:
   lexer() = default;
@@ -59,12 +59,12 @@ private:
   void add_string();
   void add_comment();
   void next_token();
-  void add_token(const token_type_t &, std::any = std::any());
+  void add_token(const token_type_t &, literal_type = {});
   void add_lex_error(lex_error::type_t = error_t::kMonostate);
   bool is_at_end(size_t = 0) const;
   auto lex_string() -> lexer::status_t::Code;
   auto lex_identifier() -> string_view_type;
-  auto lex_number(bool) -> std::any;
+  auto lex_number(bool) -> literal_type;
 
 private:
   /// @brief lookaheads; we have only consumed the character before the cursor
@@ -90,15 +90,6 @@ private:
 
 public:
   [[nodiscard]] const tokens_t &get_tokens() const { return tokens; }
-
-private:
-  /// @brief convert a string to a number
-  /// @tparam Num the number type
-  /// @param value the string to convert
-  /// @return the number if successful, std::any() otherwise
-  template <typename Num>
-    requires std::is_arithmetic_v<Num>
-  std::any to_number(string_view_type value);
 
 private:
   /// @brief head of a token
