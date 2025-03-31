@@ -248,7 +248,7 @@ auto interpreter::evaluate_impl(const expression::Expr &expr) const
   if (!res)
     return res;
   dbg(info, "result: {}", res->underlying_string())
-  return last_expr_res.reset(*res);
+  return last_expr_res.reset(*std::move(res));
 }
 auto interpreter::visit_impl(const statement::Return &expr) const
     -> eval_result_t {
