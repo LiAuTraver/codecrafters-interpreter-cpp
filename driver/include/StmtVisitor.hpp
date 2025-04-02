@@ -37,6 +37,9 @@ private:
   virtual eval_result_t visit_impl(const Function &) = 0;
   virtual eval_result_t visit_impl(const Return &) = 0;
   virtual eval_result_t execute_impl(const Stmt &) = 0;
+
+public:
+  virtual ~StmtVisitor() = default;
 };
 } // namespace accat::loxo::statement
 #endif // LOXO_STMTVISITOR_HPP

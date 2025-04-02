@@ -105,9 +105,9 @@ auxilia::Status evaluate(ExecutionContext &ctx) {
 auxilia::Status interpret(ExecutionContext &ctx) {
   dbg(info, "interpreting...")
   ctx.interpreter.reset(new interpreter);
-  //
-  // auto resolver = Resolver{*ctx.interpreter};
-  // resolver.resolve(ctx.parser->get_statements()).ignore_error();
+
+  auto resolver = Resolver{*ctx.interpreter};
+  resolver.resolve(ctx.parser->get_statements()).ignore_error();
   Environment::isGlobalScopeInited = false;
   auto res = ctx.interpreter->interpret(ctx.parser->get_statements());
   dbg(info, "interpretation completed.")

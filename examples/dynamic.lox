@@ -1,29 +1,13 @@
-fun makeFilter(min) {
-  fun filter(n) {
-    if (n < min) {
-      return false;
-    }
-    return true;
-  }
-  return filter;
+// bug 1
+for (var a = 1; a < 3; a = a + 1) {
+  print a;
 }
+print a + 10; // the var should not defined
 
-// This function applies a function to a list of numbers
-fun applyToNumbers(f, count) {
-  var n = 0;
-  while (n < count) {
-    if (f(n)) {
-      print n;
-    }
-    n = n + 1;
+// bug 2
+var b = "glob";
+{ // if there's no block, then it executes fine. however.
+  for (var b = 0; b < 1; b = b + 1) {
+    print b;
   }
 }
-
-var greaterThanX = makeFilter(55);
-var greaterThanY = makeFilter(10);
-
-print "Numbers >= 55:";
-applyToNumbers(greaterThanX, 55 + 5);
-
-print "Numbers >= 10:";
-applyToNumbers(greaterThanY, 10 + 5);

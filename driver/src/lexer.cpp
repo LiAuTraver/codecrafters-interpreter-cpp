@@ -248,8 +248,8 @@ lexer::status_t::Code lexer::lex_string() {
   }
   // "i am a string..."
   // 						      ^ cursor position
-  else
-    get(); // consume the closing quote.
+
+  get(); // consume the closing quote.
   return status_t::kOk;
 }
 auto lexer::lex_number(const bool is_negative) -> literal_type {

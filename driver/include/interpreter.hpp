@@ -38,7 +38,7 @@ public:
   eval_result_t interpret(std::span<std::shared_ptr<statement::Stmt>>);
   auto set_env(const env_ptr_t &) -> interpreter &;
   auto get_current_env() { return env; }
-  size_t resolve(const expression::Expr &, const size_t);
+  size_t resolve(const expression::Expr &, size_t);
 
 private:
   virtual auto visit_impl(const expression::Literal &)

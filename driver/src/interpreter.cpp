@@ -28,11 +28,7 @@ interpreter::interpreter() : env(std::make_shared<Environment>()) {}
 auto interpreter::interpret(
     const std::span<std::shared_ptr<statement::Stmt>> stmts) -> eval_result_t {
   is_interpreting_stmts = true;
-  static bool has_init_global_env = false;
-  if (!has_init_global_env) {
-    this->env = Environment::Global();
-    has_init_global_env = true;
-  }
+  this->env = Environment::Global();
 
   for (const auto &stmt : stmts)
     if (auto eval_res = execute(*stmt); !eval_res) {
@@ -66,13 +62,13 @@ auto interpreter::is_deep_equal(const eval_result_t &lhs,
     -> evaluation::Boolean {
   using Bool = evaluation::Boolean;
   auto pattern = match{
-      [](const evaluation::Nil &lhs, const evaluation::Nil &rhs) -> Bool {
-        return {Bool::make_true(lhs.get_line())};
+      [](const evaluation::Nil &l, const evaluation::Nil &r) -> Bool {
+        return {Bool::make_true(l.get_line())};
       },
-      []<typename T>(const T &lhs, const T &rhs) -> Bool {
-        return {lhs == rhs};
+      []<typename T>(const T &l, const T &r) -> Bool {
+        return {l == r};
       },
-      [](const auto &lhs, const auto &rhs) -> Bool {
+      [](const auto &l, const auto &r) -> Bool {
         return {Bool{evaluation::False}};
       },
   };
@@ -264,7 +260,7 @@ auto interpreter::visit_impl(const statement::Return &expr) -> eval_result_t {
 auto interpreter::visit_impl(const expression::Literal &expr) -> eval_result_t {
   dbg(trace, "literal type: {}", expr.literal.type)
 
-  auto T = [&expr](TokenType::type_t t) constexpr noexcept -> bool {
+  auto T = [&expr](const TokenType::type_t t) constexpr noexcept -> bool {
     return expr.literal.is_type(t);
   };
 
@@ -380,16 +376,16 @@ auto interpreter::visit_impl(const expression::Grouping &expr)
 }
 auto interpreter::visit_impl(const expression::Variable &expr)
     -> eval_result_t {
-  // if (auto it = local_env.find(expr.shared_from_this());
-  //     it != local_env.end()) {
-  //   return env->get_at_depth(it->second, expr.name.to_string(kDetailed));
-  // }
-  // if (auto res = Environment::Global()->get(expr.name.to_string(kDetailed));
-  //     !res.empty()) {
-  //   return res;
-  // }
-  if (auto res = env->get(expr.name.to_string(kDetailed)); !res.empty())
+  if (auto it = local_env.find(expr.shared_from_this());
+      it != local_env.end()) {
+    return env->get_at_depth(it->second, expr.name.to_string(kDetailed));
+  }
+  if (auto res = Environment::Global()->get(expr.name.to_string(kDetailed));
+      !res.empty()) {
     return res;
+  }
+  // if (auto res = env->get(expr.name.to_string(kDetailed)); !res.empty())
+  //   return res;
 
   return {auxilia::NotFoundError("Undefined variable '{}'.\n[line {}]",
                                  expr.name.to_string(kDetailed),
@@ -402,21 +398,21 @@ auto interpreter::visit_impl(const expression::Assignment &expr)
   if (!res)
     return res;
 
-  if (!env->reassign(expr.name.to_string(kDetailed), *res, expr.name.line))
+  if (auto it = local_env.find(expr.shared_from_this());
+      it != local_env.end()) {
+    return env->reassign_at_depth(
+        it->second, expr.name.to_string(kDetailed), *res, expr.name.line);
+  }
+  if (!Environment::Global()->reassign(
+          expr.name.to_string(kDetailed), *res, expr.name.line)) {
     return {auxilia::NotFoundError("Undefined variable '{}'.\n[line {}]",
                                    expr.name.to_string(kDetailed),
                                    expr.name.line)};
-  // if (auto it = local_env.find(expr.shared_from_this());
-  //     it != local_env.end()) {
-  //   return env->reassign_at_depth(
-  //       it->second, expr.name.to_string(kDetailed), *res, expr.name.line);
-  // }
-  // if (!Environment::Global()->reassign(
-  //         expr.name.to_string(kDetailed), *res, expr.name.line)) {
+  }
+  // if (!env->reassign(expr.name.to_string(kDetailed), *res, expr.name.line))
   //   return {auxilia::NotFoundError("Undefined variable '{}'.\n[line {}]",
   //                                  expr.name.to_string(kDetailed),
   //                                  expr.name.line)};
-  // }
   return *res;
 }
 auto interpreter::visit_impl(const expression::Logical &expr) -> eval_result_t {
