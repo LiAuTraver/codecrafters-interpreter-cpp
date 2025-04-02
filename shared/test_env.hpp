@@ -5,7 +5,7 @@
 #include <execution_context.hpp>
 
 #ifndef LOXO_ROOT_DIR
-#define LOXO_ROOT_DIR "Z:/loxo"
+#  define LOXO_ROOT_DIR "Z:/loxo"
 #endif
 
 static inline auto you_should_not_include_this_header_file_twice =

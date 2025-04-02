@@ -1,3 +1,5 @@
+#include "ASTPrinter.hpp"
+
 #include <ostream>
 #include <source_location>
 #include <sstream>
@@ -9,50 +11,50 @@
 #include "accat/auxilia/details/format.hpp"
 #include "details/loxo_fwd.hpp"
 #include "details/IVisitor.hpp"
-#include "ASTPrinter.hpp"
+
 #include "expression.hpp"
 
 namespace accat::loxo::expression {
-ASTPrinter::eval_result_t ASTPrinter::visit_impl(const Grouping &expr) const {
+ASTPrinter::eval_result_t ASTPrinter::visit_impl(const Grouping &expr) {
   dbg(trace, "Grouping: {}", expr.to_string(auxilia::FormatPolicy::kDefault))
   oss << expr << std::endl;
   return {};
 }
-ASTPrinter::eval_result_t ASTPrinter::visit_impl(const Variable &expr) const {
+ASTPrinter::eval_result_t ASTPrinter::visit_impl(const Variable &expr) {
   dbg(trace, "Variable: {}", expr.to_string(auxilia::FormatPolicy::kDefault))
   oss << expr << std::endl;
   return {};
 }
-IVisitor::eval_result_t ASTPrinter::visit_impl(const Assignment &expr) const {
+IVisitor::eval_result_t ASTPrinter::visit_impl(const Assignment &expr) {
   dbg(trace, "Assignment: {}", expr.to_string(auxilia::FormatPolicy::kDefault))
   oss << expr << std::endl;
   return {};
 }
-ASTPrinter::eval_result_t ASTPrinter::visit_impl(const Logical &expr) const {
+ASTPrinter::eval_result_t ASTPrinter::visit_impl(const Logical &expr) {
   dbg(trace, "Logical: {}", expr.to_string(auxilia::FormatPolicy::kDefault))
   oss << expr << std::endl;
   return {};
 }
-ASTPrinter::eval_result_t ASTPrinter::visit_impl(const Call &expr) const {
+ASTPrinter::eval_result_t ASTPrinter::visit_impl(const Call &expr) {
   dbg(trace, "Call: {}", expr.to_string(auxilia::FormatPolicy::kDefault))
   oss << expr << std::endl;
   return {};
 }
-auto ASTPrinter::evaluate_impl(const Expr &expr) const -> eval_result_t {
+auto ASTPrinter::evaluate_impl(const Expr &expr) -> eval_result_t {
   const_cast<eval_result_t &>(res) = expr.accept(*this);
   return {};
 }
-ASTPrinter::eval_result_t ASTPrinter::visit_impl(const Literal &expr) const {
+ASTPrinter::eval_result_t ASTPrinter::visit_impl(const Literal &expr) {
   dbg(trace, "Literal: {}", expr.to_string(auxilia::FormatPolicy::kDefault))
   oss << expr << std::endl;
   return {};
 }
-ASTPrinter::eval_result_t ASTPrinter::visit_impl(const Unary &expr) const {
+ASTPrinter::eval_result_t ASTPrinter::visit_impl(const Unary &expr) {
   dbg(trace, "Unary: {}", expr.to_string(auxilia::FormatPolicy::kDefault))
   oss << expr << std::endl;
   return {};
 }
-ASTPrinter::eval_result_t ASTPrinter::visit_impl(const Binary &expr) const {
+ASTPrinter::eval_result_t ASTPrinter::visit_impl(const Binary &expr) {
   dbg(trace, "Binary: {}", expr.to_string(auxilia::FormatPolicy::kDefault))
   oss << expr << std::endl;
   return {};

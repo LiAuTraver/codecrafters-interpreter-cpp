@@ -25,9 +25,11 @@ public:
   using token_type = TokenType;
   using error_t = lex_error;
   using string_view_type = auxilia::string_view;
-  using literal_type = auxilia::
-      Variant<auxilia::Monostate, string_view_type, long long, long double, bool>;
-
+  using literal_type = auxilia::Variant<auxilia::Monostate,
+                                        string_view_type,
+                                        long long,
+                                        long double,
+                                        bool>;
 
 public:
   Token() = default;
@@ -37,6 +39,7 @@ public:
         uint_least32_t line = std::numeric_limits<
             std::underlying_type_t<enum token_type::type_t>>::signaling_NaN())
       : type(type), lexeme(lexeme), literal(literal), line(line) {}
+
 public:
   string_type number_to_string(auxilia::FormatPolicy policy) const;
   constexpr auto is_type(const token_type &type) const noexcept -> bool {

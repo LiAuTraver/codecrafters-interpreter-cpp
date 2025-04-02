@@ -18,21 +18,25 @@ public:
   template <typename DerivedStmt>
     requires std::is_base_of_v<Stmt, DerivedStmt>
   auto visit(const DerivedStmt &stmt) const {
-    return visit_impl(stmt);
+    // workaround
+    return const_cast<StmtVisitor *>(this)->visit_impl(stmt);
   }
-  auto execute(const Stmt &stmt) const { return execute_impl(stmt); }
+  auto execute(const Stmt &stmt) const {
+    // workaround
+    return const_cast<StmtVisitor *>(this)->execute_impl(stmt);
+  }
 
 private:
-  virtual eval_result_t visit_impl(const Variable &) const = 0;
-  virtual eval_result_t visit_impl(const Print &) const = 0;
-  virtual eval_result_t visit_impl(const Expression &) const = 0;
-  virtual eval_result_t visit_impl(const Block &) const = 0;
-  virtual eval_result_t visit_impl(const If &) const = 0;
-  virtual eval_result_t visit_impl(const While &) const = 0;
-  virtual eval_result_t visit_impl(const For &) const = 0;
-  virtual eval_result_t visit_impl(const Function &) const = 0;
-  virtual eval_result_t visit_impl(const Return &) const = 0;
-  virtual eval_result_t execute_impl(const Stmt &) const = 0;
+  virtual eval_result_t visit_impl(const Variable &) = 0;
+  virtual eval_result_t visit_impl(const Print &) = 0;
+  virtual eval_result_t visit_impl(const Expression &) = 0;
+  virtual eval_result_t visit_impl(const Block &) = 0;
+  virtual eval_result_t visit_impl(const If &) = 0;
+  virtual eval_result_t visit_impl(const While &) = 0;
+  virtual eval_result_t visit_impl(const For &) = 0;
+  virtual eval_result_t visit_impl(const Function &) = 0;
+  virtual eval_result_t visit_impl(const Return &) = 0;
+  virtual eval_result_t execute_impl(const Stmt &) = 0;
 };
 } // namespace accat::loxo::statement
 #endif // LOXO_STMTVISITOR_HPP

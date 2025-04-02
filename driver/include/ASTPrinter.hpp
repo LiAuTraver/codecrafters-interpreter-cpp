@@ -7,8 +7,7 @@
 
 namespace accat::loxo::expression {
 /// @implements ExprVisitor
-class LOXO_API ASTPrinter : public ExprVisitor,
-                            public auxilia::Viewable {
+class LOXO_API ASTPrinter : public ExprVisitor, public auxilia::Viewable {
 public:
   using ostream_t = std::ostream;
   using ostringstream_t = std::ostringstream;
@@ -20,19 +19,22 @@ public:
   virtual ~ASTPrinter() override = default;
 
 private:
-  virtual eval_result_t visit_impl(const Literal &) const override;
-  virtual eval_result_t visit_impl(const Unary &) const override;
-  virtual eval_result_t visit_impl(const Binary &) const override;
-  virtual eval_result_t visit_impl(const Grouping &) const override;
-  virtual eval_result_t visit_impl(const Variable &) const override;
-  virtual eval_result_t visit_impl(const Assignment &) const override;
-  virtual eval_result_t visit_impl(const Logical &) const override;
-  virtual eval_result_t visit_impl(const Call &) const override;
-  virtual eval_result_t evaluate_impl(const Expr &) const override;
+  virtual eval_result_t visit_impl(const Literal &) override;
+  virtual eval_result_t visit_impl(const Unary &) override;
+  virtual eval_result_t visit_impl(const Binary &) override;
+  virtual eval_result_t visit_impl(const Grouping &) override;
+  virtual eval_result_t visit_impl(const Variable &) override;
+  virtual eval_result_t visit_impl(const Assignment &) override;
+  virtual eval_result_t visit_impl(const Logical &) override;
+  virtual eval_result_t visit_impl(const Call &) override;
+  virtual eval_result_t evaluate_impl(const Expr &) override;
 
 public:
-  string_type to_string(const auxilia::FormatPolicy & = auxilia::FormatPolicy::kDefault) const;
-  auto to_string_view(const auxilia::FormatPolicy & = auxilia::FormatPolicy::kDefault) const -> string_view_type;
+  string_type to_string(
+      const auxilia::FormatPolicy & = auxilia::FormatPolicy::kDefault) const;
+  auto
+  to_string_view(const auxilia::FormatPolicy & =
+                     auxilia::FormatPolicy::kDefault) const -> string_view_type;
   eval_result_t get_result_impl() const override;
 
 private:

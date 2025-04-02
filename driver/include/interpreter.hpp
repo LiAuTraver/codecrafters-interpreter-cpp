@@ -1,7 +1,9 @@
 #pragma once
 
+#include <cstddef>
 #include <memory>
 #include <expected>
+#include <unordered_map>
 #include <utility>
 #include <span>
 
@@ -29,37 +31,32 @@ public:
   using ostringstream_t = std::ostringstream;
   using env_t = Environment;
   using env_ptr_t = std::shared_ptr<env_t>;
+  using local_env_t =
+      std::unordered_map<std::shared_ptr<const expression::Expr>, size_t>;
 
 public:
-  eval_result_t interpret(std::span<std::shared_ptr<statement::Stmt>>) const;
-  // auto save_env() const -> const interpreter &;
-  auto set_env(const env_ptr_t &) const -> const interpreter &;
-  // auto restore_env() const -> const interpreter &;
-  auto get_current_env() const { return env; }
-  // auto get_global_env() const -> std::weak_ptr<Environment> {
-  //   return global_env;
-  // }
+  eval_result_t interpret(std::span<std::shared_ptr<statement::Stmt>>);
+  auto set_env(const env_ptr_t &) -> interpreter &;
+  auto get_current_env() { return env; }
+  size_t resolve(const expression::Expr &, const size_t);
 
 private:
-  virtual auto visit_impl(const expression::Literal &) const
+  virtual auto visit_impl(const expression::Literal &)
       -> eval_result_t override;
-  virtual auto visit_impl(const expression::Unary &) const
+  virtual auto visit_impl(const expression::Unary &) -> eval_result_t override;
+  virtual auto visit_impl(const expression::Binary &) -> eval_result_t override;
+  virtual auto visit_impl(const expression::Grouping &)
       -> eval_result_t override;
-  virtual auto visit_impl(const expression::Binary &) const
+  virtual auto visit_impl(const expression::Variable &)
       -> eval_result_t override;
-  virtual auto visit_impl(const expression::Grouping &) const
+  virtual auto visit_impl(const expression::Assignment &)
       -> eval_result_t override;
-  virtual auto visit_impl(const expression::Variable &) const
+  virtual auto visit_impl(const expression::Logical &)
       -> eval_result_t override;
-  virtual auto visit_impl(const expression::Assignment &) const
-      -> eval_result_t override;
-  virtual auto visit_impl(const expression::Logical &) const
-      -> eval_result_t override;
-  virtual auto visit_impl(const expression::Call &) const
-      -> eval_result_t override;
+  virtual auto visit_impl(const expression::Call &) -> eval_result_t override;
 
 private:
-  virtual auto evaluate_impl(const expression::Expr &) const
+  virtual auto evaluate_impl(const expression::Expr &)
       -> eval_result_t override;
   virtual auto get_result_impl() const -> eval_result_t override;
 
@@ -73,37 +70,27 @@ private:
       -> auxilia::StatusOr<std::vector<variant_type>>;
 
 private:
-  virtual auto visit_impl(const statement::Variable &) const
+  virtual auto visit_impl(const statement::Variable &)
       -> eval_result_t override;
-  virtual auto visit_impl(const statement::Print &) const
+  virtual auto visit_impl(const statement::Print &) -> eval_result_t override;
+  virtual auto visit_impl(const statement::Expression &)
       -> eval_result_t override;
-  virtual auto visit_impl(const statement::Expression &) const
+  virtual auto visit_impl(const statement::Block &) -> eval_result_t override;
+  virtual auto visit_impl(const statement::If &) -> eval_result_t override;
+  virtual auto visit_impl(const statement::While &) -> eval_result_t override;
+  virtual auto visit_impl(const statement::For &) -> eval_result_t override;
+  virtual auto visit_impl(const statement::Function &)
       -> eval_result_t override;
-  virtual auto visit_impl(const statement::Block &) const
-      -> eval_result_t override;
-  virtual auto visit_impl(const statement::If &) const
-      -> eval_result_t override;
-  virtual auto visit_impl(const statement::While &) const
-      -> eval_result_t override;
-  virtual auto visit_impl(const statement::For &) const
-      -> eval_result_t override;
-  virtual auto visit_impl(const statement::Function &) const
-      -> eval_result_t override;
-  virtual auto visit_impl(const statement::Return &) const
-      -> eval_result_t override;
-  virtual auto execute_impl(const statement::Stmt &) const
-      -> eval_result_t override;
+  virtual auto visit_impl(const statement::Return &) -> eval_result_t override;
+  virtual auto execute_impl(const statement::Stmt &) -> eval_result_t override;
 
 private:
-  /// @remark `mutable` wasn't intentional, but my design is flawed and this is
-  /// a temporary fix.
-  mutable eval_result_t last_expr_res{auxilia::Monostate{}};
-  mutable std::vector<eval_result_t> stmts_res{};
-  mutable env_ptr_t env{};
-  // mutable env_ptr_t prev_env{};
-  // mutable env_ptr_t global_env{};
+  eval_result_t last_expr_res{auxilia::Monostate{}};
+  std::vector<eval_result_t> stmts_res{};
+  env_ptr_t env{};
+  local_env_t local_env{};
   // temporary fix, is it's true, do not `to_string` for last_expr.
-  mutable bool is_interpreting_stmts = false;
+  bool is_interpreting_stmts = false;
 
 private:
   auto expr_to_string(const auxilia::FormatPolicy &) const -> string_type;
@@ -116,12 +103,12 @@ public:
 
 private:
   [[nodiscard]] inline interpreter::eval_result_t
-  Returning(interpreter::eval_result_t &&res) const {
+  Returning(interpreter::eval_result_t &&res) {
     this->last_expr_res.reset(res.value()).ignore_error();
     return {auxilia::Status::kReturning, res.value()};
   }
   [[nodiscard]] inline interpreter::eval_result_t
-  Returning(interpreter::eval_result_t &res) const {
+  Returning(interpreter::eval_result_t &res) {
     this->last_expr_res.reset(res.value()).ignore_error();
     return {auxilia::Status::kReturning, res.value()};
   }
