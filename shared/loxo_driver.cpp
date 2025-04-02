@@ -14,8 +14,10 @@
 #include "execution_context.hpp"
 #include "lexer.hpp"
 #include "ASTPrinter.hpp"
+#include "Environment.hpp"
 #include "parser.hpp"
 #include "interpreter.hpp"
+#include "Resolver.hpp"
 
 namespace accat::loxo {
 auxilia::Status show_msg() {
@@ -103,6 +105,10 @@ auxilia::Status evaluate(ExecutionContext &ctx) {
 auxilia::Status interpret(ExecutionContext &ctx) {
   dbg(info, "interpreting...")
   ctx.interpreter.reset(new interpreter);
+
+  auto resolver = Resolver{*ctx.interpreter};
+  resolver.resolve(ctx.parser->get_statements()).ignore_error();
+  Environment::isGlobalScopeInited = false;
   auto res = ctx.interpreter->interpret(ctx.parser->get_statements());
   dbg(info, "interpretation completed.")
   return std::move(res).as_status();

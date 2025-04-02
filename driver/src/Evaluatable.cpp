@@ -274,58 +274,53 @@ auto Callable::create_native(unsigned argc,
   return {argc, std::move(func), env};
 }
 
-auto Callable::call(const interpreter &interpreter, args_t &&args) const
+auto Callable::call(interpreter &interpreter, args_t &&args) const
     -> eval_result_t {
-  precondition(
-      this->arity() == args.size(),
-      "arity mismatch; should check it before calling") return my_function
-      .visit(match{
-          [&](const native_function_t &native_function) -> eval_result_t {
-            return {native_function.operator()(interpreter, args)};
-          },
-          [&](const custom_function_t &custom_function) -> eval_result_t {
-            auto saved_env = interpreter.get_current_env();
+  precondition(this->arity() == args.size(),
+               "arity mismatch; should check it before calling")
+  return my_function.visit(
+      match{[&](const native_function_t &native_function) -> eval_result_t {
+              return {native_function.operator()(interpreter, args)};
+            },
+            [&](const custom_function_t &custom_function) -> eval_result_t {
+              auto saved_env = interpreter.get_current_env();
 
-            auto scoped_env = std::make_shared<Environment>(this->my_env);
+              auto scoped_env = Environment::Scope(this->my_env);
 
-            for (size_t i = 0; i < custom_function.parameters.size(); ++i) {
-              if (auto res =
-                      scoped_env->add(custom_function.parameters[i], args[i]);
-                  !res.ok()) {
-                return {res};
-              }
-            }
-
-            dbg(info, "entering a function...")
-            interpreter.set_env(scoped_env);
-
-            defer { interpreter.set_env(saved_env); };
-            
-            for (const auto &index : custom_function.body) {
-              if (auto res = interpreter.execute(*index); !res) {
-                if (res.is_return()) {
-                  auto my_result = interpreter.get_result();
-                  // FIXME: i my logic was completely gone here: `last_expr`
-                  //              itself was a mistake!
-                  dbg(info, "returning: {}", my_result->underlying_string())
-                  dbg(info,
-                      "current interpreter's returned res: {}",
-                      res->underlying_string())
-
-                  return my_result;
+              for (size_t i = 0; i < custom_function.parameters.size(); ++i) {
+                if (auto res =
+                        scoped_env->add(custom_function.parameters[i], args[i]);
+                    !res.ok()) {
+                  return {res};
                 }
-                // else, error, return as is
-                return res;
               }
-            }
 
-            dbg(info, "void function, returning nil.")
-            return {{NilValue}};
-          },
-          [](const auto &) -> eval_result_t {
-            dbg_break
-            return {auxilia::NotFoundError("no function to call")};
-          }});
+              dbg(info, "entering a function...")
+              interpreter.set_env(scoped_env);
+
+              defer { interpreter.set_env(saved_env); };
+
+              for (const auto &index : custom_function.body) {
+                if (auto res = interpreter.execute(*index); !res) {
+                  if (res.is_return()) {
+                    auto my_result = interpreter.get_result();
+                    // FIXME: i my logic was completely gone here: `last_expr`
+                    //              itself was a mistake!
+                    dbg(info, "returning: {}", my_result->underlying_string())
+                    return my_result;
+                  }
+                  // else, error, return as is
+                  return res;
+                }
+              }
+
+              dbg(info, "void function, returning nil.")
+              return {{NilValue}};
+            },
+            [](const auto &) -> eval_result_t {
+              dbg_break
+              return {auxilia::NotFoundError("no function to call")};
+            }});
 }
 
 auto Callable::to_string(const auxilia::FormatPolicy &) const -> string_type {

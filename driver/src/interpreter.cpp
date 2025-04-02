@@ -26,14 +26,9 @@ using enum TokenType::type_t;
 using enum auxilia::FormatPolicy;
 interpreter::interpreter() : env(std::make_shared<Environment>()) {}
 auto interpreter::interpret(
-    const std::span<std::shared_ptr<statement::Stmt>> stmts) const
-    -> eval_result_t {
+    const std::span<std::shared_ptr<statement::Stmt>> stmts) -> eval_result_t {
   is_interpreting_stmts = true;
-  static bool has_init_global_env = false;
-  if (!has_init_global_env) {
-    this->env = Environment::Global();
-    has_init_global_env = true;
-  }
+  this->env = Environment::Global();
 
   for (const auto &stmt : stmts)
     if (auto eval_res = execute(*stmt); !eval_res) {
@@ -43,9 +38,11 @@ auto interpreter::interpret(
 
   return {};
 }
+size_t interpreter::resolve(const expression::Expr &expr, const size_t depth) {
+  return local_env.emplace(expr.shared_from_this(), depth).second;
+}
 
-auto interpreter::set_env(const env_ptr_t &new_env) const
-    -> const interpreter & {
+auto interpreter::set_env(const env_ptr_t &new_env) -> interpreter & {
   env = new_env;
   return *this;
 }
@@ -65,13 +62,13 @@ auto interpreter::is_deep_equal(const eval_result_t &lhs,
     -> evaluation::Boolean {
   using Bool = evaluation::Boolean;
   auto pattern = match{
-      [](const evaluation::Nil &lhs, const evaluation::Nil &rhs) -> Bool {
-        return {Bool::make_true(lhs.get_line())};
+      [](const evaluation::Nil &l, const evaluation::Nil &r) -> Bool {
+        return {Bool::make_true(l.get_line())};
       },
-      []<typename T>(const T &lhs, const T &rhs) -> Bool {
-        return {lhs == rhs};
+      []<typename T>(const T &l, const T &r) -> Bool {
+        return {l == r};
       },
-      [](const auto &lhs, const auto &rhs) -> Bool {
+      [](const auto &l, const auto &r) -> Bool {
         return {Bool{evaluation::False}};
       },
   };
@@ -93,8 +90,7 @@ auto interpreter::get_call_args(const expression::Call &expr) const
   }
   return {args};
 }
-auto interpreter::visit_impl(const statement::Variable &stmt) const
-    -> eval_result_t {
+auto interpreter::visit_impl(const statement::Variable &stmt) -> eval_result_t {
 
   if (stmt.has_initilizer()) {
     auto eval_res = evaluate(*stmt.initializer);
@@ -107,42 +103,40 @@ auto interpreter::visit_impl(const statement::Variable &stmt) const
         stmt.name.literal.get<string_view_type>(),
         eval_res->underlying_string())
     // string view failed again; not null-terminated
-    return {env->add(
-        stmt.name.to_string(kDetailed), eval_res.value(), stmt.name.line)};
+    return {
+        env->add(stmt.name.to_string(kDetailed), *eval_res, stmt.name.line)};
   }
   // if no initializer, it's a nil value.
   return env->add(
       stmt.name.to_string(kDetailed), evaluation::NilValue, stmt.name.line);
 }
-auto interpreter::visit_impl(const statement::Print &stmt) const
-    -> eval_result_t {
+auto interpreter::visit_impl(const statement::Print &stmt) -> eval_result_t {
   auto eval_res = evaluate(*stmt.value);
   if (!eval_res)
     return eval_res;
-  stmts_res.emplace_back(eval_res.value());
+  stmts_res.emplace_back(*eval_res);
   return {{evaluation::NilValue}};
 }
-auto interpreter::visit_impl(const statement::If &stmt) const -> eval_result_t {
+auto interpreter::visit_impl(const statement::If &stmt) -> eval_result_t {
   auto eval_res = evaluate(*stmt.condition);
   if (!eval_res)
     return eval_res;
-  if (is_true_value(eval_res.value()).is_true()) {
+  if (is_true_value(*eval_res).is_true()) {
     return execute(*stmt.then_branch);
   }
   // else we execute the else branch.
   if (stmt.else_branch) { // maybe we dont have an else branch, so check it.
     return execute(*stmt.else_branch);
   }
-  return {eval_res.value()};
+  return {*eval_res};
 }
-auto interpreter::visit_impl(const statement::While &stmt) const
-    -> eval_result_t {
+auto interpreter::visit_impl(const statement::While &stmt) -> eval_result_t {
   eval_result_t res;
   do {
     auto eval_res = evaluate(*stmt.condition);
     if (!eval_res)
       return eval_res;
-    if (not is_true_value(eval_res.value()).is_true())
+    if (not is_true_value(*eval_res).is_true())
       break;
     res = execute(*stmt.body);
     if (!res)
@@ -151,8 +145,7 @@ auto interpreter::visit_impl(const statement::While &stmt) const
 
   return {*res};
 }
-auto interpreter::visit_impl(const statement::For &stmt) const
-    -> eval_result_t {
+auto interpreter::visit_impl(const statement::For &stmt) -> eval_result_t {
 
   if (stmt.initializer)
     if (auto res = execute(*stmt.initializer); !res)
@@ -175,8 +168,7 @@ auto interpreter::visit_impl(const statement::For &stmt) const
   }
   return {};
 }
-auto interpreter::visit_impl(const statement::Function &stmt) const
-    -> eval_result_t {
+auto interpreter::visit_impl(const statement::Function &stmt) -> eval_result_t {
   // TODO: function overloading
   if (auto res = env->get(stmt.name.to_string(kDetailed)); !res.empty()) {
     if (!res.is_type<evaluation::Callable>()) {
@@ -215,14 +207,13 @@ auto interpreter::visit_impl(const statement::Function &stmt) const
       stmt.name.line);
   // clang-format on
 }
-auto interpreter::visit_impl(const statement::Expression &stmt) const
+auto interpreter::visit_impl(const statement::Expression &stmt)
     -> eval_result_t {
   return evaluate(*stmt.expr);
 }
-auto interpreter::visit_impl(const statement::Block &stmt) const
-    -> eval_result_t {
+auto interpreter::visit_impl(const statement::Block &stmt) -> eval_result_t {
   auto original_env = env; // save the original environment
-  auto sub_env = std::make_shared<Environment>(env);
+  auto sub_env = Environment::Scope(original_env);
   env = sub_env;
   for (const auto &scoped_stmt : stmt.statements) {
     if (auto eval_res = execute(*scoped_stmt); !eval_res) {
@@ -234,24 +225,21 @@ auto interpreter::visit_impl(const statement::Block &stmt) const
   env = original_env; // restore
   return {};
 }
-auto interpreter::execute_impl(const statement::Stmt &stmt) const
-    -> eval_result_t {
+auto interpreter::execute_impl(const statement::Stmt &stmt) -> eval_result_t {
   return stmt.accept(*this);
 }
 auto interpreter::get_result_impl() const -> eval_result_t {
   return last_expr_res;
 }
 
-auto interpreter::evaluate_impl(const expression::Expr &expr) const
-    -> eval_result_t {
+auto interpreter::evaluate_impl(const expression::Expr &expr) -> eval_result_t {
   auto res = expr.accept(*this);
   if (!res)
     return res;
   dbg(info, "result: {}", res->underlying_string())
   return last_expr_res.reset(*std::move(res));
 }
-auto interpreter::visit_impl(const statement::Return &expr) const
-    -> eval_result_t {
+auto interpreter::visit_impl(const statement::Return &expr) -> eval_result_t {
   if (this->env == Environment::Global()) {
     return {
         auxilia::InvalidArgumentError("Cannot return from top-level code.")};
@@ -269,11 +257,10 @@ auto interpreter::visit_impl(const statement::Return &expr) const
   dbg(trace, "result: {}", res->underlying_string())
   return Returning(*res);
 }
-auto interpreter::visit_impl(const expression::Literal &expr) const
-    -> eval_result_t {
+auto interpreter::visit_impl(const expression::Literal &expr) -> eval_result_t {
   dbg(trace, "literal type: {}", expr.literal.type)
 
-  auto T = [&expr](TokenType::type_t t) constexpr noexcept -> bool {
+  auto T = [&expr](const TokenType::type_t t) constexpr noexcept -> bool {
     return expr.literal.is_type(t);
   };
 
@@ -301,8 +288,7 @@ auto interpreter::visit_impl(const expression::Literal &expr) const
                                         expr.literal.line)};
 }
 
-auto interpreter::visit_impl(const expression::Unary &expr) const
-    -> eval_result_t {
+auto interpreter::visit_impl(const expression::Unary &expr) -> eval_result_t {
   auto inner_expr = expr.expr->accept(*this);
   if (expr.op.is_type(kMinus)) {
     if (inner_expr->is_type<evaluation::Number>()) {
@@ -322,8 +308,7 @@ auto interpreter::visit_impl(const expression::Unary &expr) const
   return {};
 }
 
-auto interpreter::visit_impl(const expression::Binary &expr) const
-    -> eval_result_t {
+auto interpreter::visit_impl(const expression::Binary &expr) -> eval_result_t {
   auto lhs = expr.left->accept(*this);
   if (!lhs) {
     return lhs;
@@ -385,34 +370,52 @@ auto interpreter::visit_impl(const expression::Binary &expr) const
   return {auxilia::InvalidArgumentError(
       "unimplemented binary operator.\n[line {}]", expr.op.line)};
 }
-auto interpreter::visit_impl(const expression::Grouping &expr) const
+auto interpreter::visit_impl(const expression::Grouping &expr)
     -> eval_result_t {
   return {expr.expr->accept(*this)};
 }
-auto interpreter::visit_impl(const expression::Variable &expr) const
+auto interpreter::visit_impl(const expression::Variable &expr)
     -> eval_result_t {
-  if (auto res = env->get(expr.name.to_string(kDetailed)); !res.empty())
+  if (auto it = local_env.find(expr.shared_from_this());
+      it != local_env.end()) {
+    return env->get_at_depth(it->second, expr.name.to_string(kDetailed));
+  }
+  if (auto res = Environment::Global()->get(expr.name.to_string(kDetailed));
+      !res.empty()) {
     return res;
+  }
+  // if (auto res = env->get(expr.name.to_string(kDetailed)); !res.empty())
+  //   return res;
 
   return {auxilia::NotFoundError("Undefined variable '{}'.\n[line {}]",
                                  expr.name.to_string(kDetailed),
                                  expr.name.line)};
 }
-auto interpreter::visit_impl(const expression::Assignment &expr) const
+auto interpreter::visit_impl(const expression::Assignment &expr)
     -> eval_result_t {
   // FIXME: here my logic went away. fixme here.
   auto res = this->evaluate(*expr.value_expr);
   if (!res)
     return res;
 
-  if (!env->reassign(expr.name.to_string(kDetailed), *res, expr.name.line))
+  if (auto it = local_env.find(expr.shared_from_this());
+      it != local_env.end()) {
+    return env->reassign_at_depth(
+        it->second, expr.name.to_string(kDetailed), *res, expr.name.line);
+  }
+  if (!Environment::Global()->reassign(
+          expr.name.to_string(kDetailed), *res, expr.name.line)) {
     return {auxilia::NotFoundError("Undefined variable '{}'.\n[line {}]",
                                    expr.name.to_string(kDetailed),
                                    expr.name.line)};
+  }
+  // if (!env->reassign(expr.name.to_string(kDetailed), *res, expr.name.line))
+  //   return {auxilia::NotFoundError("Undefined variable '{}'.\n[line {}]",
+  //                                  expr.name.to_string(kDetailed),
+  //                                  expr.name.line)};
   return *res;
 }
-auto interpreter::visit_impl(const expression::Logical &expr) const
-    -> eval_result_t {
+auto interpreter::visit_impl(const expression::Logical &expr) -> eval_result_t {
   auto lhs = expr.left->accept(*this);
   if (!lhs)
     return lhs;
@@ -432,8 +435,7 @@ auto interpreter::visit_impl(const expression::Logical &expr) const
   contract_assert(false, "unimplemented logical operator")
   return {auxilia::Monostate{}};
 }
-auto interpreter::visit_impl(const expression::Call &expr) const
-    -> eval_result_t {
+auto interpreter::visit_impl(const expression::Call &expr) -> eval_result_t {
   auto res = evaluate(*expr.callee);
   if (!res)
     return res;

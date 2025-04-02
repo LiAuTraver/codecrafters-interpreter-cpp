@@ -39,23 +39,19 @@ public:
   auto operator=(ScopeAssoc &&that) noexcept -> ScopeAssoc & = default;
 
 private:
-  auto add(const string_type &,
+  auto add(string_view_type,
            const variant_type &,
            uint_least32_t = std::numeric_limits<uint_least32_t>::quiet_NaN())
       -> auxilia::Status;
-  auto find(this auto &&self, const string_type &name)
-      -> std::optional<associations_t::iterator>;
+  auto find(string_view_type) -> std::optional<associations_t::iterator>;
+
+  auto find(string_view_type) const
+      -> std::optional<associations_t::const_iterator>;
 
 private:
-  associations_t associations{};
+  associations_t associations;
 
 public:
   auto to_string(const auxilia::FormatPolicy &) const -> string_type;
 };
-auto ScopeAssoc::find(this auto &&self, const string_type &name)
-    -> std::optional<associations_t::iterator> {
-  if (auto it = self.associations.find(name); it != self.associations.end())
-    return it;
-  return std::nullopt;
-}
 } // namespace accat::loxo::evaluation

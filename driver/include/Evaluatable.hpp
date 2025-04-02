@@ -33,9 +33,11 @@ public:
   virtual ~Evaluatable() = default;
   auto operator=(const Evaluatable &) -> Evaluatable & = default;
   uint_least32_t get_line() const { return line; }
+
 public:
   virtual auto to_string(const auxilia::FormatPolicy &) const
       -> string_type = 0;
+
 private:
   uint_least32_t line = std::numeric_limits<uint_least32_t>::quiet_NaN();
 };
@@ -74,10 +76,8 @@ public:
   virtual ~Boolean() = default;
 
 public:
-  auto to_string(const auxilia::FormatPolicy &) const
-      -> string_type;
-  auto to_string_view(const auxilia::FormatPolicy &) const
-      -> string_view_type;
+  auto to_string(const auxilia::FormatPolicy &) const -> string_type;
+  auto to_string_view(const auxilia::FormatPolicy &) const -> string_view_type;
 
 private:
   std::optional<bool> value = std::nullopt;
@@ -94,10 +94,8 @@ public:
   virtual ~Nil() = default;
 
 public:
-  auto to_string(const auxilia::FormatPolicy &) const
-      -> string_type;
-  auto to_string_view(const auxilia::FormatPolicy &) const
-      -> string_view_type;
+  auto to_string(const auxilia::FormatPolicy &) const -> string_type;
+  auto to_string_view(const auxilia::FormatPolicy &) const -> string_view_type;
 } static inline AC_CONSTEXPR20 NilValue{};
 
 class String : public Evaluatable, public auxilia::Viewable {
@@ -126,10 +124,8 @@ public:
   explicit operator Boolean() const;
 
 public:
-  auto to_string(const auxilia::FormatPolicy &) const
-      -> string_type override;
-  auto to_string_view(const auxilia::FormatPolicy &) const
-      -> string_view_type;
+  auto to_string(const auxilia::FormatPolicy &) const -> string_type override;
+  auto to_string_view(const auxilia::FormatPolicy &) const -> string_view_type;
 
 private:
   string_type value;
@@ -167,8 +163,7 @@ private:
   long double value = std::numeric_limits<long double>::quiet_NaN();
 
 public:
-  auto to_string(const auxilia::FormatPolicy &) const 
-      -> string_type override;
+  auto to_string(const auxilia::FormatPolicy &) const -> string_type override;
 };
 class Callable : public Evaluatable {
   struct Function {
@@ -182,11 +177,11 @@ class Callable : public Evaluatable {
 public:
   using args_t = std::vector<IVisitor::variant_type>;
   using string_view_type = auxilia::string_view;
-  using native_function_t = std::function<IVisitor::variant_type(
-      const interpreter &, args_t &)>;
+  using native_function_t =
+      std::function<IVisitor::variant_type(interpreter &, args_t &)>;
   using custom_function_t = Function;
-  using function_t =
-      auxilia::Variant<auxilia::Monostate, native_function_t, custom_function_t>;
+  using function_t = auxilia::
+      Variant<auxilia::Monostate, native_function_t, custom_function_t>;
   using env_t = Environment;
   using env_ptr_t = std::shared_ptr<env_t>;
 
@@ -208,8 +203,8 @@ public:
   constexpr inline auto arity() const -> unsigned { return my_arity; }
 
 public:
-  auto call(const interpreter &, args_t &&) const -> eval_result_t;
-    
+  auto call(interpreter &, args_t &&) const -> eval_result_t;
+
 private:
   // dont support static variables in this function
   unsigned my_arity = std::numeric_limits<unsigned>::quiet_NaN();
@@ -223,17 +218,14 @@ public:
   auto to_string(const auxilia::FormatPolicy &) const -> string_type;
 
 private:
-  friend inline auto operator==(
-      const Callable &lhs,
-      const Callable &rhs) -> bool {
+  friend inline auto operator==(const Callable &lhs, const Callable &rhs)
+      -> bool {
     return lhs.my_arity == rhs.my_arity &&
            lhs.my_function.index() == rhs.my_function.index() &&
-           std::addressof(*lhs.my_env) ==
-               std::addressof(*rhs.my_env);
+           std::addressof(*lhs.my_env) == std::addressof(*rhs.my_env);
   }
-  friend inline auto operator!=(
-      const Callable &lhs,
-      const Callable &rhs) -> bool {
+  friend inline auto operator!=(const Callable &lhs, const Callable &rhs)
+      -> bool {
     return !(lhs == rhs);
   }
 };

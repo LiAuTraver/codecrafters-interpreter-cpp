@@ -23,7 +23,7 @@ TEST(scope, local_func) {
 TEST(scope, global_func) {
   const auto path = LOXO_ROOT_DIR R"(\examples\scope\global_func.lox)";
   auto [callback, str] = get_result(path);
-  EXPECT_EQ(str, "global\nglobal");
+  EXPECT_EQ(str, "global\nglobal\n");
   EXPECT_EQ(callback, 0);
 }
 

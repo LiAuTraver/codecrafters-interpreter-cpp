@@ -6,15 +6,15 @@
 namespace accat::loxo {
 /// @brief Interface for the visitor pattern
 /// @interface IVisitor
-class IVisitor  {
+class IVisitor {
 public:
   using variant_type = auxilia::Variant<accat::auxilia::Monostate,
-                               loxo::evaluation::Boolean,
-                               loxo::evaluation::Nil,
-                               loxo::evaluation::Number,
-                               loxo::evaluation::String,
-                               loxo::evaluation::Callable>;
+                                        loxo::evaluation::Boolean,
+                                        loxo::evaluation::Nil,
+                                        loxo::evaluation::Number,
+                                        loxo::evaluation::String,
+                                        loxo::evaluation::Callable>;
   using eval_result_t = auxilia::StatusOr<variant_type>;
   using string_view_type = auxilia::string_view;
 };
-} // namespace accat::auxilia
+} // namespace accat::loxo

@@ -39,8 +39,9 @@ lex_error::to_string(const string_view_t lexeme_sv,
                      const uint_least32_t line) const {
   if (!line)
     dbg(warn, "line number is 0")
-  if (lexeme_sv.empty()){
-    dbg(warn, "lexeme is empty")}
+  if (lexeme_sv.empty()) {
+    dbg(warn, "lexeme is empty")
+  }
 
   auto my_msg = string_t{};
 
@@ -59,9 +60,9 @@ lex_error::to_string(const string_view_t lexeme_sv,
   return auxilia::format("[line {}] Error: {}", line, my_msg);
 }
 
-inline auto
-format_to(const lex_error &lex_error,
-          const auxilia::FormatPolicy format_policy = auxilia::FormatPolicy::kDefault) {
+inline auto format_to(const lex_error &lex_error,
+                      const auxilia::FormatPolicy format_policy =
+                          auxilia::FormatPolicy::kDefault) {
   return lex_error.to_string();
 }
 } // namespace accat::loxo

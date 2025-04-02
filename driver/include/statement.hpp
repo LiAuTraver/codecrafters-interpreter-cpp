@@ -29,8 +29,11 @@ public:
   auto accept(const DerivedVisitor &visitor) const {
     return accept_impl(visitor);
   }
+
 public:
-  virtual auto to_string(const auxilia::FormatPolicy &) const -> string_type = 0;
+  virtual auto
+  to_string(const auxilia::FormatPolicy &) const -> string_type = 0;
+
 private:
   virtual stmt_result_t accept_impl(const StmtVisitor &) const = 0;
 };
@@ -54,7 +57,8 @@ private:
   auto accept_impl(const StmtVisitor &) const -> stmt_result_t override;
 
 public:
-  virtual auto to_string(const auxilia::FormatPolicy & ) const -> string_type override;
+  virtual auto
+  to_string(const auxilia::FormatPolicy &) const -> string_type override;
 };
 class Print : public Stmt {
 public:
@@ -67,7 +71,8 @@ public:
 
 private:
 public:
-  virtual auto to_string(const auxilia::FormatPolicy & ) const -> string_type override;
+  virtual auto
+  to_string(const auxilia::FormatPolicy &) const -> string_type override;
 
 private:
   auto accept_impl(const StmtVisitor &) const -> stmt_result_t override;
@@ -82,7 +87,8 @@ public:
   expr_ptr_t expr;
 
 public:
-  virtual auto to_string(const auxilia::FormatPolicy & ) const -> string_type override;
+  virtual auto
+  to_string(const auxilia::FormatPolicy &) const -> string_type override;
 
 private:
   auto accept_impl(const StmtVisitor &) const -> stmt_result_t override;
@@ -98,7 +104,8 @@ public:
   std::vector<stmt_ptr_t> statements;
 
 public:
-  virtual auto to_string(const auxilia::FormatPolicy & ) const -> string_type override;
+  virtual auto
+  to_string(const auxilia::FormatPolicy &) const -> string_type override;
 
 private:
   auto accept_impl(const StmtVisitor &) const -> stmt_result_t override;
@@ -120,7 +127,8 @@ public:
   stmt_ptr_t else_branch; // needed to set to nullptr
 
 public:
-  virtual auto to_string(const auxilia::FormatPolicy & ) const -> string_type override;
+  virtual auto
+  to_string(const auxilia::FormatPolicy &) const -> string_type override;
 
 private:
   auto accept_impl(const StmtVisitor &) const -> stmt_result_t override;
@@ -138,7 +146,8 @@ public:
   stmt_ptr_t body;
 
 public:
-  virtual auto to_string(const auxilia::FormatPolicy & ) const -> string_type override;
+  virtual auto
+  to_string(const auxilia::FormatPolicy &) const -> string_type override;
 
 private:
   auto accept_impl(const StmtVisitor &) const -> stmt_result_t override;
@@ -161,7 +170,8 @@ public:
   stmt_ptr_t body;
 
 public:
-  virtual auto to_string(const auxilia::FormatPolicy & ) const -> string_type override;
+  virtual auto
+  to_string(const auxilia::FormatPolicy &) const -> string_type override;
 
 private:
   auto accept_impl(const StmtVisitor &) const -> stmt_result_t override;
@@ -182,7 +192,8 @@ public:
   Block body;
 
 public:
-  virtual auto to_string(const auxilia::FormatPolicy & ) const -> string_type override;
+  virtual auto
+  to_string(const auxilia::FormatPolicy &) const -> string_type override;
 
 private:
   auto accept_impl(const StmtVisitor &) const -> stmt_result_t override;
@@ -198,7 +209,8 @@ public:
   expr_ptr_t value;
 
 public:
-  virtual auto to_string(const auxilia::FormatPolicy & ) const -> string_type override;
+  virtual auto
+  to_string(const auxilia::FormatPolicy &) const -> string_type override;
 
 private:
   auto accept_impl(const StmtVisitor &) const -> stmt_result_t override;
