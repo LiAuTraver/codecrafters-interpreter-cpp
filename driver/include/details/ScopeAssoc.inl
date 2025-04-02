@@ -31,7 +31,7 @@ public:
       std::unordered_map<string_type, std::pair<variant_type, uint_least32_t>>;
 
 public:
-  constexpr ScopeAssoc() = default;
+  ScopeAssoc() = default;
   ~ScopeAssoc() = default;
   ScopeAssoc(const ScopeAssoc &that) = default;
   ScopeAssoc(ScopeAssoc &&that) noexcept = default;
