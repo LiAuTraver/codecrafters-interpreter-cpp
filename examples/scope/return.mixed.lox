@@ -1,0 +1,15 @@
+fun outer() {
+  fun inner() {
+    return "ok";
+  }
+
+  return "also ok";
+}
+
+if (true) {
+  fun nested() {
+    return;
+  }
+
+  return "not ok";
+}

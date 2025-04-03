@@ -20,15 +20,23 @@ public:
   using scopes_t = std::vector<scope_t>;
 
 private:
+  enum class ScopeType : std::uint8_t {
+    kNone = 0, // kNone
+    kFunction,
+    kClass,
+  };
+
+private:
   class ::accat::loxo::interpreter &interpreter;
   scopes_t scopes;
+  ScopeType current_scope = ScopeType::kNone;
 
 public:
   auto resolve(std::span<const std::shared_ptr<statement::Stmt>>) const
       -> eval_result_t;
 
 private:
-  auto resolve(const statement::Function &) -> eval_result_t;
+  auto resolve(const statement::Function &, ScopeType) -> eval_result_t;
   auto resolve_to_interp(const expression::Expr &, const Token &)
       -> eval_result_t;
   void declare(const Token &);
