@@ -1,0 +1,12 @@
+fun outer() {
+  var a = "outer";
+
+  fun inner() {
+    var a = a;    // Error: Can't read local variable in its own initializer
+    print a;
+  }
+
+  inner();
+}
+
+outer();

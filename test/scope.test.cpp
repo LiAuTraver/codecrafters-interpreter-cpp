@@ -13,23 +13,56 @@ auto get_result(const auto &filepath) {
 }
 } // namespace
 
-TEST(scope, local_func) {
-  const auto path = LOXO_ROOT_DIR R"(\examples\scope\local_func.lox)";
+TEST(scope, func_global) {
+  const auto path = LOXO_ROOT_DIR R"(\examples\scope\func.global.lox)";
   auto [callback, str] = get_result(path);
   EXPECT_EQ(str, "global\nglobal\n");
   EXPECT_EQ(callback, 0);
 }
 
-TEST(scope, global_func) {
-  const auto path = LOXO_ROOT_DIR R"(\examples\scope\global_func.lox)";
+TEST(scope, func_local) {
+  const auto path = LOXO_ROOT_DIR R"(\examples\scope\func.local.lox)";
   auto [callback, str] = get_result(path);
   EXPECT_EQ(str, "global\nglobal\n");
   EXPECT_EQ(callback, 0);
 }
 
-TEST(scope, nested_func) {
-  const auto path = LOXO_ROOT_DIR R"(\examples\scope\nested_func.lox)";
+TEST(scope, func_nested) {
+  const auto path = LOXO_ROOT_DIR R"(\examples\scope\func.nested.lox)";
   auto [callback, str] = get_result(path);
   EXPECT_EQ(str, "1\n2\n3\n");
   EXPECT_EQ(callback, 0);
+}
+
+TEST(scope, self_init_global) {
+  const auto path = LOXO_ROOT_DIR R"(\examples\scope\self.init.global.lox)";
+  auto [callback, str] = get_result(path);
+  EXPECT_EQ(str, "value\n");
+  EXPECT_EQ(callback, 0);
+}
+
+TEST(scope, self_init_local) {
+  const auto path = LOXO_ROOT_DIR R"(\examples\scope\self.init.local.lox)";
+  auto [callback, str] = get_result(path);
+  EXPECT_EQ(str,
+            "[line 3] Error at 'a': "
+            "Can't read local variable in its own initializer.\n");
+  EXPECT_EQ(callback, 65);
+}
+
+TEST(scope, self_init_wrapped) {
+  const auto path = LOXO_ROOT_DIR R"(\examples\scope\self.init.wrapped.lox)";
+  auto [callback, str] = get_result(path);
+  EXPECT_EQ(str,
+            "[line 8] Error at 'b': "
+            "Can't read local variable in its own initializer.\n");
+  EXPECT_EQ(callback, 65);
+}
+TEST(scope, self_init_nested) {
+  const auto path = LOXO_ROOT_DIR R"(\examples\scope\self.init.nested.lox)";
+  auto [callback, str] = get_result(path);
+  EXPECT_EQ(str,
+            "[line 5] Error at 'a': "
+            "Can't read local variable in its own initializer.\n");
+  EXPECT_EQ(callback, 65);
 }

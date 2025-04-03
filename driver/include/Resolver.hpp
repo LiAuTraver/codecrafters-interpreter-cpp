@@ -14,7 +14,7 @@ class LOXO_API Resolver : auxilia::Printable,
                           virtual public statement::StmtVisitor,
                           public std::enable_shared_from_this<Resolver> {
 public:
-  explicit Resolver(::accat::loxo::interpreter &interpreter);
+  explicit Resolver(class ::accat::loxo::interpreter &interpreter);
   virtual ~Resolver() override = default;
   using scope_t = std::unordered_map<std::string, bool>;
   using scopes_t = std::vector<scope_t>;
@@ -35,17 +35,15 @@ private:
   scopes_t scopes;
 
 public:
-  auto resolve(const expression::Expr &) const -> eval_result_t;
-  auto resolve(const statement::Stmt &) const -> auxilia::Status;
   auto resolve(std::span<const std::shared_ptr<statement::Stmt>>) const
       -> eval_result_t;
 
 private:
+  auto resolve(const statement::Function &) -> eval_result_t;
+  auto resolve_to_interp(const expression::Expr &, const Token &) -> eval_result_t;
   void declare(const Token &);
   void define(const Token &);
   void add_to_scope(const Token &, bool);
-  auto resolve(const expression::Expr &, const Token &) -> eval_result_t;
-  auto resolve(const statement::Function &stmt) -> eval_result_t;
 
 private:
   auto visit_impl(const expression::Literal &) -> eval_result_t override;

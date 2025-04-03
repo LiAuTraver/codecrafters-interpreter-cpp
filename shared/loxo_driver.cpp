@@ -2,6 +2,7 @@
 #include <cstddef>
 #include <print>
 #include <ranges>
+#include <utility>
 #if __has_include(<spdlog/spdlog.h>)
 #  include <spdlog/spdlog.h>
 #endif
@@ -102,16 +103,20 @@ auxilia::Status evaluate(ExecutionContext &ctx) {
   dbg(info, "evaluation completed.")
   return std::move(res).as_status();
 }
-auxilia::Status interpret(ExecutionContext &ctx) {
+auto interpret(ExecutionContext &ctx) {
   dbg(info, "interpreting...")
   ctx.interpreter.reset(new interpreter);
 
   auto resolver = Resolver{*ctx.interpreter};
-  resolver.resolve(ctx.parser->get_statements()).ignore_error();
+  if (auto res = resolver.resolve(ctx.parser->get_statements()); !res)
+    // resolver error return code 65 rather than 70
+    return std::make_pair(std::move(res).as_status(), 65);
   Environment::isGlobalScopeInited = false;
   auto res = ctx.interpreter->interpret(ctx.parser->get_statements());
   dbg(info, "interpretation completed.")
-  return std::move(res).as_status();
+  if (!res)
+    return std::make_pair(std::move(res).as_status(), 70);
+  return std::make_pair(std::move(res).as_status(), 0);
 }
 void writeParseResultToContextStream(ExecutionContext &ctx) {
   expression::ASTPrinter astPrinter;
@@ -200,8 +205,9 @@ int loxo_main(_In_ const int argc,
     }
   }
   auxilia::Status interpret_result;
+  int returnCode = 0;
   if (ctx.commands.front() & ExecutionContext::needs_interpret) {
-    interpret_result = interpret(ctx);
+    std::tie(interpret_result, returnCode) = interpret(ctx);
   }
   if (ctx.commands.front() == ExecutionContext::interpret) {
     writeInterpResultToContextStream(ctx);
@@ -217,7 +223,7 @@ int loxo_main(_In_ const int argc,
         std::cout << ctx.output_stream.view();
       if (argv)
         std::cerr << ctx.error_stream.view(); // DONT add newline character
-      return 70;
+      return returnCode;
     }
   }
   return onCommandNotFound(ctx).raw_code();
