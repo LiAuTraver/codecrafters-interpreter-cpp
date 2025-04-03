@@ -20,17 +20,6 @@ public:
   using scopes_t = std::vector<scope_t>;
 
 private:
-  /// @brief basic RAII for scope management
-  struct scope_guard {
-    inline constexpr explicit scope_guard(scopes_t &scopes) noexcept
-        : scopes(scopes) {
-      scopes.emplace_back();
-    }
-    inline constexpr ~scope_guard() noexcept { scopes.pop_back(); }
-    scopes_t &scopes;
-  };
-
-private:
   class ::accat::loxo::interpreter &interpreter;
   scopes_t scopes;
 
@@ -40,9 +29,11 @@ public:
 
 private:
   auto resolve(const statement::Function &) -> eval_result_t;
-  auto resolve_to_interp(const expression::Expr &, const Token &) -> eval_result_t;
+  auto resolve_to_interp(const expression::Expr &, const Token &)
+      -> eval_result_t;
   void declare(const Token &);
   void define(const Token &);
+  bool is_defined(const Token &) const;
   void add_to_scope(const Token &, bool);
 
 private:
@@ -72,6 +63,10 @@ private:
 public:
   auto to_string(const auxilia::FormatPolicy & =
                      auxilia::FormatPolicy::kDefault) const -> string_type;
+
+private:
+  /// @brief basic RAII for scope management
+  struct scope_guard;
 };
 
 } // namespace accat::loxo

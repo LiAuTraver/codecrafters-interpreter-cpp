@@ -1,13 +1,7 @@
-fun returnArg(arg) {
-  return arg;
+{fun foo(a) {
+  "body";
 }
 
-var b = "global";
-{
-  var a = "first";
-  var b = returnArg(b);    // Error: Can't read local variable in its own initializer
-  print b;
-}
-
-var b = b + " updated";
-print b;
+fun foo(a) {
+  "body";
+}}

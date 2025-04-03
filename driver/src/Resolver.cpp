@@ -11,8 +11,19 @@
 
 namespace accat::loxo {
 using enum auxilia::FormatPolicy;
+using auxilia::InvalidArgumentError;
 using auxilia::OkStatus;
 using auxilia::Status;
+
+struct Resolver::scope_guard {
+  inline constexpr explicit scope_guard(scopes_t &scopes) noexcept
+      : scopes(scopes) {
+    scopes.emplace_back();
+  }
+  inline constexpr ~scope_guard() noexcept { scopes.pop_back(); }
+  scopes_t &scopes;
+};
+
 Resolver::Resolver(loxo::interpreter &interpreter) : interpreter(interpreter) {}
 
 auto Resolver::resolve(
@@ -39,8 +50,15 @@ auto Resolver::resolve(const statement::Function &stmt) -> eval_result_t {
 
   scope_guard guard(scopes);
 
-  std::ranges::for_each(stmt.parameters,
-                        [this](const auto &param) { define(param); });
+  for (const auto &param : stmt.parameters) {
+    if (is_defined(param))
+      return {InvalidArgumentError("[line {}] Error at '{}': "
+                                   "Already a variable with this name in "
+                                   "this scope.",
+                                   param.line,
+                                   param.to_string(kDetailed))};
+    define(param);
+  }
 
   return resolve(stmt.body.statements);
 }
@@ -49,6 +67,15 @@ void Resolver::declare(const Token &token) {
 }
 void Resolver::define(const Token &token) {
   return this->add_to_scope(token, true);
+}
+bool Resolver::is_defined(const Token &token) const {
+  if (scopes.empty())
+    return false;
+  if (auto it = scopes.back().find(token.to_string(kDetailed));
+      it != scopes.back().end()) {
+    return it->second;
+  }
+  return false;
 }
 
 void Resolver::add_to_scope(const Token &token, const bool is_defined) {
@@ -74,11 +101,10 @@ auto Resolver::visit_impl(const expression::Variable &expr) -> eval_result_t {
   if (!scopes.empty() and
       scopes.back().contains(expr.name.to_string(kDetailed)) and
       scopes.back()[expr.name.to_string(kDetailed)] == false) {
-    return {
-        auxilia::InvalidArgumentError("[line {}] Error at '{}': Can't read "
-                                      "local variable in its own initializer.",
-                                      expr.name.line,
-                                      expr.name.to_string(kDetailed))};
+    return {InvalidArgumentError("[line {}] Error at '{}': Can't read "
+                                 "local variable in its own initializer.",
+                                 expr.name.line,
+                                 expr.name.to_string(kDetailed))};
   }
   return resolve_to_interp(expr, expr.name);
 }
@@ -103,6 +129,13 @@ auto Resolver::evaluate_impl(const expression::Expr &expr) -> eval_result_t {
 auto Resolver::get_result_impl() const -> eval_result_t { TODO() }
 
 auto Resolver::visit_impl(const statement::Variable &stmt) -> eval_result_t {
+  if (is_defined(stmt.name))
+    return {InvalidArgumentError("[line {}] Error at '{}': "
+                                 "Already a variable with this name in "
+                                 "this scope.",
+                                 stmt.name.line,
+                                 stmt.name.to_string(kDetailed))};
+
   declare(stmt.name);
 
   if (stmt.has_initilizer())

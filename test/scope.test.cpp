@@ -66,3 +66,36 @@ TEST(scope, self_init_nested) {
             "Can't read local variable in its own initializer.\n");
   EXPECT_EQ(callback, 65);
 }
+
+TEST(scope, redefine_func) {
+  const auto path = LOXO_ROOT_DIR R"(\examples\scope\redefine.func.lox)";
+  auto [callback, str] = get_result(path);
+  EXPECT_EQ(str,
+            "[line 2] Error at 'a': "
+            "Already a variable with this name in this scope.\n");
+  EXPECT_EQ(callback, 65);
+}
+TEST(scope, redefine_local) {
+  const auto path = LOXO_ROOT_DIR R"(\examples\scope\redefine.local.lox)";
+  auto [callback, str] = get_result(path);
+  EXPECT_EQ(str,
+            "[line 3] Error at 'a': "
+            "Already a variable with this name in this scope.\n");
+  EXPECT_EQ(callback, 65);
+}
+TEST(scope, redefine_mixed) {
+  const auto path = LOXO_ROOT_DIR R"(\examples\scope\redefine.mixed.lox)";
+  auto [callback, str] = get_result(path);
+  EXPECT_EQ(str,
+            "[line 12] Error at 'a': "
+            "Already a variable with this name in this scope.\n");
+  EXPECT_EQ(callback, 65);
+}
+TEST(scope, redefine_param) {
+  const auto path = LOXO_ROOT_DIR R"(\examples\scope\redefine.param.lox)";
+  auto [callback, str] = get_result(path);
+  EXPECT_EQ(str,
+            "[line 1] Error at 'arg': "
+            "Already a variable with this name in this scope.\n");
+  EXPECT_EQ(callback, 65);
+}
