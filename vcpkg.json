@@ -1,10 +1,5 @@
- {
-   "name": "loxo",
-   "version": "1.0.0",
-   "dependencies": [
-    "fmt",
-    "spdlog",
-    "gtest",
-    "benchmark"
-   ]
- }
+{
+  "name": "loxo",
+  "version": "1.0.0",
+  "dependencies": []
+}
