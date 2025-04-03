@@ -1,1 +1,7 @@
 * text=auto
+README.md merge=ours
+vcpkg.json merge=ours
+vcpkg-configuration.json merge=ours
+codecrafters.yml merge=ours
+.codecrafters/** merge=ours
+image/** merge=ours
