@@ -1,4 +1,6 @@
 * text=auto
+# Seems no use, use `git update-index --skip-worktree file` instead 
+#     to keep files differenc between branches
 README.md merge=ours
 vcpkg.json merge=ours
 vcpkg-configuration.json merge=ours

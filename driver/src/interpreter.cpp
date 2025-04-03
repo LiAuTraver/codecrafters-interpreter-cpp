@@ -24,6 +24,17 @@ namespace accat::loxo {
 using auxilia::match;
 using enum TokenType::type_t;
 using enum auxilia::FormatPolicy;
+
+struct interpreter::environment_guard {
+  class interpreter &interpreter;
+  env_ptr_t original_env;
+  inline explicit environment_guard(class interpreter &interpreter) noexcept
+      : interpreter(interpreter), original_env(interpreter.env) {
+    interpreter.env = Environment::Scope(original_env);
+  }
+  inline ~environment_guard() noexcept { interpreter.env = original_env; }
+};
+
 interpreter::interpreter() : env(std::make_shared<Environment>()) {}
 auto interpreter::interpret(
     const std::span<std::shared_ptr<statement::Stmt>> stmts) -> eval_result_t {
@@ -187,7 +198,7 @@ auto interpreter::visit_impl(const statement::Function &stmt) -> eval_result_t {
   }
 
   dbg(info, "func name: {}", stmt.name.to_string(kDetailed))
-  
+
   // clang-format off
   auto callable = evaluation::Callable::create_custom(
       stmt.parameters.size(),
@@ -394,15 +405,18 @@ auto interpreter::visit_impl(const expression::Assignment &expr)
 
   if (auto it = local_env.find(expr.shared_from_this());
       it != local_env.end()) {
-    return env->reassign_at_depth(
-        it->second, expr.name.to_string(kDetailed), *res, expr.name.line);
-  }
-  if (!Environment::Global()->reassign(
-          expr.name.to_string(kDetailed), *res, expr.name.line)) {
+    if (auto reassign_res = env->reassign_at_depth(
+            it->second, expr.name.to_string(kDetailed), *res, expr.name.line);
+        !reassign_res)
+      return reassign_res;
+
+  } else if (!Environment::Global()->reassign(
+                 expr.name.to_string(kDetailed), *res, expr.name.line)) {
     return {auxilia::NotFoundError("Undefined variable '{}'.\n[line {}]",
                                    expr.name.to_string(kDetailed),
                                    expr.name.line)};
   }
+  // Assignment expression returns the value of the assignment.
   return *res;
 }
 auto interpreter::visit_impl(const expression::Logical &expr) -> eval_result_t {
@@ -461,11 +475,6 @@ auto interpreter::visit_impl(const expression::Call &expr) -> eval_result_t {
       args.size())};
 }
 
-interpreter::environment_guard::environment_guard(
-    class loxo::interpreter &interpreter) noexcept
-    : interpreter(interpreter), original_env(interpreter.env) {
-  interpreter.env = Environment::Scope(original_env);
-}
 auto interpreter::expr_to_string(
     const auxilia::FormatPolicy &format_policy) const -> string_type {
   return value_to_string(format_policy, last_expr_res);

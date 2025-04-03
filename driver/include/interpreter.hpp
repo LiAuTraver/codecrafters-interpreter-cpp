@@ -93,15 +93,6 @@ private:
   bool is_interpreting_stmts = false;
 
 private:
-  /// @brief basic RAII guard for entering a new scope.
-  struct environment_guard {
-    class interpreter &interpreter;
-    env_ptr_t original_env;
-    explicit environment_guard(class interpreter &) noexcept;
-    inline ~environment_guard() noexcept { interpreter.env = original_env; }
-  };
-
-private:
   auto expr_to_string(const auxilia::FormatPolicy &) const -> string_type;
   auto value_to_string(const auxilia::FormatPolicy &,
                        const eval_result_t &) const -> string_type;
@@ -124,5 +115,7 @@ private:
 
 private:
   friend LOXO_API void delete_interpreter_fwd(interpreter *);
+  /// @brief basic RAII guard for entering a new scope.
+  struct environment_guard;
 };
 } // namespace accat::loxo
