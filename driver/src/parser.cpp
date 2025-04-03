@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <iterator>
 #include <memory>
 #include <utility>
 #include <vector>
@@ -370,6 +371,8 @@ auto parser::for_stmt() -> stmt_ptr_t {
 }
 auto parser::return_stmt() -> stmt_ptr_t {
   expr_ptr_t value = nullptr;
+  auto line = std::ranges::prev(cursor)->line;
+
   if (!inspect(kSemicolon)) {
     value = next_expression();
   }
@@ -377,7 +380,7 @@ auto parser::return_stmt() -> stmt_ptr_t {
     throw synchronize({parse_error::kUnknownError, "Expect ';'."});
   }
   this->get();
-  return std::make_shared<statement::Return>(std::move(value));
+  return std::make_shared<statement::Return>(std::move(value), line);
 }
 auto parser::print_stmt() -> stmt_ptr_t {
   auto value = next_expression();

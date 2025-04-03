@@ -14,14 +14,24 @@ using enum auxilia::FormatPolicy;
 using auxilia::InvalidArgumentError;
 using auxilia::OkStatus;
 using auxilia::Status;
-
 struct Resolver::scope_guard {
-  inline constexpr explicit scope_guard(scopes_t &scopes) noexcept
-      : scopes(scopes) {
-    scopes.emplace_back();
+  using enum Resolver::ScopeType;
+  inline constexpr explicit scope_guard(Resolver &resolver,
+                                        ScopeType sc) noexcept
+      : resolver(resolver) {
+    enclosing_scope = resolver.current_scope;
+    // if sc == kNone, ignore it.
+    if (sc != kNone) {
+      resolver.current_scope = sc;
+    }
+    resolver.scopes.emplace_back();
   }
-  inline constexpr ~scope_guard() noexcept { scopes.pop_back(); }
-  scopes_t &scopes;
+  inline constexpr ~scope_guard() noexcept {
+    resolver.scopes.pop_back();
+    resolver.current_scope = enclosing_scope;
+  }
+  Resolver &resolver;
+  ScopeType enclosing_scope;
 };
 
 Resolver::Resolver(loxo::interpreter &interpreter) : interpreter(interpreter) {}
@@ -45,10 +55,11 @@ auto Resolver::resolve_to_interp(const expression::Expr &expr,
     }
   return {};
 }
-auto Resolver::resolve(const statement::Function &stmt) -> eval_result_t {
+auto Resolver::resolve(const statement::Function &stmt,
+                       const ScopeType scopeType) -> eval_result_t {
   define(stmt.name);
 
-  scope_guard guard(scopes);
+  scope_guard guard(*this, scopeType);
 
   for (const auto &param : stmt.parameters) {
     if (is_defined(param))
@@ -169,7 +180,7 @@ auto Resolver::visit_impl(const statement::For &stmt) -> eval_result_t {
   // }
   // the `body` might not be a Block itself. just recursively resolve it.
 
-  scope_guard guard(scopes);
+  scope_guard guard(*this, ScopeType::kNone);
 
   return (stmt.initializer ? execute(*stmt.initializer) : OkStatus()) &&
          evaluate(*stmt.condition) &&
@@ -177,21 +188,26 @@ auto Resolver::visit_impl(const statement::For &stmt) -> eval_result_t {
          (stmt.increment ? evaluate(*stmt.increment) : OkStatus());
 }
 auto Resolver::visit_impl(const statement::Function &stmt) -> eval_result_t {
-  return resolve(stmt);
+  return resolve(stmt, ScopeType::kFunction);
 }
 auto Resolver::visit_impl(const statement::Return &stmt) -> eval_result_t {
+  if (this->current_scope == ScopeType::kNone)
+    return {InvalidArgumentError("[line {}] Error at '{}': "
+                                 "Can't return from top-level code.",
+                                 stmt.line,
+                                 "return")};
   return stmt.value ? evaluate(*stmt.value) : OkStatus();
 }
 auto Resolver::execute_impl(const statement::Stmt &stmt) -> eval_result_t {
   return stmt.accept(*this);
 }
 auto Resolver::visit_impl(const statement::Block &stmt) -> eval_result_t {
-  scope_guard guard(scopes);
+  scope_guard guard(*this, ScopeType::kNone);
 
   return resolve(stmt.statements);
 }
 
 auto Resolver::to_string(const auxilia::FormatPolicy &) const -> string_type {
-  TODO()
+  return "Resolver";
 }
 } // namespace accat::loxo

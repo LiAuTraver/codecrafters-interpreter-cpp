@@ -99,3 +99,34 @@ TEST(scope, redefine_param) {
             "Already a variable with this name in this scope.\n");
   EXPECT_EQ(callback, 65);
 }
+
+TEST(scope, return_block) {
+  const auto path = LOXO_ROOT_DIR R"(\examples\scope\return.block.lox)";
+  auto [callback, str] = get_result(path);
+  EXPECT_EQ(str,
+            "[line 3] Error at 'return': Can't return from top-level code.\n");
+  EXPECT_EQ(callback, 65);
+}
+TEST(scope, return_ctrlflow) {
+  const auto path = LOXO_ROOT_DIR R"(\examples\scope\return.ctrlflow.lox)";
+  auto [callback, str] = get_result(path);
+  EXPECT_EQ(str,
+            "[line 12] Error at 'return': Can't return from top-level code.\n");
+  EXPECT_EQ(callback, 65);
+}
+
+TEST(scope, return_global) {
+  const auto path = LOXO_ROOT_DIR R"(\examples\scope\return.global.lox)";
+  auto [callback, str] = get_result(path);
+  EXPECT_EQ(str,
+            "[line 6] Error at 'return': Can't return from top-level code.\n");
+  EXPECT_EQ(callback, 65);
+}
+
+TEST(scope, return_mixed) {
+  const auto path = LOXO_ROOT_DIR R"(\examples\scope\return.mixed.lox)";
+  auto [callback, str] = get_result(path);
+  EXPECT_EQ(str,
+            "[line 15] Error at 'return': Can't return from top-level code.\n");
+  EXPECT_EQ(callback, 65);
+}
