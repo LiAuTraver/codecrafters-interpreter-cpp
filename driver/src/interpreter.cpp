@@ -376,16 +376,24 @@ auto interpreter::visit_impl(const expression::Binary &expr) -> eval_result_t {
     auto bool_lhs = lhs->get<evaluation::Boolean>();
     auto bool_rhs = rhs->get<evaluation::Boolean>();
     switch (expr.op.type.type) {
-    case kGreater:
-      return {{bool_lhs > bool_rhs}};
-    case kGreaterEqual:
-      return {{bool_lhs >= bool_rhs}};
-    case kLess:
-      return {{bool_lhs < bool_rhs}};
-    case kLessEqual:
-      return {{bool_lhs <= bool_rhs}};
+    // case kGreater:
+    //   return {{bool_lhs > bool_rhs}};
+    // case kGreaterEqual:
+    //   return {{bool_lhs >= bool_rhs}};
+    // case kLess:
+    //   return {{bool_lhs < bool_rhs}};
+    // case kLessEqual:
+    //   return {{bool_lhs <= bool_rhs}};
+    case kEqualEqual:
+      return {{bool_lhs == bool_rhs}};
+    case kBangEqual:
+      return {{bool_lhs != bool_rhs}};
     default:
-      break;
+      // forbids relational operators on boolean values except equality.
+      return {auxilia::InvalidArgumentError(
+          "Operands must be two numbers or two strings.\n[line "
+          "{}]",
+          expr.op.line)};
     }
   }
   dbg(critical, "unimplemented binary operator: {}", expr.op.to_string())

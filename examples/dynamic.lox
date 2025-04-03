@@ -1,1 +1,1 @@
-for (var quz = 0; quz < 3;) print quz = quz + 1;
+false >= true

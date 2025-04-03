@@ -86,18 +86,18 @@ public:
   Boolean operator!=(const Boolean &rhs) {
     return (*this->value != rhs.value);
   }
-  Boolean operator<(const Boolean &rhs) {
-    return (*this->value < rhs.value);
-  }
-  Boolean operator<=(const Boolean &rhs) {
-    return (*this->value <= rhs.value);
-  }
-  Boolean operator>(const Boolean &rhs) {
-    return (*this->value > rhs.value);
-  }
-  Boolean operator>=(const Boolean &rhs) {
-    return (*this->value >= rhs.value);
-  }
+  // Boolean operator<(const Boolean &rhs) {
+  //   return (*this->value < rhs.value);
+  // }
+  // Boolean operator<=(const Boolean &rhs) {
+  //   return (*this->value <= rhs.value);
+  // }
+  // Boolean operator>(const Boolean &rhs) {
+  //   return (*this->value > rhs.value);
+  // }
+  // Boolean operator>=(const Boolean &rhs) {
+  //   return (*this->value >= rhs.value);
+  // }
 
 private:
   std::optional<bool> value = std::nullopt;
