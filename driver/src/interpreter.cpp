@@ -49,29 +49,25 @@ auto interpreter::set_env(const env_ptr_t &new_env) -> interpreter & {
 
 evaluation::Boolean
 interpreter::is_true_value(const eval_result_t &value) const {
-  return value->visit(match{
+  return value->visit(match(
       [](const evaluation::Nil &n) {
         return evaluation::Boolean::make_false(n.get_line());
       },
       [](const evaluation::Boolean &b) { return b; },
-      [](const auto &) { return evaluation::True; },
-  });
+      [](const auto &) { return evaluation::True; }));
 }
 auto interpreter::is_deep_equal(const eval_result_t &lhs,
                                 const eval_result_t &rhs) const
     -> evaluation::Boolean {
   using Bool = evaluation::Boolean;
-  auto pattern = match{
+  auto pattern = match(
       [](const evaluation::Nil &l, const evaluation::Nil &r) -> Bool {
         return {Bool::make_true(l.get_line())};
       },
-      []<typename T>(const T &l, const T &r) -> Bool {
-        return {l == r};
-      },
+      []<typename T>(const T &l, const T &r) -> Bool { return {l == r}; },
       [](const auto &l, const auto &r) -> Bool {
         return {Bool{evaluation::False}};
-      },
-  };
+      });
   return auxilia::visit(pattern, *lhs, *rhs);
 }
 auto interpreter::get_call_args(const expression::Call &expr) const
@@ -147,6 +143,8 @@ auto interpreter::visit_impl(const statement::While &stmt) -> eval_result_t {
 }
 auto interpreter::visit_impl(const statement::For &stmt) -> eval_result_t {
 
+  environment_guard guard(*this);
+
   if (stmt.initializer)
     if (auto res = execute(*stmt.initializer); !res)
       return res;
@@ -189,18 +187,20 @@ auto interpreter::visit_impl(const statement::Function &stmt) -> eval_result_t {
   }
 
   dbg(info, "func name: {}", stmt.name.to_string(kDetailed))
-
+  
   // clang-format off
   auto callable = evaluation::Callable::create_custom(
-          stmt.parameters.size(),
-          {stmt.name.to_string(kDetailed),
-           stmt.parameters
-           | std::ranges::views::transform([&](const auto &param) {
-               return param.to_string(kDetailed);
-             })
-           | std::ranges::to<std::vector<string_type>>(),
-           stmt.body.statements},
-           this->env); 
+      stmt.parameters.size(),
+      {
+        .name = stmt.name.to_string(kDetailed),
+        .parameters = stmt.parameters
+                      | std::ranges::views::transform([&](const auto &param) {
+                          return param.to_string(kDetailed);
+                        })
+                      | std::ranges::to<std::vector<string_type>>(),
+        .body = stmt.body.statements
+      },
+      this->env);
   return env->add(
       stmt.name.to_string(kDetailed),
       callable,
@@ -212,17 +212,13 @@ auto interpreter::visit_impl(const statement::Expression &stmt)
   return evaluate(*stmt.expr);
 }
 auto interpreter::visit_impl(const statement::Block &stmt) -> eval_result_t {
-  auto original_env = env; // save the original environment
-  auto sub_env = Environment::Scope(original_env);
-  env = sub_env;
-  for (const auto &scoped_stmt : stmt.statements) {
-    if (auto eval_res = execute(*scoped_stmt); !eval_res) {
-      env = original_env; // restore // TODO: shall i also restore env when
-                          // eval_res cantains `returning`?
+
+  environment_guard guard(*this);
+
+  for (const auto &scoped_stmt : stmt.statements)
+    if (auto eval_res = execute(*scoped_stmt); !eval_res)
       return eval_res;
-    }
-  }
-  env = original_env; // restore
+
   return {};
 }
 auto interpreter::execute_impl(const statement::Stmt &stmt) -> eval_result_t {
@@ -384,8 +380,6 @@ auto interpreter::visit_impl(const expression::Variable &expr)
       !res.empty()) {
     return res;
   }
-  // if (auto res = env->get(expr.name.to_string(kDetailed)); !res.empty())
-  //   return res;
 
   return {auxilia::NotFoundError("Undefined variable '{}'.\n[line {}]",
                                  expr.name.to_string(kDetailed),
@@ -409,10 +403,6 @@ auto interpreter::visit_impl(const expression::Assignment &expr)
                                    expr.name.to_string(kDetailed),
                                    expr.name.line)};
   }
-  // if (!env->reassign(expr.name.to_string(kDetailed), *res, expr.name.line))
-  //   return {auxilia::NotFoundError("Undefined variable '{}'.\n[line {}]",
-  //                                  expr.name.to_string(kDetailed),
-  //                                  expr.name.line)};
   return *res;
 }
 auto interpreter::visit_impl(const expression::Logical &expr) -> eval_result_t {
@@ -471,6 +461,11 @@ auto interpreter::visit_impl(const expression::Call &expr) -> eval_result_t {
       args.size())};
 }
 
+interpreter::environment_guard::environment_guard(
+    class loxo::interpreter &interpreter) noexcept
+    : interpreter(interpreter), original_env(interpreter.env) {
+  interpreter.env = Environment::Scope(original_env);
+}
 auto interpreter::expr_to_string(
     const auxilia::FormatPolicy &format_policy) const -> string_type {
   return value_to_string(format_policy, last_expr_res);

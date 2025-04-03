@@ -5,6 +5,7 @@
 
 #include <accat/auxilia/auxilia.hpp>
 
+#include "Token.hpp"
 #include "details/loxo_fwd.hpp"
 
 #include "statement.hpp"
@@ -343,7 +344,9 @@ auto parser::for_stmt() -> stmt_ptr_t {
   ///   here we only allow for variable declaration or expression statement.
 
   // else, no initializer
-  expr_ptr_t condition = nullptr;
+  // defaule condition is `true`.
+  expr_ptr_t condition =
+      std::make_shared<expression::Literal>(Token(kTrue, "true"sv, {"true"sv}));
   if (!inspect(kSemicolon)) {
     condition = next_expression();
   }
@@ -436,10 +439,11 @@ auto parser::synchronize(const parse_error &parse_error) -> auxilia::Status {
     };
     this->get();
   }
-  return auxilia::ParseError("[line {}] Error at '{}': {}",
-                             error_token.line,
-                             error_token.to_string(auxilia::FormatPolicy::kDetailed),
-                             parse_error.message());
+  return auxilia::ParseError(
+      "[line {}] Error at '{}': {}",
+      error_token.line,
+      error_token.to_string(auxilia::FormatPolicy::kDetailed),
+      parse_error.message());
 }
 LOXO_API void delete_parser_fwd(parser *ptr) { delete ptr; }
 

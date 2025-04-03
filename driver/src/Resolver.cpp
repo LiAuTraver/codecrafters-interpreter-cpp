@@ -11,12 +11,14 @@
 
 namespace accat::loxo {
 using enum auxilia::FormatPolicy;
+using auxilia::OkStatus;
+using auxilia::Status;
 Resolver::Resolver(loxo::interpreter &interpreter) : interpreter(interpreter) {}
 
 auto Resolver::resolve(const expression::Expr &expr) const -> eval_result_t {
   return expr.accept(*this);
 }
-auto Resolver::resolve(const statement::Stmt &stmt) const -> auxilia::Status {
+auto Resolver::resolve(const statement::Stmt &stmt) const -> Status {
   return stmt.accept(*this);
 }
 
@@ -76,8 +78,9 @@ auto Resolver::visit_impl(const expression::Grouping &) -> eval_result_t {
   return {};
 }
 auto Resolver::visit_impl(const expression::Variable &expr) -> eval_result_t {
-  if (!scopes.empty() and scopes.back().contains(expr.name.to_string(kDetailed))
-                          and scopes.back()[expr.name.to_string(kDetailed)] == false) {
+  if (!scopes.empty() and
+      scopes.back().contains(expr.name.to_string(kDetailed)) and
+      scopes.back()[expr.name.to_string(kDetailed)] == false) {
     // return {auxilia::InvalidArgumentError(
     //     "Cannot read local variable '{}' in its own initializer.\n[line {}]",
     //     expr.name.to_string(kDetailed),
@@ -125,19 +128,34 @@ auto Resolver::visit_impl(const statement::Expression &stmt) -> eval_result_t {
 }
 auto Resolver::visit_impl(const statement::If &stmt) -> eval_result_t {
   return resolve(*stmt.condition) && resolve(*stmt.then_branch) &&
-         (stmt.else_branch ? resolve(*stmt.else_branch) : auxilia::OkStatus());
+         (stmt.else_branch ? resolve(*stmt.else_branch) : OkStatus());
 }
 auto Resolver::visit_impl(const statement::While &stmt) -> eval_result_t {
   return resolve(*stmt.condition) && resolve(*stmt.body);
 }
 auto Resolver::visit_impl(const statement::For &stmt) -> eval_result_t {
-  return {};
+  // should not exists, should be desugared in the parser.
+  // nonetheless I did not desugar it.
+
+  // {
+  //   initializer;
+  //   while (condition)
+  //     body and increment;
+  // }
+  // the `body` might not be a Block itself. just recursively resolve it.
+
+  scope_guard guard(scopes);
+
+  return (stmt.initializer ? resolve(*stmt.initializer) : OkStatus()) &&
+         resolve(*stmt.condition) &&
+         (stmt.body ? resolve(*stmt.body) : OkStatus()) &&
+         (stmt.increment ? resolve(*stmt.increment) : OkStatus());
 }
 auto Resolver::visit_impl(const statement::Function &stmt) -> eval_result_t {
   return resolve(stmt);
 }
 auto Resolver::visit_impl(const statement::Return &stmt) -> eval_result_t {
-  return stmt.value ? resolve(*stmt.value) : auxilia::OkStatus();
+  return stmt.value ? resolve(*stmt.value) : OkStatus();
 }
 auto Resolver::execute_impl(const statement::Stmt &) -> eval_result_t { TODO() }
 auto Resolver::visit_impl(const statement::Block &stmt) -> eval_result_t {

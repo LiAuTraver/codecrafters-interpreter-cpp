@@ -41,8 +41,4 @@ target_link_libraries(loxo.test PRIVATE
   driver
 )
 
-if(AC_CPP_DEBUG)
-  copy_dlls_for(loxo.test)
-endif()
-
 gtest_discover_tests(loxo.test)

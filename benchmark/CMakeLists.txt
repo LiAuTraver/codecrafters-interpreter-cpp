@@ -22,7 +22,6 @@ target_link_libraries(fib.benchmark PUBLIC
     spdlog::spdlog
     benchmark::benchmark
 )
-copy_dlls_for(fib.benchmark)
 
 if(CMAKE_CXX_COMPILER_ID MATCHES MSVC)
   list(REMOVE_ITEM CMAKE_CXX_FLAGS_RELEASE "/O0")
