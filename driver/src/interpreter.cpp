@@ -372,8 +372,23 @@ auto interpreter::visit_impl(const expression::Binary &expr) -> eval_result_t {
       break;
     }
   }
-  dbg(error, "unimplemented binary operator: {}", expr.op.to_string())
-  dbg_break
+  if (lhs->is_type<evaluation::Boolean>()) {
+    auto bool_lhs = lhs->get<evaluation::Boolean>();
+    auto bool_rhs = rhs->get<evaluation::Boolean>();
+    switch (expr.op.type.type) {
+    case kGreater:
+      return {{bool_lhs > bool_rhs}};
+    case kGreaterEqual:
+      return {{bool_lhs >= bool_rhs}};
+    case kLess:
+      return {{bool_lhs < bool_rhs}};
+    case kLessEqual:
+      return {{bool_lhs <= bool_rhs}};
+    default:
+      break;
+    }
+  }
+  dbg(critical, "unimplemented binary operator: {}", expr.op.to_string())
   return {auxilia::InvalidArgumentError(
       "unimplemented binary operator.\n[line {}]", expr.op.line)};
 }

@@ -79,6 +79,26 @@ public:
   auto to_string(const auxilia::FormatPolicy &) const -> string_type;
   auto to_string_view(const auxilia::FormatPolicy &) const -> string_view_type;
 
+public:
+  Boolean operator==(const Boolean &rhs) {
+    return (*this->value == rhs.value);
+  }
+  Boolean operator!=(const Boolean &rhs) {
+    return (*this->value != rhs.value);
+  }
+  Boolean operator<(const Boolean &rhs) {
+    return (*this->value < rhs.value);
+  }
+  Boolean operator<=(const Boolean &rhs) {
+    return (*this->value <= rhs.value);
+  }
+  Boolean operator>(const Boolean &rhs) {
+    return (*this->value > rhs.value);
+  }
+  Boolean operator>=(const Boolean &rhs) {
+    return (*this->value >= rhs.value);
+  }
+
 private:
   std::optional<bool> value = std::nullopt;
 } static inline AC_CONSTEXPR20 True{true, 0}, False{false, 0};
