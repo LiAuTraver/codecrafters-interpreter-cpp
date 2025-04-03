@@ -1,13 +1,1 @@
-// bug 1
-for (var a = 1; a < 3; a = a + 1) {
-  print a;
-}
-print a + 10; // the var should not defined
-
-// bug 2
-var b = "glob";
-{ // if there's no block, then it executes fine. however.
-  for (var b = 0; b < 1; b = b + 1) {
-    print b;
-  }
-}
+for (var quz = 0; quz < 3;) print quz = quz + 1;
