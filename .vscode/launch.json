@@ -2,13 +2,41 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "debug current target",
+      "name": "run",
       "type": "cppvsdbg",
       "request": "launch",
       "program": "${command:cmake.launchTargetPath}",
       "args": [
         "run",
-        "Z:/loxo/examples/dynamic.lox",
+        "${workspaceFolder}/examples/dynamic.lox",
+      ],
+      "stopAtEntry": false,
+      "cwd": "${command:cmake.launchTargetDirectory}",
+      "environment": [],
+      "console": "internalConsole"
+    },
+    {
+      "name": "parse",
+      "type": "cppvsdbg",
+      "request": "launch",
+      "program": "${command:cmake.launchTargetPath}",
+      "args": [
+        "parse",
+        "${workspaceFolder}/examples/dynamic.lox",
+      ],
+      "stopAtEntry": false,
+      "cwd": "${command:cmake.launchTargetDirectory}",
+      "environment": [],
+      "console": "internalConsole"
+    },
+    {
+      "name": "tokenize",
+      "type": "cppvsdbg",
+      "request": "launch",
+      "program": "${command:cmake.launchTargetPath}",
+      "args": [
+        "tokenize",
+        "${workspaceFolder}/examples/dynamic.lox",
       ],
       "stopAtEntry": false,
       "cwd": "${command:cmake.launchTargetDirectory}",

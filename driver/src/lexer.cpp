@@ -232,7 +232,7 @@ void lexer::add_token(const token_type_t &type, literal_type literal) {
 void lexer::add_lex_error(const error_code_t type) {
   dbg(error, "Lexical error: {}", contents.substr(head, cursor - head))
   error_count++;
-  return add_token(kLexError);
+  return add_token(kLexError, literal_type{error_t{type}});
 }
 lexer::status_t::Code lexer::lex_string() {
   while (peek() != '"' && !is_at_end()) {

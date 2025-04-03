@@ -262,17 +262,17 @@ Token::to_string(const auxilia::FormatPolicy &policy) const {
     literal_sv = "null"sv;
     break;
   case kLexError:
-    // if (policy == kDefault) {
-    //   /// @note message is different from the other cases.
-    //   if (auto ptr = cast_literal<error_t>())
-    //     return ptr->to_string(lexeme, line);
-    //   else
-    //     return auxilia::format(
-    //         "[line {}] Error: {}", line, "<failed to access data>");
-    // } else {
-    //   // do nothing
-    //   return ""s;
-    // }
+    if (policy == kDefault) {
+      /// @note message is different from the other cases.
+      if (auto ptr = this->literal.get_if<error_t>())
+        return ptr->to_string(lexeme, line);
+      else
+        return auxilia::format(
+            "[line {}] Error: {}", line, "<failed to access data>");
+    } else {
+      // do nothing
+      return ""s;
+    }
   default:
     dbg_break
     break;

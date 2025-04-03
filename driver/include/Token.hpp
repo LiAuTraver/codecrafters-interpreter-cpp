@@ -17,7 +17,8 @@
 #  error                                                                       \
       "please do not include TokenType.hpp in other files; include Token.hpp instead"
 #endif
-#include "details/TokenType.inl"
+#  include "details/TokenType.inl"
+#include "details/lex_error.hpp"
 
 namespace accat::loxo {
 class LOXO_API Token : public auxilia::Printable {
@@ -29,7 +30,8 @@ public:
                                         string_view_type,
                                         long long,
                                         long double,
-                                        bool>;
+                                        bool,
+                                        error_t>;
 
 public:
   Token() = default;
