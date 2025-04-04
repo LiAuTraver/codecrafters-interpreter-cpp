@@ -1,5 +1,5 @@
-#ifndef LOXO_EXPRVISITOR_HPP
-#define LOXO_EXPRVISITOR_HPP
+#pragma once
+
 #include <type_traits>
 #include <variant>
 
@@ -43,10 +43,11 @@ private:
   virtual eval_result_t visit_impl(const Assignment &) = 0;
   virtual eval_result_t visit_impl(const Logical &) = 0;
   virtual eval_result_t visit_impl(const Call &) = 0;
+  virtual eval_result_t visit_impl(const Get &) = 0;
+  virtual eval_result_t visit_impl(const Set &) = 0;
 
 private:
   virtual eval_result_t evaluate_impl(const Expr &) = 0;
   virtual eval_result_t get_result_impl() const = 0;
 };
 } // namespace accat::loxo::expression
-#endif // LOXO_EXPRVISITOR_HPP

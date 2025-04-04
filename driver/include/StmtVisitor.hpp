@@ -35,6 +35,7 @@ private:
   virtual eval_result_t visit_impl(const While &) = 0;
   virtual eval_result_t visit_impl(const For &) = 0;
   virtual eval_result_t visit_impl(const Function &) = 0;
+  virtual eval_result_t visit_impl(const Class &) = 0;
   virtual eval_result_t visit_impl(const Return &) = 0;
   virtual eval_result_t execute_impl(const Stmt &) = 0;
 

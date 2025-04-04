@@ -8,6 +8,14 @@ set(CMAKE_C_STANDARD 23)
 # see https://stackoverflow.com/questions/56089330/cmake-creates-lots-of-targets-i-didnt-specify
 set_property(GLOBAL PROPERTY CTEST_TARGETS_ADDED 1)
 
+include(cmake/prelude.cmake)
+if(PROJECT_IS_TOP_LEVEL)
+set(LOXO_PROJECT_IS_TOP_LEVEL ON)
+else()  
+set(LOXO_PROJECT_IS_TOP_LEVEL OFF)
+endif(PROJECT_IS_TOP_LEVEL)
+include(cmake/folder.cmake)
+
 # for codecrafters' test
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux" AND NOT DEFINED ENV{AC_CPP_DEBUG})
   set(CMAKE_CXX_COMPILER "g++")
@@ -26,8 +34,6 @@ if(${CMAKE_GENERATOR} MATCHES "Visual Studio")
 endif()
 
 option(AC_CPP_DEBUG "set the environment variable AC_CPP_DEBUG to enable debug mode" OFF)
-option(USE_BOOST_CONTRACT "set the environment variable LOXO_USE_BOOST_CONTRACT to enable boost contract; only works when AC_CPP_DEBUG is enabled"
-  OFF)
 option(LOXO_BUILD_SHARED "build shared library" OFF)
 
 if(DEFINED ENV{AC_CPP_DEBUG})
@@ -121,3 +127,5 @@ if(AC_CPP_DEBUG)
   add_subdirectory(benchmark)
   add_subdirectory(demo)
 endif()
+
+add_folder(Tools)

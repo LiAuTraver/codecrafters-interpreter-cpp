@@ -1,5 +1,4 @@
-#ifndef AC_LOXO_EVALUATABLE_HPP
-#define AC_LOXO_EVALUATABLE_HPP
+#pragma once
 
 #include <algorithm>
 #include <cmath>
@@ -8,6 +7,7 @@
 #include <limits>
 #include <memory>
 #include <random>
+#include <string_view>
 #include <utility>
 #include <vector>
 #include <functional>
@@ -24,6 +24,9 @@ namespace accat::loxo::evaluation {
 /// @interface Evaluatable
 /// @implements auxilia::Printable
 class Evaluatable : public auxilia::Printable {
+protected:
+  static constexpr auto nan = &std::numeric_limits<uint_least32_t>::quiet_NaN;
+
 public:
   using eval_result_t = IVisitor::eval_result_t;
 
@@ -39,7 +42,17 @@ public:
       -> string_type = 0;
 
 private:
-  uint_least32_t line = std::numeric_limits<uint_least32_t>::quiet_NaN();
+  uint_least32_t line = nan();
+};
+/// @brief A class that represents a callable object
+class Callable {
+protected:
+  using args_t = std::vector<IVisitor::variant_type>;
+  virtual ~Callable() = default;
+
+public:
+  virtual auto arity() const -> unsigned = 0;
+  virtual auto call(interpreter &, args_t &&) -> Evaluatable::eval_result_t = 0;
 };
 
 /// @brief A class that represents a value
@@ -57,50 +70,33 @@ public:
 class LOXO_API Boolean : public Value, public auxilia::Viewable {
 public:
   constexpr Boolean() = default;
-  constexpr Boolean(bool value,
-                    const uint_least32_t line =
-                        std::numeric_limits<uint_least32_t>::quiet_NaN())
+  constexpr Boolean(bool value, const uint_least32_t line = nan())
       : Value(line), value(value) {}
-  constexpr Boolean(long double,
-                    const uint_least32_t line =
-                        std::numeric_limits<uint_least32_t>::quiet_NaN())
+  constexpr Boolean(long double, const uint_least32_t line = nan())
       : Value(line), value(true) {}
   Boolean(const Boolean &);
   Boolean &operator=(const Boolean &);
   Boolean(Boolean &&) noexcept;
   Boolean &operator=(Boolean &&) noexcept;
-  auto operator==(const Boolean &) const -> Boolean;
   static auto make_true(uint_least32_t) -> Boolean;
   static auto make_false(uint_least32_t) -> Boolean;
   auto is_true() const noexcept -> bool;
   virtual ~Boolean() = default;
 
 public:
-  auto to_string(const auxilia::FormatPolicy &) const -> string_type;
+  auto to_string(const auxilia::FormatPolicy &) const -> string_type override;
   auto to_string_view(const auxilia::FormatPolicy &) const -> string_view_type;
 
 public:
-  Boolean operator==(const Boolean &rhs) {
-    return (*this->value == rhs.value);
+  Boolean operator==(const Boolean &rhs) const {
+    return (this->value == rhs.value);
   }
-  Boolean operator!=(const Boolean &rhs) {
-    return (*this->value != rhs.value);
+  Boolean operator!=(const Boolean &rhs) const {
+    return (this->value != rhs.value);
   }
-  // Boolean operator<(const Boolean &rhs) {
-  //   return (*this->value < rhs.value);
-  // }
-  // Boolean operator<=(const Boolean &rhs) {
-  //   return (*this->value <= rhs.value);
-  // }
-  // Boolean operator>(const Boolean &rhs) {
-  //   return (*this->value > rhs.value);
-  // }
-  // Boolean operator>=(const Boolean &rhs) {
-  //   return (*this->value >= rhs.value);
-  // }
 
 private:
-  std::optional<bool> value = std::nullopt;
+  bool value = false;
 } static inline AC_CONSTEXPR20 True{true, 0}, False{false, 0};
 
 class LOXO_API Nil : public Value, public auxilia::Viewable {
@@ -121,16 +117,9 @@ public:
 class String : public Evaluatable, public auxilia::Viewable {
 public:
   constexpr String() = default;
-  explicit String(
-      const string_type &,
-      uint_least32_t line = std::numeric_limits<uint_least32_t>::quiet_NaN());
-  explicit String(
-      string_view_type,
-      uint_least32_t line = std::numeric_limits<uint_least32_t>::quiet_NaN());
-  explicit String(
-      string_type &&,
-      uint_least32_t line =
-          std::numeric_limits<uint_least32_t>::quiet_NaN()) noexcept;
+  explicit String(const string_type &, uint_least32_t line = nan());
+  explicit String(string_view_type, uint_least32_t line = nan());
+  explicit String(string_type &&, uint_least32_t line = nan()) noexcept;
   String(const String &);
   String(String &&) noexcept;
   String &operator=(const String &);
@@ -144,8 +133,12 @@ public:
   explicit operator Boolean() const;
 
 public:
-  auto to_string(const auxilia::FormatPolicy &) const -> string_type override;
-  auto to_string_view(const auxilia::FormatPolicy &) const -> string_view_type;
+  auto to_string(const auxilia::FormatPolicy &) const -> string_type override {
+    return value;
+  }
+  auto to_string_view(const auxilia::FormatPolicy &) const -> string_view_type {
+    return value;
+  }
 
 private:
   string_type value;
@@ -154,9 +147,7 @@ private:
 class Number : public Value {
 public:
   constexpr Number() = default;
-  Number(
-      long double,
-      uint_least32_t line = std::numeric_limits<uint_least32_t>::quiet_NaN());
+  Number(long double, uint_least32_t line = nan());
   Number(const Number &);
   Number(Number &&) noexcept;
   Number &operator=(const Number &);
@@ -185,8 +176,8 @@ private:
 public:
   auto to_string(const auxilia::FormatPolicy &) const -> string_type override;
 };
-class Callable : public Evaluatable {
-  struct Function {
+class Function : public Evaluatable, public Callable {
+  struct RealFunction {
     using token_t = Token;
     using stmt_ptr_t = std::shared_ptr<statement::Stmt>;
     string_type name;
@@ -195,60 +186,107 @@ class Callable : public Evaluatable {
   };
 
 public:
-  using args_t = std::vector<IVisitor::variant_type>;
   using string_view_type = auxilia::string_view;
   using native_function_t =
       std::function<IVisitor::variant_type(interpreter &, args_t &)>;
-  using custom_function_t = Function;
+  using custom_function_t = RealFunction;
   using function_t = auxilia::
       Variant<auxilia::Monostate, native_function_t, custom_function_t>;
   using env_t = Environment;
   using env_ptr_t = std::shared_ptr<env_t>;
 
 public:
-  Callable() = default;
-  virtual ~Callable() = default;
+  Function() = default;
+  virtual ~Function() = default;
 
 private:
-  Callable(unsigned, native_function_t &&, const env_ptr_t &);
-  Callable(unsigned, custom_function_t &&, const env_ptr_t &);
+  Function(unsigned, native_function_t &&, const env_ptr_t &);
+  Function(unsigned, custom_function_t &&, const env_ptr_t &);
 
 public:
   static auto create_custom(unsigned, custom_function_t &&, const env_ptr_t &)
-      -> Callable;
+      -> Function;
   static auto create_native(unsigned, native_function_t &&, const env_ptr_t &)
-      -> Callable;
+      -> Function;
 
 public:
-  constexpr inline auto arity() const -> unsigned { return my_arity; }
-
-public:
-  auto call(interpreter &, args_t &&) const -> eval_result_t;
+  virtual inline auto arity() const -> unsigned override { return my_arity; }
+  virtual auto call(interpreter &, args_t &&) -> eval_result_t override;
 
 private:
   // dont support static variables in this function
   unsigned my_arity = std::numeric_limits<unsigned>::quiet_NaN();
-  function_t my_function{auxilia::Monostate{}};
+  function_t my_function;
   env_ptr_t my_env;
 
 private:
   static constexpr auto native_signature = "<native fn>"sv;
 
 public:
-  auto to_string(const auxilia::FormatPolicy &) const -> string_type;
+  auto to_string(const auxilia::FormatPolicy &) const -> string_type override;
 
 private:
-  friend inline auto operator==(const Callable &lhs, const Callable &rhs)
+  friend inline auto operator==(const Function &lhs, const Function &rhs)
       -> bool {
     return lhs.my_arity == rhs.my_arity &&
            lhs.my_function.index() == rhs.my_function.index() &&
            std::addressof(*lhs.my_env) == std::addressof(*rhs.my_env);
   }
-  friend inline auto operator!=(const Callable &lhs, const Callable &rhs)
+  friend inline auto operator!=(const Function &lhs, const Function &rhs)
       -> bool {
     return !(lhs == rhs);
   }
 };
 
+class Class : public Evaluatable, public Callable {
+public:
+  string_type name;
+  std::vector<Function> methods;
+
+public:
+  Class(const string_type &name) : name(name) {}
+
+public:
+  auto arity() const -> unsigned override { return 0; }
+  auto call(interpreter &, args_t &&) -> eval_result_t override;
+
+public:
+  auto to_string(const auxilia::FormatPolicy &) const -> string_type override;
+
+private:
+  friend inline auto operator==(const Class &lhs, const Class &rhs) -> bool {
+    return lhs.name == rhs.name && lhs.methods == rhs.methods;
+  }
+  friend inline auto operator!=(const Class &lhs, const Class &rhs) -> bool {
+    return !(lhs == rhs);
+  }
+};
+class Instance : public Evaluatable {
+  using field_t = std::pair<string_type, eval_result_t>;
+  using fields_t =
+      std::unordered_map<string_type, eval_result_t>;
+
+private:
+  string_type class_name;
+  fields_t fields;
+
+public:
+  explicit Instance(const std::string_view class_name, fields_t &&fields = {})
+      : class_name(class_name), fields(std::move(fields)) {}
+
+public:
+  auto get_field(std::string_view) const
+      -> eval_result_t;
+  auto set_field(std::string_view, eval_result_t &&)
+      -> auxilia::Status;
+  auto to_string(const auxilia::FormatPolicy &) const -> string_type override;
+
+private:
+  friend auto operator==(const Instance &lhs, const Instance &rhs) {
+    return lhs.class_name == rhs.class_name;
+  }
+  friend auto operator!=(const Instance &lhs, const Instance &rhs) {
+    return !(lhs == rhs);
+  }
+};
 } // namespace accat::loxo::evaluation
-#endif // AC_LOXO_EVALUATABLE_HPP

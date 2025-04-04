@@ -53,6 +53,8 @@ private:
   auto visit_impl(const expression::Assignment &) -> eval_result_t override;
   auto visit_impl(const expression::Logical &) -> eval_result_t override;
   auto visit_impl(const expression::Call &) -> eval_result_t override;
+  auto visit_impl(const expression::Get &) -> eval_result_t override;
+  auto visit_impl(const expression::Set &) -> eval_result_t override;
   auto evaluate_impl(const expression::Expr &) -> eval_result_t override;
   auto get_result_impl() const -> eval_result_t override;
 
@@ -65,6 +67,7 @@ private:
   auto visit_impl(const statement::While &) -> eval_result_t override;
   auto visit_impl(const statement::For &) -> eval_result_t override;
   auto visit_impl(const statement::Function &) -> eval_result_t override;
+  auto visit_impl(const statement::Class &) -> eval_result_t override;
   auto visit_impl(const statement::Return &) -> eval_result_t override;
   auto execute_impl(const statement::Stmt &) -> eval_result_t override;
 

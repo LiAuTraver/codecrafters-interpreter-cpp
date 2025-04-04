@@ -41,8 +41,8 @@ public:
   }
 
 public:
-  virtual auto
-  to_string(const auxilia::FormatPolicy &) const -> string_type = 0;
+  virtual auto to_string(const auxilia::FormatPolicy &) const
+      -> string_type = 0;
 
 private:
   virtual expr_result_t accept_impl(const ExprVisitor &) const = 0;
@@ -57,8 +57,8 @@ private:
   virtual auto accept_impl(const ExprVisitor &) const -> expr_result_t override;
 
 public:
-  virtual auto
-  to_string(const auxilia::FormatPolicy &) const -> string_type override;
+  virtual auto to_string(const auxilia::FormatPolicy &) const
+      -> string_type override;
 
 public:
   token_t literal;
@@ -74,8 +74,8 @@ private:
   virtual auto accept_impl(const ExprVisitor &) const -> expr_result_t override;
 
 public:
-  virtual auto
-  to_string(const auxilia::FormatPolicy &) const -> string_type override;
+  virtual auto to_string(const auxilia::FormatPolicy &) const
+      -> string_type override;
 
 public:
   token_t op;
@@ -92,8 +92,8 @@ private:
   virtual auto accept_impl(const ExprVisitor &) const -> expr_result_t override;
 
 public:
-  virtual auto
-  to_string(const auxilia::FormatPolicy &) const -> string_type override;
+  virtual auto to_string(const auxilia::FormatPolicy &) const
+      -> string_type override;
 
 public:
   token_t op;
@@ -125,8 +125,8 @@ private:
   virtual auto accept_impl(const ExprVisitor &) const -> expr_result_t override;
 
 public:
-  virtual auto
-  to_string(const auxilia::FormatPolicy &) const -> string_type override;
+  virtual auto to_string(const auxilia::FormatPolicy &) const
+      -> string_type override;
 
 public:
   expr_ptr_t expr;
@@ -146,8 +146,8 @@ private:
   virtual auto accept_impl(const ExprVisitor &) const -> expr_result_t override;
 
 public:
-  virtual auto
-  to_string(const auxilia::FormatPolicy &) const -> string_type override;
+  virtual auto to_string(const auxilia::FormatPolicy &) const
+      -> string_type override;
 };
 /// @implements Expr
 class Logical : public Expr {
@@ -163,8 +163,8 @@ public:
 
 private:
 public:
-  virtual auto
-  to_string(const auxilia::FormatPolicy &) const -> string_type override;
+  virtual auto to_string(const auxilia::FormatPolicy &) const
+      -> string_type override;
   virtual auto accept_impl(const ExprVisitor &) const -> expr_result_t override;
 };
 class Call : public Expr {
@@ -181,6 +181,37 @@ private:
 public:
   auto to_string(const auxilia::FormatPolicy &) const -> string_type override;
   expr_result_t accept_impl(const ExprVisitor &) const override;
+};
+
+class Get : public Expr {
+public:
+  Get(expr_ptr_t &&, token_t &&);
+  virtual ~Get() override = default;
+
+public:
+  expr_ptr_t object;
+  token_t field;
+
+private:
+  auto accept_impl(const ExprVisitor &) const -> expr_result_t override;
+
+public:
+  auto to_string(const auxilia::FormatPolicy &) const -> string_type override;
+};
+
+class Set : public Expr {
+public:
+  Set(expr_ptr_t &&, token_t &&, expr_ptr_t &&);
+public:
+  expr_ptr_t object;
+  token_t field;
+  expr_ptr_t value;
+
+private:
+  auto accept_impl(const ExprVisitor &) const -> expr_result_t override;
+
+public:
+  auto to_string(const auxilia::FormatPolicy &) const -> string_type override;
 };
 
 } // namespace accat::loxo::expression

@@ -27,6 +27,8 @@ private:
   virtual eval_result_t visit_impl(const Assignment &) override;
   virtual eval_result_t visit_impl(const Logical &) override;
   virtual eval_result_t visit_impl(const Call &) override;
+  virtual eval_result_t visit_impl(const Get &) override;
+  virtual eval_result_t visit_impl(const Set &) override;
   virtual eval_result_t evaluate_impl(const Expr &) override;
 
 public:

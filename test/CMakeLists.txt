@@ -30,6 +30,7 @@ add_executable(loxo.test
   controlflow.test.cpp
   function.test.cpp
   scope.test.cpp
+  class.test.cpp
   ${TEST_SHARED_SOURCES}
 )
 target_link_libraries(loxo.test PRIVATE
@@ -42,3 +43,5 @@ target_link_libraries(loxo.test PRIVATE
 )
 
 gtest_discover_tests(loxo.test)
+
+add_folder(Tests)

@@ -13,3 +13,4 @@ target_link_libraries(demo PUBLIC
   fmt::fmt
   spdlog::spdlog
 )
+add_folder(Demos)

@@ -49,6 +49,8 @@ class Variable;
 class Assignment;
 class Logical;
 class Call;
+class Get;
+class Set;
 class IllegalExpr;
 
 class ExprVisitor;
@@ -63,6 +65,7 @@ class If;
 class While;
 class For;
 class Function;
+class Class;
 class Return;
 class IllegalStmt;
 
@@ -75,7 +78,9 @@ class String;
 class Value;
 class Boolean;
 class Nil;
-class Callable;
+class Function;
+class Class;
+class Instance;
 
 class ScopeAssoc;
 } // namespace evaluation
