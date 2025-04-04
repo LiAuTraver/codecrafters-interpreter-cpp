@@ -1,0 +1,12 @@
+class Spaceship {}
+var falcon = Spaceship();
+print falcon;
+
+// Creating multiple instances of the same class
+class Robot {}
+var r1 = Robot();
+var r2 = Robot();
+
+print "Created multiple robots:";
+print r1;
+print r2;

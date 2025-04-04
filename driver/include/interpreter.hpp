@@ -68,8 +68,9 @@ private:
   evaluation::Boolean is_true_value(const eval_result_t &) const;
   evaluation::Boolean is_deep_equal(const eval_result_t &,
                                     const eval_result_t &) const;
-  auto get_call_args(const expression::Call &expr) const
+  auto get_call_args(const expression::Call &) const
       -> auxilia::StatusOr<std::vector<variant_type>>;
+  auto get_function(const statement::Function&) -> evaluation::Function;
 
 private:
   virtual auto visit_impl(const statement::Variable &)

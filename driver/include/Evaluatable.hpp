@@ -8,6 +8,7 @@
 #include <memory>
 #include <random>
 #include <string_view>
+#include <unordered_map>
 #include <utility>
 #include <vector>
 #include <functional>
@@ -199,6 +200,10 @@ public:
 
 public:
   Function() = default;
+  Function(const Function &) = default;
+  Function &operator=(const Function &) = default;
+  Function(Function &&) noexcept;
+  Function &operator=(Function &&) noexcept;
   virtual ~Function() = default;
 
 private:
@@ -242,16 +247,20 @@ private:
 
 class Class : public Evaluatable, public Callable {
 public:
+  using methods_t = std::unordered_map<string_type, Function>;
   string_type name;
-  std::vector<Function> methods;
+  methods_t methods;
 
 public:
-  Class(const string_type &name) : name(name) {}
+  Class(const std::string_view name, methods_t &&methods = {})
+      : name(name), methods(methods) {}
 
 public:
   auto arity() const -> unsigned override { return 0; }
   auto call(interpreter &, args_t &&) -> eval_result_t override;
 
+public:
+  auto get_method(std::string_view) const -> auxilia::StatusOr<Function>;
 public:
   auto to_string(const auxilia::FormatPolicy &) const -> string_type override;
 

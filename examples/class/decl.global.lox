@@ -1,3 +1,6 @@
+class Spaceship {}
+print Spaceship;
+
 // Multiple class declarations with empty body
 class Robot {}
 class Wizard {}

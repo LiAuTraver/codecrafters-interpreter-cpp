@@ -1,0 +1,33 @@
+class Wizard {}
+class Dragon {}
+
+// Instantiating classes in a function should work
+fun createCharacters() {
+  var merlin = Wizard();
+  var smaug = Dragon();
+  print "Characters created in fantasy world:";
+  print merlin;
+  print smaug;
+  return merlin;
+}
+
+var mainCharacter = createCharacters();
+// An instance of a class should be truthy
+if (mainCharacter) {
+  print "The main character is:";
+  print mainCharacter;
+} else {
+  print "Failed to create a main character.";
+}
+
+class Superhero {}
+
+var count = 0;
+while (count < 3) {
+  var hero = Superhero();
+  print "Hero created:";
+  print hero;
+  count = count + 1;
+}
+
+print "All heroes created!";

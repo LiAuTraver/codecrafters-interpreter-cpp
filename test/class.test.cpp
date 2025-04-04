@@ -13,23 +13,18 @@ auto get_result(const auto &filepath) {
 }
 } // namespace
 
-TEST(class, decl_global1) {
-  const auto path = LOXO_ROOT_DIR R"(\examples\class\decl.global1.lox)";
-  auto [callback, str] = get_result(path);
-  EXPECT_EQ(str, "Spaceship\n");
-  EXPECT_EQ(callback, 0);
-}
-TEST(class, decl_global2) {
-  const auto path = LOXO_ROOT_DIR R"(\examples\class\decl.global2.lox)";
+TEST(class, decl_global) {
+  const auto path = LOXO_ROOT_DIR R"(\examples\class\decl.global.lox)";
   auto [callback, str] = get_result(path);
   EXPECT_EQ(str,
+            "Spaceship\n"
             "Robot\n"
             "Wizard\n"
             "Both classes successfully printed\n");
   EXPECT_EQ(callback, 0);
 }
 
-TEST(class, decl_local){
+TEST(class, decl_local) {
   const auto path = LOXO_ROOT_DIR R"(\examples\class\decl.local.lox)";
   auto [callback, str] = get_result(path);
   EXPECT_EQ(str,
@@ -47,5 +42,35 @@ TEST(class, decl_func) {
             "Class declared inside function\n"
             "Superhero\n"
             "Function called successfully\n");
+  EXPECT_EQ(callback, 0);
+}
+
+TEST(class, instance_global) {
+  const auto path = LOXO_ROOT_DIR R"(\examples\class\instance.global.lox)";
+  auto [callback, str] = get_result(path);
+  EXPECT_EQ(str,
+            "Spaceship instance\n"
+            "Created multiple robots:\n"
+            "Robot instance\n"
+            "Robot instance\n");
+  EXPECT_EQ(callback, 0);
+}
+
+TEST(class, instance_local) {
+  const auto path = LOXO_ROOT_DIR R"(\examples\class\instance.local.lox)";
+  auto [callback, str] = get_result(path);
+  EXPECT_EQ(str,
+            "Characters created in fantasy world:\n"
+            "Wizard instance\n"
+            "Dragon instance\n"
+            "The main character is:\n"
+            "Wizard instance\n"
+            "Hero created:\n"
+            "Superhero instance\n"
+            "Hero created:\n"
+            "Superhero instance\n"
+            "Hero created:\n"
+            "Superhero instance\n"
+            "All heroes created!\n");
   EXPECT_EQ(callback, 0);
 }

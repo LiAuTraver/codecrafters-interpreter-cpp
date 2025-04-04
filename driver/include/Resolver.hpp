@@ -23,7 +23,7 @@ private:
   enum class ScopeType : std::uint8_t {
     kNone = 0, // kNone
     kFunction,
-    kClass,
+    kClassMethod,
   };
 
 private:

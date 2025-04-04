@@ -1,9 +1,14 @@
-// Class declaration inside function should work
-fun foo() {
-  class Superhero {}
-  print "Class declared inside function";
-  print Superhero;
+class PrintHello {
+  printHello() {
+    print "Hello, world!";
+  }
 }
 
-foo();
-print "Function called successfully";
+var p = PrintHello();
+var q = PrintHello();
+q = nil;
+if(p == q){
+  print "p and q are the same object";
+} else {
+  print "p and q are different objects";
+}

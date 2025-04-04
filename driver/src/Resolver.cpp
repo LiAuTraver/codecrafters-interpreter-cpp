@@ -34,7 +34,7 @@ struct Resolver::scope_guard {
   ScopeType enclosing_scope;
 };
 
-Resolver::Resolver(loxo::interpreter &interpreter) : interpreter(interpreter) {}
+Resolver::Resolver(class ::accat::loxo::interpreter &interpreter) : interpreter(interpreter) {}
 
 auto Resolver::resolve(
     const std::span<const std::shared_ptr<statement::Stmt>> stmts) const
@@ -198,7 +198,12 @@ auto Resolver::visit_impl(const statement::Function &stmt) -> eval_result_t {
 }
 auto Resolver::visit_impl(const statement::Class &stmt) -> eval_result_t {
   define(stmt.name);
-  return {};
+
+  Status res;
+  std::ranges::for_each(stmt.methods, [this, &res](const auto &method) {
+    res &= resolve(method, ScopeType::kClassMethod);
+  });
+  return res;
 }
 auto Resolver::visit_impl(const statement::Return &stmt) -> eval_result_t {
   if (this->current_scope == ScopeType::kNone)

@@ -13,6 +13,7 @@
 #include <accat/auxilia/auxilia.hpp>
 
 #include "Token.hpp"
+#include "accat/auxilia/details/format.hpp"
 #include "details/loxo_fwd.hpp"
 #include "Environment.hpp"
 #include "Evaluatable.hpp"
@@ -177,6 +178,23 @@ auto interpreter::visit_impl(const statement::For &stmt) -> eval_result_t {
   }
   return {};
 }
+auto interpreter::get_function(const statement::Function &stmtFunc)
+    -> evaluation::Function {
+  // clang-format off
+  return evaluation::Function::create_custom(
+    stmtFunc.parameters.size(),
+    {
+      .name = stmtFunc.name.to_string(kDetailed),
+      .parameters = stmtFunc.parameters
+                    | std::ranges::views::transform([&](const auto &param) {
+                        return param.to_string(kDetailed);
+                      })
+                    | std::ranges::to<std::vector<string_type>>(),
+      .body = stmtFunc.body.statements
+    },
+    this->env);
+  // clang-format on
+}
 auto interpreter::visit_impl(const statement::Function &stmt) -> eval_result_t {
   // TODO: function overloading
   if (auto res = env->get(stmt.name.to_string(kDetailed)); !res.empty()) {
@@ -197,35 +215,23 @@ auto interpreter::visit_impl(const statement::Function &stmt) -> eval_result_t {
     }
   }
 
-  dbg(info, "func name: {}", stmt.name.to_string(kDetailed))
+  dbg(trace, "func name: {}", stmt.name.to_string(kDetailed))
 
-  // clang-format off
-  auto callable = evaluation::Function::create_custom(
-      stmt.parameters.size(),
-      {
-        .name = stmt.name.to_string(kDetailed),
-        .parameters = stmt.parameters
-                      | std::ranges::views::transform([&](const auto &param) {
-                          return param.to_string(kDetailed);
-                        })
-                      | std::ranges::to<std::vector<string_type>>(),
-        .body = stmt.body.statements
-      },
-      this->env);
   return env->add(
-      stmt.name.to_string(kDetailed),
-      callable,
-      stmt.name.line);
-  // clang-format on
+      stmt.name.to_string(kDetailed), get_function(stmt), stmt.name.line);
 }
 auto interpreter::visit_impl(const statement::Class &stmt) -> eval_result_t {
   if (auto res = env->find(stmt.name.to_string(kDetailed)); res) {
     TODO(...)
   }
-  // TODO: methods
-  return env->add(stmt.name.to_string(kDetailed),
-                  evaluation::Class{stmt.name.to_string(kDetailed)},
-                  stmt.name.line);
+  evaluation::Class::methods_t methods;
+  std::ranges::for_each(stmt.methods, [this, &methods](auto &&method) {
+    methods.emplace(method.name.to_string(kDetailed), get_function(method));
+  });
+  return env->add(
+      stmt.name.to_string(kDetailed),
+      evaluation::Class{stmt.name.to_string(kDetailed), std::move(methods)},
+      stmt.name.line);
 }
 auto interpreter::visit_impl(const statement::Expression &stmt)
     -> eval_result_t {
@@ -479,14 +485,7 @@ auto interpreter::visit_impl(const expression::Call &expr) -> eval_result_t {
   // `result` would change in `get_call_args`, so we need to save it.
   const auto callee = expr.callee;
   evaluation::Callable *callable;
-  // if (res->is_type<evaluation::Function>()) {
-  //   callable = &res->get<evaluation::Function>();
-  // } else if (res->is_type<evaluation::Class>()) {
-  //   callable = &res->get<evaluation::Class>();
-  // } else {
-  //   return {auxilia::InvalidArgumentError(
-  //       "Can only call functions and classes.\n[line {}]", expr.paren.line)};
-  // }
+  // a bit less-readable, may change to a more readable version later.
   if (!((callable = res->get_if<evaluation::Function>())))
     if (!((callable = res->get_if<evaluation::Class>())))
       return {auxilia::InvalidArgumentError(
@@ -497,7 +496,6 @@ auto interpreter::visit_impl(const expression::Call &expr) -> eval_result_t {
     return maybe_args;
 
   auto args = *std::move(maybe_args);
-
   if (args.size() == callable->arity())
     // clear `Returning` status has already been implemented in `call` method.
     // just return here.

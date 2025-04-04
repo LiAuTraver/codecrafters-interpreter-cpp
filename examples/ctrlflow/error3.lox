@@ -1,2 +1,2 @@
-// Invalid condition for condition, comment here!
+// Invalid condition for condition
 for (var a = 1; {}; a = a + 1) {}

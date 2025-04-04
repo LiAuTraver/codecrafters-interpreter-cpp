@@ -1,6 +1,5 @@
 #include <algorithm>
 #include <cmath>
-#include <accat/auxilia/auxilia.hpp>
 #include <memory>
 #include <utility>
 
@@ -9,6 +8,7 @@
 #include "Evaluatable.hpp"
 #include "Environment.hpp"
 #include "interpreter.hpp"
+#include <accat/auxilia/auxilia.hpp>
 
 #include <memory>
 
@@ -229,6 +229,19 @@ auto Number::to_string(const auxilia::FormatPolicy &format_policy) const
   return auxilia::format("{}", value);
 }
 
+Function::Function(Function &&that) noexcept {
+  my_arity = that.my_arity;
+  my_function = std::move(that.my_function);
+  my_env = std::move(that.my_env);
+}
+Function &Function::operator=(Function &&that) noexcept {
+  if (this == &that)
+    return *this;
+  this->my_arity = that.my_arity;
+  this->my_function = std::move(that.my_function);
+  this->my_env = std::move(that.my_env);
+  return *this;
+}
 Function::Function(const unsigned argc,
                    native_function_t &&func,
                    const env_ptr_t &env) {
@@ -317,21 +330,31 @@ auto Function::to_string(const auxilia::FormatPolicy &) const -> string_type {
 auto Class::call(interpreter &interpreter, args_t &&variants) -> eval_result_t {
   return {Instance{this->name}};
 }
+auto Class::get_method(const std::string_view name) const
+    -> auxilia::StatusOr<Function> {
+  if (const auto it = methods.find({name.begin(), name.end()});
+      it != methods.end())
+    return {it->second};
+
+  return auxilia::NotFoundError(
+      "Undefined property '{}'.\n[line {}]", name, get_line());
+}
 auto Class::to_string(const auxilia::FormatPolicy &) const -> string_type {
   return name;
 }
-auto Instance::get_field(const std::string_view name) const
-    -> eval_result_t {
+auto Instance::get_field(const std::string_view name) const -> eval_result_t {
   if (const auto it = fields.find({name.begin(), name.end()});
       it != fields.end())
     return it->second;
-
+  // if field not found, find method
+  // TODO
+  // my_calss.get_methods
   return auxilia::NotFoundError(
       "Undefined property '{}'.\n[line {}]", name, get_line());
 }
 auto Instance::set_field(std::string_view name, eval_result_t &&new_val)
     -> auxilia::Status {
-  if (auto it = fields.find({name.begin(),name.end()}); it != fields.end()){
+  if (auto it = fields.find({name.begin(), name.end()}); it != fields.end()) {
     it->second = std::move(new_val);
     return {};
   }
