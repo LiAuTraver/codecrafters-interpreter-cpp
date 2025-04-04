@@ -66,7 +66,12 @@ private:
 private:
   auto get_args() -> std::vector<expr_ptr_t>;
   auto get_params() -> std::vector<token_t>;
+  auto get_methods() -> std::vector<statement::Function>;
   auto get_stmts() -> stmt_ptrs_t;
+  /// @remark used in @link while_stmt @endlink and @link if_stmt @endlink
+  auto get_condition() -> expr_ptr_t;
+  /// @remark used in @link function_decl @endlink and @link get_methods @endlink
+  auto function_decl_impl() -> statement::Function;
 
 private:
   auto next_declaration() -> stmt_ptr_t;
@@ -78,6 +83,7 @@ private:
   auto while_stmt() -> stmt_ptr_t;
   auto for_stmt() -> stmt_ptr_t;
   auto return_stmt() -> stmt_ptr_t;
+  auto class_stmt() -> stmt_ptr_t;
   auto var_decl() -> stmt_ptr_t;
   auto function_decl() -> stmt_ptr_t;
 
@@ -86,10 +92,6 @@ private:
   /// FIXME: 2. add a field to the parser to track the error, not returns a
   ///         shared_ptr
   auto synchronize(const parse_error &) -> auxilia::Status;
-
-private:
-  /// @remark used in @link while_stmt @endlink and @link if_stmt @endlink
-  auto get_condition() -> expr_ptr_t;
 
 private:
   template <typename... Args>

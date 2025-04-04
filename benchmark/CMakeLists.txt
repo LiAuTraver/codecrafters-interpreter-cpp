@@ -42,3 +42,4 @@ else()
   list(APPEND CMAKE_CXX_FLAGS_RELEASE "   -O3")
 endif()
 
+add_folder(Benchmarks)

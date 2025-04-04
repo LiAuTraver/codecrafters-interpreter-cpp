@@ -88,6 +88,12 @@ auto Function::to_string(const FormatPolicy &format_policy) const
 auto Function::accept_impl(const StmtVisitor &visitor) const -> stmt_result_t {
   return visitor.visit(*this);
 }
+auto Class::to_string(const auxilia::FormatPolicy &format_policy) const -> string_type {
+  return "class "s.append(this->name.to_string(format_policy)).append(" { ... }");
+}
+auto Class::accept_impl(const StmtVisitor &visitor) const -> stmt_result_t {
+  return visitor.visit(*this);
+}
 auto Return::to_string(const FormatPolicy &format_policy) const
     -> string_type {
   return "return "s.append(this->value->to_string(format_policy));

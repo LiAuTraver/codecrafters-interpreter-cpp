@@ -8,26 +8,29 @@
 
 #include <accat/auxilia/auxilia.hpp>
 
-#include "accat/auxilia/details/Status.hpp"
-#include "accat/auxilia/details/macros.hpp"
 #include "details/IVisitor.hpp"
 #include "details/loxo_fwd.hpp"
 #include "Environment.hpp"
 #include "Evaluatable.hpp"
 
 namespace accat::loxo {
+using auxilia::Status;
+using variant_type = IVisitor::variant_type;
+using Env = Environment;
+using auxilia::FormatPolicy;
+using enum auxilia::FormatPolicy;
 
-bool Environment::isGlobalScopeInited = false;
+bool Env::isGlobalScopeInited = false;
 
-Environment::Environment(const std::shared_ptr<self_type> &enclosing)
+Env::Environment(const std::shared_ptr<self_type> &enclosing)
     : parent(enclosing) {}
 
-Environment::Environment(Environment &&that) noexcept {
+Env::Environment(Environment &&that) noexcept {
   current = std::move(that.current);
   parent = std::move(that.parent);
 }
 
-auto Environment::operator=(Environment &&that) noexcept -> Environment & {
+auto Env::operator=(Env &&that) noexcept -> Env & {
   if (this == &that) {
     return *this;
   }
@@ -35,56 +38,58 @@ auto Environment::operator=(Environment &&that) noexcept -> Environment & {
   this->parent = std::move(that.parent);
   return *this;
 }
-
-auto Environment::Global() -> std::shared_ptr<Environment> {
-  if (isGlobalScopeInited)
-    return global_env;
+auto Env::initGlobalEnv() -> std::shared_ptr<Env> {
   isGlobalScopeInited = true;
-  global_env = std::make_shared<Environment>();
+  global_env = std::make_shared<Env>();
   global_env
-      ->add(
-          "clock"s,
-          evaluation::Callable::create_native(
-              0,
-              [](interpreter &, evaluation::Callable::args_t &) {
-                dbg(trace, "clock() called")
-                return IVisitor::variant_type{
-                    evaluation::Number{static_cast<long double>(
-                        std::chrono::duration_cast<std::chrono::seconds>(
-                            std::chrono::system_clock::now().time_since_epoch())
-                            .count())}};
-              },
-              nullptr))
+      ->add("clock"s,
+            evaluation::Function::create_native(
+                0,
+                [](interpreter &,
+                   evaluation::Function::args_t &) -> variant_type {
+                  dbg(trace, "clock() called")
+                  return {evaluation::Number{static_cast<long double>(
+                      std::chrono::duration_cast<std::chrono::seconds>(
+                          std::chrono::system_clock::now().time_since_epoch())
+                          .count())}};
+                },
+                nullptr))
       .ignore_error();
   global_env
       ->add("about",
-            evaluation::Callable::create_native(
+            evaluation::Function::create_native(
                 0,
-                [](interpreter &, evaluation::Callable::args_t &) {
-                  return IVisitor::variant_type{evaluation::String{
-                      "lox programming language, based on "
-                      "book Crafting Interpreters's lox."sv}};
+                [](interpreter &,
+                   evaluation::Function::args_t &) -> variant_type {
+                  return {
+                      evaluation::String{"lox programming language, based on "
+                                         "book Crafting Interpreters."sv}};
                 },
                 nullptr))
       .ignore_error();
   return global_env;
 }
-
-auto Environment::Scope(const std::shared_ptr<self_type> &enclosing)
-    -> std::shared_ptr<self_type> {
-  return std::shared_ptr<Environment>(new Environment(enclosing));
+auto Env::Global() -> std::shared_ptr<Env> {
+  if (isGlobalScopeInited)
+    return global_env;
+  return initGlobalEnv();
 }
 
-auto Environment::add(const string_view_type name,
-                      const IVisitor::variant_type &value,
-                      const uint_least32_t line) -> auxilia::Status {
+auto Env::Scope(const std::shared_ptr<self_type> &enclosing)
+    -> std::shared_ptr<self_type> {
+  return std::shared_ptr<Env>(new Env(enclosing));
+}
+
+auto Env::add(const string_view_type name,
+              const variant_type &value,
+              const uint_least32_t line) -> Status {
   return current.add(name, value, line);
 }
 
-auto Environment::reassign(const string_view_type name,
-                           const IVisitor::variant_type &value,
-                           const uint_least32_t line,
-                           bool currentScopeOnly) -> auxilia::Status {
+auto Env::reassign(const string_view_type name,
+                   const variant_type &value,
+                   const uint_least32_t line,
+                   bool currentScopeOnly) -> Status {
   if (const auto it = find(name, currentScopeOnly)) {
     (*it)->second.first = value;
     (*it)->second.second = line;
@@ -93,21 +98,20 @@ auto Environment::reassign(const string_view_type name,
   return auxilia::InvalidArgumentError("variable not defined");
 }
 
-auto Environment::get(const string_view_type name,
-                      const bool currentScopeOnly) const
-    -> IVisitor::variant_type {
+auto Env::get(const string_view_type name, const bool currentScopeOnly) const
+    -> variant_type {
   if (const auto it = find(name, currentScopeOnly))
     return {(*it)->second.first};
 
-  return {auxilia::Monostate{}};
+  return {};
 }
 
-auto Environment::copy() const -> std::shared_ptr<self_type> {
+auto Env::copy() const -> std::shared_ptr<self_type> {
   // return std::make_shared<self_type>(*this);
   TODO("^^^ failed to compile")
 }
-auto Environment::ancestor(const size_t n) const -> std::shared_ptr<self_type> {
-  auto raw_env = const_cast<Environment *>(this);
+auto Env::ancestor(const size_t n) const -> std::shared_ptr<self_type> {
+  auto raw_env = const_cast<Env *>(this);
   for (auto _ : std::views::iota(0ull, n)) {
     if (!raw_env or !raw_env->parent)
       return nullptr;
@@ -115,36 +119,32 @@ auto Environment::ancestor(const size_t n) const -> std::shared_ptr<self_type> {
   }
   return raw_env->shared_from_this();
 }
-auto Environment::get_at_depth(const size_t n,
-                               const string_view_type name) const
-    -> IVisitor::variant_type {
+auto Env::get_at_depth(const size_t n, const string_view_type name) const
+    -> variant_type {
   auto myenv = this->ancestor(n);
   contract_assert(myenv, "ancestor is null")
   const auto it = myenv->find(name, true);
   contract_assert(it, "variable not found")
   return (*it)->second.first;
 }
-auto Environment::reassign_at_depth(const size_t n,
-                                    const string_view_type name,
-                                    const IVisitor::variant_type &value,
-                                    const uint_least32_t line)
-    -> auxilia::Status {
+auto Env::reassign_at_depth(const size_t n,
+                            const string_view_type name,
+                            const variant_type &value,
+                            const uint_least32_t line) -> Status {
   precondition(this->ancestor(n), "ancestor is null")
   return this->ancestor(n)->reassign(name, value, line, true);
 }
 
-auto Environment::to_string(const auxilia::FormatPolicy &format_policy) const
-    -> string_type {
+auto Env::to_string(const FormatPolicy &format_policy) const -> string_type {
   string_type result;
-  result += current.to_string(auxilia::FormatPolicy::kDetailed);
+  result += current.to_string(kDetailed);
   if (const auto enclosing = this->parent.get()) {
-    result += enclosing->to_string(auxilia::FormatPolicy::kDetailed);
+    result += enclosing->to_string(kDetailed);
   }
   return result;
 }
 
-auto Environment::find(const string_view_type name,
-                       const bool currentScopeOnly) const
+auto Env::find(const string_view_type name, const bool currentScopeOnly) const
     -> std::optional<self_type::scope_env_t::associations_t::const_iterator> {
   if (auto maybe_it = current.find(name)) {
     dbg_block
@@ -168,7 +168,7 @@ auto Environment::find(const string_view_type name,
 
   return std::nullopt;
 }
-auto Environment::find(const string_view_type name, const bool currentScopeOnly)
+auto Env::find(const string_view_type name, const bool currentScopeOnly)
     -> std::optional<self_type::scope_env_t::associations_t::iterator> {
   if (auto maybe_it = current.find(name)) {
     dbg_block

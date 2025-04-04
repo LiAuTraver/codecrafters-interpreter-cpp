@@ -13,7 +13,9 @@ public:
                                         loxo::evaluation::Nil,
                                         loxo::evaluation::Number,
                                         loxo::evaluation::String,
-                                        loxo::evaluation::Callable>;
+                                        loxo::evaluation::Function,
+                                        loxo::evaluation::Class,
+                                        loxo::evaluation::Instance>;
   using eval_result_t = auxilia::StatusOr<variant_type>;
   using string_view_type = auxilia::string_view;
 };

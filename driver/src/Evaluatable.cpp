@@ -10,6 +10,8 @@
 #include "Environment.hpp"
 #include "interpreter.hpp"
 
+#include <memory>
+
 namespace accat::loxo::evaluation {
 using auxilia::match;
 
@@ -45,10 +47,6 @@ Boolean &Boolean::operator=(Boolean &&value) noexcept {
   return *this;
 }
 
-auto Boolean::operator==(const Boolean &rhs) const -> Boolean {
-  return Boolean{value == rhs.value, this->get_line()};
-}
-
 auto Boolean::make_true(const uint_least32_t line) -> Boolean {
   return Boolean{true, line};
 }
@@ -57,21 +55,16 @@ auto Boolean::make_false(const uint_least32_t line) -> Boolean {
   return Boolean{false, line};
 }
 
-bool Boolean::is_true() const noexcept {
-  contract_assert(value.has_value(), "value is not set")
-  return value.value();
-}
+bool Boolean::is_true() const noexcept { return value; }
 
 auto Boolean::to_string(const auxilia::FormatPolicy &format_policy) const
     -> string_type {
-  contract_assert(value.has_value(), "value is not set")
-  return value.value() ? "true"s : "false"s;
+  return value ? "true" : "false";
 }
 
 auto Boolean::to_string_view(const auxilia::FormatPolicy &format_policy) const
     -> string_view_type {
-  contract_assert(value.has_value(), "value is not set")
-  return value.value() ? "true"sv : "false"sv;
+  return value ? "true"sv : "false"sv;
 }
 
 Nil &Nil::operator=(const Nil &that) {
@@ -142,16 +135,6 @@ Boolean String::operator!=(const String &rhs) const {
 }
 
 String::operator Boolean() const { return True; }
-
-auto String::to_string(const auxilia::FormatPolicy &format_policy) const
-    -> string_type {
-  return value;
-}
-
-auto String::to_string_view(const auxilia::FormatPolicy &format_policy) const
-    -> string_view_type {
-  return value;
-}
 
 Number::Number(const long double value, const uint_least32_t line)
     : Value(line), value(value) {}
@@ -246,7 +229,7 @@ auto Number::to_string(const auxilia::FormatPolicy &format_policy) const
   return auxilia::format("{}", value);
 }
 
-Callable::Callable(const unsigned argc,
+Function::Function(const unsigned argc,
                    native_function_t &&func,
                    const env_ptr_t &env) {
   my_arity = argc;
@@ -254,7 +237,7 @@ Callable::Callable(const unsigned argc,
   my_env = env;
 }
 
-Callable::Callable(const unsigned argc,
+Function::Function(const unsigned argc,
                    custom_function_t &&block,
                    const env_ptr_t &env) {
   my_arity = argc;
@@ -262,68 +245,67 @@ Callable::Callable(const unsigned argc,
   my_env = env;
 }
 
-auto Callable::create_custom(unsigned argc,
+auto Function::create_custom(unsigned argc,
                              custom_function_t &&func,
-                             const env_ptr_t &env) -> Callable {
+                             const env_ptr_t &env) -> Function {
   return {argc, std::move(func), env};
 }
 
-auto Callable::create_native(unsigned argc,
+auto Function::create_native(unsigned argc,
                              native_function_t &&func,
-                             const env_ptr_t &env) -> Callable {
+                             const env_ptr_t &env) -> Function {
   return {argc, std::move(func), env};
 }
 
-auto Callable::call(interpreter &interpreter, args_t &&args) const
-    -> eval_result_t {
+auto Function::call(interpreter &interpreter, args_t &&args) -> eval_result_t {
   precondition(this->arity() == args.size(),
                "arity mismatch; should check it before calling")
-  return my_function.visit(
-      match{[&](const native_function_t &native_function) -> eval_result_t {
-              return {native_function.operator()(interpreter, args)};
-            },
-            [&](const custom_function_t &custom_function) -> eval_result_t {
-              auto saved_env = interpreter.get_current_env();
+  return my_function.visit(match(
+      [&](const native_function_t &native_function) -> eval_result_t {
+        return {native_function.operator()(interpreter, args)};
+      },
+      [&](const custom_function_t &custom_function) -> eval_result_t {
+        auto saved_env = interpreter.get_current_env();
 
-              auto scoped_env = Environment::Scope(this->my_env);
+        auto scoped_env = Environment::Scope(this->my_env);
 
-              for (size_t i = 0; i < custom_function.parameters.size(); ++i) {
-                if (auto res =
-                        scoped_env->add(custom_function.parameters[i], args[i]);
-                    !res.ok()) {
-                  return {res};
-                }
-              }
+        for (size_t i = 0; i < custom_function.parameters.size(); ++i) {
+          if (auto res =
+                  scoped_env->add(custom_function.parameters[i], args[i]);
+              !res.ok()) {
+            return {res};
+          }
+        }
 
-              dbg(info, "entering a function...")
-              interpreter.set_env(scoped_env);
+        dbg(info, "entering a function...")
+        interpreter.set_env(scoped_env);
 
-              defer { interpreter.set_env(saved_env); };
+        defer { interpreter.set_env(saved_env); };
 
-              for (const auto &index : custom_function.body) {
-                if (auto res = interpreter.execute(*index); !res) {
-                  if (res.is_return()) {
-                    auto my_result = interpreter.get_result();
-                    // FIXME: i my logic was completely gone here: `last_expr`
-                    //              itself was a mistake!
-                    dbg(info, "returning: {}", my_result->underlying_string())
-                    return my_result;
-                  }
-                  // else, error, return as is
-                  return res;
-                }
-              }
+        for (const auto &index : custom_function.body) {
+          if (auto res = interpreter.execute(*index); !res) {
+            if (res.is_return()) {
+              auto my_result = interpreter.get_result();
+              // FIXME: i my logic was completely gone here: `last_expr`
+              //              itself was a mistake!
+              dbg(info, "returning: {}", my_result->underlying_string())
+              return my_result;
+            }
+            // else, error, return as is
+            return res;
+          }
+        }
 
-              dbg(info, "void function, returning nil.")
-              return {{NilValue}};
-            },
-            [](const auto &) -> eval_result_t {
-              dbg_break
-              return {auxilia::NotFoundError("no function to call")};
-            }});
+        dbg(info, "void function, returning nil.")
+        return {{NilValue}};
+      },
+      [](const auto &) -> eval_result_t {
+        dbg_break
+        return {auxilia::NotFoundError("no function to call")};
+      }));
 }
 
-auto Callable::to_string(const auxilia::FormatPolicy &) const -> string_type {
+auto Function::to_string(const auxilia::FormatPolicy &) const -> string_type {
   return my_function.visit(match{
       [](const native_function_t &) { return "<native fn>"s; },
       [](const custom_function_t &f) {
@@ -331,5 +313,32 @@ auto Callable::to_string(const auxilia::FormatPolicy &) const -> string_type {
       },
       [](const auto &) { return "<unknown fn>"s; },
   });
+}
+auto Class::call(interpreter &interpreter, args_t &&variants) -> eval_result_t {
+  return {Instance{this->name}};
+}
+auto Class::to_string(const auxilia::FormatPolicy &) const -> string_type {
+  return name;
+}
+auto Instance::get_field(const std::string_view name) const
+    -> eval_result_t {
+  if (const auto it = fields.find({name.begin(), name.end()});
+      it != fields.end())
+    return it->second;
+
+  return auxilia::NotFoundError(
+      "Undefined property '{}'.\n[line {}]", name, get_line());
+}
+auto Instance::set_field(std::string_view name, eval_result_t &&new_val)
+    -> auxilia::Status {
+  if (auto it = fields.find({name.begin(),name.end()}); it != fields.end()){
+    it->second = std::move(new_val);
+    return {};
+  }
+  return {auxilia::NotFoundError(
+      "Undefined property '{}'.\n[line {}]", name, get_line())};
+}
+auto Instance::to_string(const auxilia::FormatPolicy &) const -> string_type {
+  return class_name + " instance";
 }
 } // namespace accat::loxo::evaluation

@@ -1,6 +1,6 @@
 # Lox Interpreter written in C++
 
-> my exercise for codecrafters' online judge repo see [here](https://github.com/LiAuTraver/codecrafters-interpreter-cpp); this is a more detailed version of my exercise's codebase.
+> my exercise for codecrafters' online judge repo see [here](https://github.com/LiAuTraver/codecrafters-interpreter-cpp); this is a more detailed version of my exercise's [codebase](https://github.com/LiAuTraver/loxo).
 
 > from [Crafting Interpreters](http://www.craftinginterpreters.com/appendix-i.html)
 
@@ -37,7 +37,7 @@ interpreter tokenize <source>
 interpreter parse <source>
 interpreter evaluate <source>
 interpreter run <source>
-# repl was on the way... but not in a forseeable future...
+# repl was on the way, but not in a forseeable future...
 ```
 
 ## Grammar
@@ -51,10 +51,12 @@ program        → declaration* EOF ;
 ```cpp
 declaration    -> varDecl
                 | statement
-                | funcDecl ;
+                | funcDecl 
+                | classDecl ;
 
 varDecl        -> "var" IDENTIFIER ( "=" expression )? ";" ;
-funcDecl   -> "fun" function ;  
+funcDecl   -> "fun" function ;
+classDecl  -> "class" IDENTIFIER ( "{" function* "}" )? ;  
 ```
 
 ### Statement

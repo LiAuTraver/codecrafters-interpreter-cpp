@@ -180,7 +180,7 @@ auto interpreter::visit_impl(const statement::For &stmt) -> eval_result_t {
 auto interpreter::visit_impl(const statement::Function &stmt) -> eval_result_t {
   // TODO: function overloading
   if (auto res = env->get(stmt.name.to_string(kDetailed)); !res.empty()) {
-    if (!res.is_type<evaluation::Callable>()) {
+    if (!res.is_type<evaluation::Function>()) {
       dbg(error,
           "bad function definition: {} is not a function",
           stmt.name.to_string(kDefault))
@@ -188,7 +188,7 @@ auto interpreter::visit_impl(const statement::Function &stmt) -> eval_result_t {
     }
     // if arity is same, warn and overwrite the function;
     // if arity is different, just as overloading.
-    auto callable = res.get<evaluation::Callable>();
+    auto callable = res.get<evaluation::Function>();
     if (callable.arity() == stmt.parameters.size()) {
       dbg(warn, "function {} already defined", stmt.name.to_string(kDetailed))
     } else {
@@ -200,7 +200,7 @@ auto interpreter::visit_impl(const statement::Function &stmt) -> eval_result_t {
   dbg(info, "func name: {}", stmt.name.to_string(kDetailed))
 
   // clang-format off
-  auto callable = evaluation::Callable::create_custom(
+  auto callable = evaluation::Function::create_custom(
       stmt.parameters.size(),
       {
         .name = stmt.name.to_string(kDetailed),
@@ -217,6 +217,15 @@ auto interpreter::visit_impl(const statement::Function &stmt) -> eval_result_t {
       callable,
       stmt.name.line);
   // clang-format on
+}
+auto interpreter::visit_impl(const statement::Class &stmt) -> eval_result_t {
+  if (auto res = env->find(stmt.name.to_string(kDetailed)); res) {
+    TODO(...)
+  }
+  // TODO: methods
+  return env->add(stmt.name.to_string(kDetailed),
+                  evaluation::Class{stmt.name.to_string(kDetailed)},
+                  stmt.name.line);
 }
 auto interpreter::visit_impl(const statement::Expression &stmt)
     -> eval_result_t {
@@ -469,33 +478,68 @@ auto interpreter::visit_impl(const expression::Call &expr) -> eval_result_t {
 
   // `result` would change in `get_call_args`, so we need to save it.
   const auto callee = expr.callee;
-  if (!res->is_type<evaluation::Callable>()) {
-    dbg(error,
-        "bad function call: {} is not a function",
-        callee->to_string(kDefault))
-    return {auxilia::NotFoundError(
-        "Can only call functions and classes.\n[line {}]", expr.paren.line)};
-  }
+  evaluation::Callable *callable;
+  // if (res->is_type<evaluation::Function>()) {
+  //   callable = &res->get<evaluation::Function>();
+  // } else if (res->is_type<evaluation::Class>()) {
+  //   callable = &res->get<evaluation::Class>();
+  // } else {
+  //   return {auxilia::InvalidArgumentError(
+  //       "Can only call functions and classes.\n[line {}]", expr.paren.line)};
+  // }
+  if (!((callable = res->get_if<evaluation::Function>())))
+    if (!((callable = res->get_if<evaluation::Class>())))
+      return {auxilia::InvalidArgumentError(
+          "Can only call functions and classes.\n[line {}]", expr.paren.line)};
 
-  auto callable = res->get<evaluation::Callable>();
   auto maybe_args = get_call_args(expr);
-
   if (!maybe_args)
-    return {maybe_args.as_status()};
+    return maybe_args;
+
   auto args = *std::move(maybe_args);
 
-  if (args.size() == callable.arity())
+  if (args.size() == callable->arity())
     // clear `Returning` status has already been implemented in `call` method.
     // just return here.
-    return callable.call(*this, std::move(args));
+    return callable->call(*this, std::move(args));
 
   return {auxilia::InvalidArgumentError(
       "Too {} arguments to call function '{}': "
       "expected {} but got {}",
-      args.size() > callable.arity() ? "many" : "few",
+      args.size() > callable->arity() ? "many" : "few",
       callee->to_string(kDefault),
-      callable.arity(),
+      callable->arity(),
       args.size())};
+}
+
+auto interpreter::visit_impl(const expression::Get &expr) -> eval_result_t {
+  auto res = evaluate(*expr.object);
+  if (!res)
+    return res;
+
+  if (!res->is_type<evaluation::Instance>()) {
+    return {auxilia::InvalidArgumentError(
+        "Only instances have fields.\n[line {}]", expr.field.line)};
+  }
+  return {res->get<evaluation::Instance>().get_field(
+      expr.field.to_string(kDetailed))};
+}
+auto interpreter::visit_impl(const expression::Set &expr) -> eval_result_t {
+  auto res = evaluate(*expr.object);
+  if (!res)
+    return res;
+
+  if (!res->is_type<evaluation::Instance>()) {
+    return {auxilia::InvalidArgumentError(
+        "Only instances have properties.\n[line {}]", expr.field.line)};
+  }
+
+  auto maybe_value = evaluate(*expr.value);
+  if (!maybe_value)
+    return maybe_value;
+
+  return {res->get<evaluation::Instance>().set_field(
+      expr.field.to_string(kDetailed), *std::move(maybe_value))};
 }
 
 auto interpreter::expr_to_string(

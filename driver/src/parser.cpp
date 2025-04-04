@@ -72,9 +72,14 @@ auto parser::assignment() -> expr_ptr_t {
   if (inspect(kEqual)) {
     auto eq_op = this->get();
     auto res = assignment();
-    if (auto var_name = std::dynamic_pointer_cast<expression::Variable>(expr)) {
-      return std::make_shared<expression::Assignment>(std::move(var_name->name),
+    if (auto variable = std::dynamic_pointer_cast<expression::Variable>(expr)) {
+      return std::make_shared<expression::Assignment>(std::move(variable->name),
                                                       std::move(res));
+    }
+    if (auto get_expr = std::dynamic_pointer_cast<expression::Get>(expr)) {
+      return std::make_shared<expression::Set>(std::move(get_expr->object),
+                                               std::move(get_expr->field),
+                                               std::move(res));
     }
     throw synchronize({parse_error::kUnknownError, "Expect variable name."});
   }
@@ -151,12 +156,26 @@ auto parser::unary() -> expr_ptr_t {
 }
 auto parser::call() -> expr_ptr_t {
   auto expr = primary();
-  while (inspect(kLeftParen)) {
-    auto paren = this->get();
-    auto args = get_args();
-    expr = std::make_shared<expression::Call>(
-        std::move(expr), std::move(paren), std::move(args));
+
+  while (true) {
+    if (inspect(kLeftParen)) {
+      auto paren = this->get();
+      auto args = get_args();
+      expr = std::make_shared<expression::Call>(
+          std::move(expr), std::move(paren), std::move(args));
+    } else if (inspect(kDot)) {
+      this->get();
+      if (!inspect(kIdentifier)) {
+        throw synchronize(parse_error{parse_error::kUnknownError,
+                                      "Expect property name after '.'."});
+      }
+      auto name = this->get();
+      expr =
+          std::make_shared<expression::Get>(std::move(expr), std::move(name));
+    } else
+      break;
   }
+
   return expr;
 }
 auto parser::primary() -> expr_ptr_t {
@@ -278,7 +297,7 @@ auto parser::var_decl() -> stmt_ptr_t {
   return std::make_shared<statement::Variable>(std::move(var_tok),
                                                std::move(initializer));
 }
-auto parser::function_decl() -> stmt_ptr_t {
+auto parser::function_decl_impl() -> statement::Function {
   auto name = this->get();
 
   if (!inspect(kLeftParen)) {
@@ -290,8 +309,38 @@ auto parser::function_decl() -> stmt_ptr_t {
     throw synchronize({parse_error::kMissingBrace, "Expect '{'."});
   }
   this->get();
-  return std::make_shared<statement::Function>(
-      std::move(name), std::move(parameters), get_stmts());
+  auto body = get_stmts();
+  return statement::Function(
+      std::move(name), std::move(parameters), std::move(body));
+}
+auto parser::function_decl() -> stmt_ptr_t {
+  return std::make_shared<statement::Function>(function_decl_impl());
+}
+auto parser::get_methods() -> std::vector<statement::Function> {
+  std::vector<statement::Function> methods;
+  // in lox grammar the `fun` keyword is not required when inside a class.
+  while (
+      // inspect(kFun) or
+      !inspect(kRightBrace)) {
+    // this->get();
+    methods.emplace_back(function_decl_impl());
+  }
+  if (!inspect(kRightBrace)) {
+    throw synchronize(
+        {parse_error::kMissingBrace, "Expect '}' after class body."});
+  }
+  this->get();
+  return methods;
+}
+auto parser::class_stmt() -> stmt_ptr_t {
+  auto name = this->get();
+
+  if (!inspect(kLeftBrace)) {
+    throw synchronize(
+        {parse_error::kMissingBrace, "Expect '{' before class body."});
+  }
+  this->get();
+  return std::make_shared<statement::Class>(std::move(name), get_methods());
 }
 auto parser::get_condition() -> expr_ptr_t {
   if (!inspect(kLeftParen)) {
@@ -418,6 +467,10 @@ auto parser::next_statement() -> stmt_ptr_t {
   if (inspect(kFor)) {
     this->get();
     return for_stmt();
+  }
+  if (inspect(kClass)) {
+    this->get();
+    return class_stmt();
   }
   if (inspect(kReturn)) {
     this->get();

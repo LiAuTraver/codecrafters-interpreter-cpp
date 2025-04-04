@@ -69,6 +69,7 @@ private:
   scope_env_t current;
   std::shared_ptr<self_type> parent;
   static inline std::shared_ptr<self_type> global_env;
+  static auto initGlobalEnv() -> std::shared_ptr<self_type>; 
 
 public:
   auto to_string(const auxilia::FormatPolicy &) const -> string_type;

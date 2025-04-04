@@ -134,6 +134,12 @@ auto Resolver::visit_impl(const expression::Call &expr) -> eval_result_t {
   // clang-format on
   return res;
 }
+auto Resolver::visit_impl(const expression::Get &expr) -> eval_result_t {
+  return evaluate(*expr.object);
+}
+auto Resolver::visit_impl(const expression::Set &expr) -> eval_result_t {
+  return evaluate(*expr.object) && evaluate(*expr.value);
+}
 auto Resolver::evaluate_impl(const expression::Expr &expr) -> eval_result_t {
   return expr.accept(*this);
 }
@@ -189,6 +195,10 @@ auto Resolver::visit_impl(const statement::For &stmt) -> eval_result_t {
 }
 auto Resolver::visit_impl(const statement::Function &stmt) -> eval_result_t {
   return resolve(stmt, ScopeType::kFunction);
+}
+auto Resolver::visit_impl(const statement::Class &stmt) -> eval_result_t {
+  define(stmt.name);
+  return {};
 }
 auto Resolver::visit_impl(const statement::Return &stmt) -> eval_result_t {
   if (this->current_scope == ScopeType::kNone)
