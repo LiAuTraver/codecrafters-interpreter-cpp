@@ -47,8 +47,10 @@ private:
 /// @brief A class that represents a callable object
 class Callable {
 protected:
-  using args_t = std::vector<IVisitor::variant_type>;
   virtual ~Callable() = default;
+
+public:
+  using args_t = std::vector<IVisitor::variant_type>;
 
 public:
   virtual auto arity() const -> unsigned = 0;
@@ -263,8 +265,7 @@ private:
 };
 class Instance : public Evaluatable {
   using field_t = std::pair<string_type, eval_result_t>;
-  using fields_t =
-      std::unordered_map<string_type, eval_result_t>;
+  using fields_t = std::unordered_map<string_type, eval_result_t>;
 
 private:
   string_type class_name;
@@ -275,10 +276,8 @@ public:
       : class_name(class_name), fields(std::move(fields)) {}
 
 public:
-  auto get_field(std::string_view) const
-      -> eval_result_t;
-  auto set_field(std::string_view, eval_result_t &&)
-      -> auxilia::Status;
+  auto get_field(std::string_view) const -> eval_result_t;
+  auto set_field(std::string_view, eval_result_t &&) -> auxilia::Status;
   auto to_string(const auxilia::FormatPolicy &) const -> string_type override;
 
 private:
