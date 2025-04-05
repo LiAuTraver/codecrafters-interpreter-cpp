@@ -1,8 +1,10 @@
 #include <algorithm>
 #include <cmath>
 #include <memory>
+#include <string_view>
 #include <utility>
 
+#include "details/IVisitor.hpp"
 #include "details/loxo_fwd.hpp"
 
 #include "Evaluatable.hpp"
@@ -328,7 +330,7 @@ auto Function::to_string(const auxilia::FormatPolicy &) const -> string_type {
   });
 }
 auto Class::call(interpreter &interpreter, args_t &&variants) -> eval_result_t {
-  return {Instance{this->name}};
+  return {Instance{interpreter.get_current_env(), {name}}};
 }
 auto Class::get_method(const std::string_view name) const
     -> auxilia::StatusOr<Function> {
@@ -342,26 +344,35 @@ auto Class::get_method(const std::string_view name) const
 auto Class::to_string(const auxilia::FormatPolicy &) const -> string_type {
   return name;
 }
+Instance::Instance(const env_ptr_t &env, const std::string_view name)
+    : class_env(env), class_name(name) {}
 auto Instance::get_field(const std::string_view name) const -> eval_result_t {
   if (const auto it = fields.find({name.begin(), name.end()});
       it != fields.end())
     return it->second;
   // if field not found, find method
-  // TODO
-  // my_calss.get_methods
-  return auxilia::NotFoundError(
-      "Undefined property '{}'.\n[line {}]", name, get_line());
+  // clang-format off
+  return get_class()
+      .get_method(name)
+      .transform(
+        [&](auto &&method) -> IVisitor::variant_type {
+          return {method};
+      });
+  // clang-format on
 }
-auto Instance::set_field(std::string_view name, eval_result_t &&new_val)
+auto Instance::set_field(const std::string_view name, eval_result_t &&new_val)
     -> auxilia::Status {
   if (auto it = fields.find({name.begin(), name.end()}); it != fields.end()) {
     it->second = std::move(new_val);
     return {};
   }
-  return {auxilia::NotFoundError(
-      "Undefined property '{}'.\n[line {}]", name, get_line())};
+  return auxilia::NotFoundError(
+      "Undefined property '{}'.\n[line {}]", name, get_line());
 }
 auto Instance::to_string(const auxilia::FormatPolicy &) const -> string_type {
-  return class_name + " instance";
+  return get_class().name + " instance";
+}
+auto Instance::get_class() const -> Class & {
+  return (*(class_env->find(class_name)))->second.first.get<Class>();
 }
 } // namespace accat::loxo::evaluation

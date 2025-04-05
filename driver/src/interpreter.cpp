@@ -436,7 +436,6 @@ auto interpreter::visit_impl(const expression::Variable &expr)
 }
 auto interpreter::visit_impl(const expression::Assignment &expr)
     -> eval_result_t {
-  // FIXME: here my logic went away. fixme here.
   auto res = this->evaluate(*expr.value_expr);
   if (!res)
     return res;

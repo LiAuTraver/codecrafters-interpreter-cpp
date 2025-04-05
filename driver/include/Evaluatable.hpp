@@ -52,6 +52,8 @@ protected:
 
 public:
   using args_t = std::vector<IVisitor::variant_type>;
+  using env_t = Environment;
+  using env_ptr_t = std::shared_ptr<env_t>;
 
 public:
   virtual auto arity() const -> unsigned = 0;
@@ -195,8 +197,6 @@ public:
   using custom_function_t = RealFunction;
   using function_t = auxilia::
       Variant<auxilia::Monostate, native_function_t, custom_function_t>;
-  using env_t = Environment;
-  using env_ptr_t = std::shared_ptr<env_t>;
 
 public:
   Function() = default;
@@ -261,6 +261,7 @@ public:
 
 public:
   auto get_method(std::string_view) const -> auxilia::StatusOr<Function>;
+
 public:
   auto to_string(const auxilia::FormatPolicy &) const -> string_type override;
 
@@ -277,12 +278,14 @@ class Instance : public Evaluatable {
   using fields_t = std::unordered_map<string_type, eval_result_t>;
 
 private:
-  string_type class_name;
+  using env_t = Callable::env_t;
+  using env_ptr_t = Callable::env_ptr_t;
   fields_t fields;
+  env_ptr_t class_env;
+  string_type class_name;
 
 public:
-  explicit Instance(const std::string_view class_name, fields_t &&fields = {})
-      : class_name(class_name), fields(std::move(fields)) {}
+  explicit Instance(const env_ptr_t &, std::string_view);
 
 public:
   auto get_field(std::string_view) const -> eval_result_t;
@@ -290,8 +293,13 @@ public:
   auto to_string(const auxilia::FormatPolicy &) const -> string_type override;
 
 private:
+  auto get_class() const -> Class&;
+
+private:
   friend auto operator==(const Instance &lhs, const Instance &rhs) {
-    return lhs.class_name == rhs.class_name;
+    return lhs.get_class() == rhs.get_class()
+        // && lhs.fields == rhs.fields  // compile error
+        ;
   }
   friend auto operator!=(const Instance &lhs, const Instance &rhs) {
     return !(lhs == rhs);
