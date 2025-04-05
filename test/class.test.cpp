@@ -173,3 +173,37 @@ TEST(class, ctor_global) {
             "Toyota Corolla with four wheels\n");
   EXPECT_EQ(callback, 0);
 }
+
+TEST(class, ctor_return1) {
+  const auto path = LOXO_ROOT_DIR R"(\examples\class\ctor.return1.lox)";
+  auto [callback, str] = get_result(path);
+  EXPECT_EQ(str, "world\n");
+  EXPECT_EQ(callback, 0);
+}
+
+TEST(class, ctor_return2) {
+  const auto path = LOXO_ROOT_DIR R"(\examples\class\ctor.return2.lox)";
+  auto [callback, str] = get_result(path);
+  EXPECT_EQ(str,
+            "[line 5] Error at 'return': Can't return a value from an "
+            "initializer.\n");
+  EXPECT_EQ(callback, 65);
+}
+
+TEST(class, ctor_return3) {
+  const auto path = LOXO_ROOT_DIR R"(\examples\class\ctor.return3.lox)";
+  auto [callback, str] = get_result(path);
+  EXPECT_EQ(str,
+            "[line 3] Error at 'return': Can't return a value from an "
+            "initializer.\n");
+  EXPECT_EQ(callback, 65);
+}
+
+TEST(class, ctor_return4) {
+  const auto path = LOXO_ROOT_DIR R"(\examples\class\ctor.return4.lox)";
+  auto [callback, str] = get_result(path);
+  EXPECT_EQ(str,
+            "[line 3] Error at 'return': Can't return a value from an "
+            "initializer.\n");
+  EXPECT_EQ(callback, 65);
+}
