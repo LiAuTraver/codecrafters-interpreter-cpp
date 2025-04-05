@@ -1,0 +1,14 @@
+class Wizard {
+  getSpellCaster() {
+    fun castSpell() {
+      print this;
+      print "Casting spell as " + this.name;
+    }
+
+    return castSpell;
+  }
+}
+
+var wizard = Wizard();
+wizard.name = "Merlin";
+wizard.getSpellCaster()();

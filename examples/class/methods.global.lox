@@ -1,0 +1,36 @@
+class Robot {
+  beep() {
+    print "Beep boop!";
+  }
+}
+
+var r2d2 = Robot();
+r2d2.beep();
+
+Robot().beep();
+
+class Wizard {
+  castSpell(spell) {
+    print "Casting a magical spell: " + spell;
+  }
+}
+
+class Dragon {
+  breatheFire(fire, intensity) {
+    print "Breathing " + fire + " with intensity: "
+    + intensity;
+  }
+}
+
+// Methods on different class instances
+var merlin = Wizard();
+var smaug = Dragon();
+
+// Conditional method calling
+if (true) {
+  var action = merlin.castSpell;
+  action("Fireball");
+} else {
+  var action = smaug.breatheFire;
+  action("Fire", "100");
+}

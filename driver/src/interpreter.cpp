@@ -178,7 +178,8 @@ auto interpreter::visit_impl(const statement::For &stmt) -> eval_result_t {
   }
   return {};
 }
-auto interpreter::get_function(const statement::Function &stmtFunc)
+auto interpreter::get_function(const statement::Function &stmtFunc,
+                               const bool is_initializer)
     -> evaluation::Function {
   // clang-format off
   return evaluation::Function::create_custom(
@@ -192,7 +193,8 @@ auto interpreter::get_function(const statement::Function &stmtFunc)
                     | std::ranges::to<std::vector<string_type>>(),
       .body = stmtFunc.body.statements
     },
-    this->env);
+    this->env,
+    is_initializer);
   // clang-format on
 }
 auto interpreter::visit_impl(const statement::Function &stmt) -> eval_result_t {
@@ -226,12 +228,14 @@ auto interpreter::visit_impl(const statement::Class &stmt) -> eval_result_t {
   }
   evaluation::Class::methods_t methods;
   std::ranges::for_each(stmt.methods, [this, &methods](auto &&method) {
-    methods.emplace(method.name.to_string(kDetailed), get_function(method));
+    auto name = method.name.to_string(kDetailed);
+    methods.emplace(name, get_function(method, name == "init" ? true : false));
   });
-  return env->add(
-      stmt.name.to_string(kDetailed),
-      evaluation::Class{stmt.name.to_string(kDetailed), std::move(methods)},
-      stmt.name.line);
+  return env->add(stmt.name.to_string(kDetailed),
+                  evaluation::Class{stmt.name.to_string(kDetailed),
+                                    stmt.name.line,
+                                    std::move(methods)},
+                  stmt.name.line);
 }
 auto interpreter::visit_impl(const statement::Expression &stmt)
     -> eval_result_t {
@@ -541,7 +545,7 @@ auto interpreter::visit_impl(const expression::Set &expr) -> eval_result_t {
   auto maybe_value = evaluate(*expr.value);
   if (!maybe_value)
     return maybe_value;
-  
+
   return {res->get<evaluation::Instance>().set_field(
       expr.field.to_string(kDetailed), *std::move(maybe_value))};
 }

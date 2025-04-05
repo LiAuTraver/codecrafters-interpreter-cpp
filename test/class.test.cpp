@@ -108,3 +108,68 @@ TEST(class, property_manipulation) {
             "100\n");
   EXPECT_EQ(callback, 0);
 }
+
+TEST(class, methods_global) {
+  const auto path = LOXO_ROOT_DIR R"(\examples\class\methods.global.lox)";
+  auto [callback, str] = get_result(path);
+  EXPECT_EQ(str,
+            "Beep boop!\n"
+            "Beep boop!\n"
+            "Casting a magical spell: Fireball\n");
+  EXPECT_EQ(callback, 0);
+}
+
+TEST(class, methods_local) {
+  const auto path = LOXO_ROOT_DIR R"(\examples\class\methods.local.lox)";
+  auto [callback, str] = get_result(path);
+  EXPECT_EQ(str, "Foo\n");
+  EXPECT_EQ(callback, 0);
+}
+
+TEST(class, methods_withArgs) {
+  const auto path = LOXO_ROOT_DIR R"(\examples\class\methods.withArgs.lox)";
+  auto [callback, str] = get_result(path);
+  EXPECT_EQ(str, "Using power: Flight\n");
+  EXPECT_EQ(callback, 0);
+}
+
+TEST(class, this_basic) {
+  const auto path = LOXO_ROOT_DIR R"(\examples\class\this.basic.lox)";
+  auto [callback, str] = get_result(path);
+  EXPECT_EQ(str, "Spaceship instance\n");
+  EXPECT_EQ(callback, 0);
+}
+
+TEST(class, this_property) {
+  const auto path = LOXO_ROOT_DIR R"(\examples\class\this.property.lox)";
+  auto [callback, str] = get_result(path);
+  EXPECT_EQ(str,
+            "175\n"
+            "Woof\n"
+            "Cat\n");
+  EXPECT_EQ(callback, 0);
+}
+
+TEST(class, this_nested) {
+  const auto path = LOXO_ROOT_DIR R"(\examples\class\this.nested.lox)";
+  auto [callback, str] = get_result(path);
+  EXPECT_EQ(str,
+            "Wizard instance\n"
+            "Casting spell as Merlin\n");
+  EXPECT_EQ(callback, 0);
+}
+
+TEST(class, ctor_global) {
+  const auto path = LOXO_ROOT_DIR R"(\examples\class\ctor.global.lox)";
+  auto [callback, str] = get_result(path);
+  EXPECT_EQ(str,
+            "bar\n"
+            "91\n"
+            "R2-D2\n"
+            "startValue can't be negative\n"
+            "0\n"
+            "52\n"
+            "Generic Generic\n"
+            "Toyota Corolla with four wheels\n");
+  EXPECT_EQ(callback, 0);
+}

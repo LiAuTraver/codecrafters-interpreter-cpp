@@ -72,7 +72,7 @@ private:
                                     const eval_result_t &) const;
   auto get_call_args(const expression::Call &) const
       -> auxilia::StatusOr<std::vector<variant_type>>;
-  auto get_function(const statement::Function &) -> evaluation::Function;
+  auto get_function(const statement::Function &, bool = false) -> evaluation::Function;
   auto find_variable(const expression::Expr &, const Token&) -> eval_result_t;
 
 private:

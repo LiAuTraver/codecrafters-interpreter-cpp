@@ -179,6 +179,25 @@ public:
 private:
   auto accept_impl(const StmtVisitor &) const -> stmt_result_t override;
 };
+
+class Return : public Stmt {
+public:
+  constexpr Return() = default;
+  explicit Return(expr_ptr_t &&value, uint_least32_t line)
+      : value(std::move(value)), line(line) {}
+  virtual ~Return() = default;
+
+public:
+  expr_ptr_t value;
+  uint_least32_t line = std::numeric_limits<uint_least32_t>::max();
+
+public:
+  virtual auto to_string(const auxilia::FormatPolicy &) const
+      -> string_type override;
+
+private:
+  auto accept_impl(const StmtVisitor &) const -> stmt_result_t override;
+};
 class Function : public Stmt {
 public:
   constexpr Function() = default;
@@ -211,24 +230,6 @@ public:
   explicit Class(token_t &&name, std::vector<Function> &&methods)
       : name(std::move(name)), methods(std::move(methods)) {}
   virtual ~Class() = default;
-
-public:
-  virtual auto to_string(const auxilia::FormatPolicy &) const
-      -> string_type override;
-
-private:
-  auto accept_impl(const StmtVisitor &) const -> stmt_result_t override;
-};
-class Return : public Stmt {
-public:
-  constexpr Return() = default;
-  explicit Return(expr_ptr_t &&value, uint_least32_t line)
-      : value(std::move(value)), line(line) {}
-  virtual ~Return() = default;
-
-public:
-  expr_ptr_t value;
-  uint_least32_t line = std::numeric_limits<uint_least32_t>::max();
 
 public:
   virtual auto to_string(const auxilia::FormatPolicy &) const

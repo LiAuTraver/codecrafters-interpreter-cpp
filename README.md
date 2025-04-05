@@ -126,9 +126,9 @@ identifier    -> [a-zA-Z_] + [a-zA-Z0-9_]* ;
 This exercise is still in active development, and I will be updating it as I progress through the book.
 
 TODO(pirority from high to low)
-- [x] Binding and resolving
 - [ ] Desugar `for` statement(currently handles it saparately)
-- [ ] Add `class` support
+- [x] Binding and resolving
+- [x] Add `class` support
 - [ ] JVM bytecode generation
 - [ ] Add class inheritance support
 - [ ] LLVM IR generation

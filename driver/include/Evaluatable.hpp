@@ -17,7 +17,6 @@
 
 #include "details/loxo_fwd.hpp"
 #include "details/IVisitor.hpp"
-#include "Token.hpp"
 
 namespace accat::loxo::evaluation {
 
@@ -26,7 +25,8 @@ namespace accat::loxo::evaluation {
 /// @implements auxilia::Printable
 class Evaluatable : public auxilia::Printable {
 protected:
-  static constexpr auto nan = &std::numeric_limits<uint_least32_t>::quiet_NaN;
+  static constexpr auto nan =
+      &std::numeric_limits<uint_least32_t>::signaling_NaN;
 
 public:
   using eval_result_t = IVisitor::eval_result_t;
@@ -183,7 +183,6 @@ public:
 };
 class Function : public Evaluatable, public Callable {
   struct RealFunction {
-    using token_t = Token;
     using stmt_ptr_t = std::shared_ptr<statement::Stmt>;
     string_type name;
     std::vector<string_type> parameters;
@@ -207,14 +206,14 @@ public:
   virtual ~Function() = default;
 
 private:
-  Function(unsigned, native_function_t &&, const env_ptr_t &);
-  Function(unsigned, custom_function_t &&, const env_ptr_t &);
-  Function(unsigned, const function_t &, const env_ptr_t &);
+  Function(unsigned, native_function_t &&, const env_ptr_t &, bool = false);
+  Function(unsigned, custom_function_t &&, const env_ptr_t &, bool = false);
+  Function(unsigned, const function_t &, const env_ptr_t &, bool = false);
 
 public:
-  static auto create_custom(unsigned, custom_function_t &&, const env_ptr_t &)
+  static auto create_custom(unsigned, custom_function_t &&, const env_ptr_t &, bool = false)
       -> Function;
-  static auto create_native(unsigned, native_function_t &&, const env_ptr_t &)
+  static auto create_native(unsigned, native_function_t &&, const env_ptr_t &, bool = false)
       -> Function;
   auto bind(const Instance &) const -> Function;
 
@@ -227,6 +226,7 @@ private:
   unsigned my_arity = std::numeric_limits<unsigned>::quiet_NaN();
   function_t my_function;
   env_ptr_t my_env;
+  bool is_initializer = false;
 
 private:
   static constexpr auto native_signature = "<native fn>"sv;
@@ -254,11 +254,10 @@ public:
   methods_t methods;
 
 public:
-  Class(const std::string_view name, methods_t &&methods = {})
-      : name(name), methods(methods) {}
+  Class(std::string_view, uint_least32_t, methods_t && = {});
 
 public:
-  auto arity() const -> unsigned override { return 0; }
+  auto arity() const -> unsigned override;
   auto call(interpreter &, args_t &&) -> eval_result_t override;
 
 public:
@@ -266,6 +265,9 @@ public:
 
 public:
   auto to_string(const auxilia::FormatPolicy &) const -> string_type override;
+
+private:
+  auto get_initializer() -> Function *;
 
 private:
   friend inline auto operator==(const Class &lhs, const Class &rhs) -> bool {

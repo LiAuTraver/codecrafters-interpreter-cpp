@@ -235,6 +235,7 @@ Function::Function(Function &&that) noexcept {
   my_arity = that.my_arity;
   my_function = std::move(that.my_function);
   my_env = std::move(that.my_env);
+  is_initializer = that.is_initializer;
 }
 Function &Function::operator=(Function &&that) noexcept {
   if (this == &that)
@@ -242,47 +243,56 @@ Function &Function::operator=(Function &&that) noexcept {
   this->my_arity = that.my_arity;
   this->my_function = std::move(that.my_function);
   this->my_env = std::move(that.my_env);
+  this->is_initializer = that.is_initializer;
   return *this;
 }
 Function::Function(const unsigned argc,
                    native_function_t &&func,
-                   const env_ptr_t &env) {
+                   const env_ptr_t &env,
+                   const bool is_initializer) {
   my_arity = argc;
   my_function.emplace(std::move(func));
   my_env = env;
+  this->is_initializer = is_initializer;
 }
 
 Function::Function(const unsigned argc,
                    custom_function_t &&block,
-                   const env_ptr_t &env) {
+                   const env_ptr_t &env,
+                   const bool is_initializer) {
   my_arity = argc;
   my_function.emplace(std::move(block));
   my_env = env;
+  this->is_initializer = is_initializer;
 }
 Function::Function(const unsigned argc,
                    const function_t &func,
-                   const env_ptr_t &env) {
+                   const env_ptr_t &env,
+                   const bool is_initializer) {
   my_arity = argc;
   my_function = func;
   my_env = env;
+  this->is_initializer = is_initializer;
 }
 
 auto Function::create_custom(unsigned argc,
                              custom_function_t &&func,
-                             const env_ptr_t &env) -> Function {
-  return {argc, std::move(func), env};
+                             const env_ptr_t &env,
+                             const bool is_initializer) -> Function {
+  return {argc, std::move(func), env, is_initializer};
 }
 
 auto Function::create_native(unsigned argc,
                              native_function_t &&func,
-                             const env_ptr_t &env) -> Function {
-  return {argc, std::move(func), env};
+                             const env_ptr_t &env,
+                             const bool is_initializer) -> Function {
+  return {argc, std::move(func), env, is_initializer};
 }
 auto Function::bind(const Instance &instance) const -> Function {
-  auto method_env = Environment::Scope(this->my_env);
+  auto method_env = Environment::Scope(my_env);
   // TODO: wrong here, copying an instance!!!
   method_env->add("this", {instance});
-  return {this->my_arity, this->my_function, method_env};
+  return {my_arity, my_function, method_env, is_initializer};
 }
 
 auto Function::call(interpreter &interpreter, args_t &&args) -> eval_result_t {
@@ -307,7 +317,6 @@ auto Function::call(interpreter &interpreter, args_t &&args) -> eval_result_t {
 
         dbg(info, "entering a function...")
         interpreter.set_env(scoped_env);
-
         defer { interpreter.set_env(saved_env); };
 
         for (const auto &index : custom_function.body) {
@@ -323,7 +332,10 @@ auto Function::call(interpreter &interpreter, args_t &&args) -> eval_result_t {
             return res;
           }
         }
-
+        if (is_initializer) {
+          dbg(info, "constructor, returning this.")
+          return {my_env->get_at_depth(0, "this")};
+        }
         dbg(info, "void function, returning nil.")
         return {{NilValue}};
       },
@@ -342,8 +354,24 @@ auto Function::to_string(const auxilia::FormatPolicy &) const -> string_type {
       [](const auto &) { return "<unknown fn>"s; },
   });
 }
+auto Class::arity() const -> unsigned {
+  if (auto init = const_cast<Class *>(this)->get_initializer())
+    return init->arity();
+  return 0;
+}
+Class::Class(const std::string_view name,
+             const uint_least32_t line,
+             methods_t &&methods)
+    : Evaluatable(line), name(name), methods(methods) {}
 auto Class::call(interpreter &interpreter, args_t &&variants) -> eval_result_t {
-  return {Instance{interpreter.get_current_env(), {name}}};
+  auto instance = Instance{interpreter.get_current_env(), name};
+  if (auto initializer = get_initializer())
+    if (auto res =
+            initializer->bind(instance).call(interpreter, std::move(variants));
+        !res)
+      return res;
+
+  return {instance};
 }
 auto Class::get_method(const std::string_view name) const
     -> auxilia::StatusOr<Function> {
@@ -357,8 +385,13 @@ auto Class::get_method(const std::string_view name) const
 auto Class::to_string(const auxilia::FormatPolicy &) const -> string_type {
   return name;
 }
+auto Class::get_initializer() -> Function * {
+  if (auto it = methods.find("init"); it != methods.end())
+    return &it->second;
+  return nullptr;
+}
 Instance::Instance(const env_ptr_t &env, const std::string_view name)
-    : class_env(env), class_name(name) , fields(std::make_shared<fields_t>()) {}
+    : class_env(env), class_name(name), fields(std::make_shared<fields_t>()) {}
 auto Instance::get_field(const std::string_view name) const -> eval_result_t {
   if (const auto it = fields->find({name.begin(), name.end()});
       it != fields->end())

@@ -225,7 +225,9 @@ auto Resolver::visit_impl(const statement::Class &stmt) -> eval_result_t {
 
   auto res = OkStatus();
   std::ranges::for_each(stmt.methods, [this, &res](const auto &method) {
-    res &= resolve(method, ScopeType::kMethod);
+    res &= resolve(method, method.name.to_string(kDetailed) == "init"
+                      ? ScopeType::kInitializer
+                      : ScopeType::kMethod);
   });
   return res;
 }
@@ -233,6 +235,12 @@ auto Resolver::visit_impl(const statement::Return &stmt) -> eval_result_t {
   if (this->current_scope_type == ScopeType::kNone)
     return {InvalidArgumentError("[line {}] Error at '{}': "
                                  "Can't return from top-level code.",
+                                 stmt.line,
+                                 "return")};
+  // allow to return a nil.
+  if (this->current_scope_type == ScopeType::kInitializer && stmt.value)
+    return {InvalidArgumentError("[line {}] Error at '{}': "
+                                 "Can't return a value from an initializer.",
                                  stmt.line,
                                  "return")};
   return stmt.value ? evaluate(*stmt.value).as_status() : OkStatus();

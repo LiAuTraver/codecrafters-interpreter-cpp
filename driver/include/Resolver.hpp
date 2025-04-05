@@ -24,6 +24,7 @@ private:
     kNone = 0, // an ordinary scope
     kFunction, // a function scope
     kMethod,   // a class method scope
+    kInitializer, // a class initializer scope
   };
   enum class ClassType : std::uint8_t {
     kNone = 0,
