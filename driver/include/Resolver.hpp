@@ -21,15 +21,20 @@ public:
 
 private:
   enum class ScopeType : std::uint8_t {
-    kNone = 0, // kNone
-    kFunction,
-    kClassMethod,
+    kNone = 0, // an ordinary scope
+    kFunction, // a function scope
+    kMethod,   // a class method scope
+  };
+  enum class ClassType : std::uint8_t {
+    kNone = 0,
+    kClass,
   };
 
 private:
   class ::accat::loxo::interpreter &interpreter;
   scopes_t scopes;
-  ScopeType current_scope = ScopeType::kNone;
+  ScopeType current_scope_type = ScopeType::kNone;
+  ClassType current_class_type = ClassType::kNone;
 
 public:
   auto resolve(std::span<const std::shared_ptr<statement::Stmt>>) const
@@ -55,6 +60,7 @@ private:
   auto visit_impl(const expression::Call &) -> eval_result_t override;
   auto visit_impl(const expression::Get &) -> eval_result_t override;
   auto visit_impl(const expression::Set &) -> eval_result_t override;
+  auto visit_impl(const expression::This &) -> eval_result_t override;
   auto evaluate_impl(const expression::Expr &) -> eval_result_t override;
   auto get_result_impl() const -> eval_result_t override;
 

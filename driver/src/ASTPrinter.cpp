@@ -79,5 +79,9 @@ auto ASTPrinter::visit_impl(const Set &expr) -> eval_result_t {
   oss << expr << std::endl;
   return {};
 }
+auto ASTPrinter::visit_impl(const This &expr) -> eval_result_t {
+  oss << expr.to_string_view(kDetailed) << std::endl;
+  return {};
+}
 auto ASTPrinter::get_result_impl() const -> eval_result_t { return res; }
 } // namespace accat::loxo::expression

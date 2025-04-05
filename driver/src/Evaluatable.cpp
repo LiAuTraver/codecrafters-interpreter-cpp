@@ -259,6 +259,13 @@ Function::Function(const unsigned argc,
   my_function.emplace(std::move(block));
   my_env = env;
 }
+Function::Function(const unsigned argc,
+                   const function_t &func,
+                   const env_ptr_t &env) {
+  my_arity = argc;
+  my_function = func;
+  my_env = env;
+}
 
 auto Function::create_custom(unsigned argc,
                              custom_function_t &&func,
@@ -270,6 +277,12 @@ auto Function::create_native(unsigned argc,
                              native_function_t &&func,
                              const env_ptr_t &env) -> Function {
   return {argc, std::move(func), env};
+}
+auto Function::bind(const Instance &instance) const -> Function {
+  auto method_env = Environment::Scope(this->my_env);
+  // TODO: wrong here, copying an instance!!!
+  method_env->add("this", {instance});
+  return {this->my_arity, this->my_function, method_env};
 }
 
 auto Function::call(interpreter &interpreter, args_t &&args) -> eval_result_t {
@@ -345,10 +358,10 @@ auto Class::to_string(const auxilia::FormatPolicy &) const -> string_type {
   return name;
 }
 Instance::Instance(const env_ptr_t &env, const std::string_view name)
-    : class_env(env), class_name(name) {}
+    : class_env(env), class_name(name) , fields(std::make_shared<fields_t>()) {}
 auto Instance::get_field(const std::string_view name) const -> eval_result_t {
-  if (const auto it = fields.find({name.begin(), name.end()});
-      it != fields.end())
+  if (const auto it = fields->find({name.begin(), name.end()});
+      it != fields->end())
     return it->second;
   // if field not found, find method
   // clang-format off
@@ -356,13 +369,19 @@ auto Instance::get_field(const std::string_view name) const -> eval_result_t {
       .get_method(name)
       .transform(
         [&](auto &&method) -> IVisitor::variant_type {
-          return {method};
+          return {method.bind(*this)};
       });
   // clang-format on
 }
-auto Instance::set_field(const std::string_view name, eval_result_t &&new_val)
-    -> auxilia::Status {
-  if (auto it = fields.find({name.begin(), name.end()}); it != fields.end()) {
+auto Instance::set_field(const std::string_view name,
+                         eval_result_t &&new_val,
+                         const bool shallBeDefined) -> auxilia::Status {
+  if (!shallBeDefined) {
+    // like js or python, we can set a field even if it is not defined yet.
+    fields->insert_or_assign({name.begin(), name.end()}, std::move(new_val));
+    return {};
+  }
+  if (auto it = fields->find({name.begin(), name.end()}); it != fields->end()) {
     it->second = std::move(new_val);
     return {};
   }

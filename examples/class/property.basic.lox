@@ -1,0 +1,25 @@
+// Basic property setting and getting
+class Spaceship {}
+var falcon = Spaceship();
+
+falcon.name = "Millennium Falcon";
+falcon.speed = 75.5;
+
+print "Ship details:";
+print falcon.name;
+print falcon.speed;
+
+// Multiple properties and conditional access
+class Robot {}
+var r2d2 = Robot();
+
+r2d2.model = "Astromech";
+r2d2.operational = false;
+
+if (r2d2.operational) {
+  print r2d2.model;
+  r2d2.mission = "Navigate hyperspace";
+  print r2d2.mission;
+} else {
+  print "Robot is not operational.";
+}

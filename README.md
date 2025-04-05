@@ -84,7 +84,7 @@ returnStmt      -> "return" expression? ";" ;
 ```cpp
 expression     -> assignment ;
 
-assignment     -> IDENTIFIER "=" assignment
+assignment     -> ( call "." )? IDENTIFIER "=" assignment
                 | logic_or ;
 
 logic_or       -> logic_and ( "or" logic_and )* ;
@@ -95,7 +95,7 @@ term           -> factor ( ( "-" | "+" ) factor )* ;
 factor         -> unary ( ( "/" | "*" ) unary )* ;
 unary          -> ( "!" | "-" ) unary
                 | call ;
-call           -> primary ( "(" arguments? ")" )* ;
+call           -> primary ( "(" arguments? ")" | "." IDENTIFIER )* ;
 
 primary        -> NUMBER | STRING | "true" | "false" | "nil"
                 | "(" expression ")" | IDENTIFIER ;

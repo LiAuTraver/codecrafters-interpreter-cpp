@@ -98,7 +98,18 @@ Set::Set(expr_ptr_t &&object, token_t &&field, expr_ptr_t &&value)
 auto Set::accept_impl(const ExprVisitor &visitor) const -> expr_result_t {
   return visitor.visit(*this);
 }
-auto Set::to_string(const auxilia::FormatPolicy &format_policy) const -> string_type {
+auto Set::to_string(const FormatPolicy &format_policy) const -> string_type {
   TODO()
+}
+This::This(token_t &&name) : name(std::move(name)) {}
+auto This::accept_impl(const ExprVisitor &visitor) const -> expr_result_t {
+  return visitor.visit(*this);
+}
+auto This::to_string(const FormatPolicy &format_policy) const -> string_type {
+  return "this";
+}
+auto This::to_string_view(const FormatPolicy &format_policy) const
+    -> string_view_type {
+  return "this";
 }
 } // namespace accat::loxo::expression

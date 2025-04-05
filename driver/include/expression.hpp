@@ -214,4 +214,20 @@ public:
   auto to_string(const auxilia::FormatPolicy &) const -> string_type override;
 };
 
+class This : public Expr, public  auxilia::Viewable {
+public:
+  This(token_t &&);
+  virtual ~This() override = default;
+
+public:
+  token_t name;
+  
+private:
+  auto accept_impl(const ExprVisitor &) const -> expr_result_t override;
+
+public:
+  auto to_string(const auxilia::FormatPolicy &) const -> string_type override;
+  auto to_string_view(const auxilia::FormatPolicy&) const -> string_view_type;
+};
+
 } // namespace accat::loxo::expression

@@ -74,3 +74,37 @@ TEST(class, instance_local) {
             "All heroes created!\n");
   EXPECT_EQ(callback, 0);
 }
+
+TEST(class, property_basic) {
+  const auto path = LOXO_ROOT_DIR R"(\examples\class\property.basic.lox)";
+  auto [callback, str] = get_result(path);
+  EXPECT_EQ(str,
+            "Ship details:\n"
+            "Millennium Falcon\n"
+            "75.5\n"
+            "Robot is not operational.\n");
+  EXPECT_EQ(callback, 0);
+}
+
+TEST(class, property_multiple) {
+  const auto path = LOXO_ROOT_DIR R"(\examples\class\property.multiple.lox)";
+  auto [callback, str] = get_result(path);
+
+  EXPECT_EQ(str,
+            "Times Superman was called: \n"
+            "66\n"
+            "Times Batman was called: \n"
+            "18\n");
+  EXPECT_EQ(callback, 0);
+}
+
+TEST(class, property_manipulation) {
+  const auto path =
+      LOXO_ROOT_DIR R"(\examples\class\property.manipulation.lox)";
+  auto [callback, str] = get_result(path);
+  EXPECT_EQ(str,
+            "Grey\n"
+            "White\n"
+            "100\n");
+  EXPECT_EQ(callback, 0);
+}

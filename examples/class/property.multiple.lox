@@ -1,0 +1,15 @@
+// Multiple instances with properties
+class Superhero {}
+var batman = Superhero();
+var superman = Superhero();
+
+batman.name = "Batman";
+batman.called = 18;
+
+superman.name = "Superman";
+superman.called = 66;
+
+print "Times " + superman.name + " was called: ";
+print superman.called;
+print "Times " + batman.name + " was called: ";
+print batman.called;

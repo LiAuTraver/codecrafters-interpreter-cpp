@@ -51,7 +51,7 @@ class Logical;
 class Call;
 class Get;
 class Set;
-class IllegalExpr;
+class This;
 
 class ExprVisitor;
 } // namespace expression
@@ -67,7 +67,6 @@ class For;
 class Function;
 class Class;
 class Return;
-class IllegalStmt;
 
 class StmtVisitor;
 } // namespace statement

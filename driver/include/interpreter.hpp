@@ -10,6 +10,7 @@
 #include <accat/auxilia/auxilia.hpp>
 #include <vector>
 
+#include "Token.hpp"
 #include "accat/auxilia/details/format.hpp"
 #include "details/loxo_fwd.hpp"
 
@@ -56,6 +57,7 @@ private:
   virtual auto visit_impl(const expression::Call &) -> eval_result_t override;
   virtual auto visit_impl(const expression::Get &) -> eval_result_t override;
   virtual auto visit_impl(const expression::Set &) -> eval_result_t override;
+  virtual auto visit_impl(const expression::This&) -> eval_result_t override;
 
 private:
   virtual auto evaluate_impl(const expression::Expr &)
@@ -70,7 +72,8 @@ private:
                                     const eval_result_t &) const;
   auto get_call_args(const expression::Call &) const
       -> auxilia::StatusOr<std::vector<variant_type>>;
-  auto get_function(const statement::Function&) -> evaluation::Function;
+  auto get_function(const statement::Function &) -> evaluation::Function;
+  auto find_variable(const expression::Expr &, const Token&) -> eval_result_t;
 
 private:
   virtual auto visit_impl(const statement::Variable &)

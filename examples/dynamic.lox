@@ -1,7 +1,10 @@
-class Bacon {
-  eat() {
-    print "Crunch crunch crunch!";
-  }
-}
+// Basic property setting and getting
+class Spaceship {}
+var falcon = Spaceship();
 
-var b = Bacon().eat(); // Prints "Crunch crunch crunch!".
+falcon.name = "Millennium Falcon";
+falcon.speed = 75.5;
+
+print "Ship details:";
+print falcon.name;
+print falcon.speed;

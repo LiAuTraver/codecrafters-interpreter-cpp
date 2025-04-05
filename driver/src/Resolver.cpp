@@ -19,22 +19,26 @@ struct Resolver::scope_guard {
   inline constexpr explicit scope_guard(Resolver &resolver,
                                         ScopeType sc) noexcept
       : resolver(resolver) {
-    enclosing_scope = resolver.current_scope;
+    enclosing_scope_type = resolver.current_scope_type;
     // if sc == kNone, ignore it.
     if (sc != kNone) {
-      resolver.current_scope = sc;
+      resolver.current_scope_type = sc;
     }
     resolver.scopes.emplace_back();
   }
   inline constexpr ~scope_guard() noexcept {
     resolver.scopes.pop_back();
-    resolver.current_scope = enclosing_scope;
+    resolver.current_scope_type = enclosing_scope_type;
   }
+
+private:
   Resolver &resolver;
-  ScopeType enclosing_scope;
+  /// @brief represents the enclosing scope type.
+  ScopeType enclosing_scope_type;
 };
 
-Resolver::Resolver(class ::accat::loxo::interpreter &interpreter) : interpreter(interpreter) {}
+Resolver::Resolver(class ::accat::loxo::interpreter &interpreter)
+    : interpreter(interpreter) {}
 
 auto Resolver::resolve(
     const std::span<const std::shared_ptr<statement::Stmt>> stmts) const
@@ -140,6 +144,16 @@ auto Resolver::visit_impl(const expression::Get &expr) -> eval_result_t {
 auto Resolver::visit_impl(const expression::Set &expr) -> eval_result_t {
   return evaluate(*expr.object) && evaluate(*expr.value);
 }
+auto Resolver::visit_impl(const expression::This &expr) -> eval_result_t {
+  return current_class_type == ClassType::kNone
+             ? InvalidArgumentError(
+                   "[line {}] "
+                   "Error at '{}': Can't use 'this' outside of a "
+                   "class.",
+                   expr.name.line,
+                   expr.name.to_string(kDetailed))
+             : resolve_to_interp(expr, expr.name);
+}
 auto Resolver::evaluate_impl(const expression::Expr &expr) -> eval_result_t {
   return expr.accept(*this);
 }
@@ -170,7 +184,8 @@ auto Resolver::visit_impl(const statement::Expression &stmt) -> eval_result_t {
 }
 auto Resolver::visit_impl(const statement::If &stmt) -> eval_result_t {
   return evaluate(*stmt.condition) && execute(*stmt.then_branch) &&
-         (stmt.else_branch ? execute(*stmt.else_branch) : OkStatus());
+         (stmt.else_branch ? execute(*stmt.else_branch).as_status()
+                           : OkStatus());
 }
 auto Resolver::visit_impl(const statement::While &stmt) -> eval_result_t {
   return evaluate(*stmt.condition) && execute(*stmt.body);
@@ -188,10 +203,11 @@ auto Resolver::visit_impl(const statement::For &stmt) -> eval_result_t {
 
   scope_guard guard(*this, ScopeType::kNone);
 
-  return (stmt.initializer ? execute(*stmt.initializer) : OkStatus()) &&
+  return (stmt.initializer ? execute(*stmt.initializer).as_status()
+                           : OkStatus()) &&
          evaluate(*stmt.condition) &&
-         (stmt.body ? execute(*stmt.body) : OkStatus()) &&
-         (stmt.increment ? evaluate(*stmt.increment) : OkStatus());
+         (stmt.body ? execute(*stmt.body).as_status() : OkStatus()) &&
+         (stmt.increment ? evaluate(*stmt.increment).as_status() : OkStatus());
 }
 auto Resolver::visit_impl(const statement::Function &stmt) -> eval_result_t {
   return resolve(stmt, ScopeType::kFunction);
@@ -199,19 +215,27 @@ auto Resolver::visit_impl(const statement::Function &stmt) -> eval_result_t {
 auto Resolver::visit_impl(const statement::Class &stmt) -> eval_result_t {
   define(stmt.name);
 
-  Status res;
+  scope_guard guard(*this, ScopeType::kNone);
+  auto enclosing_class_type = this->current_class_type;
+  this->current_class_type = ClassType::kClass;
+  defer { this->current_class_type = enclosing_class_type; };
+
+  // TODO: define 'super' in the class scope.
+  this->scopes.back().emplace("this", true);
+
+  auto res = OkStatus();
   std::ranges::for_each(stmt.methods, [this, &res](const auto &method) {
-    res &= resolve(method, ScopeType::kClassMethod);
+    res &= resolve(method, ScopeType::kMethod);
   });
   return res;
 }
 auto Resolver::visit_impl(const statement::Return &stmt) -> eval_result_t {
-  if (this->current_scope == ScopeType::kNone)
+  if (this->current_scope_type == ScopeType::kNone)
     return {InvalidArgumentError("[line {}] Error at '{}': "
                                  "Can't return from top-level code.",
                                  stmt.line,
                                  "return")};
-  return stmt.value ? evaluate(*stmt.value) : OkStatus();
+  return stmt.value ? evaluate(*stmt.value).as_status() : OkStatus();
 }
 auto Resolver::execute_impl(const statement::Stmt &stmt) -> eval_result_t {
   return stmt.accept(*this);

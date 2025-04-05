@@ -209,12 +209,14 @@ public:
 private:
   Function(unsigned, native_function_t &&, const env_ptr_t &);
   Function(unsigned, custom_function_t &&, const env_ptr_t &);
+  Function(unsigned, const function_t &, const env_ptr_t &);
 
 public:
   static auto create_custom(unsigned, custom_function_t &&, const env_ptr_t &)
       -> Function;
   static auto create_native(unsigned, native_function_t &&, const env_ptr_t &)
       -> Function;
+  auto bind(const Instance &) const -> Function;
 
 public:
   virtual inline auto arity() const -> unsigned override { return my_arity; }
@@ -276,12 +278,29 @@ private:
 class Instance : public Evaluatable {
   using field_t = std::pair<string_type, eval_result_t>;
   using fields_t = std::unordered_map<string_type, eval_result_t>;
-
-private:
+  using fields_ptr_t = std::shared_ptr<fields_t>;
   using env_t = Callable::env_t;
   using env_ptr_t = Callable::env_ptr_t;
-  fields_t fields;
+
+private:
+  /// @note the current design flaw was rather big, storing value in variant as
+  /// result was great until class and instance comes in, which is stateful and
+  /// if copied, we're changing the state of the copy, not the original.
+  ///
+  /// Currently i have neither no desire nor the time to change it, so I have to
+  /// use shared_ptr to store class_env and class fields.
+  fields_ptr_t fields;
+  /// @note this is a bit of a hack, but it works for now.
+  /// We ought to store a (strong) reference to the Class object, but the class
+  /// object was inside variant and the unordered_map might move it when
+  /// rehashing; if the env was destroyed, the class object would be destroyed
+  /// too, but in language like js and C++, the class still works even if the
+  /// class was not visible outside a scope (in a word, classes defined in scope
+  /// only affect its usage for the user, restricting it in a specific scope,
+  /// much like a define-ed and undef-ed macro in C), the instance might
+  /// outlive. So we have to make it a strong reference.
   env_ptr_t class_env;
+  /// @note class name won't change(stateless), so we can store it as a value.
   string_type class_name;
 
 public:
@@ -289,11 +308,12 @@ public:
 
 public:
   auto get_field(std::string_view) const -> eval_result_t;
-  auto set_field(std::string_view, eval_result_t &&) -> auxilia::Status;
+  auto set_field(std::string_view, eval_result_t &&, bool = false)
+      -> auxilia::Status;
   auto to_string(const auxilia::FormatPolicy &) const -> string_type override;
 
 private:
-  auto get_class() const -> Class&;
+  auto get_class() const -> Class &;
 
 private:
   friend auto operator==(const Instance &lhs, const Instance &rhs) {

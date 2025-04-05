@@ -258,7 +258,10 @@ auto interpreter::evaluate_impl(const expression::Expr &expr) -> eval_result_t {
   auto res = expr.accept(*this);
   if (!res)
     return res;
-  dbg(info, "result: {}", res->underlying_string())
+  dbg(info,
+      "result: {}",
+      res->is_type<auxilia::Monostate>() ? "<nothing>"
+                                         : res->underlying_string())
   return last_expr_res.reset(*std::move(res));
 }
 auto interpreter::visit_impl(const statement::Return &expr) -> eval_result_t {
@@ -419,20 +422,24 @@ auto interpreter::visit_impl(const expression::Grouping &expr)
     -> eval_result_t {
   return {expr.expr->accept(*this)};
 }
-auto interpreter::visit_impl(const expression::Variable &expr)
+auto interpreter::find_variable(const expression::Expr &expr, const Token &name)
     -> eval_result_t {
   if (auto it = local_env.find(expr.shared_from_this());
       it != local_env.end()) {
-    return env->get_at_depth(it->second, expr.name.to_string(kDetailed));
+    return env->get_at_depth(it->second, name.to_string(kDetailed));
   }
-  if (auto res = Environment::Global()->get(expr.name.to_string(kDetailed));
+  if (auto res = Environment::Global()->get(name.to_string(kDetailed));
       !res.empty()) {
     return res;
   }
 
   return {auxilia::NotFoundError("Undefined variable '{}'.\n[line {}]",
-                                 expr.name.to_string(kDetailed),
-                                 expr.name.line)};
+                                 name.to_string(kDetailed),
+                                 name.line)};
+}
+auto interpreter::visit_impl(const expression::Variable &expr)
+    -> eval_result_t {
+  return find_variable(expr, expr.name);
 }
 auto interpreter::visit_impl(const expression::Assignment &expr)
     -> eval_result_t {
@@ -534,9 +541,12 @@ auto interpreter::visit_impl(const expression::Set &expr) -> eval_result_t {
   auto maybe_value = evaluate(*expr.value);
   if (!maybe_value)
     return maybe_value;
-
+  
   return {res->get<evaluation::Instance>().set_field(
       expr.field.to_string(kDetailed), *std::move(maybe_value))};
+}
+auto interpreter::visit_impl(const expression::This &expr) -> eval_result_t {
+  return find_variable(expr, expr.name);
 }
 
 auto interpreter::expr_to_string(

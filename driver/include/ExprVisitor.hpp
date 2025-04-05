@@ -45,6 +45,7 @@ private:
   virtual eval_result_t visit_impl(const Call &) = 0;
   virtual eval_result_t visit_impl(const Get &) = 0;
   virtual eval_result_t visit_impl(const Set &) = 0;
+  virtual eval_result_t visit_impl(const This&) = 0;
 
 private:
   virtual eval_result_t evaluate_impl(const Expr &) = 0;

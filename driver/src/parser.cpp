@@ -189,6 +189,8 @@ auto parser::primary() -> expr_ptr_t {
     return std::make_shared<expression::Literal>(this->get());
   if (inspect(kString))
     return std::make_shared<expression::Literal>(this->get());
+  if (inspect(kThis))
+    return std::make_shared<expression::This>(this->get());
   if (inspect(kIdentifier)) {
     return std::make_shared<expression::Variable>(this->get());
   }
