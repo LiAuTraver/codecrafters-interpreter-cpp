@@ -20,6 +20,7 @@ class LOXO_API TokenType : public auxilia::Printable,
                            public auxilia::Viewable {
 public:
   enum type_t : uint16_t;
+  using Viewable::string_view_type;
 
 public:
   enum type_t : uint16_t {

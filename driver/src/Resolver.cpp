@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <iterator>
 #include <string>
+#include <utility>
 
 #include "Token.hpp"
 #include "expression.hpp"
@@ -54,7 +55,7 @@ auto Resolver::resolve_to_interp(const expression::Expr &expr,
                                  const Token &token) -> eval_result_t {
   for (auto it = scopes.rbegin(); it != scopes.rend(); ++it)
     if (it->contains(token.to_string(kDetailed))) {
-      interpreter.resolve(expr, std::ranges::distance(scopes.rbegin(), it));
+      interpreter.resolve(expr.shared_from_this(), std::ranges::distance(scopes.rbegin(), it));
       return {};
     }
   return {};
@@ -169,7 +170,7 @@ auto Resolver::visit_impl(const statement::Variable &stmt) -> eval_result_t {
 
   declare(stmt.name);
 
-  if (stmt.has_initilizer())
+  if (stmt.has_initializer())
     if (auto res = evaluate(*stmt.initializer); !res)
       return res;
 
@@ -222,7 +223,24 @@ auto Resolver::visit_impl(const statement::Class &stmt) -> eval_result_t {
 
   // TODO: define 'super' in the class scope.
   this->scopes.back().emplace("this", true);
-
+  
+  if (!stmt.superclass.is_type(TokenType::kMonostate)) {
+    // has superclass.
+    if (stmt.name == stmt.superclass) {
+      return {InvalidArgumentError("[line {}] Error at '{}': "
+                                   "A class can't inherit from itself.",
+                                   stmt.superclass.line,
+                                   stmt.superclass.to_string(kDetailed))};
+    
+    }
+    expression::Variable sup;
+    sup.name = stmt.superclass;
+    if (auto res = evaluate(sup); !res) {
+      return res;
+    }
+    this->scopes.back().emplace("super", true);
+  }
+  
   auto res = OkStatus();
   std::ranges::for_each(stmt.methods, [this, &res](const auto &method) {
     res &= resolve(method, method.name.to_string(kDetailed) == "init"

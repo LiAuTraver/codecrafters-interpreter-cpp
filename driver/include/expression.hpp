@@ -103,6 +103,7 @@ public:
 
 class Variable : public Expr {
 public:
+  constexpr Variable() = default;
   explicit Variable(token_t &&);
   virtual ~Variable() override = default;
 

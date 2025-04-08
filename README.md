@@ -56,7 +56,7 @@ declaration    -> varDecl
 
 varDecl        -> "var" IDENTIFIER ( "=" expression )? ";" ;
 funcDecl   -> "fun" function ;
-classDecl  -> "class" IDENTIFIER ( "{" function* "}" )? ;  
+classDecl  -> "class" IDENTIFIER ("<" IDENTIFIER )? ( "{" function* "}" )? ;  
 ```
 
 ### Statement

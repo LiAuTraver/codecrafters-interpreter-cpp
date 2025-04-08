@@ -12,7 +12,6 @@
 #include <utility>
 #include <vector>
 
-#include "accat/auxilia/details/Status.hpp"
 #include "details/loxo_fwd.hpp"
 
 #include "details/lex_error.hpp"

@@ -40,13 +40,13 @@ private:
 };
 class Variable : public Stmt {
 public:
-  // TODO: move or copy the token or reference it?
-  Variable(Token name, expr_ptr_t initializer)
+  Variable() = default;
+  Variable(token_t &&name, expr_ptr_t &&initializer)
       : name(std::move(name)), initializer(std::move(initializer)) {}
   virtual ~Variable() override = default;
 
 public:
-  AC_CONSTEXPR20 auto inline has_initilizer() const noexcept -> bool {
+  AC_CONSTEXPR20 auto inline has_initializer() const noexcept -> bool {
     return initializer != nullptr;
   }
 
@@ -223,12 +223,16 @@ private:
 class Class : public Stmt {
 public:
   token_t name;
+  token_t superclass;
   std::vector<Function> methods;
 
 public:
   constexpr Class() = default;
-  explicit Class(token_t &&name, std::vector<Function> &&methods)
-      : name(std::move(name)), methods(std::move(methods)) {}
+  explicit Class(token_t &&name,
+                 token_t &&superclass,
+                 std::vector<Function> &&methods)
+      : name(std::move(name)), superclass(std::move(superclass)),
+        methods(std::move(methods)) {}
   virtual ~Class() = default;
 
 public:

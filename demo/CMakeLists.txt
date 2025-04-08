@@ -12,5 +12,6 @@ add_executable(demo
 target_link_libraries(demo PUBLIC
   fmt::fmt
   spdlog::spdlog
+  auxilia::auxilia
 )
 add_folder(Demos)

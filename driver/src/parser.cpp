@@ -337,12 +337,23 @@ auto parser::get_methods() -> std::vector<statement::Function> {
 auto parser::class_stmt() -> stmt_ptr_t {
   auto name = this->get();
 
+  token_t superclass = token_t{};
+  if (inspect(kLess)) {
+    this->get();
+    if (!inspect(kIdentifier)) {
+      throw synchronize(
+          {parse_error::kUnknownError, "Expect superclass name."});
+    }
+    superclass = this->get();
+  }
+
   if (!inspect(kLeftBrace)) {
     throw synchronize(
         {parse_error::kMissingBrace, "Expect '{' before class body."});
   }
   this->get();
-  return std::make_shared<statement::Class>(std::move(name), get_methods());
+  return std::make_shared<statement::Class>(
+      std::move(name), std::move(superclass), get_methods());
 }
 auto parser::get_condition() -> expr_ptr_t {
   if (!inspect(kLeftParen)) {

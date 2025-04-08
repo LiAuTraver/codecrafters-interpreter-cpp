@@ -325,7 +325,7 @@ auto Function::call(interpreter &interpreter, args_t &&args) -> eval_result_t {
               auto my_result = interpreter.get_result();
               // FIXME: i my logic was completely gone here: `last_expr`
               //              itself was a mistake!
-              dbg(info, "returning: {}", my_result->underlying_string())
+              dbg(info, "returning: {}", my_result->to_string())
               return my_result;
             }
             // else, error, return as is

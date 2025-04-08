@@ -50,8 +50,8 @@ auto interpreter::interpret(
 
   return {};
 }
-size_t interpreter::resolve(const expression::Expr &expr, const size_t depth) {
-  return local_env.emplace(expr.shared_from_this(), depth).second;
+size_t interpreter::resolve(const std::shared_ptr<const expression::Expr>& expr, const size_t depth) {
+  return local_env.emplace(expr, depth).second;
 }
 
 auto interpreter::set_env(const env_ptr_t &new_env) -> interpreter & {
@@ -100,7 +100,7 @@ auto interpreter::get_call_args(const expression::Call &expr) const
 }
 auto interpreter::visit_impl(const statement::Variable &stmt) -> eval_result_t {
 
-  if (stmt.has_initilizer()) {
+  if (stmt.has_initializer()) {
     auto eval_res = evaluate(*stmt.initializer);
     if (!eval_res)
       return eval_res;
@@ -109,7 +109,7 @@ auto interpreter::visit_impl(const statement::Variable &stmt) -> eval_result_t {
     dbg(trace,
         "variable name: {}, value: {}",
         stmt.name.literal.get<string_view_type>(),
-        eval_res->underlying_string())
+        eval_res->to_string())
     // string view failed again; not null-terminated
     return {
         env->add(stmt.name.to_string(kDetailed), *eval_res, stmt.name.line)};
@@ -265,7 +265,7 @@ auto interpreter::evaluate_impl(const expression::Expr &expr) -> eval_result_t {
   dbg(info,
       "result: {}",
       res->is_type<auxilia::Monostate>() ? "<nothing>"
-                                         : res->underlying_string())
+                                         : res->to_string())
   return last_expr_res.reset(*std::move(res));
 }
 auto interpreter::visit_impl(const statement::Return &expr) -> eval_result_t {
@@ -279,11 +279,11 @@ auto interpreter::visit_impl(const statement::Return &expr) -> eval_result_t {
     return Returning({{evaluation::NilValue}});
   }
   auto res = evaluate(*expr.value);
-  dbg(info, "return value: {}", res->underlying_string())
+  dbg(info, "return value: {}", res->to_string())
   if (!res) {
     return res;
   }
-  dbg(trace, "result: {}", res->underlying_string())
+  dbg(trace, "result: {}", res->to_string())
   return Returning(*res);
 }
 auto interpreter::visit_impl(const expression::Literal &expr) -> eval_result_t {
@@ -560,7 +560,7 @@ auto interpreter::expr_to_string(
 auto interpreter::value_to_string(const auxilia::FormatPolicy &format_policy,
                                   const eval_result_t &value) const
     -> string_type {
-  return value->underlying_string(format_policy);
+  return value->to_string(format_policy);
 }
 auto interpreter::to_string(const auxilia::FormatPolicy &format_policy) const
     -> string_type {

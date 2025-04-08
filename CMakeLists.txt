@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.21...3.31 FATAL_ERROR)
 project(loxo VERSION 1.0.0 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 26)
 set(CMAKE_C_STANDARD 23)
@@ -9,11 +9,6 @@ set(CMAKE_C_STANDARD 23)
 set_property(GLOBAL PROPERTY CTEST_TARGETS_ADDED 1)
 
 include(cmake/prelude.cmake)
-if(PROJECT_IS_TOP_LEVEL)
-set(LOXO_PROJECT_IS_TOP_LEVEL ON)
-else()  
-set(LOXO_PROJECT_IS_TOP_LEVEL OFF)
-endif(PROJECT_IS_TOP_LEVEL)
 include(cmake/folder.cmake)
 
 # for codecrafters' test
@@ -27,11 +22,6 @@ endif()
 include_directories(driver/include)
 include_directories(packages)
 include_directories(shared)
-
-if(${CMAKE_GENERATOR} MATCHES "Visual Studio")
-  message(STATUS "Visual Studio detected")
-  include_directories("C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.42.34433/include")
-endif()
 
 option(AC_CPP_DEBUG "set the environment variable AC_CPP_DEBUG to enable debug mode" OFF)
 option(LOXO_BUILD_SHARED "build shared library" OFF)
@@ -74,10 +64,10 @@ if(AC_CPP_DEBUG)
 else()
   add_compile_options(-Wno-attributes)
   include(ExternalProject)
-  
+
   # Set where to place the headers
   set(AUXILIA_INCLUDE_DIR ${CMAKE_BINARY_DIR}/auxilia-src/include)
-  
+
   # Download but don't build
   ExternalProject_Add(auxilia_download
     GIT_REPOSITORY https://github.com/LiAuTraver/auxilia.git
@@ -87,13 +77,13 @@ else()
     BUILD_COMMAND ""
     INSTALL_COMMAND ""
   )
-  
+
   # Create interface library
   add_library(auxilia INTERFACE)
   add_library(auxilia::auxilia ALIAS auxilia)
   target_include_directories(auxilia INTERFACE ${AUXILIA_INCLUDE_DIR})
   target_compile_features(auxilia INTERFACE cxx_std_23)
-  
+
   # Make sure library depends on download completion
   add_dependencies(auxilia auxilia_download)
 endif()
