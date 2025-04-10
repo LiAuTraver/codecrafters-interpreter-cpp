@@ -39,6 +39,11 @@ public:
   auto accept(const DerivedVisitor &visitor) const {
     return accept_impl(visitor);
   }
+  auto operator==(const Expr &that) const -> bool {
+    return this == &that ||
+           (typeid(*this) == typeid(that) && doEqual(*this, that));
+  }
+  auto operator!=(const Expr &that) const -> bool { return !(*this == that); }
 
 public:
   virtual auto to_string(const auxilia::FormatPolicy &) const
@@ -46,6 +51,7 @@ public:
 
 private:
   virtual expr_result_t accept_impl(const ExprVisitor &) const = 0;
+  virtual auto doEqual(const Expr &lhs, const Expr &rhs) const -> bool = 0;
 };
 /// @implements Expr
 class Literal : public Expr {
@@ -55,6 +61,11 @@ public:
 
 private:
   virtual auto accept_impl(const ExprVisitor &) const -> expr_result_t override;
+  virtual auto doEqual(const Expr &lhs, const Expr &rhs) const
+      -> bool override {
+    return static_cast<const Literal &>(lhs).literal ==
+           static_cast<const Literal &>(rhs).literal;
+  }
 
 public:
   virtual auto to_string(const auxilia::FormatPolicy &) const
@@ -72,6 +83,13 @@ public:
 
 private:
   virtual auto accept_impl(const ExprVisitor &) const -> expr_result_t override;
+  virtual auto doEqual(const Expr &lhs, const Expr &rhs) const
+      -> bool override {
+    return static_cast<const Unary &>(lhs).op ==
+               static_cast<const Unary &>(rhs).op &&
+           *static_cast<const Unary &>(lhs).expr ==
+               *static_cast<const Unary &>(rhs).expr;
+  }
 
 public:
   virtual auto to_string(const auxilia::FormatPolicy &) const
@@ -90,6 +108,15 @@ public:
 
 private:
   virtual auto accept_impl(const ExprVisitor &) const -> expr_result_t override;
+  virtual auto doEqual(const Expr &lhs, const Expr &rhs) const
+      -> bool override {
+    return static_cast<const Binary &>(lhs).op ==
+               static_cast<const Binary &>(rhs).op &&
+           *static_cast<const Binary &>(lhs).left ==
+               *static_cast<const Binary &>(rhs).left &&
+           *static_cast<const Binary &>(lhs).right ==
+               *static_cast<const Binary &>(rhs).right;
+  }
 
 public:
   virtual auto to_string(const auxilia::FormatPolicy &) const
@@ -113,6 +140,11 @@ public:
 private:
   auto accept_impl(const ExprVisitor &) const -> expr_result_t override;
 
+  auto doEqual(const Expr &lhs, const Expr &rhs) const -> bool override {
+    return static_cast<const Variable &>(lhs).name ==
+           static_cast<const Variable &>(rhs).name;
+  }
+
 public:
   auto to_string(const auxilia::FormatPolicy &) const -> string_type override;
 };
@@ -124,6 +156,11 @@ public:
 
 private:
   virtual auto accept_impl(const ExprVisitor &) const -> expr_result_t override;
+  virtual auto doEqual(const Expr &lhs, const Expr &rhs) const
+      -> bool override {
+    return *static_cast<const Grouping &>(lhs).expr ==
+           *static_cast<const Grouping &>(rhs).expr;
+  }
 
 public:
   virtual auto to_string(const auxilia::FormatPolicy &) const
@@ -145,6 +182,13 @@ public:
 
 private:
   virtual auto accept_impl(const ExprVisitor &) const -> expr_result_t override;
+  virtual auto doEqual(const Expr &lhs, const Expr &rhs) const
+      -> bool override {
+    return static_cast<const Assignment &>(lhs).name ==
+               static_cast<const Assignment &>(rhs).name &&
+           *static_cast<const Assignment &>(lhs).value_expr ==
+               *static_cast<const Assignment &>(rhs).value_expr;
+  }
 
 public:
   virtual auto to_string(const auxilia::FormatPolicy &) const
@@ -163,10 +207,20 @@ public:
   expr_ptr_t right;
 
 private:
+  virtual auto accept_impl(const ExprVisitor &) const -> expr_result_t override;
+  virtual auto doEqual(const Expr &lhs, const Expr &rhs) const
+      -> bool override {
+    return static_cast<const Logical &>(lhs).op.type ==
+               static_cast<const Logical &>(rhs).op.type &&
+           *static_cast<const Logical &>(lhs).left ==
+               *static_cast<const Logical &>(rhs).left &&
+           *static_cast<const Logical &>(lhs).right ==
+               *static_cast<const Logical &>(rhs).right;
+  }
+
 public:
   virtual auto to_string(const auxilia::FormatPolicy &) const
       -> string_type override;
-  virtual auto accept_impl(const ExprVisitor &) const -> expr_result_t override;
 };
 class Call : public Expr {
 public:
@@ -179,9 +233,15 @@ public:
   std::vector<expr_ptr_t> args;
 
 private:
+  expr_result_t accept_impl(const ExprVisitor &) const override;
+  auto doEqual(const Expr &lhs, const Expr &rhs) const -> bool override {
+    return *static_cast<const Call &>(lhs).callee ==
+               *static_cast<const Call &>(rhs).callee &&
+           static_cast<const Call &>(lhs).args ==
+               static_cast<const Call &>(rhs).args;
+  }
 public:
   auto to_string(const auxilia::FormatPolicy &) const -> string_type override;
-  expr_result_t accept_impl(const ExprVisitor &) const override;
 };
 
 class Get : public Expr {
@@ -195,7 +255,12 @@ public:
 
 private:
   auto accept_impl(const ExprVisitor &) const -> expr_result_t override;
-
+  auto doEqual(const Expr &lhs, const Expr &rhs) const -> bool override {
+    return *static_cast<const Get &>(lhs).object ==
+               *static_cast<const Get &>(rhs).object &&
+           static_cast<const Get &>(lhs).field ==
+               static_cast<const Get &>(rhs).field;
+  }
 public:
   auto to_string(const auxilia::FormatPolicy &) const -> string_type override;
 };
@@ -203,6 +268,7 @@ public:
 class Set : public Expr {
 public:
   Set(expr_ptr_t &&, token_t &&, expr_ptr_t &&);
+
 public:
   expr_ptr_t object;
   token_t field;
@@ -210,25 +276,35 @@ public:
 
 private:
   auto accept_impl(const ExprVisitor &) const -> expr_result_t override;
-
+  auto doEqual(const Expr &lhs, const Expr &rhs) const -> bool override {
+    return *static_cast<const Set &>(lhs).object ==
+               *static_cast<const Set &>(rhs).object &&
+           static_cast<const Set &>(lhs).field ==
+               static_cast<const Set &>(rhs).field &&
+           *static_cast<const Set &>(lhs).value ==
+               *static_cast<const Set &>(rhs).value;
+  }
 public:
   auto to_string(const auxilia::FormatPolicy &) const -> string_type override;
 };
 
-class This : public Expr, public  auxilia::Viewable {
+class This : public Expr, public auxilia::Viewable {
 public:
   This(token_t &&);
   virtual ~This() override = default;
 
 public:
   token_t name;
-  
+
 private:
   auto accept_impl(const ExprVisitor &) const -> expr_result_t override;
-
+  auto doEqual(const Expr &lhs, const Expr &rhs) const -> bool override {
+    return static_cast<const This &>(lhs).name ==
+           static_cast<const This &>(rhs).name;
+  }
 public:
   auto to_string(const auxilia::FormatPolicy &) const -> string_type override;
-  auto to_string_view(const auxilia::FormatPolicy&) const -> string_view_type;
+  auto to_string_view(const auxilia::FormatPolicy &) const -> string_view_type;
 };
 
 } // namespace accat::loxo::expression

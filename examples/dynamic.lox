@@ -1,16 +1,21 @@
-fun add(a,b){
-  print "can see me";
-  return a + b;
-  print "cannot see me";
-  return a - b;
+class Base{
+  init() {
+    print "Base constructor called";
+  }
 }
 
-print add(1,2);
-
-
-fun divide(a,b){
-  return a / b;
+class Derived < Base {
+  init() {
+    // super.init();
+    print "Derived constructor called";
+  }
 }
 
-print "divide by 0 is not allowed. will show 'nan'.";
-print divide(1,0);
+var d = Derived();
+print d;
+
+var NotAClass = "I am totally not a class";
+
+class Subclass < NotAClass {}
+
+print Subclass; 

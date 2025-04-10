@@ -233,9 +233,9 @@ auto Resolver::visit_impl(const statement::Class &stmt) -> eval_result_t {
                                    stmt.superclass.to_string(kDetailed))};
     
     }
-    expression::Variable sup;
-    sup.name = stmt.superclass;
-    if (auto res = evaluate(sup); !res) {
+    auto sup = std::make_shared<expression::Variable>();
+    sup->name = stmt.superclass;
+    if (auto res = evaluate(*sup); !res) {
       return res;
     }
     this->scopes.back().emplace("super", true);

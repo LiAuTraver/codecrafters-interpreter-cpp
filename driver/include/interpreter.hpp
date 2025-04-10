@@ -21,6 +21,25 @@
 
 namespace accat::loxo {
 
+template <typename SmartPtr>
+concept SmartPtrLike = requires(SmartPtr ptr) {
+  { ptr.get() } -> std::same_as<typename SmartPtr::element_type *>;
+  { ptr.operator->() } -> std::same_as<typename SmartPtr::element_type *>;
+  { ptr.operator*() } -> std::same_as<typename SmartPtr::element_type &>;
+};
+template <SmartPtrLike SmartPtr> struct Hasher {
+  std::size_t operator()(const SmartPtr &ptr) const {
+    return std::hash<std::uintptr_t>()(
+        reinterpret_cast<std::uintptr_t>(ptr.get()));
+  }
+};
+
+template <SmartPtrLike SmartPtr> struct Equal {
+  bool operator()(const SmartPtr &lhs, const SmartPtr &rhs) const {
+    return *lhs == *rhs;
+  }
+};
+
 /// @implements expression::ExprVisitor
 class LOXO_API interpreter : public auxilia::Printable,
                              virtual public expression::ExprVisitor,
@@ -33,13 +52,15 @@ public:
   using env_t = Environment;
   using env_ptr_t = std::shared_ptr<env_t>;
   using local_env_t =
-      std::unordered_map<std::shared_ptr<const expression::Expr>, size_t>;
+      std::unordered_map<std::shared_ptr<const expression::Expr>, size_t,
+                         Hasher<std::shared_ptr<const expression::Expr>>,
+                         Equal<std::shared_ptr<const expression::Expr>>>;
 
 public:
   eval_result_t interpret(std::span<std::shared_ptr<statement::Stmt>>);
   auto set_env(const env_ptr_t &) -> interpreter &;
   auto get_current_env() { return env; }
-  size_t resolve(const std::shared_ptr<const expression::Expr>&, size_t);
+  size_t resolve(const std::shared_ptr<const expression::Expr> &, size_t);
 
 private:
   virtual auto visit_impl(const expression::Literal &)
@@ -57,7 +78,7 @@ private:
   virtual auto visit_impl(const expression::Call &) -> eval_result_t override;
   virtual auto visit_impl(const expression::Get &) -> eval_result_t override;
   virtual auto visit_impl(const expression::Set &) -> eval_result_t override;
-  virtual auto visit_impl(const expression::This&) -> eval_result_t override;
+  virtual auto visit_impl(const expression::This &) -> eval_result_t override;
 
 private:
   virtual auto evaluate_impl(const expression::Expr &)
@@ -72,8 +93,9 @@ private:
                                     const eval_result_t &) const;
   auto get_call_args(const expression::Call &) const
       -> auxilia::StatusOr<std::vector<variant_type>>;
-  auto get_function(const statement::Function &, bool = false) -> evaluation::Function;
-  auto find_variable(const expression::Expr &, const Token&) -> eval_result_t;
+  auto get_function(const statement::Function &, bool = false)
+      -> evaluation::Function;
+  auto find_variable(const expression::Expr &, const Token &) -> eval_result_t;
 
 private:
   virtual auto visit_impl(const statement::Variable &)

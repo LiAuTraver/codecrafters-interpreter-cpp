@@ -50,7 +50,8 @@ auto interpreter::interpret(
 
   return {};
 }
-size_t interpreter::resolve(const std::shared_ptr<const expression::Expr>& expr, const size_t depth) {
+size_t interpreter::resolve(const std::shared_ptr<const expression::Expr> &expr,
+                            const size_t depth) {
   return local_env.emplace(expr, depth).second;
 }
 
@@ -226,6 +227,20 @@ auto interpreter::visit_impl(const statement::Class &stmt) -> eval_result_t {
   if (auto res = env->find(stmt.name.to_string(kDetailed)); res) {
     TODO(...)
   }
+  auto sup = std::make_shared<expression::Variable>();
+  if (!stmt.superclass.is_type(kMonostate)) {
+    sup->name = stmt.superclass;
+    auto res = evaluate(*sup);
+    if (!res)
+      return res;
+    if (!res->is_type<evaluation::Class>()) {
+      return auxilia::InvalidArgumentError(
+          "Superclass must be a class.\n[line {}]", stmt.superclass.line);
+    }
+  }
+
+  TODO(too late today, tomorrow start from here !)
+
   evaluation::Class::methods_t methods;
   std::ranges::for_each(stmt.methods, [this, &methods](auto &&method) {
     auto name = method.name.to_string(kDetailed);
@@ -264,8 +279,7 @@ auto interpreter::evaluate_impl(const expression::Expr &expr) -> eval_result_t {
     return res;
   dbg(info,
       "result: {}",
-      res->is_type<auxilia::Monostate>() ? "<nothing>"
-                                         : res->to_string())
+      res->is_type<auxilia::Monostate>() ? "<nothing>" : res->to_string())
   return last_expr_res.reset(*std::move(res));
 }
 auto interpreter::visit_impl(const statement::Return &expr) -> eval_result_t {

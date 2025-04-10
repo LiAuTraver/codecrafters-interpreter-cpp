@@ -13,5 +13,6 @@ target_link_libraries(demo PUBLIC
   fmt::fmt
   spdlog::spdlog
   auxilia::auxilia
+  driver
 )
 add_folder(Demos)

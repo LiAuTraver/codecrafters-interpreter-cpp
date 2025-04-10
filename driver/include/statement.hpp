@@ -46,7 +46,7 @@ public:
   virtual ~Variable() override = default;
 
 public:
-  AC_CONSTEXPR20 auto inline has_initializer() const noexcept -> bool {
+  auto inline has_initializer() const noexcept -> bool {
     return initializer != nullptr;
   }
 
