@@ -19,25 +19,25 @@ public:
     requires std::is_base_of_v<Stmt, DerivedStmt>
   auto visit(const DerivedStmt &stmt) const {
     // workaround
-    return const_cast<StmtVisitor *>(this)->visit_impl(stmt);
+    return const_cast<StmtVisitor *>(this)->visit2(stmt);
   }
   auto execute(const Stmt &stmt) const {
     // workaround
-    return const_cast<StmtVisitor *>(this)->execute_impl(stmt);
+    return const_cast<StmtVisitor *>(this)->execute4(stmt);
   }
 
 private:
-  virtual eval_result_t visit_impl(const Variable &) = 0;
-  virtual eval_result_t visit_impl(const Print &) = 0;
-  virtual eval_result_t visit_impl(const Expression &) = 0;
-  virtual eval_result_t visit_impl(const Block &) = 0;
-  virtual eval_result_t visit_impl(const If &) = 0;
-  virtual eval_result_t visit_impl(const While &) = 0;
-  virtual eval_result_t visit_impl(const For &) = 0;
-  virtual eval_result_t visit_impl(const Function &) = 0;
-  virtual eval_result_t visit_impl(const Class &) = 0;
-  virtual eval_result_t visit_impl(const Return &) = 0;
-  virtual eval_result_t execute_impl(const Stmt &) = 0;
+  virtual eval_result_t visit2(const Variable &) = 0;
+  virtual eval_result_t visit2(const Print &) = 0;
+  virtual eval_result_t visit2(const Expression &) = 0;
+  virtual eval_result_t visit2(const Block &) = 0;
+  virtual eval_result_t visit2(const If &) = 0;
+  virtual eval_result_t visit2(const While &) = 0;
+  virtual eval_result_t visit2(const For &) = 0;
+  virtual eval_result_t visit2(const Function &) = 0;
+  virtual eval_result_t visit2(const Class &) = 0;
+  virtual eval_result_t visit2(const Return &) = 0;
+  virtual eval_result_t execute4(const Stmt &) = 0;
 
 public:
   virtual ~StmtVisitor() = default;

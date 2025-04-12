@@ -325,7 +325,7 @@ auto Function::call(interpreter &interpreter, args_t &&args) -> eval_result_t {
               auto my_result = interpreter.get_result();
               // FIXME: i my logic was completely gone here: `last_expr`
               //              itself was a mistake!
-              dbg(info, "returning: {}", my_result->underlying_string())
+              dbg(info, "returning: {}", my_result->to_string())
               return my_result;
             }
             // else, error, return as is
@@ -334,7 +334,7 @@ auto Function::call(interpreter &interpreter, args_t &&args) -> eval_result_t {
         }
         if (is_initializer) {
           dbg(info, "constructor, returning this.")
-          return {my_env->get_at_depth(0, "this")};
+          return {*my_env->get_at_depth(0, "this")};
         }
         dbg(info, "void function, returning nil.")
         return {{NilValue}};
@@ -398,7 +398,8 @@ auto Instance::get_field(const std::string_view name) const -> eval_result_t {
     return it->second;
   // if field not found, find method
   // clang-format off
-  return get_class()
+  return this
+      ->get_class()
       .get_method(name)
       .transform(
         [&](auto &&method) -> IVisitor::variant_type {

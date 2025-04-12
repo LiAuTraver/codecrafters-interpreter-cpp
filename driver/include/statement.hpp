@@ -28,7 +28,7 @@ public:
   template <typename DerivedVisitor>
     requires std::is_base_of_v<StmtVisitor, DerivedVisitor>
   auto accept(const DerivedVisitor &visitor) const {
-    return accept_impl(visitor);
+    return accept2(visitor);
   }
 
 public:
@@ -36,17 +36,17 @@ public:
       -> string_type = 0;
 
 private:
-  virtual stmt_result_t accept_impl(const StmtVisitor &) const = 0;
+  virtual stmt_result_t accept2(const StmtVisitor &) const = 0;
 };
 class Variable : public Stmt {
 public:
-  // TODO: move or copy the token or reference it?
-  Variable(Token name, expr_ptr_t initializer)
+  Variable() = default;
+  Variable(token_t &&name, expr_ptr_t &&initializer)
       : name(std::move(name)), initializer(std::move(initializer)) {}
   virtual ~Variable() override = default;
 
 public:
-  AC_CONSTEXPR20 auto inline has_initilizer() const noexcept -> bool {
+  auto inline has_initializer() const noexcept -> bool {
     return initializer != nullptr;
   }
 
@@ -55,7 +55,7 @@ public:
   expr_ptr_t initializer;
 
 private:
-  auto accept_impl(const StmtVisitor &) const -> stmt_result_t override;
+  auto accept2(const StmtVisitor &) const -> stmt_result_t override;
 
 public:
   virtual auto to_string(const auxilia::FormatPolicy &) const
@@ -76,7 +76,7 @@ public:
       -> string_type override;
 
 private:
-  auto accept_impl(const StmtVisitor &) const -> stmt_result_t override;
+  auto accept2(const StmtVisitor &) const -> stmt_result_t override;
 };
 class Expression : public Stmt {
 public:
@@ -92,7 +92,7 @@ public:
       -> string_type override;
 
 private:
-  auto accept_impl(const StmtVisitor &) const -> stmt_result_t override;
+  auto accept2(const StmtVisitor &) const -> stmt_result_t override;
 };
 class Block : public Stmt {
 public:
@@ -109,7 +109,7 @@ public:
       -> string_type override;
 
 private:
-  auto accept_impl(const StmtVisitor &) const -> stmt_result_t override;
+  auto accept2(const StmtVisitor &) const -> stmt_result_t override;
 };
 
 class If : public Stmt {
@@ -132,7 +132,7 @@ public:
       -> string_type override;
 
 private:
-  auto accept_impl(const StmtVisitor &) const -> stmt_result_t override;
+  auto accept2(const StmtVisitor &) const -> stmt_result_t override;
 };
 
 class While : public Stmt {
@@ -151,7 +151,7 @@ public:
       -> string_type override;
 
 private:
-  auto accept_impl(const StmtVisitor &) const -> stmt_result_t override;
+  auto accept2(const StmtVisitor &) const -> stmt_result_t override;
 };
 
 /// @todo: This ought to be desugared to `while` statement in parser.
@@ -177,7 +177,7 @@ public:
       -> string_type override;
 
 private:
-  auto accept_impl(const StmtVisitor &) const -> stmt_result_t override;
+  auto accept2(const StmtVisitor &) const -> stmt_result_t override;
 };
 
 class Return : public Stmt {
@@ -196,7 +196,7 @@ public:
       -> string_type override;
 
 private:
-  auto accept_impl(const StmtVisitor &) const -> stmt_result_t override;
+  auto accept2(const StmtVisitor &) const -> stmt_result_t override;
 };
 class Function : public Stmt {
 public:
@@ -218,17 +218,21 @@ public:
       -> string_type override;
 
 private:
-  auto accept_impl(const StmtVisitor &) const -> stmt_result_t override;
+  auto accept2(const StmtVisitor &) const -> stmt_result_t override;
 };
 class Class : public Stmt {
 public:
   token_t name;
+  token_t superclass;
   std::vector<Function> methods;
 
 public:
   constexpr Class() = default;
-  explicit Class(token_t &&name, std::vector<Function> &&methods)
-      : name(std::move(name)), methods(std::move(methods)) {}
+  explicit Class(token_t &&name,
+                 token_t &&superclass,
+                 std::vector<Function> &&methods)
+      : name(std::move(name)), superclass(std::move(superclass)),
+        methods(std::move(methods)) {}
   virtual ~Class() = default;
 
 public:
@@ -236,6 +240,6 @@ public:
       -> string_type override;
 
 private:
-  auto accept_impl(const StmtVisitor &) const -> stmt_result_t override;
+  auto accept2(const StmtVisitor &) const -> stmt_result_t override;
 };
 } // namespace accat::loxo::statement

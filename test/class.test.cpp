@@ -207,3 +207,19 @@ TEST(class, ctor_return4) {
             "initializer.\n");
   EXPECT_EQ(callback, 65);
 }
+
+TEST(class, inheritance_basic) {
+  const auto path = LOXO_ROOT_DIR R"(\examples\class\inheritance.basic.lox)";
+  auto [callback, str] = get_result(path);
+  EXPECT_EQ(str,
+            "Doughnut instance\n"
+            "BostonCream instance\n"
+            "A instance\n"
+            "B instance\n"
+            "C instance\n"
+            "Vehicle instance\n"
+            "Car instance\n"
+            "Sedan instance\n"
+            "Truck instance\n");
+  EXPECT_EQ(callback, 0);
+}

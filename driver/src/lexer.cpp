@@ -3,7 +3,6 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
-#include <locale>
 #include <source_location>
 #include <sstream>
 #include <string>
@@ -12,7 +11,6 @@
 #include <utility>
 #include <vector>
 
-#include "accat/auxilia/details/Status.hpp"
 #include "details/loxo_fwd.hpp"
 
 #include "details/lex_error.hpp"
@@ -188,11 +186,11 @@ void lexer::next_token() {
       return add_string();
     }
     // first, numbers(order matters!)
-    if (std::isdigit(c, std::locale())) {
+    if (std::isdigit(c)) {
       return add_number();
     }
     // finally, letters
-    if (std::isalpha(c, std::locale()) or c == '_') {
+    if (std::isalpha(c) or c == '_') {
       return add_identifier_and_keyword();
     }
     add_lex_error(error_t::kUnexpectedCharacter);
@@ -253,14 +251,14 @@ lexer::status_t::Code lexer::lex_string() {
   return status_t::kOk;
 }
 auto lexer::lex_number(const bool is_negative) -> literal_type {
-  while (std::isdigit(peek(), std::locale())) {
+  while (std::isdigit(peek())) {
     get();
   }
   bool is_floating_point = false;
   // maybe a '.'?
-  if (peek() == '.' && std::isdigit(peek(1), std::locale())) {
+  if (peek() == '.' && std::isdigit(peek(1))) {
     get(); // consume the '.'
-    while (std::isdigit(peek(), std::locale())) {
+    while (std::isdigit(peek())) {
       get();
     }
     // 123.456_
@@ -288,7 +286,7 @@ auto lexer::get_tokens() -> tokens_t & { return tokens; }
 bool lexer::ok() const noexcept { return !error_count; }
 uint_least32_t lexer::error() const noexcept { return error_count; }
 lexer::string_view_type lexer::lex_identifier() {
-  while (std::isalnum(peek(), std::locale()) ||
+  while (std::isalnum(peek()) ||
          tolerable_chars.find(peek()) != string_view_type::npos) {
     get();
   }

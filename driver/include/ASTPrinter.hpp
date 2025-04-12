@@ -19,18 +19,19 @@ public:
   virtual ~ASTPrinter() override = default;
 
 private:
-  virtual eval_result_t visit_impl(const Literal &) override;
-  virtual eval_result_t visit_impl(const Unary &) override;
-  virtual eval_result_t visit_impl(const Binary &) override;
-  virtual eval_result_t visit_impl(const Grouping &) override;
-  virtual eval_result_t visit_impl(const Variable &) override;
-  virtual eval_result_t visit_impl(const Assignment &) override;
-  virtual eval_result_t visit_impl(const Logical &) override;
-  virtual eval_result_t visit_impl(const Call &) override;
-  virtual eval_result_t visit_impl(const Get &) override;
-  virtual eval_result_t visit_impl(const Set &) override;
-  virtual eval_result_t visit_impl(const This &) override;
-  virtual eval_result_t evaluate_impl(const Expr &) override;
+  virtual eval_result_t visit2(const Literal &) override;
+  virtual eval_result_t visit2(const Unary &) override;
+  virtual eval_result_t visit2(const Binary &) override;
+  virtual eval_result_t visit2(const Grouping &) override;
+  virtual eval_result_t visit2(const Variable &) override;
+  virtual eval_result_t visit2(const Assignment &) override;
+  virtual eval_result_t visit2(const Logical &) override;
+  virtual eval_result_t visit2(const Call &) override;
+  virtual eval_result_t visit2(const Get &) override;
+  virtual eval_result_t visit2(const Set &) override;
+  virtual eval_result_t visit2(const This &) override;
+  virtual eval_result_t visit2(const Super &) override;
+  virtual eval_result_t evaluate4(const Expr &) override;
 
 public:
   string_type to_string(

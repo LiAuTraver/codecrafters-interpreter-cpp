@@ -17,7 +17,7 @@
 #  error                                                                       \
       "please do not include TokenType.hpp in other files; include Token.hpp instead"
 #endif
-#  include "details/TokenType.inl"
+#include "details/TokenType.inl"
 #include "details/lex_error.hpp"
 
 namespace accat::loxo {
@@ -66,6 +66,12 @@ public:
 private:
   friend auto format_as(const Token &token) -> Token::string_type {
     return token.to_string(auxilia::FormatPolicy::kDefault);
+  }
+  friend auto operator==(const Token &lhs, const Token &rhs) noexcept -> bool {
+    return lhs.type == rhs.type && lhs.lexeme == rhs.lexeme;
+  }
+  friend auto operator!=(const Token &lhs, const Token &rhs) noexcept -> bool {
+    return !(lhs == rhs);
   }
 };
 } // namespace accat::loxo

@@ -8,7 +8,7 @@ namespace accat::loxo {
 /// @interface IVisitor
 class IVisitor {
 public:
-  using variant_type = auxilia::Variant<accat::auxilia::Monostate,
+  using variant_type = auxilia::Variant<auxilia::Monostate,
                                         loxo::evaluation::Boolean,
                                         loxo::evaluation::Nil,
                                         loxo::evaluation::Number,

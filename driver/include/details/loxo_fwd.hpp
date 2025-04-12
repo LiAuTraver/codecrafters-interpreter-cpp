@@ -52,6 +52,7 @@ class Call;
 class Get;
 class Set;
 class This;
+class Super;
 
 class ExprVisitor;
 } // namespace expression

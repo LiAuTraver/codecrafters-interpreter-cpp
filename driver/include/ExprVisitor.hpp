@@ -26,29 +26,30 @@ public:
     requires std::is_base_of_v<Expr, DerivedExpr>
   auto visit(const DerivedExpr &expr) const {
     // workaround
-    return const_cast<ExprVisitor *>(this)->visit_impl(expr);
+    return const_cast<ExprVisitor *>(this)->visit2(expr);
   }
   auto evaluate(const Expr &expr) const {
     // workaround
-    return const_cast<ExprVisitor *>(this)->evaluate_impl(expr);
+    return const_cast<ExprVisitor *>(this)->evaluate4(expr);
   }
   auto get_result() const { return get_result_impl(); }
 
 private:
-  virtual eval_result_t visit_impl(const Literal &) = 0;
-  virtual eval_result_t visit_impl(const Unary &) = 0;
-  virtual eval_result_t visit_impl(const Binary &) = 0;
-  virtual eval_result_t visit_impl(const Grouping &) = 0;
-  virtual eval_result_t visit_impl(const Variable &) = 0;
-  virtual eval_result_t visit_impl(const Assignment &) = 0;
-  virtual eval_result_t visit_impl(const Logical &) = 0;
-  virtual eval_result_t visit_impl(const Call &) = 0;
-  virtual eval_result_t visit_impl(const Get &) = 0;
-  virtual eval_result_t visit_impl(const Set &) = 0;
-  virtual eval_result_t visit_impl(const This&) = 0;
+  virtual auto visit2(const Literal &) -> eval_result_t = 0;
+  virtual auto visit2(const Unary &) -> eval_result_t = 0;
+  virtual auto visit2(const Binary &) -> eval_result_t = 0;
+  virtual auto visit2(const Grouping &) -> eval_result_t = 0;
+  virtual auto visit2(const Variable &) -> eval_result_t = 0;
+  virtual auto visit2(const Assignment &) -> eval_result_t = 0;
+  virtual auto visit2(const Logical &) -> eval_result_t = 0;
+  virtual auto visit2(const Call &) -> eval_result_t = 0;
+  virtual auto visit2(const Get &) -> eval_result_t = 0;
+  virtual auto visit2(const Set &) -> eval_result_t = 0;
+  virtual auto visit2(const This &) -> eval_result_t = 0;
+  virtual auto visit2(const Super &) -> eval_result_t = 0;
 
 private:
-  virtual eval_result_t evaluate_impl(const Expr &) = 0;
-  virtual eval_result_t get_result_impl() const = 0;
+  virtual auto evaluate4(const Expr &) -> eval_result_t = 0;
+  virtual auto get_result_impl() const -> eval_result_t = 0;
 };
 } // namespace accat::loxo::expression

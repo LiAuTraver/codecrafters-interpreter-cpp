@@ -211,9 +211,11 @@ private:
   Function(unsigned, const function_t &, const env_ptr_t &, bool = false);
 
 public:
-  static auto create_custom(unsigned, custom_function_t &&, const env_ptr_t &, bool = false)
+  static auto
+  create_custom(unsigned, custom_function_t &&, const env_ptr_t &, bool = false)
       -> Function;
-  static auto create_native(unsigned, native_function_t &&, const env_ptr_t &, bool = false)
+  static auto
+  create_native(unsigned, native_function_t &&, const env_ptr_t &, bool = false)
       -> Function;
   auto bind(const Instance &) const -> Function;
 
@@ -267,7 +269,7 @@ public:
   auto to_string(const auxilia::FormatPolicy &) const -> string_type override;
 
 private:
-  auto get_initializer() -> Function *;
+  auto get_initializer() [[clang::lifetimebound]] -> Function *;
 
 private:
   friend inline auto operator==(const Class &lhs, const Class &rhs) -> bool {
@@ -291,6 +293,13 @@ private:
   ///
   /// Currently i have neither no desire nor the time to change it, so I have to
   /// use shared_ptr to store class_env and class fields.
+  ///
+  /// @todo weak_ptr seems not to be a proper choice!
+  /// If shared_ptr is used, then the env and values stored may have cyclic
+  /// strong reference: it'll fine for Function holds a strong ref to env, and
+  /// env holds a weak_ref to func, but its not the case for pure values like
+  /// String, Number etc; while the values are stored in env probably in a
+  /// type-erasure way.
   fields_ptr_t fields;
   /// @note this is a bit of a hack, but it works for now.
   /// We ought to store a (strong) reference to the Class object, but the class

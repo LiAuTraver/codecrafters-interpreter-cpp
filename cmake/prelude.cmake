@@ -2,14 +2,6 @@ if(CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
   message(FATAL_ERROR "Bad user. Bad code.")
 endif()
 
-if(NOT DEFINED PROJECT_IS_TOP_LEVEL)
-  if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
-    set(PROJECT_IS_TOP_LEVEL ON)
-  else()
-    set(PROJECT_IS_TOP_LEVEL OFF)
-  endif()
-endif()
-
 macro(is_undefined var)
   if(NOT DEFINED ${var})
     message(FATAL_ERROR "${var} is not defined")
@@ -29,8 +21,8 @@ message(STATUS "Compiler ID: ${CMAKE_CXX_COMPILER_ID}")
 message(STATUS "Compiler version: ${CMAKE_CXX_COMPILER_VERSION}")
 
 if(CMAKE_CXX_SIMULATE_ID)
-  message(STATUS "Simulate ID: ${CMAKE_CXX_SIMULATE_ID}")
-endif(CMAKE_CXX_SIMULATE_ID)
+  message(STATUS "Compiler Simulate ID: ${CMAKE_CXX_SIMULATE_ID}")
+endif()
 
 set(CXX_FLAGS_STYLES_GNU OFF CACHE BOOL "Enable GNU style C++ flags")
 set(CXX_FLAGS_STYLES_CLANG OFF CACHE BOOL "Enable Clang style C++ flags")
@@ -50,26 +42,3 @@ elseif(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
 else()
   message(FATAL_ERROR "Unsupported compiler: ${CMAKE_CXX_COMPILER_ID}")
 endif()
-
-find_package(Python3 COMPONENTS Interpreter QUIET)
-
-if(NOT Python3_Interpreter_FOUND)
-  message(WARNING "Python3 interpreter was not found. dll may not be copied to the target directory.")
-elseif(Python3_FOUND)
-  set(PYTHON_EXECUTABLE ${Python3_EXECUTABLE})
-  message(STATUS "Python3 interpreter found at ${Python3_EXECUTABLE}")
-else()
-  message(WARNING "Python3 interpreter was found, but Python3 was not found. This may caused by venv or conda environment.")
-endif()
-
-macro(copy_dlls target deps)
-  add_custom_target(copy_dlls_${target} ALL
-    COMMENT "copy necessary dynamic libraries to the test directory..."
-    COMMAND ${CMAKE_COMMAND} -E env ${PYTHON_EXECUTABLE} ${LOXO_PROJECT_ROOT_DIR}/scripts/copy_dlls.py $<TARGET_FILE_DIR:${deps}> $<TARGET_FILE_DIR:${target}>
-    DEPENDS ${deps}
-  )
-  add_dependencies(${target} copy_dlls_${target})
-endmacro()
-
-# set(CMAKE_CXX_FLAGS_DEBUG "")
-# set(CMAKE_EXE_LINKER_FLAGS_DEBUG "")

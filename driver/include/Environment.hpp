@@ -56,10 +56,9 @@ public:
                 const IVisitor::variant_type &,
                 uint_least32_t,
                 bool = false) -> auxilia::Status;
-  auto get(string_view_type, bool = false) const -> IVisitor::variant_type;
-  auto copy() const -> std::shared_ptr<self_type>;
+  auto get(string_view_type, bool = false) const -> IVisitor::variant_type*;
   auto ancestor(size_t) const -> std::shared_ptr<self_type>;
-  auto get_at_depth(size_t, string_view_type) const -> IVisitor::variant_type;
+  auto get_at_depth(size_t, string_view_type) const -> IVisitor::variant_type*;
   auto reassign_at_depth(size_t,
                          string_view_type,
                          const IVisitor::variant_type &,
