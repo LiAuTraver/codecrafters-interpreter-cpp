@@ -146,7 +146,8 @@ auto interpreter::visit2(const statement::For &stmt) -> eval_result_t {
 }
 auto interpreter::visit2(const statement::Function &stmt) -> eval_result_t {
   // TODO: function overloading
-  if (auto res = env->get(stmt.name.to_string(kDetailed)); !res->empty()) {
+  if (auto res = env->get(stmt.name.to_string(kDetailed));
+      res && !res->empty()) {
     if (!res->is_type<evaluation::Function>()) {
       dbg(error,
           "bad function definition: {} is not a function",
@@ -632,7 +633,7 @@ auto interpreter::find_variable(const cexpr_ptr_t &expr, const Token &name)
     return *env->get_at_depth(it->second, name.to_string(kDetailed));
   }
   if (auto res = Environment::Global()->get(name.to_string(kDetailed));
-      !res->empty()) {
+      res && !res->empty()) {
     return *res;
   }
 

@@ -70,6 +70,7 @@ class LOXO_API interpreter : public auxilia::Printable,
         return realLocalEnv.emplace(expr, depth).second;
       return false;
     }
+    dbg_only([[gnu::used]])
     auto to_string(const auxilia::FormatPolicy &format_policy =
                        auxilia::FormatPolicy::kDefault) const -> string_type {
       ostringstream_t oss;
