@@ -33,6 +33,14 @@ public:
 public:
   string_t to_string(string_view_t lexeme_sv = ""sv,
                      uint_least32_t line = 0) const;
+
+private:
+  friend auto operator==(const lex_error &lhs, const lex_error &rhs) -> bool {
+    return lhs.type == rhs.type;
+  }
+  friend auto operator!=(const lex_error &lhs, const lex_error &rhs) -> bool {
+    return !(lhs == rhs);
+  }
 };
 inline lex_error::string_t
 lex_error::to_string(const string_view_t lexeme_sv,

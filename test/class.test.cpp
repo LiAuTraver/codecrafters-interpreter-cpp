@@ -6,7 +6,7 @@ auto get_result(const auto &filepath) {
   ExecutionContext ec;
   ec.commands.emplace_back(ExecutionContext::interpret);
   ec.input_files.emplace_back(filepath);
-    auto exec = loxo_main(3, nullptr, ec);
+  auto exec = loxo_main(3, nullptr, ec);
   return exec ? std::make_pair(exec,
                                ec.output_stream.str() + ec.error_stream.str())
               : std::make_pair(exec, ec.output_stream.str());
@@ -206,4 +206,20 @@ TEST(class, ctor_return4) {
             "[line 3] Error at 'return': Can't return a value from an "
             "initializer.\n");
   EXPECT_EQ(callback, 65);
+}
+
+TEST(class, inheritance_basic) {
+  const auto path = LOXO_ROOT_DIR R"(\examples\class\inheritance.basic.lox)";
+  auto [callback, str] = get_result(path);
+  EXPECT_EQ(str,
+            "Doughnut instance\n"
+            "BostonCream instance\n"
+            "A instance\n"
+            "B instance\n"
+            "C instance\n"
+            "Vehicle instance\n"
+            "Car instance\n"
+            "Sedan instance\n"
+            "Truck instance\n");
+  EXPECT_EQ(callback, 0);
 }

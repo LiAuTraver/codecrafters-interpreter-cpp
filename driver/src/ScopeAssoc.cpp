@@ -29,7 +29,21 @@ auxilia::Status ScopeAssoc::add(string_view_type name,
 }
 auto ScopeAssoc::to_string(const auxilia::FormatPolicy &format_policy) const
     -> string_type {
-  return {};
+  string_type result;
+  result += "[ ";
+  for (const auto &[key, value] : associations) {
+    result += key;
+    result += ": ";
+    result += value.first.to_string(format_policy);
+    result += ", ";
+  }
+  if (!associations.empty()){
+    result.pop_back();
+    result.pop_back();
+  }
+  result += auxilia::format(" ] ({} entries) ", associations.size());
+  
+  return result;
 }
 auto ScopeAssoc::find(const string_view_type name)
     -> std::optional<associations_t::iterator> {

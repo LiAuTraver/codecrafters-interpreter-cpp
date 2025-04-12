@@ -68,8 +68,7 @@ private:
     return token.to_string(auxilia::FormatPolicy::kDefault);
   }
   friend auto operator==(const Token &lhs, const Token &rhs) noexcept -> bool {
-    return lhs.type == rhs.type && lhs.lexeme == rhs.lexeme &&
-           lhs.line == rhs.line;
+    return lhs.type == rhs.type && lhs.lexeme == rhs.lexeme;
   }
   friend auto operator!=(const Token &lhs, const Token &rhs) noexcept -> bool {
     return !(lhs == rhs);

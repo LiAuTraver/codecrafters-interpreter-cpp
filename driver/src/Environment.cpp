@@ -99,17 +99,13 @@ auto Env::reassign(const string_view_type name,
 }
 
 auto Env::get(const string_view_type name, const bool currentScopeOnly) const
-    -> variant_type {
-  if (const auto it = find(name, currentScopeOnly))
-    return {(*it)->second.first};
+    -> variant_type* {
+  if (auto it = const_cast<Env *>(this)->find(name, currentScopeOnly))
+    return &(*it)->second.first;
 
-  return {};
+  return nullptr;
 }
 
-auto Env::copy() const -> std::shared_ptr<self_type> {
-  // return std::make_shared<self_type>(*this);
-  TODO("^^^ failed to compile")
-}
 auto Env::ancestor(const size_t n) const -> std::shared_ptr<self_type> {
   auto raw_env = const_cast<Env *>(this);
   for (auto _ : std::views::iota(0ull, n)) {
@@ -120,12 +116,12 @@ auto Env::ancestor(const size_t n) const -> std::shared_ptr<self_type> {
   return raw_env->shared_from_this();
 }
 auto Env::get_at_depth(const size_t n, const string_view_type name) const
-    -> variant_type {
+    -> variant_type* {
   auto myenv = this->ancestor(n);
   contract_assert(myenv, "ancestor is null")
   const auto it = myenv->find(name, true);
   contract_assert(it, "variable not found")
-  return (*it)->second.first;
+  return &(*it)->second.first;
 }
 auto Env::reassign_at_depth(const size_t n,
                             const string_view_type name,
@@ -137,10 +133,14 @@ auto Env::reassign_at_depth(const size_t n,
 
 auto Env::to_string(const FormatPolicy &format_policy) const -> string_type {
   string_type result;
-  result += current.to_string(kDetailed);
-  if (const auto enclosing = this->parent.get()) {
-    result += enclosing->to_string(kDetailed);
-  }
+  result.append(current.to_string(format_policy)).append(",\n\t-> ");
+  
+
+  if (const auto enclosing = this->parent.get()) 
+    result.append(enclosing->to_string(format_policy));
+  else 
+    result.append("nullptr");
+  
   return result;
 }
 

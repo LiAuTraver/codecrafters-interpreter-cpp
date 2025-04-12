@@ -2,10 +2,12 @@
 
 #include <algorithm>
 #include <iterator>
+#include <memory>
 #include <string>
 #include <utility>
 
 #include "Token.hpp"
+#include "accat/auxilia/details/Status.hpp"
 #include "expression.hpp"
 #include "statement.hpp"
 #include "interpreter.hpp"
@@ -51,11 +53,12 @@ auto Resolver::resolve(
   return {};
 }
 
-auto Resolver::resolve_to_interp(const expression::Expr &expr,
-                                 const Token &token) -> eval_result_t {
+auto Resolver::resolve_to_interp(
+    const std::shared_ptr<const expression::Expr> &expr, const Token &token)
+    -> eval_result_t {
   for (auto it = scopes.rbegin(); it != scopes.rend(); ++it)
     if (it->contains(token.to_string(kDetailed))) {
-      interpreter.resolve(expr.shared_from_this(), std::ranges::distance(scopes.rbegin(), it));
+      interpreter.resolve(expr, std::ranges::distance(scopes.rbegin(), it));
       return {};
     }
   return {};
@@ -99,21 +102,21 @@ void Resolver::add_to_scope(const Token &token, const bool is_defined) {
     return;
   scopes.back().insert_or_assign(token.to_string(kDetailed), is_defined);
 }
-auto Resolver::visit_impl(const expression::Literal &) -> eval_result_t {
+auto Resolver::visit2(const expression::Literal &) -> eval_result_t {
   // nothing to do
   return {};
 }
-auto Resolver::visit_impl(const expression::Unary &expr) -> eval_result_t {
+auto Resolver::visit2(const expression::Unary &expr) -> eval_result_t {
   return evaluate(*expr.expr);
 }
-auto Resolver::visit_impl(const expression::Binary &expr) -> eval_result_t {
+auto Resolver::visit2(const expression::Binary &expr) -> eval_result_t {
   return evaluate(*expr.left) && evaluate(*expr.right);
 }
-auto Resolver::visit_impl(const expression::Grouping &) -> eval_result_t {
+auto Resolver::visit2(const expression::Grouping &) -> eval_result_t {
   // nothing to do
   return {};
 }
-auto Resolver::visit_impl(const expression::Variable &expr) -> eval_result_t {
+auto Resolver::visit2(const expression::Variable &expr) -> eval_result_t {
   if (!scopes.empty() and
       scopes.back().contains(expr.name.to_string(kDetailed)) and
       scopes.back()[expr.name.to_string(kDetailed)] == false) {
@@ -122,15 +125,16 @@ auto Resolver::visit_impl(const expression::Variable &expr) -> eval_result_t {
                                  expr.name.line,
                                  expr.name.to_string(kDetailed))};
   }
-  return resolve_to_interp(expr, expr.name);
+  return resolve_to_interp(expr.shared_from_this(), expr.name);
 }
-auto Resolver::visit_impl(const expression::Assignment &expr) -> eval_result_t {
-  return evaluate(*expr.value_expr) && resolve_to_interp(expr, expr.name);
+auto Resolver::visit2(const expression::Assignment &expr) -> eval_result_t {
+  return evaluate(*expr.value_expr) &&
+         resolve_to_interp(expr.shared_from_this(), expr.name);
 }
-auto Resolver::visit_impl(const expression::Logical &expr) -> eval_result_t {
+auto Resolver::visit2(const expression::Logical &expr) -> eval_result_t {
   return evaluate(*expr.left) && evaluate(*expr.right);
 }
-auto Resolver::visit_impl(const expression::Call &expr) -> eval_result_t {
+auto Resolver::visit2(const expression::Call &expr) -> eval_result_t {
   auto res = evaluate(*expr.callee);
   // clang-format off
   std::ranges::for_each(expr.args, [this, &res](const auto &arg) {
@@ -139,13 +143,13 @@ auto Resolver::visit_impl(const expression::Call &expr) -> eval_result_t {
   // clang-format on
   return res;
 }
-auto Resolver::visit_impl(const expression::Get &expr) -> eval_result_t {
+auto Resolver::visit2(const expression::Get &expr) -> eval_result_t {
   return evaluate(*expr.object);
 }
-auto Resolver::visit_impl(const expression::Set &expr) -> eval_result_t {
+auto Resolver::visit2(const expression::Set &expr) -> eval_result_t {
   return evaluate(*expr.object) && evaluate(*expr.value);
 }
-auto Resolver::visit_impl(const expression::This &expr) -> eval_result_t {
+auto Resolver::visit2(const expression::This &expr) -> eval_result_t {
   return current_class_type == ClassType::kNone
              ? InvalidArgumentError(
                    "[line {}] "
@@ -153,14 +157,25 @@ auto Resolver::visit_impl(const expression::This &expr) -> eval_result_t {
                    "class.",
                    expr.name.line,
                    expr.name.to_string(kDetailed))
-             : resolve_to_interp(expr, expr.name);
+             : resolve_to_interp(expr.shared_from_this(), expr.name);
 }
-auto Resolver::evaluate_impl(const expression::Expr &expr) -> eval_result_t {
+auto Resolver::visit2(const expression::Super &expr) -> eval_result_t {
+  if (current_class_type == ClassType::kNone)
+    return {InvalidArgumentError("[line {}] Error at '{}':"
+                                 "Can't use 'super' outside of a class.")};
+  if (current_class_type == ClassType::kClass)
+    return {InvalidArgumentError(
+        "[line {}] Error at '{}': "
+        "Can't use 'super' in a class with no super class.")};
+  // current class type is kDerivedClass
+  return resolve_to_interp(expr.shared_from_this(), expr.name);
+}
+auto Resolver::evaluate4(const expression::Expr &expr) -> eval_result_t {
   return expr.accept(*this);
 }
 auto Resolver::get_result_impl() const -> eval_result_t { TODO() }
 
-auto Resolver::visit_impl(const statement::Variable &stmt) -> eval_result_t {
+auto Resolver::visit2(const statement::Variable &stmt) -> eval_result_t {
   if (is_defined(stmt.name))
     return {InvalidArgumentError("[line {}] Error at '{}': "
                                  "Already a variable with this name in "
@@ -177,21 +192,21 @@ auto Resolver::visit_impl(const statement::Variable &stmt) -> eval_result_t {
   define(stmt.name);
   return {};
 }
-auto Resolver::visit_impl(const statement::Print &stmt) -> eval_result_t {
+auto Resolver::visit2(const statement::Print &stmt) -> eval_result_t {
   return evaluate(*stmt.value);
 }
-auto Resolver::visit_impl(const statement::Expression &stmt) -> eval_result_t {
+auto Resolver::visit2(const statement::Expression &stmt) -> eval_result_t {
   return evaluate(*stmt.expr);
 }
-auto Resolver::visit_impl(const statement::If &stmt) -> eval_result_t {
+auto Resolver::visit2(const statement::If &stmt) -> eval_result_t {
   return evaluate(*stmt.condition) && execute(*stmt.then_branch) &&
          (stmt.else_branch ? execute(*stmt.else_branch).as_status()
                            : OkStatus());
 }
-auto Resolver::visit_impl(const statement::While &stmt) -> eval_result_t {
+auto Resolver::visit2(const statement::While &stmt) -> eval_result_t {
   return evaluate(*stmt.condition) && execute(*stmt.body);
 }
-auto Resolver::visit_impl(const statement::For &stmt) -> eval_result_t {
+auto Resolver::visit2(const statement::For &stmt) -> eval_result_t {
   // should not exists, should be desugared in the parser.
   // nonetheless I did not desugar it.
 
@@ -210,46 +225,50 @@ auto Resolver::visit_impl(const statement::For &stmt) -> eval_result_t {
          (stmt.body ? execute(*stmt.body).as_status() : OkStatus()) &&
          (stmt.increment ? evaluate(*stmt.increment).as_status() : OkStatus());
 }
-auto Resolver::visit_impl(const statement::Function &stmt) -> eval_result_t {
+auto Resolver::visit2(const statement::Function &stmt) -> eval_result_t {
   return resolve(stmt, ScopeType::kFunction);
 }
-auto Resolver::visit_impl(const statement::Class &stmt) -> eval_result_t {
+auto Resolver::visit2(const statement::Class &stmt) -> eval_result_t {
   define(stmt.name);
 
-  scope_guard guard(*this, ScopeType::kNone);
   auto enclosing_class_type = this->current_class_type;
   this->current_class_type = ClassType::kClass;
   defer { this->current_class_type = enclosing_class_type; };
 
-  // TODO: define 'super' in the class scope.
-  this->scopes.back().emplace("this", true);
-  
-  if (!stmt.superclass.is_type(TokenType::kMonostate)) {
-    // has superclass.
-    if (stmt.name == stmt.superclass) {
+  const bool hasSuperclass = stmt.superclass.is_type(TokenType::kIdentifier);
+  if (hasSuperclass) {
+    if (stmt.name == stmt.superclass)
       return {InvalidArgumentError("[line {}] Error at '{}': "
                                    "A class can't inherit from itself.",
                                    stmt.superclass.line,
                                    stmt.superclass.to_string(kDetailed))};
-    
-    }
-    auto sup = std::make_shared<expression::Variable>();
-    sup->name = stmt.superclass;
-    if (auto res = evaluate(*sup); !res) {
+
+    this->current_class_type = ClassType::kDerivedClass;
+    // design flaw
+    if (auto res =
+            visit2(*std::make_shared<expression::Variable>(stmt.superclass));
+        !res) {
       return res;
     }
-    this->scopes.back().emplace("super", true);
+    this->scopes.emplace_back().emplace("super", true);
   }
   
-  auto res = OkStatus();
-  std::ranges::for_each(stmt.methods, [this, &res](const auto &method) {
-    res &= resolve(method, method.name.to_string(kDetailed) == "init"
-                      ? ScopeType::kInitializer
-                      : ScopeType::kMethod);
-  });
-  return res;
+  scope_guard guard(*this, ScopeType::kNone);
+  this->scopes.back().emplace("this", true);
+
+  for (const auto &method : stmt.methods)
+    if (auto res = resolve(method,
+                           method.name.to_string(kDetailed) == "init"
+                               ? ScopeType::kInitializer
+                               : ScopeType::kMethod);
+        !res)
+      // TODO: restore scope if the class has superclass.?(see below)
+      return res;
+  if (hasSuperclass)
+    this->scopes.pop_back(); // pop the super class scope.
+  return {};
 }
-auto Resolver::visit_impl(const statement::Return &stmt) -> eval_result_t {
+auto Resolver::visit2(const statement::Return &stmt) -> eval_result_t {
   if (this->current_scope_type == ScopeType::kNone)
     return {InvalidArgumentError("[line {}] Error at '{}': "
                                  "Can't return from top-level code.",
@@ -263,10 +282,10 @@ auto Resolver::visit_impl(const statement::Return &stmt) -> eval_result_t {
                                  "return")};
   return stmt.value ? evaluate(*stmt.value).as_status() : OkStatus();
 }
-auto Resolver::execute_impl(const statement::Stmt &stmt) -> eval_result_t {
+auto Resolver::execute4(const statement::Stmt &stmt) -> eval_result_t {
   return stmt.accept(*this);
 }
-auto Resolver::visit_impl(const statement::Block &stmt) -> eval_result_t {
+auto Resolver::visit2(const statement::Block &stmt) -> eval_result_t {
   scope_guard guard(*this, ScopeType::kNone);
 
   return resolve(stmt.statements);

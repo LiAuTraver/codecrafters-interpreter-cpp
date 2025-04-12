@@ -14,7 +14,7 @@ namespace accat::loxo::statement {
 using enum auxilia::FormatPolicy;
 using auxilia::FormatPolicy;
 
-Stmt::stmt_result_t Variable::accept_impl(const StmtVisitor &visitor) const {
+Stmt::stmt_result_t Variable::accept2(const StmtVisitor &visitor) const {
   return visitor.visit(*this);
 }
 auto Variable::to_string(const FormatPolicy &format_policy) const
@@ -25,14 +25,14 @@ auto Print::to_string(const FormatPolicy &format_policy) const
     -> string_type {
   return this->value->to_string(format_policy);
 }
-Stmt::stmt_result_t Print::accept_impl(const StmtVisitor &visitor) const {
+Stmt::stmt_result_t Print::accept2(const StmtVisitor &visitor) const {
   return visitor.visit(*this);
 }
 auto Expression::to_string(const FormatPolicy &format_policy) const
     -> string_type {
   return this->expr->to_string(format_policy);
 }
-Stmt::stmt_result_t Expression::accept_impl(const StmtVisitor &visitor) const {
+Stmt::stmt_result_t Expression::accept2(const StmtVisitor &visitor) const {
   return visitor.visit(*this);
 }
 auto Block::to_string(const FormatPolicy &format_policy) const
@@ -48,11 +48,11 @@ auto Block::to_string(const FormatPolicy &format_policy) const
   result += "}\n";
   return result;
 }
-Stmt::stmt_result_t Block::accept_impl(const StmtVisitor &visitor) const {
+Stmt::stmt_result_t Block::accept2(const StmtVisitor &visitor) const {
   return visitor.visit(*this);
 }
 
-Stmt::stmt_result_t If::accept_impl(const StmtVisitor &visitor) const {
+Stmt::stmt_result_t If::accept2(const StmtVisitor &visitor) const {
   return visitor.visit(*this);
 }
 auto While::to_string(const FormatPolicy &format_policy) const
@@ -60,7 +60,7 @@ auto While::to_string(const FormatPolicy &format_policy) const
   return "while (" + this->condition->to_string(format_policy) + ") " +
          this->body->to_string(format_policy);
 }
-auto While::accept_impl(const StmtVisitor &visitor) const -> stmt_result_t {
+auto While::accept2(const StmtVisitor &visitor) const -> stmt_result_t {
   return visitor.visit(*this);
 }
 auto If::to_string(const FormatPolicy &format_policy) const
@@ -85,20 +85,20 @@ auto Function::to_string(const FormatPolicy &format_policy) const
   result.append(") { ... }");
   return result;
 }
-auto Function::accept_impl(const StmtVisitor &visitor) const -> stmt_result_t {
+auto Function::accept2(const StmtVisitor &visitor) const -> stmt_result_t {
   return visitor.visit(*this);
 }
 auto Class::to_string(const auxilia::FormatPolicy &format_policy) const -> string_type {
   return "class "s.append(this->name.to_string(format_policy)).append(" { ... }");
 }
-auto Class::accept_impl(const StmtVisitor &visitor) const -> stmt_result_t {
+auto Class::accept2(const StmtVisitor &visitor) const -> stmt_result_t {
   return visitor.visit(*this);
 }
 auto Return::to_string(const FormatPolicy &format_policy) const
     -> string_type {
   return "return "s.append(this->value->to_string(format_policy));
 }
-auto Return::accept_impl(const StmtVisitor &visitor) const -> stmt_result_t {
+auto Return::accept2(const StmtVisitor &visitor) const -> stmt_result_t {
   return visitor.visit(*this);
 }
 auto For::to_string(const FormatPolicy &format_policy) const
@@ -119,7 +119,7 @@ auto For::to_string(const FormatPolicy &format_policy) const
   result += ") " + this->body->to_string(format_policy);
   return result;
 }
-Stmt::stmt_result_t For::accept_impl(const StmtVisitor &visitor) const {
+Stmt::stmt_result_t For::accept2(const StmtVisitor &visitor) const {
   return visitor.visit(*this);
 }
 

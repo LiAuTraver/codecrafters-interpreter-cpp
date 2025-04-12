@@ -24,7 +24,6 @@ namespace accat::loxo {
 auxilia::Status show_msg() {
   dbg(critical, "please provide a command.")
   dbg_break
-  // return auxilia::Status::kEmptyInput;
   return auxilia::InvalidArgumentError("please provide a command.");
 }
 auxilia::Status onFileOperationFailed(const auxilia::Status &load_result) {
@@ -126,7 +125,7 @@ void writeParseResultToContextStream(ExecutionContext &ctx) {
 }
 void writeExprResultToContextStream(ExecutionContext &ctx) {
   // add missing newline character
-  ctx.output_stream << ctx.interpreter->to_string() << std::endl;
+  ctx.output_stream << ctx.interpreter->to_string() << '\n';
 }
 void writeInterpResultToContextStream(ExecutionContext &ctx) {
   // DONT add newline character
@@ -216,7 +215,10 @@ int loxo_main(_In_ const int argc,
         std::cout << ctx.output_stream.view() << std::endl;
       return 0;
     } else {
-      dbg(error, "Interpretation failed: {}", interpret_result.message())
+      dbg(error,
+          "{} failed: {}",
+          returnCode == 70 ? "Interpretation" : "Resolve process",
+          interpret_result.message())
       ctx.error_stream << interpret_result.message() << std::endl;
       // for codecrafter's test
       if (argv)

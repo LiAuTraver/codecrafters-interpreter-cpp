@@ -8,8 +8,6 @@ find_package(GTest CONFIG REQUIRED)
 find_package(magic_enum CONFIG REQUIRED)
 include_directories(${CMAKE_SOURCE_DIR}/shared)
 
-file(GLOB_RECURSE TEST_SHARED_SOURCES ${CMAKE_SOURCE_DIR}/shared/*.cpp)
-
 enable_testing()
 include(CTest)
 include(GoogleTest)
@@ -31,7 +29,10 @@ add_executable(loxo.test
   function.test.cpp
   scope.test.cpp
   class.test.cpp
-  ${TEST_SHARED_SOURCES}
+  
+  ${CMAKE_SOURCE_DIR}/shared/loxo_driver.cpp
+  ${CMAKE_SOURCE_DIR}/shared/execution_context.hpp
+  ${CMAKE_SOURCE_DIR}/shared/test_env.hpp
 )
 target_link_libraries(loxo.test PRIVATE
   spdlog::spdlog

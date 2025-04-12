@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <stack>
 
 #include "details/loxo_fwd.hpp"
@@ -21,14 +22,15 @@ public:
 
 private:
   enum class ScopeType : std::uint8_t {
-    kNone = 0, // an ordinary scope
-    kFunction, // a function scope
-    kMethod,   // a class method scope
+    kNone = 0,    // an ordinary scope(doesn't change the current scope type)
+    kFunction,    // a function scope
+    kMethod,      // a class method scope
     kInitializer, // a class initializer scope
   };
   enum class ClassType : std::uint8_t {
     kNone = 0,
     kClass,
+    kDerivedClass,
   };
 
 private:
@@ -43,40 +45,41 @@ public:
 
 private:
   auto resolve(const statement::Function &, ScopeType) -> eval_result_t;
-  auto resolve_to_interp(const expression::Expr &, const Token &)
-      -> eval_result_t;
+  auto resolve_to_interp(const std::shared_ptr<const expression::Expr> &,
+                         const Token &) -> eval_result_t;
   void declare(const Token &);
   void define(const Token &);
   bool is_defined(const Token &) const;
   void add_to_scope(const Token &, bool);
 
 private:
-  auto visit_impl(const expression::Literal &) -> eval_result_t override;
-  auto visit_impl(const expression::Unary &) -> eval_result_t override;
-  auto visit_impl(const expression::Binary &) -> eval_result_t override;
-  auto visit_impl(const expression::Grouping &) -> eval_result_t override;
-  auto visit_impl(const expression::Variable &) -> eval_result_t override;
-  auto visit_impl(const expression::Assignment &) -> eval_result_t override;
-  auto visit_impl(const expression::Logical &) -> eval_result_t override;
-  auto visit_impl(const expression::Call &) -> eval_result_t override;
-  auto visit_impl(const expression::Get &) -> eval_result_t override;
-  auto visit_impl(const expression::Set &) -> eval_result_t override;
-  auto visit_impl(const expression::This &) -> eval_result_t override;
-  auto evaluate_impl(const expression::Expr &) -> eval_result_t override;
+  auto visit2(const expression::Literal &) -> eval_result_t override;
+  auto visit2(const expression::Unary &) -> eval_result_t override;
+  auto visit2(const expression::Binary &) -> eval_result_t override;
+  auto visit2(const expression::Grouping &) -> eval_result_t override;
+  auto visit2(const expression::Variable &) -> eval_result_t override;
+  auto visit2(const expression::Assignment &) -> eval_result_t override;
+  auto visit2(const expression::Logical &) -> eval_result_t override;
+  auto visit2(const expression::Call &) -> eval_result_t override;
+  auto visit2(const expression::Get &) -> eval_result_t override;
+  auto visit2(const expression::Set &) -> eval_result_t override;
+  auto visit2(const expression::This &) -> eval_result_t override;
+  auto visit2(const expression::Super &) -> eval_result_t override;
+  auto evaluate4(const expression::Expr &) -> eval_result_t override;
   auto get_result_impl() const -> eval_result_t override;
 
 private:
-  auto visit_impl(const statement::Variable &) -> eval_result_t override;
-  auto visit_impl(const statement::Print &) -> eval_result_t override;
-  auto visit_impl(const statement::Expression &) -> eval_result_t override;
-  auto visit_impl(const statement::Block &) -> eval_result_t override;
-  auto visit_impl(const statement::If &) -> eval_result_t override;
-  auto visit_impl(const statement::While &) -> eval_result_t override;
-  auto visit_impl(const statement::For &) -> eval_result_t override;
-  auto visit_impl(const statement::Function &) -> eval_result_t override;
-  auto visit_impl(const statement::Class &) -> eval_result_t override;
-  auto visit_impl(const statement::Return &) -> eval_result_t override;
-  auto execute_impl(const statement::Stmt &) -> eval_result_t override;
+  auto visit2(const statement::Variable &) -> eval_result_t override;
+  auto visit2(const statement::Print &) -> eval_result_t override;
+  auto visit2(const statement::Expression &) -> eval_result_t override;
+  auto visit2(const statement::Block &) -> eval_result_t override;
+  auto visit2(const statement::If &) -> eval_result_t override;
+  auto visit2(const statement::While &) -> eval_result_t override;
+  auto visit2(const statement::For &) -> eval_result_t override;
+  auto visit2(const statement::Function &) -> eval_result_t override;
+  auto visit2(const statement::Class &) -> eval_result_t override;
+  auto visit2(const statement::Return &) -> eval_result_t override;
+  auto execute4(const statement::Stmt &) -> eval_result_t override;
 
 public:
   auto to_string(const auxilia::FormatPolicy & =

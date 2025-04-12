@@ -191,6 +191,19 @@ auto parser::primary() -> expr_ptr_t {
     return std::make_shared<expression::Literal>(this->get());
   if (inspect(kThis))
     return std::make_shared<expression::This>(this->get());
+  if (inspect(kSuper)) {
+    auto name = this->get();
+    if (!inspect(kDot))
+      throw synchronize(
+          {parse_error::kUnknownError, "Expect '.' after 'super'."});
+
+    this->get();
+    if (!inspect(kIdentifier))
+      throw synchronize(
+          {parse_error::kUnknownError, "Expect property name after '.'."});
+
+    return std::make_shared<expression::Super>(std::move(name), this->get());
+  }
   if (inspect(kIdentifier)) {
     return std::make_shared<expression::Variable>(this->get());
   }

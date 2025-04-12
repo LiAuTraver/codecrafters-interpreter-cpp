@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.21...3.31 FATAL_ERROR)
 project(loxo VERSION 1.0.0 LANGUAGES CXX)
-set(CMAKE_CXX_STANDARD 26)
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_C_STANDARD 23)
 
 # set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -16,7 +16,7 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux" AND NOT DEFINED ENV{AC_CPP_DEBUG})
   set(CMAKE_CXX_COMPILER "g++")
   set(CMAKE_MAKE_PROGRAM "make")
   set(CMAKE_C_COMPILER "gcc")
-  add_compile_options(-Wno-deprecated -Wno-deprecated-declarations)
+  add_compile_options(-Wno-deprecated -Wno-deprecated-declarations -Wno-c++26-extensions)
 endif()
 
 include_directories(driver/include)
@@ -45,13 +45,13 @@ if(AC_CPP_DEBUG)
   include(CTest)
 
   if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
-    add_compile_options(-D_DEBUG -DDEBUG -D__DEBUG__ -DAC_CPP_DEBUG -Wimplicit-fallthrough -Wno-deprecated-declarations -Wno-deprecated
+    add_compile_options(-D_DEBUG -DDEBUG -D__DEBUG__ -DAC_CPP_DEBUG -Wimplicit-fallthrough -Wno-deprecated-declarations -Wno-deprecated -Wno-c++26-extensions
 
       # MinGW does can't get through the `source_location` in file `spdlog/logger.h:334`
       -DSPDLOG_NO_EXCEPTIONS -DSPDLOG_NO_SOURCE_LOC
     )
   elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-    add_compile_options(-D_DEBUG -DDEBUG -D__DEBUG__ -DAC_CPP_DEBUG -Wimplicit-fallthrough -Wno-deprecated-declarations -Wno-deprecated)
+    add_compile_options(-D_DEBUG -DDEBUG -D__DEBUG__ -DAC_CPP_DEBUG -Wimplicit-fallthrough -Wno-deprecated-declarations -Wno-deprecated -Wno-c++26-extensions)
   elseif(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
     add_compile_options(/EHsc /D_DEBUG /DDEBUG /D__DEBUG__ /DAC_CPP_DEBUG /wd4716 /wd4530 /wd4244)
     add_link_options(/DEBUG:FULL)
