@@ -11,13 +11,13 @@
 #include <variant>
 #include <vector>
 
-#include "details/loxo_fwd.hpp"
+#include "details/lox_fwd.hpp"
 
 #include "parse_error.hpp"
 #include "Token.hpp"
 
-namespace accat::loxo {
-class LOXO_API parser {
+namespace accat::lox {
+class AC_LOX_API parser {
 public:
   enum ParsePolicy {
     kStatement = 0,
@@ -119,7 +119,7 @@ private:
   mutable stmt_ptrs_t stmts = {};
   // bool is_in_panic = false;
 private:
-  friend LOXO_API void delete_parser_fwd(parser *);
+  friend AC_LOX_API void delete_parser_fwd(parser *);
 };
 template <typename... Args>
   requires(std::is_enum_v<std::common_type_t<Args...>>)
@@ -128,4 +128,4 @@ bool parser::inspect(Args &&...args) {
     return false;
   return (... || (peek().type.type == args));
 }
-} // namespace accat::loxo
+} // namespace accat::lox

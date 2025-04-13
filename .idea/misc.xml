@@ -10,10 +10,9 @@
       <file path="$PROJECT_DIR$/.cache" />
       <file path="$PROJECT_DIR$/.clwb" />
       <file path="$PROJECT_DIR$/.vs" />
-      <file path="$PROJECT_DIR$/.vscode" />
       <file path="$PROJECT_DIR$/Testing" />
       <file path="$PROJECT_DIR$/bazel-bin" />
-      <file path="$PROJECT_DIR$/bazel-loxo" />
+      <file path="$PROJECT_DIR$/bazel-lox" />
       <file path="$PROJECT_DIR$/bazel-out" />
       <file path="$PROJECT_DIR$/bazel-testlogs" />
       <file path="$PROJECT_DIR$/build" />

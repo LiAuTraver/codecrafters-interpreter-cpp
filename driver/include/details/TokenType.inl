@@ -1,22 +1,22 @@
 /// @note no include guard.
-#ifdef AC_LOXO_DETAILS_TOKENTYPE_HPP
+#ifdef AC_LOX_DETAILS_TOKENTYPE_HPP
 #  error                                                                       \
       "please do not include TokenType.hpp in other files; include Token.hpp instead"
 #endif
-#define AC_LOXO_DETAILS_TOKENTYPE_HPP
+#define AC_LOX_DETAILS_TOKENTYPE_HPP
 
 #include <cstdint>
 #include <string>
 #include <string_view>
 #include <unordered_map>
 
-#include "details/loxo_fwd.hpp"
+#include "details/lox_fwd.hpp"
 
-namespace accat::loxo {
+namespace accat::lox {
 /// @brief enhanced token type, more like rust's enum
 /// @implements auxilia::Printable
 /// @implements auxilia::Viewable
-class LOXO_API TokenType : public auxilia::Printable,
+class AC_LOX_API TokenType : public auxilia::Printable,
                            public auxilia::Viewable {
 public:
   enum type_t : uint16_t;
@@ -201,4 +201,4 @@ inline auto format_as(const TokenType &t) noexcept
     return "UNKNOWN"sv;
   }
 }
-} // namespace accat::loxo
+} // namespace accat::lox

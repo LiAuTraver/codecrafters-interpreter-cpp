@@ -11,21 +11,21 @@
 #include <vector>
 
 #include <accat/auxilia/auxilia.hpp>
-#include <details/loxo_fwd.hpp>
+#include <details/lox_fwd.hpp>
 
-namespace accat::loxo {
-class LOXO_API lexer;
-class LOXO_API parser;
-class LOXO_API interpreter;
+namespace accat::lox {
+class AC_LOX_API lexer;
+class AC_LOX_API parser;
+class AC_LOX_API interpreter;
 /// @remark forward declaration isn't enough for @link std::unique_ptr @endlink,
 /// nor do I want to include those implementation files.
-extern LOXO_API void delete_lexer_fwd(lexer *);
-extern LOXO_API void delete_parser_fwd(parser *);
-extern LOXO_API void delete_interpreter_fwd(interpreter *);
+extern AC_LOX_API void delete_lexer_fwd(lexer *);
+extern AC_LOX_API void delete_parser_fwd(parser *);
+extern AC_LOX_API void delete_interpreter_fwd(interpreter *);
 struct ExecutionContext;
 
 [[nodiscard]]
-extern int loxo_main(_In_ int, _In_ char **, _Inout_ ExecutionContext &);
+extern int main(_In_ int, _In_ char **, _Inout_ ExecutionContext &);
 /// @brief mimic from llvm clang-driver's ToolContext
 struct ExecutionContext {
   inline explicit ExecutionContext()
@@ -153,4 +153,4 @@ inline std::string_view ExecutionContext::command_sv(const commands_t &cmd) {
     return "unknown"sv;
   }
 }
-} // namespace accat::loxo
+} // namespace accat::lox

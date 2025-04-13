@@ -11,14 +11,14 @@
 #include <utility>
 #include <vector>
 
-#include "details/loxo_fwd.hpp"
+#include "details/lox_fwd.hpp"
 
 #include "details/lex_error.hpp"
 #include "lexer.hpp"
 #include "Token.hpp"
 
-/// @namespace accat::loxo
-namespace accat::loxo {
+/// @namespace accat::lox
+namespace accat::lox {
 template <typename Predicate>
 bool lexer::advance_if(Predicate &&predicate)
   requires std::invocable<Predicate, char_t> &&
@@ -295,5 +295,5 @@ lexer::string_view_type lexer::lex_identifier() {
   auto value = string_view_type(contents.data() + head, cursor - head);
   return value;
 }
-LOXO_API void delete_lexer_fwd(lexer *ptr) { delete ptr; }
-} // namespace accat::loxo
+AC_LOX_API void delete_lexer_fwd(lexer *ptr) { delete ptr; }
+} // namespace accat::lox

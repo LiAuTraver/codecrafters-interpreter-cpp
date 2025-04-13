@@ -5,11 +5,11 @@
 
 #include <accat/auxilia/auxilia.hpp>
 
-#include "details/loxo_fwd.hpp"
+#include "details/lox_fwd.hpp"
 
 #include "details/IVisitor.hpp"
 #include "Evaluatable.hpp"
-namespace accat::loxo::expression {
+namespace accat::lox::expression {
 /// @interface ExprVisitor
 class ExprVisitor : virtual public IVisitor {
 public:
@@ -52,4 +52,4 @@ private:
   virtual auto evaluate4(const Expr &) -> eval_result_t = 0;
   virtual auto get_result_impl() const -> eval_result_t = 0;
 };
-} // namespace accat::loxo::expression
+} // namespace accat::lox::expression

@@ -12,7 +12,7 @@
 #include "statement.hpp"
 #include "interpreter.hpp"
 
-namespace accat::loxo {
+namespace accat::lox {
 using enum auxilia::FormatPolicy;
 using auxilia::InvalidArgumentError;
 using auxilia::OkStatus;
@@ -40,7 +40,7 @@ private:
   ScopeType enclosing_scope_type;
 };
 
-Resolver::Resolver(class ::accat::loxo::interpreter &interpreter)
+Resolver::Resolver(class ::accat::lox::interpreter &interpreter)
     : interpreter(interpreter) {}
 
 auto Resolver::resolve(
@@ -294,4 +294,4 @@ auto Resolver::visit2(const statement::Block &stmt) -> eval_result_t {
 auto Resolver::to_string(const auxilia::FormatPolicy &) const -> string_type {
   return "Resolver";
 }
-} // namespace accat::loxo
+} // namespace accat::lox

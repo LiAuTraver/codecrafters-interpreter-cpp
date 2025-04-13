@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.21...3.31 FATAL_ERROR)
-project(loxo VERSION 1.0.0 LANGUAGES CXX)
+project(lox VERSION 1.0.0 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_C_STANDARD 23)
 
@@ -24,7 +24,7 @@ include_directories(packages)
 include_directories(shared)
 
 option(AC_CPP_DEBUG "set the environment variable AC_CPP_DEBUG to enable debug mode" OFF)
-option(LOXO_BUILD_SHARED "build shared library" OFF)
+option(LOX_BUILD_SHARED "build shared library" OFF)
 
 if(DEFINED ENV{AC_CPP_DEBUG})
   if($ENV{AC_CPP_DEBUG} STREQUAL "ON")
@@ -32,7 +32,7 @@ if(DEFINED ENV{AC_CPP_DEBUG})
     set(AC_CPP_DEBUG ON)
     set(VCPKG_MANIFEST_MODE OFF)
     set(VCPKG_MANIFEST_INSTALL OFF)
-    set(LOXO_BUILD_SHARED ON)
+    set(LOX_BUILD_SHARED ON)
   endif()
 endif()
 
@@ -103,7 +103,7 @@ target_link_libraries(driver PUBLIC
 
 add_executable(interpreter
   tools/lox_interpreter.cpp
-  shared/loxo_driver.cpp
+  shared/lox_driver.cpp
   shared/execution_context.hpp
 )
 

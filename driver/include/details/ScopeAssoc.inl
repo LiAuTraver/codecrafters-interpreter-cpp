@@ -1,9 +1,9 @@
 /// @note no include guard.
-#ifdef AC_LOXO_SCOPEASSOC_INL
+#ifdef AC_LOX_SCOPEASSOC_INL
 #  error                                                                       \
       "please do not include ScopeAssoc.inl in other files; include Environment.hpp instead"
 #endif
-#define AC_LOXO_SCOPEASSOC_INL
+#define AC_LOX_SCOPEASSOC_INL
 #include <cstddef>
 #include <cstdint>
 #include <functional>
@@ -15,12 +15,12 @@
 #include <variant>
 #include <accat/auxilia/auxilia.hpp>
 
-#include "details/loxo_fwd.hpp"
+#include "details/lox_fwd.hpp"
 #include "details/IVisitor.hpp"
 
-namespace accat::loxo::evaluation {
+namespace accat::lox::evaluation {
 class ScopeAssoc : public auxilia::Printable {
-  friend class ::accat::loxo::Environment;
+  friend class ::accat::lox::Environment;
 
 public:
   using variant_type = IVisitor::variant_type;
@@ -54,4 +54,4 @@ private:
 public:
   auto to_string(const auxilia::FormatPolicy &) const -> string_type;
 };
-} // namespace accat::loxo::evaluation
+} // namespace accat::lox::evaluation

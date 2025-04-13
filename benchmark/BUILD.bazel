@@ -3,7 +3,7 @@ cc_binary(
     srcs = [
         "fib.bm.cpp",
         "//shared:execution_context.hpp",
-        "//shared:loxo_driver.cpp",
+        "//shared:lox_driver.cpp",
         "//shared:test_env.hpp",
     ],
     copts = [
@@ -15,7 +15,7 @@ cc_binary(
     ],
     defines = [
         "AC_CPP_DEBUG",
-        "LIBLOXO_SHARED",
+        "LIBlox_SHARED",
     ],
     deps = [
         "//driver",

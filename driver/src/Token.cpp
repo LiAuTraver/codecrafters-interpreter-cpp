@@ -9,12 +9,12 @@
 #include <cmath>
 #include <source_location>
 
-#include "details/loxo_fwd.hpp"
+#include "details/lox_fwd.hpp"
 
 #include "details/lex_error.hpp"
 #include "Token.hpp"
 
-namespace accat::loxo {
+namespace accat::lox {
 using enum auxilia::FormatPolicy;
 Token::string_type
 Token::number_to_string(const auxilia::FormatPolicy policy) const {
@@ -288,4 +288,4 @@ Token::to_string(const auxilia::FormatPolicy &policy) const {
   dbg_break
   return ""s;
 }
-} // namespace accat::loxo
+} // namespace accat::lox

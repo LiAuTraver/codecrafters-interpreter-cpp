@@ -1,7 +1,7 @@
 exports_files(
     [
         "execution_context.hpp",
-        "loxo_driver.cpp",
+        "lox_driver.cpp",
         "test_env.hpp",
     ],
 )

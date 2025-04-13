@@ -4,14 +4,14 @@
 
 #include "execution_context.hpp"
 
-AC_SPDLOG_INITIALIZATION(loxo, info);
+AC_SPDLOG_INITIALIZATION(lox, info);
 
-void alterToolContext(accat::loxo::ExecutionContext &execution_context) {
+void alterToolContext(accat::lox::ExecutionContext &execution_context) {
   static auto debugInputFilePath =
-      std::filesystem::path{"Z:/loxo/examples/dynamic.lox"};
+      std::filesystem::path{"Z:/lox/examples/dynamic.lox"};
   if (execution_context.commands.empty())
     execution_context.commands.emplace_back(
-        accat::loxo::ExecutionContext::interpret);
+        accat::lox::ExecutionContext::interpret);
   if (execution_context.input_files.empty()) {
     if (exists(debugInputFilePath))
       execution_context.input_files.emplace_back(debugInputFilePath);
@@ -26,7 +26,7 @@ void alterToolContext(accat::loxo::ExecutionContext &execution_context) {
 }
 int main(int argc, char **argv, char **envp) {
 
-  auto &ctx = accat::loxo::ExecutionContext::inspectArgs(argc, argv, envp);
+  auto &ctx = accat::lox::ExecutionContext::inspectArgs(argc, argv, envp);
 
   dbg_block
   {
@@ -38,11 +38,11 @@ int main(int argc, char **argv, char **envp) {
         "Command: {}",
         ctx.commands.empty()
             ? "<no command provided>"
-            : accat::loxo::ExecutionContext::command_sv(ctx.commands.front()));
+            : accat::lox::ExecutionContext::command_sv(ctx.commands.front()));
     dbg(info, "Input files: {}", ctx.input_files);
     dbg(info, "Execution directory: {}", ctx.execution_dir);
     dbg(info, "Temp directory: {}", ctx.tempdir)
   };
 
-  return accat::loxo::loxo_main(argc, argv, ctx);
+  return accat::lox::main(argc, argv, ctx);
 }

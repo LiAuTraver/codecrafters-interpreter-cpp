@@ -15,10 +15,10 @@
 
 #include <accat/auxilia/auxilia.hpp>
 
-#include "details/loxo_fwd.hpp"
+#include "details/lox_fwd.hpp"
 #include "details/IVisitor.hpp"
 
-namespace accat::loxo::evaluation {
+namespace accat::lox::evaluation {
 
 /// @brief A class that represents an evaluatable object
 /// @interface Evaluatable
@@ -72,7 +72,7 @@ public:
   Boolean operator!() const noexcept;
 };
 
-class LOXO_API Boolean : public Value, public auxilia::Viewable {
+class AC_LOX_API Boolean : public Value, public auxilia::Viewable {
 public:
   constexpr Boolean() = default;
   constexpr Boolean(bool value, const uint_least32_t line = nan())
@@ -104,7 +104,7 @@ private:
   bool value = false;
 } static inline AC_CONSTEXPR20 True{true, 0}, False{false, 0};
 
-class LOXO_API Nil : public Value, public auxilia::Viewable {
+class AC_LOX_API Nil : public Value, public auxilia::Viewable {
 public:
   constexpr Nil() = default;
   explicit Nil(const uint_least32_t line) : Value(line) {}
@@ -336,4 +336,4 @@ private:
     return !(lhs == rhs);
   }
 };
-} // namespace accat::loxo::evaluation
+} // namespace accat::lox::evaluation

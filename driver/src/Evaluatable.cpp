@@ -5,7 +5,7 @@
 #include <utility>
 
 #include "details/IVisitor.hpp"
-#include "details/loxo_fwd.hpp"
+#include "details/lox_fwd.hpp"
 
 #include "Evaluatable.hpp"
 #include "Environment.hpp"
@@ -14,7 +14,7 @@
 
 #include <memory>
 
-namespace accat::loxo::evaluation {
+namespace accat::lox::evaluation {
 using auxilia::match;
 
 Value::operator Boolean() const noexcept {
@@ -428,4 +428,4 @@ auto Instance::to_string(const auxilia::FormatPolicy &) const -> string_type {
 auto Instance::get_class() const -> Class & {
   return (*(class_env->find(class_name)))->second.first.get<Class>();
 }
-} // namespace accat::loxo::evaluation
+} // namespace accat::lox::evaluation

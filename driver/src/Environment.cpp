@@ -9,11 +9,11 @@
 #include <accat/auxilia/auxilia.hpp>
 
 #include "details/IVisitor.hpp"
-#include "details/loxo_fwd.hpp"
+#include "details/lox_fwd.hpp"
 #include "Environment.hpp"
 #include "Evaluatable.hpp"
 
-namespace accat::loxo {
+namespace accat::lox {
 using auxilia::Status;
 using variant_type = IVisitor::variant_type;
 using Env = Environment;
@@ -192,4 +192,4 @@ auto Env::find(const string_view_type name, const bool currentScopeOnly)
 
   return std::nullopt;
 }
-} // namespace accat::loxo
+} // namespace accat::lox

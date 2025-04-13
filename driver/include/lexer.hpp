@@ -9,13 +9,13 @@
 
 #include <accat/auxilia/auxilia.hpp>
 
-#include "details/loxo_fwd.hpp"
+#include "details/lox_fwd.hpp"
 #include "details/lex_error.hpp"
 #include "Token.hpp"
 
-/// @namespace accat::loxo
-namespace accat::loxo {
-class LOXO_API lexer {
+/// @namespace accat::lox
+namespace accat::lox {
+class AC_LOX_API lexer {
 public:
   using size_type = typename auxilia::string::size_type;
   using string_type = auxilia::string;
@@ -108,6 +108,6 @@ private:
   uint_least32_t error_count = 0;
 
 private:
-  friend LOXO_API void delete_lexer_fwd(lexer *);
+  friend AC_LOX_API void delete_lexer_fwd(lexer *);
 };
-} // namespace accat::loxo
+} // namespace accat::lox

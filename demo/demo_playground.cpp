@@ -14,7 +14,7 @@
 #include "../driver/include/expression.hpp"
 using namespace accat::auxilia;
 
-using namespace accat::loxo;
+using namespace accat::lox;
 
 struct Base {
   virtual ~Base() = default;

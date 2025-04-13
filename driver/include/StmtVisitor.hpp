@@ -1,16 +1,16 @@
-#ifndef LOXO_STMTVISITOR_HPP
-#define LOXO_STMTVISITOR_HPP
+#ifndef lox_STMTVISITOR_HPP
+#define lox_STMTVISITOR_HPP
 #include <variant>
 #include <cmath>
 
 #include <accat/auxilia/auxilia.hpp>
 
-#include "details/loxo_fwd.hpp"
+#include "details/lox_fwd.hpp"
 #include "details/IVisitor.hpp"
 
 #include "Evaluatable.hpp"
 
-namespace accat::loxo::statement {
+namespace accat::lox::statement {
 /// @implements auxilia::Printable
 /// @interface StmtVisitor
 class StmtVisitor : virtual public IVisitor {
@@ -42,5 +42,5 @@ private:
 public:
   virtual ~StmtVisitor() = default;
 };
-} // namespace accat::loxo::statement
-#endif // LOXO_STMTVISITOR_HPP
+} // namespace accat::lox::statement
+#endif // lox_STMTVISITOR_HPP

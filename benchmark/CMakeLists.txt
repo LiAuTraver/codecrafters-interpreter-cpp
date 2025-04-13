@@ -9,7 +9,7 @@ find_package(benchmark CONFIG REQUIRED)
 
 add_executable(fib.benchmark
     fib.bm.cpp
-    ../shared/loxo_driver.cpp
+    ../shared/lox_driver.cpp
 )
 
 target_include_directories(fib.benchmark PUBLIC

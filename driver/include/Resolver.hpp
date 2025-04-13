@@ -3,19 +3,19 @@
 #include <memory>
 #include <stack>
 
-#include "details/loxo_fwd.hpp"
+#include "details/lox_fwd.hpp"
 
 #include "details/IVisitor.hpp"
 #include "ExprVisitor.hpp"
 #include "StmtVisitor.hpp"
 
-namespace accat::loxo {
-class LOXO_API Resolver : auxilia::Printable,
+namespace accat::lox {
+class AC_LOX_API Resolver : auxilia::Printable,
                           virtual public expression::ExprVisitor,
                           virtual public statement::StmtVisitor,
                           public std::enable_shared_from_this<Resolver> {
 public:
-  explicit Resolver(class ::accat::loxo::interpreter &interpreter);
+  explicit Resolver(class ::accat::lox::interpreter &interpreter);
   virtual ~Resolver() override = default;
   using scope_t = std::unordered_map<std::string, bool>;
   using scopes_t = std::vector<scope_t>;
@@ -34,7 +34,7 @@ private:
   };
 
 private:
-  class ::accat::loxo::interpreter &interpreter;
+  class ::accat::lox::interpreter &interpreter;
   scopes_t scopes;
   ScopeType current_scope_type = ScopeType::kNone;
   ClassType current_class_type = ClassType::kNone;
@@ -90,4 +90,4 @@ private:
   struct scope_guard;
 };
 
-} // namespace accat::loxo
+} // namespace accat::lox

@@ -1,13 +1,13 @@
 #include <string>
 
 #include "accat/auxilia/details/format.hpp"
-#include "details/loxo_fwd.hpp"
+#include "details/lox_fwd.hpp"
 
 #include "expression.hpp"
 #include "ExprVisitor.hpp"
 #include "Evaluatable.hpp"
 
-namespace accat::loxo::expression {
+namespace accat::lox::expression {
 using auxilia::FormatPolicy;
 using enum auxilia::FormatPolicy;
 
@@ -121,4 +121,4 @@ auto Super::accept2(const ExprVisitor &visitor) const -> expr_result_t {
 auto Super::to_string(const auxilia::FormatPolicy &format_policy) const -> string_type {
   return "super."s.append(method.to_string(format_policy));
 }
-} // namespace accat::loxo::expression
+} // namespace accat::lox::expression

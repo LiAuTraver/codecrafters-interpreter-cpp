@@ -6,7 +6,7 @@ auto get_result(const auto &filepath) {
   ExecutionContext ec;
   ec.commands.emplace_back(ExecutionContext::interpret);
   ec.input_files.emplace_back(filepath);
-  auto exec = loxo_main(3, nullptr, ec);
+  auto exec = accat::lox::main(3, nullptr, ec);
   return exec ? std::make_pair(exec,
                                ec.output_stream.str() + ec.error_stream.str())
               : std::make_pair(exec, ec.output_stream.str());
@@ -14,7 +14,7 @@ auto get_result(const auto &filepath) {
 } // namespace
 
 TEST(class, decl_global) {
-  const auto path = LOXO_ROOT_DIR R"(\examples\class\decl.global.lox)";
+  const auto path = LOX_ROOT_DIR R"(\examples\class\decl.global.lox)";
   auto [callback, str] = get_result(path);
   EXPECT_EQ(str,
             "Spaceship\n"
@@ -25,7 +25,7 @@ TEST(class, decl_global) {
 }
 
 TEST(class, decl_local) {
-  const auto path = LOXO_ROOT_DIR R"(\examples\class\decl.local.lox)";
+  const auto path = LOX_ROOT_DIR R"(\examples\class\decl.local.lox)";
   auto [callback, str] = get_result(path);
   EXPECT_EQ(str,
             "Inside block: Dinosaur exists\n"
@@ -36,7 +36,7 @@ TEST(class, decl_local) {
   EXPECT_EQ(callback, 70);
 }
 TEST(class, decl_func) {
-  const auto path = LOXO_ROOT_DIR R"(\examples\class\decl.func.lox)";
+  const auto path = LOX_ROOT_DIR R"(\examples\class\decl.func.lox)";
   auto [callback, str] = get_result(path);
   EXPECT_EQ(str,
             "Class declared inside function\n"
@@ -46,7 +46,7 @@ TEST(class, decl_func) {
 }
 
 TEST(class, instance_global) {
-  const auto path = LOXO_ROOT_DIR R"(\examples\class\instance.global.lox)";
+  const auto path = LOX_ROOT_DIR R"(\examples\class\instance.global.lox)";
   auto [callback, str] = get_result(path);
   EXPECT_EQ(str,
             "Spaceship instance\n"
@@ -57,7 +57,7 @@ TEST(class, instance_global) {
 }
 
 TEST(class, instance_local) {
-  const auto path = LOXO_ROOT_DIR R"(\examples\class\instance.local.lox)";
+  const auto path = LOX_ROOT_DIR R"(\examples\class\instance.local.lox)";
   auto [callback, str] = get_result(path);
   EXPECT_EQ(str,
             "Characters created in fantasy world:\n"
@@ -76,7 +76,7 @@ TEST(class, instance_local) {
 }
 
 TEST(class, property_basic) {
-  const auto path = LOXO_ROOT_DIR R"(\examples\class\property.basic.lox)";
+  const auto path = LOX_ROOT_DIR R"(\examples\class\property.basic.lox)";
   auto [callback, str] = get_result(path);
   EXPECT_EQ(str,
             "Ship details:\n"
@@ -87,7 +87,7 @@ TEST(class, property_basic) {
 }
 
 TEST(class, property_multiple) {
-  const auto path = LOXO_ROOT_DIR R"(\examples\class\property.multiple.lox)";
+  const auto path = LOX_ROOT_DIR R"(\examples\class\property.multiple.lox)";
   auto [callback, str] = get_result(path);
 
   EXPECT_EQ(str,
@@ -100,7 +100,7 @@ TEST(class, property_multiple) {
 
 TEST(class, property_manipulation) {
   const auto path =
-      LOXO_ROOT_DIR R"(\examples\class\property.manipulation.lox)";
+      LOX_ROOT_DIR R"(\examples\class\property.manipulation.lox)";
   auto [callback, str] = get_result(path);
   EXPECT_EQ(str,
             "Grey\n"
@@ -110,7 +110,7 @@ TEST(class, property_manipulation) {
 }
 
 TEST(class, methods_global) {
-  const auto path = LOXO_ROOT_DIR R"(\examples\class\methods.global.lox)";
+  const auto path = LOX_ROOT_DIR R"(\examples\class\methods.global.lox)";
   auto [callback, str] = get_result(path);
   EXPECT_EQ(str,
             "Beep boop!\n"
@@ -120,28 +120,28 @@ TEST(class, methods_global) {
 }
 
 TEST(class, methods_local) {
-  const auto path = LOXO_ROOT_DIR R"(\examples\class\methods.local.lox)";
+  const auto path = LOX_ROOT_DIR R"(\examples\class\methods.local.lox)";
   auto [callback, str] = get_result(path);
   EXPECT_EQ(str, "Foo\n");
   EXPECT_EQ(callback, 0);
 }
 
 TEST(class, methods_withArgs) {
-  const auto path = LOXO_ROOT_DIR R"(\examples\class\methods.withArgs.lox)";
+  const auto path = LOX_ROOT_DIR R"(\examples\class\methods.withArgs.lox)";
   auto [callback, str] = get_result(path);
   EXPECT_EQ(str, "Using power: Flight\n");
   EXPECT_EQ(callback, 0);
 }
 
 TEST(class, this_basic) {
-  const auto path = LOXO_ROOT_DIR R"(\examples\class\this.basic.lox)";
+  const auto path = LOX_ROOT_DIR R"(\examples\class\this.basic.lox)";
   auto [callback, str] = get_result(path);
   EXPECT_EQ(str, "Spaceship instance\n");
   EXPECT_EQ(callback, 0);
 }
 
 TEST(class, this_property) {
-  const auto path = LOXO_ROOT_DIR R"(\examples\class\this.property.lox)";
+  const auto path = LOX_ROOT_DIR R"(\examples\class\this.property.lox)";
   auto [callback, str] = get_result(path);
   EXPECT_EQ(str,
             "175\n"
@@ -151,7 +151,7 @@ TEST(class, this_property) {
 }
 
 TEST(class, this_nested) {
-  const auto path = LOXO_ROOT_DIR R"(\examples\class\this.nested.lox)";
+  const auto path = LOX_ROOT_DIR R"(\examples\class\this.nested.lox)";
   auto [callback, str] = get_result(path);
   EXPECT_EQ(str,
             "Wizard instance\n"
@@ -160,7 +160,7 @@ TEST(class, this_nested) {
 }
 
 TEST(class, ctor_global) {
-  const auto path = LOXO_ROOT_DIR R"(\examples\class\ctor.global.lox)";
+  const auto path = LOX_ROOT_DIR R"(\examples\class\ctor.global.lox)";
   auto [callback, str] = get_result(path);
   EXPECT_EQ(str,
             "bar\n"
@@ -175,14 +175,14 @@ TEST(class, ctor_global) {
 }
 
 TEST(class, ctor_return1) {
-  const auto path = LOXO_ROOT_DIR R"(\examples\class\ctor.return1.lox)";
+  const auto path = LOX_ROOT_DIR R"(\examples\class\ctor.return1.lox)";
   auto [callback, str] = get_result(path);
   EXPECT_EQ(str, "world\n");
   EXPECT_EQ(callback, 0);
 }
 
 TEST(class, ctor_return2) {
-  const auto path = LOXO_ROOT_DIR R"(\examples\class\ctor.return2.lox)";
+  const auto path = LOX_ROOT_DIR R"(\examples\class\ctor.return2.lox)";
   auto [callback, str] = get_result(path);
   EXPECT_EQ(str,
             "[line 5] Error at 'return': Can't return a value from an "
@@ -191,7 +191,7 @@ TEST(class, ctor_return2) {
 }
 
 TEST(class, ctor_return3) {
-  const auto path = LOXO_ROOT_DIR R"(\examples\class\ctor.return3.lox)";
+  const auto path = LOX_ROOT_DIR R"(\examples\class\ctor.return3.lox)";
   auto [callback, str] = get_result(path);
   EXPECT_EQ(str,
             "[line 3] Error at 'return': Can't return a value from an "
@@ -200,7 +200,7 @@ TEST(class, ctor_return3) {
 }
 
 TEST(class, ctor_return4) {
-  const auto path = LOXO_ROOT_DIR R"(\examples\class\ctor.return4.lox)";
+  const auto path = LOX_ROOT_DIR R"(\examples\class\ctor.return4.lox)";
   auto [callback, str] = get_result(path);
   EXPECT_EQ(str,
             "[line 3] Error at 'return': Can't return a value from an "
@@ -209,7 +209,7 @@ TEST(class, ctor_return4) {
 }
 
 TEST(class, inheritance_basic) {
-  const auto path = LOXO_ROOT_DIR R"(\examples\class\inheritance.basic.lox)";
+  const auto path = LOX_ROOT_DIR R"(\examples\class\inheritance.basic.lox)";
   auto [callback, str] = get_result(path);
   EXPECT_EQ(str,
             "Doughnut instance\n"
@@ -221,5 +221,19 @@ TEST(class, inheritance_basic) {
             "Car instance\n"
             "Sedan instance\n"
             "Truck instance\n");
+  EXPECT_EQ(callback, 0);
+}
+
+TEST(class, inheritance_methods) {
+  const auto path = LOX_ROOT_DIR R"(\examples\class\inheritance.methods.lox)";
+  auto [callback, str] = get_result(path);
+  EXPECT_EQ(str,"Expected output for methods here");
+  EXPECT_EQ(callback, 0);
+}
+
+TEST(class, inheritance_overrides) {
+  const auto path = LOX_ROOT_DIR R"(\examples\class\inheritance.overrides.lox)";
+  auto [callback, str] = get_result(path);
+  EXPECT_EQ(str,"Expected output here");
   EXPECT_EQ(callback, 0);
 }

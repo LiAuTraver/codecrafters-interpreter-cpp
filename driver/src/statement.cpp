@@ -2,7 +2,7 @@
 #include <cmath>
 #include <accat/auxilia/auxilia.hpp>
 
-#include "details/loxo_fwd.hpp"
+#include "details/lox_fwd.hpp"
 
 #include "Evaluatable.hpp"
 #include "statement.hpp"
@@ -10,7 +10,7 @@
 #include "expression.hpp"
 #include "StmtVisitor.hpp"
 
-namespace accat::loxo::statement {
+namespace accat::lox::statement {
 using enum auxilia::FormatPolicy;
 using auxilia::FormatPolicy;
 
@@ -123,4 +123,4 @@ Stmt::stmt_result_t For::accept2(const StmtVisitor &visitor) const {
   return visitor.visit(*this);
 }
 
-} // namespace accat::loxo::statement
+} // namespace accat::lox::statement

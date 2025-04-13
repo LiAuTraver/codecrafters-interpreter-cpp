@@ -14,13 +14,13 @@ include(GoogleTest)
 
 if(${CMAKE_CXX_COMPILER} STREQUAL "MSVC")
   add_compile_options(/DGTEST_CREATE_SHARED_LIBRARY=1)
-  add_compile_options(/DLOXO_ROOT_DIR="${PROJECT_SOURCE_DIR}")
+  add_compile_options(/DLOX_ROOT_DIR="${PROJECT_SOURCE_DIR}")
 else()
   add_compile_options(-DGTEST_CREATE_SHARED_LIBRARY=1)
-  add_compile_options(-DLOXO_ROOT_DIR="${PROJECT_SOURCE_DIR}")
+  add_compile_options(-DLOX_ROOT_DIR="${PROJECT_SOURCE_DIR}")
 endif()
 
-add_executable(loxo.test
+add_executable(lox.test
   scan.test.cpp
   parse.test.cpp
   evaluate.test.cpp
@@ -30,11 +30,11 @@ add_executable(loxo.test
   scope.test.cpp
   class.test.cpp
   
-  ${CMAKE_SOURCE_DIR}/shared/loxo_driver.cpp
+  ${CMAKE_SOURCE_DIR}/shared/lox_driver.cpp
   ${CMAKE_SOURCE_DIR}/shared/execution_context.hpp
   ${CMAKE_SOURCE_DIR}/shared/test_env.hpp
 )
-target_link_libraries(loxo.test PRIVATE
+target_link_libraries(lox.test PRIVATE
   spdlog::spdlog
   fmt::fmt
   GTest::gtest
@@ -43,6 +43,6 @@ target_link_libraries(loxo.test PRIVATE
   driver
 )
 
-gtest_discover_tests(loxo.test)
+gtest_discover_tests(lox.test)
 
 add_folder(Tests)

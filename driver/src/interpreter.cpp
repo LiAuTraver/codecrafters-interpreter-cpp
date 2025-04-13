@@ -16,14 +16,14 @@
 #include "accat/auxilia/details/Status.hpp"
 #include "accat/auxilia/details/format.hpp"
 #include "accat/auxilia/details/macros.hpp"
-#include "details/loxo_fwd.hpp"
+#include "details/lox_fwd.hpp"
 #include "Environment.hpp"
 #include "Evaluatable.hpp"
 #include "statement.hpp"
 #include "expression.hpp"
 #include "interpreter.hpp"
 
-namespace accat::loxo {
+namespace accat::lox {
 using auxilia::match;
 using enum TokenType::type_t;
 using enum auxilia::FormatPolicy;
@@ -641,6 +641,6 @@ auto interpreter::find_variable(const cexpr_ptr_t &expr, const Token &name)
                                  name.to_string(kDetailed),
                                  name.line)};
 }
-LOXO_API void delete_interpreter_fwd(interpreter *ptr) { delete ptr; }
+AC_LOX_API void delete_interpreter_fwd(interpreter *ptr) { delete ptr; }
 #pragma endregion utility
-} // namespace accat::loxo
+} // namespace accat::lox

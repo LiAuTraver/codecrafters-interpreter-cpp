@@ -5,12 +5,12 @@
 
 #include <accat/auxilia/auxilia.hpp>
 
-#include "details/loxo_fwd.hpp"
+#include "details/lox_fwd.hpp"
 #include "details/ScopeAssoc.inl"
 
 #include "Evaluatable.hpp"
 
-namespace accat::loxo::evaluation {
+namespace accat::lox::evaluation {
 auxilia::Status ScopeAssoc::add(string_view_type name,
                               const variant_type &value,
                               const uint_least32_t line) {
@@ -59,4 +59,4 @@ auto ScopeAssoc::find(const string_view_type name) const
     return {it};
   return std::nullopt;
 }
-} // namespace accat::loxo::evaluation
+} // namespace accat::lox::evaluation

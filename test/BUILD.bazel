@@ -1,7 +1,7 @@
-load("//test:loxo_add_test.bzl", "loxo_add_test")
+load("//test:lox_add_test.bzl", "lox_add_test")
 
-loxo_add_test(
-  name = "loxo.test",
+lox_add_test(
+  name = "lox.test",
   src = [
     "scan.test.cpp",
     "parse.test.cpp",

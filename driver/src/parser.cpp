@@ -7,13 +7,13 @@
 #include <accat/auxilia/auxilia.hpp>
 
 #include "Token.hpp"
-#include "details/loxo_fwd.hpp"
+#include "details/lox_fwd.hpp"
 
 #include "statement.hpp"
 #include "expression.hpp"
 
 #include "parser.hpp"
-namespace accat::loxo {
+namespace accat::lox {
 // NOLINTBEGIN(misc-no-recursion)
 parser &parser::set_views(const token_views_t tokens) {
   contract_assert(tokens.size() && tokens.back().is_type(kEndOfFile),
@@ -221,7 +221,7 @@ auto parser::primary() -> expr_ptr_t {
       // } else if (inspect(kSemicolon)) {
       //   this->get();
       // } else {
-      //   dbg(critical, "unreachable code reached: {}", LOXO_STACKTRACE);
+      //   dbg(critical, "unreachable code reached: {}", lox_STACKTRACE);
       //   contract_assert(false);
       // }
       throw synchronize(
@@ -527,7 +527,7 @@ auto parser::synchronize(const parse_error &parse_error) -> auxilia::Status {
       error_token.to_string(auxilia::FormatPolicy::kDetailed),
       parse_error.message());
 }
-LOXO_API void delete_parser_fwd(parser *ptr) { delete ptr; }
+AC_LOX_API void delete_parser_fwd(parser *ptr) { delete ptr; }
 
 // NOLINTEND(misc-no-recursion)
-} // namespace accat::loxo
+} // namespace accat::lox

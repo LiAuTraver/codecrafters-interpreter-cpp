@@ -10,14 +10,14 @@
 #include <utility>
 #include <vector>
 
-#include "details/loxo_fwd.hpp"
+#include "details/lox_fwd.hpp"
 
 #include "details/IVisitor.hpp"
 #include "Token.hpp"
 #include "parse_error.hpp"
 
-/// @namespace accat::loxo::expression
-namespace accat::loxo::expression {
+/// @namespace accat::lox::expression
+namespace accat::lox::expression {
 /// @interface Expr
 class Expr : public auxilia::Printable,
              public std::enable_shared_from_this<Expr> {
@@ -339,4 +339,4 @@ public:
   auto to_string(const auxilia::FormatPolicy &) const -> string_type override;
 };
 
-} // namespace accat::loxo::expression
+} // namespace accat::lox::expression

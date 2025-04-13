@@ -20,7 +20,7 @@
 #include "interpreter.hpp"
 #include "Resolver.hpp"
 
-namespace accat::loxo {
+namespace accat::lox {
 auxilia::Status show_msg() {
   dbg(critical, "please provide a command.")
   dbg_break
@@ -133,7 +133,7 @@ void writeInterpResultToContextStream(ExecutionContext &ctx) {
 }
 // clang-format off
 [[nodiscard]]
-int loxo_main(_In_ const int argc,
+int main(_In_ const int argc,
               _In_opt_ char **argv, /// @note argv can be nullptr(debug mode or google test)
               _Inout_ ExecutionContext &ctx)
 // clang-format on
@@ -230,4 +230,4 @@ int loxo_main(_In_ const int argc,
   }
   return onCommandNotFound(ctx).raw_code();
 }
-} // namespace accat::loxo
+} // namespace accat::lox

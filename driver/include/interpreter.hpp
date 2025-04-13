@@ -12,14 +12,14 @@
 
 #include "Token.hpp"
 #include "accat/auxilia/details/format.hpp"
-#include "details/loxo_fwd.hpp"
+#include "details/lox_fwd.hpp"
 
 #include "expression.hpp"
 #include "statement.hpp"
 #include "ExprVisitor.hpp"
 #include "StmtVisitor.hpp"
 
-namespace accat::loxo {
+namespace accat::lox {
 
 // template <typename SmartPtr>
 // concept SmartPtrLike = requires(SmartPtr ptr) {
@@ -41,7 +41,7 @@ namespace accat::loxo {
 // };
 
 /// @implements expression::ExprVisitor
-class LOXO_API interpreter : public auxilia::Printable,
+class AC_LOX_API interpreter : public auxilia::Printable,
                              virtual public expression::ExprVisitor,
                              virtual public statement::StmtVisitor,
                              std::enable_shared_from_this<interpreter> {
@@ -173,8 +173,8 @@ private:
   }
 
 private:
-  friend LOXO_API void delete_interpreter_fwd(interpreter *);
+  friend AC_LOX_API void delete_interpreter_fwd(interpreter *);
   /// @brief basic RAII guard for entering a new scope.
   struct environment_guard;
 };
-} // namespace accat::loxo
+} // namespace accat::lox

@@ -1,8 +1,8 @@
 #pragma once
 
-#include "details/loxo_fwd.hpp"
+#include "details/lox_fwd.hpp"
 
-namespace accat::loxo {
+namespace accat::lox {
 class parse_error {
 public:
   enum error_type_t : uint8_t {
@@ -35,4 +35,4 @@ private:
   error_type_t my_error = kMonostate;
   string_type my_message = "<no message provided>";
 };
-} // namespace accat::loxo
+} // namespace accat::lox

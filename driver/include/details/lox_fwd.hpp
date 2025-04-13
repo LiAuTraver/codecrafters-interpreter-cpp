@@ -9,21 +9,21 @@
 
 #include <accat/auxilia/auxilia.hpp>
 
-#ifdef LIBLOXO_SHARED
+#ifdef LIBLOX_SHARED
 #  ifdef _WIN32
 #    ifdef driver_EXPORTS
-#      define LOXO_API __declspec(dllexport)
+#      define AC_LOX_API __declspec(dllexport)
 #    else
-#      define LOXO_API __declspec(dllimport)
+#      define AC_LOX_API __declspec(dllimport)
 #    endif
 #  else
-#    define LOXO_API __attribute__((visibility("default")))
+#    define AC_LOX_API __attribute__((visibility("default")))
 #  endif
 #else
-#  define LOXO_API
+#  define AC_LOX_API
 #endif
 
-namespace accat::loxo {
+namespace accat::lox {
 
 class Token;
 class TokenType;
@@ -93,4 +93,4 @@ inline static constexpr auto tolerable_chars = "_`"sv;
 // inline static constexpr auto conditional_tolerable_chars = "@$#"sv;
 inline static constexpr auto whitespace_chars = " \t\r"sv;
 inline static constexpr auto newline_chars = "\n\v\f"sv;
-} // namespace accat::loxo
+} // namespace accat::lox

@@ -9,12 +9,12 @@
 #include <accat/auxilia/auxilia.hpp>
 
 #include "accat/auxilia/details/format.hpp"
-#include "details/loxo_fwd.hpp"
+#include "details/lox_fwd.hpp"
 #include "details/IVisitor.hpp"
 
 #include "expression.hpp"
 
-namespace accat::loxo::expression {
+namespace accat::lox::expression {
 using auxilia::FormatPolicy;
 using enum auxilia::FormatPolicy;
 
@@ -88,4 +88,4 @@ auto ASTPrinter::visit2(const Super &expr) -> eval_result_t {
   return {};
 }
 auto ASTPrinter::get_result_impl() const -> eval_result_t { return res; }
-} // namespace accat::loxo::expression
+} // namespace accat::lox::expression

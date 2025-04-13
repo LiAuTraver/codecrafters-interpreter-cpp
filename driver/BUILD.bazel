@@ -12,7 +12,7 @@ cc_library(
     ],
     defines = [
         "AC_CPP_DEBUG",
-        "LIBLOXO_SHARED",
+        "LIBlox_SHARED",
         "driver_EXPORTS",
         "AC_SILENCE_CPP_STANDARD_CHECK",
     ],

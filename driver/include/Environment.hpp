@@ -1,5 +1,5 @@
-#ifndef AC_LOXO_ENVIRONMENT_HPP
-#define AC_LOXO_ENVIRONMENT_HPP
+#ifndef AC_LOX_ENVIRONMENT_HPP
+#define AC_LOX_ENVIRONMENT_HPP
 
 #include <cstddef>
 #include <limits>
@@ -12,14 +12,14 @@
 
 #include <accat/auxilia/auxilia.hpp>
 
-#include "details/loxo_fwd.hpp"
+#include "details/lox_fwd.hpp"
 
 #include "details/IVisitor.hpp"
 #include "details/ScopeAssoc.inl"
 
-namespace accat::loxo {
+namespace accat::lox {
 
-class LOXO_API Environment : public auxilia::Printable,
+class AC_LOX_API Environment : public auxilia::Printable,
                     public std::enable_shared_from_this<Environment> {
 public:
   using string_view_type = evaluation::ScopeAssoc::string_view_type;
@@ -73,6 +73,6 @@ private:
 public:
   auto to_string(const auxilia::FormatPolicy &) const -> string_type;
 };
-} // namespace accat::loxo
+} // namespace accat::lox
 
-#endif // AC_LOXO_ENVIRONMENT_HPP
+#endif // AC_LOX_ENVIRONMENT_HPP

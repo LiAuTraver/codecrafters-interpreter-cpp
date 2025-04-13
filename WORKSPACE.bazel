@@ -1,7 +1,7 @@
 """
 		main workspace file.
 """
-workspace(name = "loxo")
+workspace(name = "lox")
 
 load("//bazel/third_party:third_party.bzl", "load_third_party_libraries")
 

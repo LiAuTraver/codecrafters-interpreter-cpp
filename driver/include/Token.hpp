@@ -1,5 +1,5 @@
-#ifndef AC_LOXO_TOKEN_HPP
-#define AC_LOXO_TOKEN_HPP
+#ifndef AC_LOX_TOKEN_HPP
+#define AC_LOX_TOKEN_HPP
 
 #include <concepts>
 #include <cstdint>
@@ -11,17 +11,17 @@
 #include "accat/auxilia/details/Monostate.hpp"
 #include "accat/auxilia/details/Variant.hpp"
 #include "accat/auxilia/details/format.hpp"
-#include "details/loxo_fwd.hpp"
+#include "details/lox_fwd.hpp"
 
-#ifdef AC_LOXO_DETAILS_TOKENTYPE_HPP
+#ifdef AC_LOX_DETAILS_TOKENTYPE_HPP
 #  error                                                                       \
       "please do not include TokenType.hpp in other files; include Token.hpp instead"
 #endif
 #include "details/TokenType.inl"
 #include "details/lex_error.hpp"
 
-namespace accat::loxo {
-class LOXO_API Token : public auxilia::Printable {
+namespace accat::lox {
+class AC_LOX_API Token : public auxilia::Printable {
 public:
   using token_type = TokenType;
   using error_t = lex_error;
@@ -75,6 +75,6 @@ private:
     return !(lhs == rhs);
   }
 };
-} // namespace accat::loxo
+} // namespace accat::lox
 
-#endif // AC_LOXO_TOKEN_HPP
+#endif // AC_LOX_TOKEN_HPP

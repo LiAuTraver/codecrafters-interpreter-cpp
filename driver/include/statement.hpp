@@ -4,11 +4,11 @@
 #include <memory>
 #include <vector>
 
-#include "details/loxo_fwd.hpp"
+#include "details/lox_fwd.hpp"
 
 #include "Token.hpp"
 
-namespace accat::loxo::statement {
+namespace accat::lox::statement {
 class Stmt : public auxilia::Printable,
              public std::enable_shared_from_this<Stmt> {
 public:
@@ -242,4 +242,4 @@ public:
 private:
   auto accept2(const StmtVisitor &) const -> stmt_result_t override;
 };
-} // namespace accat::loxo::statement
+} // namespace accat::lox::statement

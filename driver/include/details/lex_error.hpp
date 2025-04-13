@@ -4,10 +4,10 @@
 #include <string_view>
 
 #include "accat/auxilia/details/format.hpp"
-#include "details/loxo_fwd.hpp"
+#include "details/lox_fwd.hpp"
 
-namespace accat::loxo {
-class LOXO_API lex_error {
+namespace accat::lox {
+class AC_LOX_API lex_error {
 public:
   enum type_t : uint8_t {
     kMonostate = 0,
@@ -73,4 +73,4 @@ inline auto format_to(const lex_error &lex_error,
                           auxilia::FormatPolicy::kDefault) {
   return lex_error.to_string();
 }
-} // namespace accat::loxo
+} // namespace accat::lox
