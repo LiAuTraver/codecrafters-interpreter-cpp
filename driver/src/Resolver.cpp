@@ -161,12 +161,17 @@ auto Resolver::visit2(const expression::This &expr) -> eval_result_t {
 }
 auto Resolver::visit2(const expression::Super &expr) -> eval_result_t {
   if (current_class_type == ClassType::kNone)
-    return {InvalidArgumentError("[line {}] Error at '{}':"
-                                 "Can't use 'super' outside of a class.")};
+    return {
+      InvalidArgumentError("[line {}] Error at '{}': "
+                           "Can't use 'super' outside of a class.",
+                           expr.name.line,
+                           expr.name.to_string(kDetailed))};
   if (current_class_type == ClassType::kClass)
     return {InvalidArgumentError(
         "[line {}] Error at '{}': "
-        "Can't use 'super' in a class with no super class.")};
+        "Can't use 'super' in a class with no superclass.",
+        expr.name.line,
+        expr.name.to_string(kDetailed))};
   // current class type is kDerivedClass
   return resolve_to_interp(expr.shared_from_this(), expr.name);
 }

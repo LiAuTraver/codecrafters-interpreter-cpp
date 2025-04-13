@@ -121,10 +121,6 @@ ExecutionContext::inspectArgs(const int argc, char **&argv, char **&envp) {
   for (auto i = 2ull; *(argv + i); ++i) {
     ctx.input_files.emplace_back(*(argv + i));
   }
-  // #ifdef AC_CPP_DEBUG
-  //   // set to nullptr for debugging
-  //   argv = nullptr;
-  // #endif
   return ctx;
 }
 inline std::string_view ExecutionContext::command_sv(const commands_t &cmd) {

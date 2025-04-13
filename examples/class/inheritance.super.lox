@@ -1,0 +1,38 @@
+class Doughnut {
+  cook() {
+    print "Fry until golden brown.";
+  }
+}
+
+// Super can be used to call the overridden method
+// of the parent class
+class BostonCream < Doughnut {
+  cook() {
+    super.cook();
+  }
+}
+
+BostonCream().cook();
+
+class Base {
+  method() {
+    print "Base.method()";
+  }
+}
+
+class Parent < Base {
+  method() {
+    super.method();
+  }
+}
+
+class Child < Parent {
+  method() {
+    super.method();
+  }
+}
+
+var parent = Parent();
+parent.method();
+var child = Child();
+child.method();

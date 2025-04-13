@@ -1,1 +1,29 @@
-"baz" "unterminated
+// dynamic.lox was the default lox file that the debug mode of the interpreter used to run 
+// save you a typing when debug!
+
+class foo {
+  infoo() {
+    print "from foo";
+  }
+}
+
+class quz < foo {
+  inquz() {
+    print "from quz";
+  }
+}
+
+class hello < quz {
+  inhello() {
+    print "from hello";
+  }
+}
+
+// hello as a variable name shall be able to share the same name as a class
+
+// hello should inherit the methods
+// from both foo and quz
+var hello = hello();
+hello.infoo();
+hello.inquz();
+hello.inhello();

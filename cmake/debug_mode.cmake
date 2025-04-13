@@ -11,12 +11,10 @@ set(SPDLOG_FMT_EXTERNAL ON)
 target_link_libraries(driver PUBLIC
   fmt::fmt
   spdlog::spdlog
-  magic_enum::magic_enum
 )
 target_link_libraries(interpreter PUBLIC
   fmt::fmt
   spdlog::spdlog
-  magic_enum::magic_enum
   driver
 )
 

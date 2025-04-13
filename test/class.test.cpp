@@ -253,9 +253,76 @@ TEST(class, symbols) {
             "from hello\n");
   EXPECT_EQ(callback, 0);
 }
-TEST(DISABLED_class, inheritance_overrides) {
+TEST(class, inheritance_overrides) {
   const auto path = LOX_ROOT_DIR R"(\examples\class\inheritance.overrides.lox)";
   auto [callback, str] = get_result(path);
-  EXPECT_EQ(str, "Expected output here");
+  EXPECT_EQ(str,
+            "B method\n"
+            "89\n"
+            "32\n"
+            "Animal speaks : Generic sound\n"
+            "Dog speaks : Woof\n"
+            "Puppy speaks : Woof\n");
   EXPECT_EQ(callback, 0);
+}
+
+TEST(class, inheritance_error1) {
+  const auto path = LOX_ROOT_DIR R"(\examples\class\inheritance.error1.lox)";
+  auto [callback, str] = get_result(path);
+  EXPECT_EQ(str,
+            "[line 2] Error at 'Foo': A class can't inherit from itself.\n");
+  EXPECT_EQ(callback, 65);
+}
+
+TEST(class, inheritance_error2) {
+  const auto path = LOX_ROOT_DIR R"(\examples\class\inheritance.error2.lox)";
+  auto [callback, str] = get_result(path);
+  EXPECT_EQ(str,
+            "Superclass must be a class.\n"
+            "[line 4]\n");
+  EXPECT_EQ(callback, 70);
+}
+
+TEST(class, inheritance_error3) {
+  const auto path = LOX_ROOT_DIR R"(\examples\class\inheritance.error3.lox)";
+  auto [callback, str] = get_result(path);
+  EXPECT_EQ(str,
+            "Superclass must be a class.\n"
+            "[line 4]\n");
+  EXPECT_EQ(callback, 70);
+}
+
+TEST(class, inheritance_super) {
+  const auto path = LOX_ROOT_DIR R"(\examples\class\inheritance.super.lox)";
+  auto [callback, str] = get_result(path);
+  EXPECT_EQ(str,
+            "Fry until golden brown.\n"
+            "Base.method()\n"
+            "Base.method()\n");
+  EXPECT_EQ(callback, 0);
+}
+
+TEST(class, super_error1) {
+  const auto path = LOX_ROOT_DIR R"(\examples\class\super.error1.lox)";
+  auto [callback, str] = get_result(path);
+  EXPECT_EQ(str,
+            "[line 4] Error at 'super': Can't use 'super' in a class with no "
+            "superclass.\n");
+  EXPECT_EQ(callback, 65);
+}
+
+TEST(class, super_error2) {
+  const auto path = LOX_ROOT_DIR R"(\examples\class\super.error2.lox)";
+  auto [callback, str] = get_result(path);
+  EXPECT_EQ(str, "[line 7] Error at ';': Expect '.' after 'super'.\n");
+  EXPECT_EQ(callback, 65);
+}
+
+TEST(class, super_error3) {
+  const auto path = LOX_ROOT_DIR R"(\examples\class\super.error3.lox)";
+  auto [callback, str] = get_result(path);
+  EXPECT_EQ(
+      str,
+      "[line 2] Error at 'super': Can't use 'super' outside of a class.\n");
+  EXPECT_EQ(callback, 65);
 }
