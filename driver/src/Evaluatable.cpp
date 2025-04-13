@@ -361,8 +361,11 @@ auto Class::arity() const -> unsigned {
 }
 Class::Class(const std::string_view name,
              const uint_least32_t line,
-             methods_t &&methods)
-    : Evaluatable(line), name(name), methods(methods) {}
+             methods_t &&methods,
+             std::string_view superclass_name,
+             env_ptr_t superclass_env)
+    : Evaluatable(line), name(name), methods(methods),
+      superclass_name(superclass_name), superclass_env(superclass_env) {}
 auto Class::call(interpreter &interpreter, args_t &&variants) -> eval_result_t {
   auto instance = Instance{interpreter.get_current_env(), name};
   if (auto initializer = get_initializer())
@@ -379,8 +382,18 @@ auto Class::get_method(const std::string_view name) const
       it != methods.end())
     return {it->second};
 
+  if (auto superclass = get_superclass())
+    return superclass->get_method(name);
+
   return auxilia::NotFoundError(
       "Undefined property '{}'.\n[line {}]", name, get_line());
+}
+auto Class::get_superclass() const -> Class * {
+  if (superclass_env)
+    if (const auto it = superclass_env->find(superclass_name))
+      return &(*it)->second.first.get<Class>();
+
+  return nullptr;
 }
 auto Class::to_string(const auxilia::FormatPolicy &) const -> string_type {
   return name;

@@ -227,7 +227,14 @@ TEST(class, inheritance_basic) {
 TEST(class, inheritance_methods) {
   const auto path = LOX_ROOT_DIR R"(\examples\class\inheritance.methods.lox)";
   auto [callback, str] = get_result(path);
-  EXPECT_EQ(str,"Expected output for methods here");
+  EXPECT_EQ(str,
+            "Fry until golden brown.\n"
+            "Root class\n"
+            "Root class\n"
+            "Root class\n"
+            "Method defined in Parent\n"
+            "Method defined in Parent\n"
+            "Method defined in Child\n");
   EXPECT_EQ(callback, 0);
 }
 

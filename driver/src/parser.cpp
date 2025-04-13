@@ -366,7 +366,11 @@ auto parser::class_stmt() -> stmt_ptr_t {
   }
   this->get();
   return std::make_shared<statement::Class>(
-      std::move(name), std::move(superclass), get_methods());
+      std::move(name),
+      superclass.is_type(kIdentifier)
+          ? std::make_shared<expression::Variable>(std::move(superclass))
+          : nullptr,
+      get_methods());
 }
 auto parser::get_condition() -> expr_ptr_t {
   if (!inspect(kLeftParen)) {

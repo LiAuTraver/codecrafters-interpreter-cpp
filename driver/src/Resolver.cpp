@@ -235,24 +235,21 @@ auto Resolver::visit2(const statement::Class &stmt) -> eval_result_t {
   this->current_class_type = ClassType::kClass;
   defer { this->current_class_type = enclosing_class_type; };
 
-  const bool hasSuperclass = stmt.superclass.is_type(TokenType::kIdentifier);
-  if (hasSuperclass) {
-    if (stmt.name == stmt.superclass)
+  if (stmt.superclass) {
+    if (stmt.name == stmt.superclass->name)
       return {InvalidArgumentError("[line {}] Error at '{}': "
                                    "A class can't inherit from itself.",
-                                   stmt.superclass.line,
-                                   stmt.superclass.to_string(kDetailed))};
+                                   stmt.superclass->name.line,
+                                   stmt.superclass->to_string(kDetailed))};
 
     this->current_class_type = ClassType::kDerivedClass;
     // design flaw
-    if (auto res =
-            visit2(*std::make_shared<expression::Variable>(stmt.superclass));
-        !res) {
+    if (auto res = visit2(*stmt.superclass); !res) {
       return res;
     }
     this->scopes.emplace_back().emplace("super", true);
   }
-  
+
   scope_guard guard(*this, ScopeType::kNone);
   this->scopes.back().emplace("this", true);
 
@@ -264,7 +261,7 @@ auto Resolver::visit2(const statement::Class &stmt) -> eval_result_t {
         !res)
       // TODO: restore scope if the class has superclass.?(see below)
       return res;
-  if (hasSuperclass)
+  if (stmt.superclass)
     this->scopes.pop_back(); // pop the super class scope.
   return {};
 }

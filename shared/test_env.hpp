@@ -5,7 +5,7 @@
 #include <execution_context.hpp>
 
 #ifndef LOX_ROOT_DIR
-#  define LOX_ROOT_DIR "Z:/lox"
+#  define LOX_ROOT_DIR R"(Z:\lox)"
 #endif
 
 static inline auto you_should_not_include_this_header_file_twice =

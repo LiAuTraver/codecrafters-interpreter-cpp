@@ -1,6 +1,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <optional>
+#include <sstream>
 #include <string>
 #include <string_view>
 #include <unordered_map>
@@ -132,16 +133,13 @@ auto Env::reassign_at_depth(const size_t n,
 }
 
 auto Env::to_string(const FormatPolicy &format_policy) const -> string_type {
-  string_type result;
-  result.append(current.to_string(format_policy)).append(",\n\t-> ");
-  
-
-  if (const auto enclosing = this->parent.get()) 
-    result.append(enclosing->to_string(format_policy));
-  else 
-    result.append("nullptr");
-  
-  return result;
+  std::ostringstream oss;
+  oss << current.to_string(format_policy) << ",\n\t-> ";
+  if (const auto enclosing = this->parent.get())
+    oss << enclosing->to_string(format_policy);
+  else
+    oss << "nullptr";
+  return oss.str();
 }
 
 auto Env::find(const string_view_type name, const bool currentScopeOnly) const

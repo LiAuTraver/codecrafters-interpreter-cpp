@@ -156,6 +156,8 @@ int main(_In_ const int argc,
   auxilia::Status lex_result;
   if (ctx.commands.front() & ExecutionContext::needs_lex) {
     lex_result = tokenize(ctx);
+    if (!lex_result.ok())
+      return 65;
   }
   if (ctx.commands.front() == ExecutionContext::lex) {
     auto tokens = ctx.lexer->get_tokens();

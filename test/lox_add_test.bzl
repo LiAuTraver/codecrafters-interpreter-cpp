@@ -23,7 +23,7 @@ def lox_add_test(name, src):
         ],
         defines = [
             "AC_CPP_DEBUG",
-            "LIBlox_SHARED",
+            "LIBLOX_SHARED",
             "AC_SILENCE_CPP_STANDARD_CHECK",
         ],
         includes = ["driver/include"],

@@ -223,13 +223,13 @@ private:
 class Class : public Stmt {
 public:
   token_t name;
-  token_t superclass;
   std::vector<Function> methods;
+  std::shared_ptr<expression::Variable> superclass;
 
 public:
   constexpr Class() = default;
   explicit Class(token_t &&name,
-                 token_t &&superclass,
+                 std::shared_ptr<expression::Variable> &&superclass,
                  std::vector<Function> &&methods)
       : name(std::move(name)), superclass(std::move(superclass)),
         methods(std::move(methods)) {}

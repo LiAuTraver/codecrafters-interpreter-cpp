@@ -255,8 +255,16 @@ public:
   string_type name;
   methods_t methods;
 
+private:
+  string_type superclass_name;
+  env_ptr_t superclass_env;
+
 public:
-  Class(std::string_view, uint_least32_t, methods_t && = {});
+  Class(std::string_view,
+        uint_least32_t,
+        methods_t && = {},
+        std::string_view = {},
+        env_ptr_t = {});
 
 public:
   auto arity() const -> unsigned override;
@@ -264,6 +272,7 @@ public:
 
 public:
   auto get_method(std::string_view) const -> auxilia::StatusOr<Function>;
+  auto get_superclass() const [[clang::lifetimebound]] -> Class *;
 
 public:
   auto to_string(const auxilia::FormatPolicy &) const -> string_type override;

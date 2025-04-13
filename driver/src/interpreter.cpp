@@ -28,7 +28,7 @@ using auxilia::match;
 using enum TokenType::type_t;
 using enum auxilia::FormatPolicy;
 
-#pragma region environment
+#pragma region env
 struct interpreter::environment_guard {
   class interpreter &interpreter;
   env_ptr_t original_env;
@@ -62,7 +62,7 @@ auto interpreter::set_env(const env_ptr_t &new_env) -> interpreter & {
   env = new_env;
   return *this;
 }
-#pragma endregion environment
+#pragma endregion env
 #pragma region statement
 auto interpreter::visit2(const statement::Variable &stmt) -> eval_result_t {
 
@@ -174,19 +174,20 @@ auto interpreter::visit2(const statement::Class &stmt) -> eval_result_t {
   if (auto res = env->find(stmt.name.to_string(kDetailed)); res) {
     TODO(...)
   }
-  const bool hasSuperclass = stmt.superclass.is_type(kIdentifier);
-  if (hasSuperclass) {
+  env_ptr_t supEnv;
+  if (stmt.superclass) {
     // design flaw
-    auto res = visit2(*std::make_shared<expression::Variable>(stmt.superclass));
+    auto res = visit2(*stmt.superclass);
     if (!res)
       return res;
     if (!res->is_type<evaluation::Class>())
       return auxilia::InvalidArgumentError(
-          "Superclass must be a class.\n[line {}]", stmt.superclass.line);
+          "Superclass must be a class.\n[line {}]", stmt.superclass->name.line);
 
     /// cannot use environment_guard here -- scope issue
     env = Environment::Scope(env);
-    env->add("super", *res, stmt.superclass.line);
+    env->add("super", *res, stmt.superclass->name.line);
+    supEnv = env;
   }
 
   evaluation::Class::methods_t methods;
@@ -195,14 +196,19 @@ auto interpreter::visit2(const statement::Class &stmt) -> eval_result_t {
     methods.emplace(name, get_function(method, name == "init" ? true : false));
   });
 
-  if (hasSuperclass)
+  if (stmt.superclass)
     env = env->ancestor(1);
 
-  return env->add(stmt.name.to_string(kDetailed),
-                  evaluation::Class{stmt.name.to_string(kDetailed),
-                                    stmt.name.line,
-                                    std::move(methods)},
-                  stmt.name.line);
+  return env->add(
+      stmt.name.to_string(kDetailed),
+      evaluation::Class{stmt.name.to_string(kDetailed),
+                        stmt.name.line,
+                        std::move(methods),
+                        stmt.superclass
+                            ? stmt.superclass->name.to_string(kDetailed)
+                            : std::string{},
+                        std::move(supEnv)},
+      stmt.name.line);
 }
 auto interpreter::visit2(const statement::Expression &stmt) -> eval_result_t {
   return evaluate(*stmt.expr);
@@ -502,34 +508,38 @@ auto interpreter::visit2(const expression::This &expr) -> eval_result_t {
   return find_variable(expr.shared_from_this(), expr.name);
 }
 auto interpreter::visit2(const expression::Super &expr) -> eval_result_t {
-  // TODO: here my logic went away. revisit this later!
-  dbg(info, "environment: {}", env->to_string(kDetailed))
-  if (auto it = local_env.find(expr.shared_from_this());
-      it != local_env.end()) {
-    const auto depth = it->second;
-    auto superclass_ptr =
-        env->get_at_depth(depth, "super")->get_if<evaluation::Class>();
-    if (!superclass_ptr) {
-      TODO(...)
-    }
-    dbg(info, "superclass name: {}", superclass_ptr->to_string(kDetailed))
-    auto object_ptr =
-        env->get_at_depth(depth - 1, "this")->get_if<evaluation::Instance>();
-    if (!object_ptr) {
-      TODO(...)
-    }
-    dbg(info, "object name: {}", object_ptr->to_string(kDetailed))
-    // clang-format off
-    return superclass_ptr
-        ->get_method(expr.method.to_string(kDetailed))
-        .transform([&](auto &&method) -> variant_type {
-          return {method.bind(*object_ptr)};
-        });
-    // clang-format on
-  }
+  auto it = local_env.find(expr.shared_from_this());
 
-  dbg_break
-  return {};
+  contract_assert(
+      it != local_env.end(),
+      "super class should be in local env; this shall be resolved in Resolver")
+
+  const auto depth = it->second;
+  
+  auto superclass_ptr =
+      env->get_at_depth(depth, "super")->get_if<evaluation::Class>();
+  if (!superclass_ptr) {
+    dbg(info, "environment: {}", env->to_string(kDetailed))
+    return {auxilia::NotFoundError("Superclass not found in the environment.")};
+  }
+  dbg(info, "superclass name: {}", superclass_ptr->to_string(kDetailed))
+
+  auto object_ptr =
+      env->get_at_depth(depth - 1, "this")->get_if<evaluation::Instance>();
+  if (!object_ptr) {
+    dbg(info, "environment: {}", env->to_string(kDetailed))
+    return {auxilia::NotFoundError(
+        "Superclass must be called from a subclass instance.")};
+  }
+  dbg(info, "object name: {}", object_ptr->to_string(kDetailed))
+  
+  // clang-format off
+  return superclass_ptr
+      ->get_method(expr.method.to_string(kDetailed))
+      .transform([&](auto &&method) -> variant_type {
+        return {method.bind(*object_ptr)};
+      });
+  // clang-format on
 }
 #pragma endregion expression
 #pragma region utility
