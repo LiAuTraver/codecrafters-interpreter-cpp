@@ -354,11 +354,7 @@ auto Function::to_string(const auxilia::FormatPolicy &) const -> string_type {
       [](const auto &) { return "<unknown fn>"s; },
   });
 }
-auto Class::arity() const -> unsigned {
-  if (auto init = const_cast<Class *>(this)->get_initializer())
-    return init->arity();
-  return 0;
-}
+
 Class::Class(const std::string_view name,
              const uint_least32_t line,
              methods_t &&methods,
@@ -366,6 +362,13 @@ Class::Class(const std::string_view name,
              env_ptr_t superclass_env)
     : Evaluatable(line), name(name), methods(methods),
       superclass_name(superclass_name), superclass_env(superclass_env) {}
+
+auto Class::arity() const -> unsigned {
+  if (auto init = const_cast<Class *>(this)->get_initializer())
+    return init->arity();
+  return 0;
+}
+
 auto Class::call(interpreter &interpreter, args_t &&variants) -> eval_result_t {
   auto instance = Instance{interpreter.get_current_env(), name};
   if (auto initializer = get_initializer())
@@ -401,6 +404,10 @@ auto Class::to_string(const auxilia::FormatPolicy &) const -> string_type {
 auto Class::get_initializer() -> Function * {
   if (auto it = methods.find("init"); it != methods.end())
     return &it->second;
+
+  if(auto superclass = get_superclass())
+    return superclass->get_initializer();
+  
   return nullptr;
 }
 Instance::Instance(const env_ptr_t &env, const std::string_view name)

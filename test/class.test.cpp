@@ -99,8 +99,7 @@ TEST(class, property_multiple) {
 }
 
 TEST(class, property_manipulation) {
-  const auto path =
-      LOX_ROOT_DIR R"(\examples\class\property.manipulation.lox)";
+  const auto path = LOX_ROOT_DIR R"(\examples\class\property.manipulation.lox)";
   auto [callback, str] = get_result(path);
   EXPECT_EQ(str,
             "Grey\n"
@@ -238,9 +237,16 @@ TEST(class, inheritance_methods) {
   EXPECT_EQ(callback, 0);
 }
 
+TEST(class, inheritance_init) {
+  const auto path = LOX_ROOT_DIR R"(\examples\class\inheritance.init.lox)";
+  auto [callback, str] = get_result(path);
+  EXPECT_EQ(str, "42\n");
+  EXPECT_EQ(callback, 0);
+}
+
 TEST(class, inheritance_overrides) {
   const auto path = LOX_ROOT_DIR R"(\examples\class\inheritance.overrides.lox)";
   auto [callback, str] = get_result(path);
-  EXPECT_EQ(str,"Expected output here");
+  EXPECT_EQ(str, "Expected output here");
   EXPECT_EQ(callback, 0);
 }
