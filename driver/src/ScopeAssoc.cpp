@@ -1,3 +1,4 @@
+#include <sstream>
 #include <unordered_map>
 #include <string>
 #include <string_view>
@@ -12,10 +13,12 @@
 
 namespace accat::lox::evaluation {
 auxilia::Status ScopeAssoc::add(string_view_type name,
-                              const variant_type &value,
-                              const uint_least32_t line) {
-  if (associations.contains({name.data(), name.size()})) {
-    (void)0; /// suppress the warning when not in debugging
+                                const variant_type &value,
+                                const uint_least32_t line) {
+  if (is_symbol(value))
+    return add_symbol(name, value, line);
+
+  if (variables.contains({name.data(), name.size()})) {
     /// Scheme allows redefining variables at the top level; so temporarily
     /// we just follow that.
     dbg(warn,
@@ -23,40 +26,76 @@ auxilia::Status ScopeAssoc::add(string_view_type name,
         "it...",
         name)
   }
-
-  associations.insert_or_assign(name.data(), std::pair{value, line});
+  variables.insert_or_assign(name.data(), std::pair{value, line});
+  return {};
+}
+auto ScopeAssoc::add_symbol(string_view_type name,
+                            const variant_type &value,
+                            uint_least32_t line) -> auxilia::Status {
+  if (auto it = symbols.find({name.data(), name.size()}); it != symbols.end()) {
+    if (it->second.first.index() != value.index()) {
+      return auxilia::InvalidArgumentError(
+          "redefine a symbol with a different type is not "
+          "allowed");
+    }
+    dbg(warn,
+        "The symbol {} is already defined in the environment. redefining "
+        "it...",
+        name)
+  }
+  symbols.insert_or_assign(name.data(), std::pair{value, line});
   return {};
 }
 auto ScopeAssoc::to_string(const auxilia::FormatPolicy &format_policy) const
     -> string_type {
-  string_type result;
-  result += "[ ";
-  for (const auto &[key, value] : associations) {
-    result += key;
-    result += ": ";
-    result += value.first.to_string(format_policy);
-    result += ", ";
+  std::ostringstream oss;
+  oss << "[ ";
+  for (const auto &[key, value] : variables) {
+    oss << key << ": " << value.first.to_string(format_policy) << ", ";
   }
-  if (!associations.empty()){
-    result.pop_back();
-    result.pop_back();
+  for (const auto &[key, value] : symbols) {
+    oss << key << ": " << value.first.to_string(format_policy) << ", ";
   }
-  result += auxilia::format(" ] ({} entries) ", associations.size());
-  
-  return result;
+
+  if (variables.size() + symbols.size() == 0)
+    oss.seekp(-2, std::ios_base::end);
+  else
+    oss << " ]";
+
+  oss << auxilia::format(" ({} entries) ", variables.size());
+  return oss.str();
 }
 auto ScopeAssoc::find(const string_view_type name)
     -> std::optional<associations_t::iterator> {
-  if (auto it = associations.find({name.data(), name.size()});
-      it != associations.end())
+  if (auto it = variables.find({name.data(), name.size()});
+      it != variables.end())
+    return {it};
+  if (auto it = symbols.find({name.data(), name.size()}); it != symbols.end())
     return {it};
   return std::nullopt;
 }
 auto ScopeAssoc::find(const string_view_type name) const
     -> std::optional<associations_t::const_iterator> {
-  if (auto it = associations.find({name.data(), name.size()});
-      it != associations.end())
+  if (auto it = variables.find({name.data(), name.size()});
+      it != variables.end())
+    return {it};
+  if (auto it = symbols.find({name.data(), name.size()}); it != symbols.end())
     return {it};
   return std::nullopt;
+}
+auto ScopeAssoc::find_symbol(const string_view_type name)
+    -> std::optional<associations_t::iterator> {
+  if (auto it = symbols.find({name.data(), name.size()}); it != symbols.end())
+    return {it};
+  return std::nullopt;
+}
+auto ScopeAssoc::find_symbol(const string_view_type name) const
+    -> std::optional<associations_t::const_iterator> {
+  if (auto it = symbols.find({name.data(), name.size()}); it != symbols.end())
+    return {it};
+  return std::nullopt;
+}
+bool ScopeAssoc::is_symbol(const variant_type &value) const {
+  return value.is_type<Class>() or value.is_type<Function>();
 }
 } // namespace accat::lox::evaluation

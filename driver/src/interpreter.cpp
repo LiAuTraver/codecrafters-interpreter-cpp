@@ -151,7 +151,7 @@ auto interpreter::visit2(const statement::Function &stmt) -> eval_result_t {
     if (!res->is_type<evaluation::Function>()) {
       dbg(error,
           "bad function definition: {} is not a function",
-          stmt.name.to_string(kDefault))
+          stmt.name.to_string(kDetailed))
       return *res;
     }
     // if arity is same, warn and overwrite the function;

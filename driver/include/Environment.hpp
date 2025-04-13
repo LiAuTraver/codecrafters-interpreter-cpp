@@ -49,6 +49,10 @@ public:
       -> std::optional<self_type::scope_env_t::associations_t::const_iterator>;
   auto find(string_view_type, bool = false)
       -> std::optional<self_type::scope_env_t::associations_t::iterator>;
+  auto find_symbol(string_view_type, bool = false) const
+      -> std::optional<self_type::scope_env_t::associations_t::const_iterator>;
+  auto find_symbol(string_view_type, bool = false)
+      -> std::optional<self_type::scope_env_t::associations_t::iterator>;
   auto add(string_view_type,
            const IVisitor::variant_type &,
            uint_least32_t = std::numeric_limits<uint_least32_t>::quiet_NaN())
@@ -72,7 +76,8 @@ private:
   static auto initGlobalEnv() -> std::shared_ptr<self_type>;
 
 public:
-  /// @note: use `env._Ptr->to_string(accat::auxilia::FormatPolicy::kDefault)` in debug
+  /// @note: use `env._Ptr->to_string(accat::auxilia::FormatPolicy::kDefault)`
+  /// in debug
   dbg_only([[gnu::used]])
   auto to_string(const auxilia::FormatPolicy &) const -> string_type;
 };

@@ -190,4 +190,54 @@ auto Env::find(const string_view_type name, const bool currentScopeOnly)
 
   return std::nullopt;
 }
+auto Environment::find_symbol(const string_view_type name,
+                              const bool currentScopeOnly) const
+    -> std::optional<self_type::scope_env_t::associations_t::const_iterator> {
+  if (auto maybe_it = current.find_symbol(name)) {
+    dbg_block
+    {
+      if (!parent or currentScopeOnly) {
+        return;
+      }
+      if (const auto another_it = parent->find_symbol(name)) {
+        dbg(warn,
+            "symbol '{}' is shadowed; previously declared at line {}",
+            name,
+            (*another_it)->second.second);
+      }
+      return;
+    };
+    return maybe_it;
+  }
+  if (!currentScopeOnly)
+    if (const auto enclosing = parent.get())
+      return enclosing->find_symbol(name, currentScopeOnly);
+
+  return std::nullopt;
+}
+
+auto Env::find_symbol(const string_view_type name,
+                      const bool currentScopeOnly) -> std::optional<self_type::scope_env_t::associations_t::iterator> {
+  if (auto maybe_it = current.find_symbol(name)) {
+    dbg_block
+    {
+      if (!parent or currentScopeOnly) {
+        return;
+      }
+      if (const auto another_it = parent->find_symbol(name)) {
+        dbg(warn,
+            "symbol '{}' is shadowed; previously declared at line {}",
+            name,
+            (*another_it)->second.second);
+      }
+      return;
+    };
+    return maybe_it;
+  }
+  if (!currentScopeOnly)
+    if (const auto enclosing = parent.get())
+      return enclosing->find_symbol(name, currentScopeOnly);
+
+  return std::nullopt;
+}
 } // namespace accat::lox

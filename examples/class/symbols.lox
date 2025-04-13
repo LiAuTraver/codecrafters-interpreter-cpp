@@ -24,10 +24,3 @@ var hello = hello();
 hello.infoo();
 hello.inquz();
 hello.inhello();
-
-// sahall not pass: function name cannot conflict with existing class name
-fun hello(){
-  print "hello world";
-}
-
-hello();

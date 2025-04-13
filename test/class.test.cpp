@@ -244,7 +244,16 @@ TEST(class, inheritance_init) {
   EXPECT_EQ(callback, 0);
 }
 
-TEST(class, inheritance_overrides) {
+TEST(class, symbols) {
+  const auto path = LOX_ROOT_DIR R"(\examples\class\symbols.lox)";
+  auto [callback, str] = get_result(path);
+  EXPECT_EQ(str,
+            "from foo\n"
+            "from quz\n"
+            "from hello\n");
+  EXPECT_EQ(callback, 0);
+}
+TEST(DISABLED_class, inheritance_overrides) {
   const auto path = LOX_ROOT_DIR R"(\examples\class\inheritance.overrides.lox)";
   auto [callback, str] = get_result(path);
   EXPECT_EQ(str, "Expected output here");

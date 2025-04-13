@@ -43,13 +43,24 @@ private:
            const variant_type &,
            uint_least32_t = std::numeric_limits<uint_least32_t>::quiet_NaN())
       -> auxilia::Status;
+  auto
+  add_symbol(string_view_type,
+             const variant_type &,
+             uint_least32_t = std::numeric_limits<uint_least32_t>::quiet_NaN())
+      -> auxilia::Status;
   auto find(string_view_type) -> std::optional<associations_t::iterator>;
-
   auto find(string_view_type) const
       -> std::optional<associations_t::const_iterator>;
+  auto find_symbol(string_view_type) -> std::optional<associations_t::iterator>;
+  auto find_symbol(string_view_type) const
+      -> std::optional<associations_t::const_iterator>;
+  bool is_symbol(const variant_type &) const;
 
 private:
-  associations_t associations;
+  // temporary workaround, store Class and Function
+  associations_t symbols;
+  // store variables and values
+  associations_t variables;
 
 public:
   auto to_string(const auxilia::FormatPolicy &) const -> string_type;

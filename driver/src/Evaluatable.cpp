@@ -411,7 +411,7 @@ auto Class::get_initializer() -> Function * {
   return nullptr;
 }
 Instance::Instance(const env_ptr_t &env, const std::string_view name)
-    : class_env(env), class_name(name), fields(std::make_shared<fields_t>()) {}
+    : fields(std::make_shared<fields_t>()), class_env(env), class_name(name) {}
 auto Instance::get_field(const std::string_view name) const -> eval_result_t {
   if (const auto it = fields->find({name.begin(), name.end()});
       it != fields->end())
@@ -446,6 +446,6 @@ auto Instance::to_string(const auxilia::FormatPolicy &) const -> string_type {
   return get_class().name + " instance";
 }
 auto Instance::get_class() const -> Class & {
-  return (*(class_env->find(class_name)))->second.first.get<Class>();
+  return (*(class_env->find_symbol(class_name)))->second.first.get<Class>();
 }
 } // namespace accat::lox::evaluation
