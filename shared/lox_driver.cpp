@@ -153,11 +153,13 @@ int main(_In_ const int argc,
     std::println(stderr, "No input files provided.");
     return 1;
   }
+  if (!std::filesystem::exists(ctx.input_files.front())) {
+    std::println(stderr, "File not found: {}", ctx.input_files.front().string());
+    return 1;
+  }
   auxilia::Status lex_result;
   if (ctx.commands.front() & ExecutionContext::needs_lex) {
     lex_result = tokenize(ctx);
-    if (!lex_result.ok())
-      return 65;
   }
   if (ctx.commands.front() == ExecutionContext::lex) {
     auto tokens = ctx.lexer->get_tokens();
